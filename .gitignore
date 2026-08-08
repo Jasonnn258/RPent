@@ -5,6 +5,10 @@ __pycache__/
 # Local run outputs.
 logs/
 
+# Model checkpoints and local download scratch (large, never commit).
+checkpoints/
+downloads/
+
 # RLinf is consumed as an external checkout, not vendored here.
 /rlinf/
 /rlinf.egg-info/

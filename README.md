@@ -149,6 +149,19 @@ rpent --env libero --dashboard --dashboard-language zh-cn \
 
 For more detailed documentation, see the [RPent documentation](https://rpent.readthedocs.io/en/latest/).
 
+### Reproduction on a GPU server
+
+To reproduce an end-to-end LIBERO run (LLM planner → Pi0.5 VLA → SAM3) from a
+fresh GPU box, see [`docs/reproduction.md`](docs/reproduction.md). A one-shot
+deployment kit (`scripts/deploy/`) bootstraps everything in ~15 minutes:
+
+```bash
+git clone https://github.com/Jasonnn258/RPent.git && cd RPent/scripts/deploy
+bash deploy.sh --deepseek-key sk-...     # env + deps + checkpoints + patch + env file
+source ~/rpent_data/rpent_env.sh
+bash run_repro.sh --cuda-device 0        # libero_object_swap task 2
+```
+
 ## Key CLI Options
 
 <table width="100%" style="width: 100%; table-layout: auto; border-collapse: collapse;">
