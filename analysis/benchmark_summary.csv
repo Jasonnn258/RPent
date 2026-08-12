@@ -29,7 +29,7 @@ goal_swap,t6,7,11,63.6
 goal_swap,t7,11,11,100.0
 goal_swap,t8,4,11,36.4
 goal_swap,t9,1,11,9.1
-spatial_task,t0,0,1,0.0
+spatial_task,t0,0,4,0.0
 spatial_task,t1,1,1,100.0
 spatial_task,t2,1,5,20.0
 spatial_task,t3,0,1,0.0
