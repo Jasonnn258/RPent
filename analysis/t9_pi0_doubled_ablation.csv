@@ -8,3 +8,4 @@ ts,suite,task,seed,result,forced_doubled_calls,turns
 19:54:15,libero_goal_swap,9,7,fail,42,40
 20:09:46,libero_goal_swap,9,8,fail,53,34
 20:10:36,libero_goal_swap,9,9,fail,54,40
+20:22:50,libero_goal_swap,9,10,fail,10,40
