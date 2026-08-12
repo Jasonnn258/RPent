@@ -1,1 +1,10 @@
 ts,suite,task,seed,result,forced_doubled_calls,turns
+19:19:11,libero_goal_swap,9,2,fail,6,40
+19:20:36,libero_goal_swap,9,1,fail,6,40
+19:31:57,libero_goal_swap,9,3,fail,19,40
+19:39:18,libero_goal_swap,9,5,success,31,24
+19:42:29,libero_goal_swap,9,4,fail,20,40
+19:53:27,libero_goal_swap,9,6,fail,39,40
+19:54:15,libero_goal_swap,9,7,fail,42,40
+20:09:46,libero_goal_swap,9,8,fail,53,34
+20:10:36,libero_goal_swap,9,9,fail,54,40

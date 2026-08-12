@@ -51,9 +51,9 @@ run_t9_eval() {
 import json,sys; st=json.load(open('$dir/states.json'))
 sys.exit(0 if (st and st[-1].get('libero_terminated')) else 1)" 2>/dev/null; then r="success"; else r="fail"; fi
     fi
-    # count forced_doubled usage from the run log
-    fd=$(grep -c "release_forced_doubled\|forced_doubled" "$dir"run.log "$rtmp" 2>/dev/null | awk -F: '{s+=$2} END{print s+0}')
-    turns=$(grep -cE "=== turn " "$rtmp" 2>/dev/null || echo 0)
+    # count forced_doubled: number of [tool>] release calls (routed to pi0_doubled)
+    fd=$(grep -cE "\[tool>\] release" "$dir"run.log 2>/dev/null || echo 0)
+    turns=$(grep -cE "=== turn " "$dir"run.log 2>/dev/null || echo 0)
     echo "$(date '+%T'),$SUITE,9,$seed,$r,$fd,$turns" >> "$ABL_CSV"
     echo "[abl gpu$gpu] t9 s$seed -> $r (forced_doubled=$fd)"
 }
