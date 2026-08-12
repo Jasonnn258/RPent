@@ -38,7 +38,7 @@ spatial_task,t5,0,1,0.0
 spatial_task,t6,1,1,100.0
 spatial_task,t7,0,1,0.0
 spatial_task,t8,1,1,100.0
-spatial_task,t9,0,1,0.0
+spatial_task,t9,1,1,100.0
 spatial_swap,t0,0,1,0.0
 spatial_swap,t1,1,1,100.0
 spatial_swap,t2,1,1,100.0
