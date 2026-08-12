@@ -273,6 +273,20 @@ Rule 2d — CLASSIFY THE DESTINATION SURFACE SEMANTICALLY (RGB) BEFORE PLACING.
    assuming the grasp or the bowl was wrong — a non-firing predicate is as often a
    wrong-SURFACE error as a wrong-object one.
 
+Rule 2e — PERCEPTION BUDGET (STOP localizing, START acting). `back_project`/`segment`
+   are cheap individually, but a localization LOOP is the failure mode: a run that
+   never grasps wastes turns, balloons context, and times out. Enforce:
+     • PRE-TASK PASS: at most 8 `back_project`/`segment` calls TOTAL to localize all
+       targets, then execute a primitive. Do not keep re-sampling the same object.
+     • BETWEEN ACTIONS: at most 2 perception calls to re-localize after a move/pick,
+       then act again.
+     • REUSE, don't re-derive: once you hold an object's world_xyz in context, use it
+       (plus the memory offset) — do NOT `back_project` it a second time unless it
+       visibly changed (e.g. it is now in-hand, or the scene re-shuffled).
+     • If a grasp/place fails, one quick re-localize (≤2 calls) and ONE re-attempt;
+       if it fails again, stop and report honestly rather than looping.
+   A decisive run with a handful of perception calls beats an endless sweep.
+
 Rule 3 — Pi0 IS the delivery service; walk the prompt ladder before scripting:
      1. "pick up the {object}"  2. the `task_language` verbatim  3. spatial qualifier
      4. re-position pre-pos (lower z, offset xy 5cm) and retry Pi0.

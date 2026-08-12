@@ -611,7 +611,19 @@ class LiberoPrimitives:
         """Open gripper for ``max_steps`` env steps while keeping eef in place.
 
         Returns once libero terminates (success) or step budget exhausted.
+
+        Causal-ablation hook (env-switch ``RPENT_FORCE_DOUBLED=1``): instead of a
+        bare gripper-open, route the placement through the Pi0 contact skill
+        (``pi0_doubled``) using the task language. No prompt / perception /
+        budget change; the flag is unset for the baseline.
         """
+        if os.environ.get("RPENT_FORCE_DOUBLED") == "1":
+            tl = self.env.get_task_language()
+            if tl:
+                r = self.pi0_doubled(prompt=tl, max_chunks=max_steps)
+                r["name"] = "release_forced_doubled"
+                r["forced_doubled"] = True
+                return r
         assert max_steps > 0, f"max_steps must be > 0, got {max_steps}"
         start_grip = self._last_obs_gripper
         peak_grip = start_grip

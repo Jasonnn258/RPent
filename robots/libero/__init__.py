@@ -495,7 +495,9 @@ def _init_runtime(
         ("vla", vla_rpc, vla_daemon),
     ):
         try:
-            wait_for_ready(client, daemon=daemon)
+            # Longer readiness window (900s) so concurrent VLA/SAM3 loads in a
+            # parallel batch do not time out before the models finish loading.
+            wait_for_ready(client, daemon=daemon, timeout_s=900.0)
         except Exception as exc:
             for started_daemon in reversed(daemons):
                 started_daemon.stop()
