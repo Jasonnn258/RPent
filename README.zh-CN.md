@@ -161,6 +161,19 @@ bash scripts/run_robocasa.sh PickPlaceCounterToCabinet 0 0    # <任务> <GPU> <
 
 更详细的文档请参见 [RPent 中文文档](https://rpent.readthedocs.io/zh-cn/latest/)。
 
+### 在 GPU 服务器上复现
+
+要在全新 GPU 机器上复现完整的 LIBERO 运行（LLM 规划 → Pi0.5 VLA → SAM3），
+参见 [`docs/reproduction.md`](docs/reproduction.md)。配套一键部署包
+（`scripts/deploy/`）约 15 分钟完成全部引导：
+
+```bash
+git clone https://github.com/Jasonnn258/RPent.git && cd RPent/scripts/deploy
+bash deploy.sh --deepseek-key sk-...     # 环境 + 依赖 + 检查点 + 补丁 + 环境文件
+source ~/rpent_data/rpent_env.sh
+bash run_repro.sh --cuda-device 0        # libero_object_swap task 2
+```
+
 ## 主要命令行参数
 
 <table width="100%" style="width: 100%; table-layout: auto; border-collapse: collapse;">
