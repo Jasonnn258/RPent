@@ -24,3 +24,11 @@ docs/build/
 build/
 .claude/settings.json
 artifacts/
+
+# Local runtime scratch / state (never commit).
+.gap_run/
+MUJOCO_LOG.TXT
+
+# Credentialed launcher scripts — contain API keys, never commit.
+harness_auto.sh
+harness_run.sh

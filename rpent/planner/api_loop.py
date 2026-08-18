@@ -13,7 +13,10 @@ import base64
 import contextlib
 import dataclasses
 import json
+import os
 import queue
+import re
+import traceback
 from collections import deque
 from pathlib import Path
 from typing import Any
@@ -59,6 +62,176 @@ _MAX_HISTORY_IMAGE_BYTES = 4 * 1024 * 1024
 #: Always retain at least this many of the most recent images, even if a single
 #: frame exceeds the byte budget, so the model never loses its current view.
 _MIN_RECENT_IMAGES = 2
+
+#: Perception tools the Progress Gate watches. The gate is an opt-in experiment
+#: selected by RPENT_PERCEPTION_MODE:
+#:   none          (default) — baseline Rule 2e, no blocking
+#:   hardcap       — block after RPENT_PERCEPTION_STREAK consecutive perception
+#:                   calls regardless of information change (a pure count cap)
+#:   progress_gate — block when consecutive perception calls return essentially
+#:                   unchanged information (world_xyz within RPENT_PERCEPTION_TOL_M,
+#:                   same camera/step), nudging the agent to act or re-observe.
+#: (Legacy RPENT_BLOCK_REPEATED_PERCEPTION=1 maps to progress_gate.)
+_PERCEPTION_GUARD_TOOLS = {"segment", "back_project", "view_driver_state", "read_image"}
+
+_PERCEPTION_BLOCK_MESSAGE = (
+    "Perception guard ({mode}): the last {n} consecutive perception calls returned "
+    "essentially unchanged information. Continuing to perceive cannot add information. "
+    "Choose ONE of the following now:\n"
+    "1) Execute a primitive action (move_to / move_pose / pi0_pick / pi0_doubled "
+    "/ release / set_gripper / rotate_wrist / rotate_pitch) to advance the task;\n"
+    "2) Get genuinely NEW information by acting first (the scene changes), or by "
+    "querying a different step / camera / pixel / prompt;\n"
+    "3) Call finish() if the task is done or hopeless."
+)
+
+_XYZ_RE = re.compile(
+    r'"(?:world_xyz|center_xyz|median_xyz)":\s*\[\s*'
+    r"(-?[0-9.]+)[,\s]*(-?[0-9.]+)[,\s]*(-?[0-9.]+)"
+)
+
+
+def _perception_query_sig(name: str, kwargs: dict[str, Any]) -> tuple | None:
+    """Stable fingerprint of *what the perception call is asking for*.
+
+    Same fingerprint => same information returned (these tools are
+    deterministic in their args), so a run of identical fingerprints is
+    repeated perception. ``None`` for non-perception tools.
+    """
+    k = kwargs or {}
+    if name == "read_image":
+        return ("read_image", str(k.get("path")))
+    if name == "view_driver_state":
+        return ("view_driver_state", k.get("step"))
+    if name == "back_project":
+        return (
+            "back_project",
+            k.get("camera"),
+            k.get("resolution"),
+            k.get("step"),
+            k.get("row"),
+            k.get("col"),
+            tuple(k.get("row_range")) if k.get("row_range") is not None else None,
+            tuple(k.get("col_range")) if k.get("col_range") is not None else None,
+        )
+    if name == "segment":
+        return (
+            "segment",
+            k.get("camera"),
+            k.get("step"),
+            ("p", tuple(k.get("point"))) if k.get("point") is not None else ("t", k.get("prompt")),
+        )
+    return None
+
+
+def _perception_info(name: str, kwargs: dict[str, Any], text: str) -> tuple | None:
+    """Semantic info a perception call returned, for change detection."""
+    k = kwargs or {}
+    if name in ("back_project", "segment"):
+        m = _XYZ_RE.search(text or "")
+        xyz = tuple(round(float(v), 4) for v in m.groups()) if m else None
+        return ("xyz", k.get("camera"), k.get("step"), xyz)
+    if name == "view_driver_state":
+        return ("view", k.get("step"))
+    if name == "read_image":
+        return ("img", str(k.get("path")))
+    return None
+
+
+def _info_unchanged(a: tuple, b: tuple, tol: float) -> bool:
+    """True when perception info b carries no new information vs a."""
+    if a[0] != b[0]:
+        return False
+    if a[0] == "xyz":
+        if a[1] != b[1] or a[2] != b[2]:  # camera or step differ -> new info
+            return False
+        if a[3] is None or b[3] is None:
+            return False
+        return all(abs(x - y) <= tol for x, y in zip(a[3], b[3]))
+    return a[1] == b[1]
+
+
+class _PerceptionGuard:
+    """Blocks perception that stops adding information (or a hard count cap).
+
+    ``hardcap`` counts every consecutive perception call and blocks past the
+    threshold. ``progress_gate`` counts only consecutive calls whose returned
+    info is essentially unchanged (same camera/step, world_xyz within tol) and
+    blocks when that no-progress streak passes the threshold. Any non-perception
+    call (an action, finish, ...) resets the streak.
+    """
+
+    def __init__(self, mode: str, streak_limit: int, tol_m: float = 0.01) -> None:
+        self._mode = mode
+        self._streak_limit = max(1, int(streak_limit))
+        self._tol = float(tol_m)
+        self._last_sig: tuple | None = None
+        self._last_info: tuple | None = None
+        self._streak = 0
+
+    def check_before(self, name: str, kwargs: dict[str, Any]) -> str | None:
+        """Return a block message if the call is known-blocked (skip execution)."""
+        sig = _perception_query_sig(name, kwargs)
+        if sig is None:
+            return None  # action -> reset happens in observe_after
+        if self._mode == "hardcap":
+            if self._streak >= self._streak_limit:
+                return self._block(name)
+            return None
+        # progress_gate: identical query already past threshold -> deterministic repeat
+        if sig == self._last_sig and self._streak >= self._streak_limit:
+            return self._block(name)
+        return None
+
+    def observe_after(self, name: str, kwargs: dict[str, Any], text: str) -> str | None:
+        """Return a block message after a tool executed, or None. Resets on action."""
+        sig = _perception_query_sig(name, kwargs)
+        if sig is None:
+            self._last_sig = None
+            self._last_info = None
+            self._streak = 0
+            return None
+        if self._mode == "hardcap":
+            self._streak += 1
+        else:  # progress_gate
+            self._last_sig = sig
+            info = _perception_info(name, kwargs, text)
+            if info is None:
+                self._last_info = None
+                self._streak = 0
+                return None
+            unchanged = self._last_info is not None and _info_unchanged(
+                self._last_info, info, self._tol
+            )
+            self._last_info = info
+            self._streak = self._streak + 1 if unchanged else 1
+        if self._streak > self._streak_limit:
+            return self._block(name)
+        return None
+
+    def _block(self, name: str) -> str:
+        return _PERCEPTION_BLOCK_MESSAGE.format(
+            mode=self._mode, name=name, n=self._streak
+        )
+
+    @classmethod
+    def make(cls) -> "_PerceptionGuard | None":
+        """Instantiate from env; None for the baseline (no gate)."""
+        mode = os.environ.get("RPENT_PERCEPTION_MODE", "none")
+        if mode == "none" and os.environ.get("RPENT_BLOCK_REPEATED_PERCEPTION") == "1":
+            mode = "progress_gate"  # legacy flag
+        if mode == "none":
+            return None
+        if mode not in ("hardcap", "progress_gate"):
+            logger.warning("unknown RPENT_PERCEPTION_MODE=%r; disabling guard", mode)
+            return None
+        limit = int(os.environ.get("RPENT_PERCEPTION_STREAK", "3") or "3")
+        tol = float(os.environ.get("RPENT_PERCEPTION_TOL_M", "0.01") or "0.01")
+        logger.info(
+            "perception guard enabled: mode=%s streak_limit=%s tol_m=%s",
+            mode, limit, tol,
+        )
+        return cls(mode, limit, tol)
 
 
 class ApiAgentLoop:
@@ -256,6 +429,7 @@ class ApiAgentLoop:
         except Exception as e:  # noqa: BLE001 - surfaced via PlannerResult.error
             last_error = _api_error_text(e, no_images=self._no_images)
             logger.error("agent run failed: %s", last_error)
+            logger.error("traceback:\n%s", traceback.format_exc())
 
         return PlannerResult(
             finish_result=observer.finish_result,
@@ -691,13 +865,38 @@ def _api_error_text(error: Exception, *, no_images: bool) -> str:
 
 def _build_tools(toolkit: Toolkit, *, no_images: bool = False) -> list[Tool]:
     """Build the API-only image reader plus pydantic-ai toolkit wrappers."""
+    guard = _PerceptionGuard.make()
     image_reader = read_image_text_only if no_images else read_image
+    if guard is not None:
+        base_reader = image_reader  # capture pre-rebind reference
+
+        def _guarded_read_image(path: str):
+            pre = guard.check_before("read_image", {"path": path})
+            if pre is not None:
+                return {
+                    "perception_blocked": True,
+                    "repeated_perception": True,
+                    "note": pre,
+                }
+            res = base_reader(path)
+            post = guard.observe_after("read_image", {"path": path}, str(path))
+            if post is not None:
+                return {
+                    "perception_blocked": True,
+                    "repeated_perception": True,
+                    "note": post,
+                }
+            return res
+
+        image_reader = _guarded_read_image
     tools: list[Tool] = [Tool(image_reader, name="read_image")]
     for spec in toolkit.get_tools_spec():
         name = spec["name"]
         tools.append(
             Tool.from_schema(
-                function=_make_tool_function(toolkit, name, no_images=no_images),
+                function=_make_tool_function(
+                    toolkit, name, no_images=no_images, perception_guard=guard
+                ),
                 name=name,
                 description=spec.get("description", ""),
                 json_schema=spec.get("input_schema")
@@ -741,12 +940,34 @@ def read_image_text_only(path: str) -> str:
     )
 
 
-def _make_tool_function(toolkit: Toolkit, name: str, *, no_images: bool = False):
+def _make_tool_function(
+    toolkit: Toolkit,
+    name: str,
+    *,
+    no_images: bool = False,
+    perception_guard: _PerceptionGuard | None = None,
+):
     """Return a callable that dispatches one tool call to the toolkit."""
 
     def _call(**kwargs: Any) -> Any:
+        if perception_guard is not None:
+            pre = perception_guard.check_before(name, kwargs)
+            if pre is not None:
+                return {
+                    "perception_blocked": True,
+                    "repeated_perception": True,
+                    "note": pre,
+                }
         result = toolkit.execute_tool(name, kwargs)
         text, images = _content_blocks_to_pydantic(result.content_blocks)
+        if perception_guard is not None:
+            post = perception_guard.observe_after(name, kwargs, text)
+            if post is not None:
+                return {
+                    "perception_blocked": True,
+                    "repeated_perception": True,
+                    "note": post,
+                }
         if images and not no_images:
             return ToolReturn(return_value=text, content=images)
         return text
