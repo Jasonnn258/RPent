@@ -32,3 +32,9 @@ MUJOCO_LOG.TXT
 # Credentialed launcher scripts — contain API keys, never commit.
 harness_auto.sh
 harness_run.sh
+
+# Transfer artifacts (reproducible from the repo / regenerable).
+rpent-data.bundle
+rpent-logs.tar.zst
+rpent/
+.claude/
