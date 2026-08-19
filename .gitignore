@@ -36,5 +36,7 @@ harness_run.sh
 # Transfer artifacts (reproducible from the repo / regenerable).
 rpent-data.bundle
 rpent-logs.tar.zst
-rpent/
+# Data-transfer clone of this repo (nested, has its own .git). Anchored so it
+# never hides the source package rpent/memory/ (see note in commit history).
+/rpent/rpent/
 .claude/

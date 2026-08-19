@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from robots.libero.prompts import system as system_parts
 from robots.libero.prompts import user as user_parts
 from rpent.context.prompt_utils import Numbered, PromptNode
@@ -9,7 +11,7 @@ from rpent.context.prompt_utils import Numbered, PromptNode
 
 def system_prompt() -> PromptNode:
     """Assemble the LIBERO system prompt tree."""
-    return {
+    node = {
         "ROLE AND EVALUATION": system_parts.ROLE_AND_EVALUATION,
         "PROVEN LEVERS & LESSONS — libero_10_task seed-0 sweep solved 9/10 (READ THIS)": (
             system_parts.PROVEN_LEVERS
@@ -27,6 +29,15 @@ def system_prompt() -> PromptNode:
         "KEY HYPERPARAMETERS": system_parts.KEY_HYPERPARAMETERS,
         "OUTPUT DISCIPLINE": system_parts.OUTPUT_DISCIPLINE,
     }
+    # Structured Global Memory v1 — gated, so the baseline prompt stays
+    # byte-identical when the gate is off.
+    if os.environ.get("RPENT_STRUCTURED_MEMORY") == "1":
+        from robots.libero.prompts import structured_memory as sm
+
+        node["STRUCTURED MEMORY (v1) — obey CURRENT PHASE + phase rules"] = (
+            sm.STRUCTURED_MEMORY
+        )
+    return node
 
 
 def user_prompt() -> PromptNode:

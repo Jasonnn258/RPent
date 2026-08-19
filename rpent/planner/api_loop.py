@@ -28,6 +28,7 @@ from pydantic_ai.messages import (
     FunctionToolCallEvent,
     FunctionToolResultEvent,
     ModelMessage,
+    ModelRequest,
     ModelResponse,
     TextPart,
     ThinkingPart,
@@ -48,7 +49,7 @@ from rpent.dashboard.planner_control import DashboardPlannerControl
 from rpent.planner.base import PlannerResult
 from rpent.tools.toolkit import Toolkit
 from rpent.utils.config import get_repo_root
-from rpent.utils.logging import get_logger
+from rpent.utils.logging import get_logger, get_output_dir
 
 logger = get_logger("api_loop")
 
@@ -62,6 +63,30 @@ _MAX_HISTORY_IMAGE_BYTES = 4 * 1024 * 1024
 #: Always retain at least this many of the most recent images, even if a single
 #: frame exceeds the byte budget, so the model never loses its current view.
 _MIN_RECENT_IMAGES = 2
+
+
+def _merge_into_tail(history: list[ModelMessage], text: str) -> list[ModelMessage]:
+    """Append *text* to the trailing model request so it survives the restart.
+
+    pydantic-ai 2.25.0 restarts a run with ``user_prompt=None`` by popping the
+    trailing ``ModelRequest`` and reusing its parts as the next message
+    (``_agent_graph.py`` ``is_resuming_without_prompt``). ``run.enqueue`` is
+    lost the moment the run closes, so a pending structured block / fast summary
+    must ride inside the tail request instead. Pure + unit-tested.
+    """
+    if not history:
+        return [ModelRequest(parts=[UserPromptPart(content=text)])]
+    tail = history[-1]
+    if isinstance(tail, ModelRequest):
+        # ModelRequest is a @dataclass (no pydantic model_copy); replace() copies
+        # the dataclass with the summary appended to the tail request's parts.
+        merged = dataclasses.replace(
+            tail, parts=list(tail.parts) + [UserPromptPart(content=text)]
+        )
+        return history[:-1] + [merged]
+    # Defensive: no trailing request (e.g. a bare end response). Start a fresh
+    # request so the injected text is still delivered on restart.
+    return history + [ModelRequest(parts=[UserPromptPart(content=text)])]
 
 #: Perception tools the Progress Gate watches. The gate is an opt-in experiment
 #: selected by RPENT_PERCEPTION_MODE:
@@ -311,14 +336,31 @@ class ApiAgentLoop:
 
         interactive = input_queue is not None
         messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
+        tracker = _new_phase_tracker(max_turns=max_turns)
         observer = _ApiRunObserver(
             dashboard_events=self._dashboard_events,
             messages=messages,
             max_turns=max_turns,
+            phase_tracker=tracker,
         )
         last_error: str | None = None
-        usage: RunUsage | None = None
         quit_requested = False
+
+        # Dual-Route Reasoning — Fast/Slow decider layered on Structured Memory
+        # (SM1 unchanged). Fast steps run conservative zero-arg actions without
+        # an LLM call; everything else falls through to the model below.
+        dual_route = tracker is not None and os.environ.get("RPENT_DUAL_ROUTE") == "1"
+        router: Any = None
+        if dual_route:
+            from rpent.memory.dual_route import DualRouter
+
+            router = DualRouter(
+                enable_release=os.environ.get("RPENT_DUAL_ROUTE_RELEASE", "1") == "1"
+            )
+        total_steps = 0
+        fast_steps = 0
+        pending_block: str | None = None
+        session_over = False
 
         def _inject_pending(run: Any) -> bool:
             """Drain queued user lines into the live run; True => end session.
@@ -361,11 +403,58 @@ class ApiAgentLoop:
         history: list[ModelMessage] | None = None
         try:
             while True:
-                run_turns = 0
+                # Dual-route Fast branch: no LLM call. Runs before each model
+                # run; the first iteration (history is None) always goes Slow.
+                if router is not None and history is not None:
+                    action = router.decide(
+                        total_steps=total_steps, max_turns=max_turns, tracker=tracker
+                    )
+                    if action is None:
+                        logger.info("[slow] reason=%s", router.slow_reason)
+                    else:
+                        total_steps += 1
+                        fast_steps += 1
+                        result = toolkit.execute_tool(action.name, action.args)
+                        tracker.on_tool_call(action.name, action.args)
+                        result_text = json.dumps(result.result, default=str)
+                        tracker.on_tool_result(
+                            action.name, result_text, "error" in result.result
+                        )
+                        router.observe_fast(action, result.result)
+                        logger.info(
+                            "[fast] %s(%s)",
+                            action.name,
+                            _clip(json.dumps(action.args), _ARGS_LOG_LIMIT),
+                        )
+                        logger.info(
+                            "[tool>] %s(%s)",
+                            action.name,
+                            _clip(json.dumps(action.args), _ARGS_LOG_LIMIT),
+                        )
+                        logger.info(
+                            "[tool<] %s: %s",
+                            action.name,
+                            _clip(result_text, _TOOL_LOG_LIMIT),
+                        )
+                        messages.append({"role": "user", "content": action.summary})
+                        history = _merge_into_tail(history, action.summary)
+                        if result.is_finish:
+                            observer.finish_result = result.result
+                            logger.info(
+                                "FINISH called (fast): %s", observer.finish_result
+                            )
+                            break
+                        continue
+
+                # Dual-route resumes with no new prompt: the merged tail (tool
+                # results + pending block / fast summary) is popped and reused
+                # by pydantic-ai's resume-without-prompt path. The first run
+                # (history is None) still starts from the seed.
+                _resume = dual_route and history is not None
                 # request_limit overrides pydantic-ai's default (50) so the
                 # manual max_turns break below is what bounds each run.
                 async with agent.iter(
-                    seed,
+                    None if _resume else seed,
                     message_history=history,
                     usage_limits=UsageLimits(request_limit=max_turns + 1),
                 ) as run:
@@ -374,25 +463,67 @@ class ApiAgentLoop:
                             quit_requested = True
                             break
                         if Agent.is_call_tools_node(node):
-                            run_turns += 1
+                            total_steps += 1
                             observer.observe_response(
                                 node.model_response,
                                 run.usage,
-                                log_turn=run_turns,
+                                log_turn=observer.turns,
                             )
 
                             async with node.stream(run.ctx) as stream:
                                 async for event in stream:
                                     observer.observe_tool(event, run.usage)
 
+                            # Structured Memory v1 — inject a compact context
+                            # block, but ONLY on phase transitions / rule fires
+                            # (throttled, so it does not inflate the turn count
+                            # with every perception).
+                            if tracker is not None and observer.finish_result is None:
+                                block = tracker.current_block(total_steps)
+                                if block is not None:
+                                    if dual_route:
+                                        # run.enqueue dies with the run on
+                                        # restart — stash it and merge it into
+                                        # the tail request instead.
+                                        pending_block = block
+                                    else:
+                                        run.enqueue(block, priority="asap")
+                                    messages.append(
+                                        {"role": "user", "content": block}
+                                    )
+                                    tracker.mark_injected()
+                                    logger.info(
+                                        "[phase] injected block (phase=%s)",
+                                        tracker.current_phase(),
+                                    )
+
                             if observer.finish_result is not None:
                                 logger.info("FINISH called: %s", observer.finish_result)
                                 break
-                            if observer.turns >= max_turns:
+                            if total_steps >= max_turns:
                                 logger.info(
                                     "reached max_turns=%d. Stopping.", max_turns
                                 )
                                 break
+                            # Dual-route (non-interactive): end this agent.iter
+                            # after exactly one model turn so the outer loop can
+                            # run the Fast/Slow decision. pydantic-ai only
+                            # commits this turn's tool results to
+                            # message_history when the *next* ModelRequestNode
+                            # runs; breaking out now would leave a
+                            # ModelResponse-with-tool_calls tail, and the resume
+                            # path would then re-execute the tools (double robot
+                            # actions). CallToolsNode has already built the
+                            # tool-result request as node._next_node.request —
+                            # commit it so the Fast branch / next model run
+                            # resumes on a clean ModelRequest tail.
+                            if dual_route and not interactive:
+                                next_node = getattr(node, "_next_node", None)
+                                if getattr(next_node, "request", None) is not None:
+                                    run.ctx.state.message_history.append(
+                                        next_node.request
+                                    )
+                                    break
                         elif Agent.is_end_node(node):
                             if interactive:
                                 logger.info(
@@ -403,27 +534,35 @@ class ApiAgentLoop:
                                 logger.info(
                                     "model ended turn without a tool call. Stopping."
                                 )
+                                if dual_route:
+                                    # Restarting on a bare ModelResponse tail
+                                    # re-emits it forever (_agent_graph.py) —
+                                    # end the session instead.
+                                    session_over = True
                             break
 
-                    usage = run.usage
-                    if interactive:
-                        history = run.all_messages()
+                    history = run.all_messages()
+                    if dual_route and pending_block is not None:
+                        history = _merge_into_tail(history, pending_block)
+                        pending_block = None
 
-                # finish, quit, non-interactive, or the cumulative turn budget is
-                # spent => end the whole session so max_turns is enforced across
-                # every run, not per run.
+                # finish, quit, end-node (dual-route), non-interactive, or the
+                # cumulative step budget is spent => end the whole session so
+                # max_turns is enforced across every run, not per run.
                 if (
                     observer.finish_result is not None
                     or quit_requested
-                    or not interactive
-                    or observer.turns >= max_turns
+                    or session_over
+                    or (not interactive and not dual_route)
+                    or total_steps >= max_turns
                 ):
                     break
-                nxt = await _await_next()
-                if nxt is None:
-                    break
-                seed = nxt
-                messages.append({"role": "user", "content": seed})
+                if interactive:
+                    nxt = await _await_next()
+                    if nxt is None:
+                        break
+                    seed = nxt
+                    messages.append({"role": "user", "content": seed})
         except UsageLimitExceeded as e:
             logger.info("usage limit reached: %s", e)
         except Exception as e:  # noqa: BLE001 - surfaced via PlannerResult.error
@@ -431,10 +570,20 @@ class ApiAgentLoop:
             logger.error("agent run failed: %s", last_error)
             logger.error("traceback:\n%s", traceback.format_exc())
 
+        if tracker is not None:
+            _write_structured_metrics(
+                tracker,
+                success=(observer.finish_result or {}).get("status") == "success",
+                fast_steps=fast_steps,
+                slow_reasons=router.slow_reasons if router is not None else None,
+            )
+
         return PlannerResult(
             finish_result=observer.finish_result,
             messages=messages,
-            stats=_build_stats(usage, observer.turns, observer.tool_calls),
+            stats=_build_stats(
+                observer._usage_accum, total_steps, observer.tool_calls
+            ),
             error=last_error,
         )
 
@@ -538,6 +687,17 @@ class _ApiRunObserver:
     turns: int = 0
     tool_calls: int = 0
     finish_result: dict[str, Any] | None = None
+    # Structured Global Memory v1 — set by _solve when the gate is on. The
+    # tracker is fed the exact same tool stream the observer already sees.
+    phase_tracker: Any = None
+    # Usage accumulation across graph runs. Each ``agent.iter`` starts a fresh
+    # per-run ``RunUsage`` (new run_id, no inheritance from message_history);
+    # in dual-route the planner restarts the graph after every model turn, so
+    # the per-run totals must be summed here to keep the ``[usage]`` log lines
+    # (and therefore the report's token/request totals) cumulative.
+    _usage_accum: RunUsage | None = None
+    _usage_run_id: str | None = None
+    _usage_in_run: RunUsage | None = None
 
     def observe_response(
         self,
@@ -547,11 +707,27 @@ class _ApiRunObserver:
         log_turn: int | None = None,
     ) -> None:
         self.turns += 1
+        run_id = getattr(response, "run_id", None)
+        if run_id != self._usage_run_id:
+            # First model turn of a graph run: `usage` is that run's own
+            # cumulative total (== this turn's usage in the one-turn-per-run
+            # dual-route flow).
+            self._usage_run_id = run_id
+            self._usage_in_run = usage
+            incr = usage
+        else:
+            # Later turn within the same run: the run's usage is cumulative,
+            # so only the delta since the previous observation is new.
+            incr = _usage_delta(usage, self._usage_in_run)
+            self._usage_in_run = usage
+        self._usage_accum = (
+            incr if self._usage_accum is None else self._usage_accum + incr
+        )
         message = _serialize_response(response)
         self.messages.append(message)
         _log_response(
             response,
-            usage,
+            self._usage_accum,
             self.turns if log_turn is None else log_turn,
             self.max_turns,
         )
@@ -571,6 +747,8 @@ class _ApiRunObserver:
             self.tool_calls += 1
             part = event.part
             args = part.args_as_dict()
+            if self.phase_tracker is not None:
+                self.phase_tracker.on_tool_call(part.tool_name, args)
             self.dashboard_events.emit(
                 TranscriptEvent(
                     {"type": "tool_call", "tool": part.tool_name, "args": args}
@@ -585,6 +763,10 @@ class _ApiRunObserver:
             _log_tool_result(message)
             part = event.part
             is_error = bool(getattr(part, "is_error", False))
+            if self.phase_tracker is not None:
+                self.phase_tracker.on_tool_result(
+                    part.tool_name, str(message.get("content", "")), is_error
+                )
             self.dashboard_events.emit(
                 TranscriptEvent(
                     {
@@ -608,6 +790,69 @@ class _ApiRunObserver:
                 tool_calls=self.tool_calls,
             )
         )
+
+
+def _new_phase_tracker(*, max_turns: int) -> Any:
+    """Build the Structured Memory PhaseTracker when the gate is on, else None.
+
+    Gate: ``RPENT_STRUCTURED_MEMORY=1`` (off => baseline behavior, no tracker).
+    Rules come from ``RPENT_STRUCTURED_RULES`` (absolute path) or the frozen
+    authoritative copy at ``analysis/structured_rules_v1.json``. Task scope
+    comes from ``RPENT_TASK`` (set per-episode by the scheduler), falling back
+    to parsing the run output dir basename (``_t<N>_s<M>``).
+    """
+    if os.environ.get("RPENT_STRUCTURED_MEMORY") != "1":
+        return None
+    from rpent.memory.structured import (
+        PhaseTracker,
+        detect_task,
+        load_rules,
+    )
+
+    rules_path = os.environ.get("RPENT_STRUCTURED_RULES") or str(
+        Path(get_repo_root()) / "analysis" / "structured_rules_v1.json"
+    )
+    rules = load_rules(rules_path)
+    task = detect_task()
+    memory_dir = str(Path(get_repo_root()) / "resources" / "libero" / "memory")
+    logger.info("[phase] structured memory ON — rules=%s task=%s", rules_path, task)
+    return PhaseTracker(
+        rules,
+        task=task,
+        max_turns=max_turns,
+        memory_dir=memory_dir,
+    )
+
+
+def _write_structured_metrics(
+    tracker: Any,
+    *,
+    success: bool,
+    fast_steps: int = 0,
+    slow_reasons: list[str] | None = None,
+) -> None:
+    """Write per-episode Structured Memory metrics into the run output dir.
+
+    Best-effort: a metrics write failure must never fail the run.
+    """
+    try:
+        out = get_output_dir()
+        snap = tracker.snapshot(success=success)
+        snap["fast_steps"] = fast_steps
+        snap["slow_reasons"] = slow_reasons
+        (out / "structured_metrics.json").write_text(
+            json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        logger.info(
+            "[phase] metrics written — fired=%s injections=%s success=%s "
+            "fast_steps=%s",
+            snap["fired_rules"],
+            snap["injections"],
+            success,
+            fast_steps,
+        )
+    except Exception as e:  # noqa: BLE001 - metrics must never break the run
+        logger.warning("[phase] failed to write structured metrics: %s", e)
 
 
 class _ApiDashboardSession:
@@ -1034,6 +1279,28 @@ def _serialize_tool_result(event: FunctionToolResultEvent) -> dict[str, Any]:
         "tool_call_id": getattr(part, "tool_call_id", None),
         "content": content,
     }
+
+
+def _usage_delta(later: RunUsage, earlier: RunUsage) -> RunUsage:
+    """Return ``later - earlier`` as a fresh RunUsage (clamped at 0).
+
+    ``RunUsage`` is cumulative within one graph run and has no subtraction
+    operator; ``_ApiRunObserver`` needs the per-turn increment to accumulate
+    totals across the restarted runs of the dual-route flow.
+    """
+    _d = lambda a, b: max(a - b, 0)  # noqa: E731 - tiny local clamp
+    d = RunUsage()
+    d.requests = _d(later.requests, earlier.requests)
+    d.tool_calls = _d(later.tool_calls, earlier.tool_calls)
+    d.input_tokens = _d(later.input_tokens, earlier.input_tokens)
+    d.output_tokens = _d(later.output_tokens, earlier.output_tokens)
+    d.cache_read_tokens = _d(later.cache_read_tokens, earlier.cache_read_tokens)
+    d.cache_write_tokens = _d(later.cache_write_tokens, earlier.cache_write_tokens)
+    d.input_audio_tokens = _d(later.input_audio_tokens, earlier.input_audio_tokens)
+    d.cache_audio_read_tokens = _d(
+        later.cache_audio_read_tokens, earlier.cache_audio_read_tokens
+    )
+    return d
 
 
 def _build_stats(

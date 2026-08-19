@@ -1,0 +1,64 @@
+ts,stage,suite,task,seed,cond,repeat,dir,rc,wall_s,result
+20260812-23:39:4,SM1,libero_spatial_task,0,1,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260812-23:39:42_libero_spatial_task_t0_s1/,0,,policy_fail
+20260812-23:47:5,SM1,libero_spatial_task,0,2,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260812-23:47:59_libero_spatial_task_t0_s2/,0,,policy_fail
+20260812-23:58:3,SM1,libero_spatial_task,0,3,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260812-23:58:33_libero_spatial_task_t0_s3/,0,,policy_fail
+20260813-12:55:2,SM1,libero_spatial_task,0,4,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-12:55:29_libero_spatial_task_t0_s4/,0,,policy_fail
+20260813-12:58:3,SM1,libero_spatial_task,0,5,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-12:58:33_libero_spatial_task_t0_s5/,0,,policy_fail
+20260813-13:01:0,SM1,libero_spatial_task,0,6,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-13:01:06_libero_spatial_task_t0_s6/,0,,success
+20260813-13:03:2,SM1,libero_spatial_task,0,7,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-13:03:28_libero_spatial_task_t0_s7/,0,,policy_fail
+20260813-13:07:3,SM1,libero_spatial_task,0,8,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-13:07:35_libero_spatial_task_t0_s8/,0,,success
+20260813-13:09:4,SM1,libero_spatial_task,0,9,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-13:09:43_libero_spatial_task_t0_s9/,0,,success
+20260813-13:10:4,SM1,libero_spatial_task,0,10,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-13:10:45_libero_spatial_task_t0_s10/,0,,success
+20260814-18:26:0,SM1,libero_spatial_task,7,1,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:26:09_libero_spatial_task_t7_s1/,0,,success
+20260814-18:26:0,SM1,libero_spatial_task,7,2,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:26:09_libero_spatial_task_t7_s2/,0,,success
+20260814-18:33:4,SM1,libero_spatial_task,7,3,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:33:48_libero_spatial_task_t7_s3/,0,,policy_fail
+20260814-18:36:5,SM1,libero_spatial_task,7,4,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:36:55_libero_spatial_task_t7_s4/,0,,policy_fail
+20260814-18:38:3,SM1,libero_spatial_task,7,5,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:38:33_libero_spatial_task_t7_s5/,0,,policy_fail
+20260814-18:43:4,SM1,libero_spatial_task,7,6,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:43:42_libero_spatial_task_t7_s6/,0,,policy_fail
+20260814-18:43:5,SM1,libero_spatial_task,7,7,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:43:55_libero_spatial_task_t7_s7/,0,,policy_fail
+20260814-18:48:0,SM1,libero_spatial_task,7,8,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:48:08_libero_spatial_task_t7_s8/,0,,policy_fail
+20260814-18:51:1,SM1,libero_spatial_task,7,9,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-18:51:14_libero_spatial_task_t7_s9/,0,,policy_fail
+20260814-14:09:4,SM1,libero_spatial_task,7,10,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260814-14:09:41_libero_spatial_task_t7_s10/,0,,success
+20260813-15:38:2,SM1,libero_spatial_task,9,1,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:38:25_libero_spatial_task_t9_s1/,0,,policy_fail
+20260813-15:38:5,SM1,libero_spatial_task,9,2,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:38:56_libero_spatial_task_t9_s2/,0,,success
+20260813-15:42:4,SM1,libero_spatial_task,9,3,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:42:48_libero_spatial_task_t9_s3/,0,,policy_fail
+20260813-15:52:3,SM1,libero_spatial_task,9,4,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:52:31_libero_spatial_task_t9_s4/,0,,success
+20260813-15:53:3,SM1,libero_spatial_task,9,5,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:53:34_libero_spatial_task_t9_s5/,0,,success
+20260813-15:53:3,SM1,libero_spatial_task,9,6,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:53:36_libero_spatial_task_t9_s6/,0,,policy_fail
+20260813-15:56:1,SM1,libero_spatial_task,9,7,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-15:56:15_libero_spatial_task_t9_s7/,0,,success
+20260813-16:06:4,SM1,libero_spatial_task,9,8,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-16:06:42_libero_spatial_task_t9_s8/,0,,policy_fail
+20260813-16:07:1,SM1,libero_spatial_task,9,9,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-16:07:13_libero_spatial_task_t9_s9/,0,,success
+20260813-16:08:4,SM1,libero_spatial_task,9,10,baseline,1,/hw-tbo/yjx/workspace/RPent/logs/20260813-16:08:46_libero_spatial_task_t9_s10/,0,,success
+20260818-15:51:59,SM1,libero_spatial_task,0,3,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s3_r1,0,479.0,success,v1,5,155,"[""R1""]",1,1,P_place
+20260818-15:51:59,SM1,libero_spatial_task,0,5,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s5_r1,0,601.1,success,v1,4,137,"[""R1""]",1,1,P_grasp
+20260818-15:51:59,SM1,libero_spatial_task,0,4,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s4_r1,0,754.8,policy_fail,v1,6,224,"[""R1"", ""R9""]",1,1,P_place
+20260818-15:51:59,SM1,libero_spatial_task,0,2,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s2_r1,0,757.1,success,v1,8,362,"[""R8"", ""R1"", ""R9"", ""R7""]",2,2,P_verify
+20260818-15:51:59,SM1,libero_spatial_task,0,6,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s6_r1,0,769.8,success,v1,5,155,"[""R1""]",1,1,P_place
+20260818-15:51:59,SM1,libero_spatial_task,0,7,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s7_r1,0,772.1,success,v1,4,159,"[""R1""]",1,1,P_grasp
+20260818-15:51:59,SM1,libero_spatial_task,0,1,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s1_r1,0,823.4,policy_fail,v1,3,117,"[""R1""]",1,1,P_transport
+20260818-15:51:59,SM1,libero_spatial_task,0,8,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:51:59_structured_libero_spatial_task_t0_s8_r1,0,998.6,policy_fail,v1,7,294,"[""R1"", ""R7"", ""R9""]",3,2,P_verify
+20260818-16:02:01,SM1,libero_spatial_task,0,10,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:02:01_structured_libero_spatial_task_t0_s10_r1,0,452.8,success,v1,6,173,"[""R1""]",1,1,P_place
+20260818-15:59:58,SM1,libero_spatial_task,0,9,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-15:59:58_structured_libero_spatial_task_t0_s9_r1,0,674.8,policy_fail,v1,5,206,"[""R1"", ""R9""]",1,1,P_grasp
+20260818-16:08:38,SM1,libero_spatial_task,7,6,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:08:38_structured_libero_spatial_task_t7_s6_r1,0,494.5,success,v1,5,155,"[""R1""]",1,1,P_place
+20260818-16:04:34,SM1,libero_spatial_task,7,1,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:04:34_structured_libero_spatial_task_t7_s1_r1,0,772.4,success,v1,6,224,"[""R1"", ""R7""]",2,1,P_verify
+20260818-16:04:49,SM1,libero_spatial_task,7,3,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:04:49_structured_libero_spatial_task_t7_s3_r1,0,941.4,success,v1,6,224,"[""R1"", ""R9""]",2,1,P_place
+20260818-16:04:37,SM1,libero_spatial_task,7,2,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:04:37_structured_libero_spatial_task_t7_s2_r1,0,1026.5,success,v1,5,155,"[""R1""]",1,1,P_place
+20260818-16:05:43,SM1,libero_spatial_task,7,5,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:05:43_structured_libero_spatial_task_t7_s5_r1,0,993.6,policy_fail,v1,7,367,"[""R1"", ""R4"", ""R9""]",2,1,P_place
+20260818-16:04:52,SM1,libero_spatial_task,7,4,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:04:52_structured_libero_spatial_task_t7_s4_r1,0,1091.0,policy_fail,v1,7,242,"[""R1"", ""R9""]",2,3,P_place
+20260818-16:11:13,SM1,libero_spatial_task,7,8,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:11:13_structured_libero_spatial_task_t7_s8_r1,0,863.2,policy_fail,v1,7,293,"[""R1"", ""R9"", ""R7""]",3,1,P_verify
+20260818-16:16:53,SM1,libero_spatial_task,7,9,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:16:53_structured_libero_spatial_task_t7_s9_r1,0,666.8,success,v1,6,251,"[""R1"", ""R9""]",2,1,P_place
+20260818-16:09:33,SM1,libero_spatial_task,7,7,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:09:33_structured_libero_spatial_task_t7_s7_r1,0,1112.5,policy_fail,v1,7,299,"[""R1"", ""R4"", ""R9""]",2,1,P_place
+20260818-16:17:27,SM1,libero_spatial_task,7,10,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:17:27_structured_libero_spatial_task_t7_s10_r1,0,767.0,success,v1,6,226,"[""R1"", ""R9""]",2,1,P_place
+20260818-16:23:02,SM1,libero_spatial_task,9,4,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:23:02_structured_libero_spatial_task_t9_s4_r1,0,454.2,success,v1,5,209,"[""R1"", ""R5""]",1,1,P_place
+20260818-16:21:43,SM1,libero_spatial_task,9,2,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:21:43_structured_libero_spatial_task_t9_s2_r1,0,699.6,success,v1,5,209,"[""R1"", ""R5""]",1,1,P_place
+20260818-16:25:37,SM1,libero_spatial_task,9,5,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:25:37_structured_libero_spatial_task_t9_s5_r1,0,531.6,success,v1,5,209,"[""R1"", ""R5""]",1,1,P_place
+20260818-16:22:16,SM1,libero_spatial_task,9,3,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:22:16_structured_libero_spatial_task_t9_s3_r1,0,816.4,policy_fail,v1,7,347,"[""R1"", ""R5"", ""R9"", ""R7""]",4,1,P_verify
+20260818-16:20:31,SM1,libero_spatial_task,9,1,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:20:31_structured_libero_spatial_task_t9_s1_r1,0,1035.2,success,v1,6,270,"[""R5"", ""R7"", ""R9""]",1,1,P_verify
+20260818-16:27:59,SM1,libero_spatial_task,9,6,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:27:59_structured_libero_spatial_task_t9_s6_r1,0,673.6,success,v1,4,175,"[""R5""]",0,2,P_place
+20260818-16:30:37,SM1,libero_spatial_task,9,9,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:30:37_structured_libero_spatial_task_t9_s9_r1,0,665.0,success,v1,6,276,"[""R8"", ""R1"", ""R5""]",2,4,P_place
+20260818-16:30:14,SM1,libero_spatial_task,9,8,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:30:14_structured_libero_spatial_task_t9_s8_r1,0,733.8,policy_fail,v1,7,348,"[""R1"", ""R5"", ""R7"", ""R9""]",2,1,P_verify
+20260818-16:34:28,SM1,libero_spatial_task,7,2,baseline,2,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:34:28_baseline_libero_spatial_task_t7_s2_r2,0,629.4,success
+20260818-16:28:06,SM1,libero_spatial_task,9,7,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:28:06_structured_libero_spatial_task_t9_s7_r1,0,1023.4,success,v1,7,348,"[""R1"", ""R5"", ""R7"", ""R9""]",4,1,P_verify
+20260818-16:37:46,SM1,libero_spatial_task,9,9,baseline,2,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:37:46_baseline_libero_spatial_task_t9_s9_r2,0,622.7,success
+20260818-16:35:53,SM1,libero_spatial_task,0,5,baseline,2,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:35:53_baseline_libero_spatial_task_t0_s5_r2,0,896.3,success
+20260818-16:33:23,SM1,libero_spatial_task,9,10,structured,1,/hw-tbo/yjx/workspace/RPent/logs/sm_exp/20260818-16:33:23_structured_libero_spatial_task_t9_s10_r1,0,1139.6,policy_fail,v1,7,348,"[""R1"", ""R5"", ""R7"", ""R9""]",4,1,P_verify
