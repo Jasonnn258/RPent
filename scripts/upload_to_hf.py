@@ -32,9 +32,10 @@ from datetime import datetime
 # ---- dir-name parsing ---------------------------------------------------------
 #  top-level: 20260814-12:25:00_libero_spatial_swap_t8_s5
 #  pg_exp:    20260814-19:05:48_baseline_libero_spatial_task_t0_s1_r2
+#  sm_exp:    20260818-15:51:59_structured_libero_spatial_task_t0_s1_r1
 EP_DIR_RE = re.compile(
     r"^(?P<ts>\d{8}-\d{2}:\d{2}:\d{2})_"
-    r"(?:(?P<cond>baseline|ours|hardcap)_)?"
+    r"(?:(?P<cond>baseline|ours|hardcap|structured)_)?"
     r"(?P<suite>libero_\w+)_(?P<task>t\d+)_(?P<seed>s\d+)"
     r"(?:_(?P<repeat>r\d+))?$"
 )
@@ -175,15 +176,16 @@ server logs. `index.jsonl` has one metadata line per episode.
 
 def upload(logs_dir, repo, token):
     try:
-        from huggingface_hub import HfApi, upload_folder
+        from huggingface_hub import HfApi
     except ImportError:
         sys.exit("huggingface_hub not installed: pip install -U huggingface_hub")
     api = HfApi(token=token)
     api.create_repo(repo_id=repo, repo_type="dataset", exist_ok=True)
     print(f"[upload] {logs_dir} -> {repo}")
-    upload_folder(
+    # upload_large_folder: robust for big dirs (batched git commits, resumable).
+    api.upload_large_folder(
         repo_id=repo, folder_path=logs_dir, repo_type="dataset",
-        token=token, allow_patterns=None,
+        allow_patterns=None,
         ignore_patterns=[".DS_Store", "__pycache__/*"],
     )
     print("[upload] done (resume-safe; re-run to continue any incomplete files)")
