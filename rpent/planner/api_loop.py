@@ -12,6 +12,7 @@ import asyncio
 import base64
 import contextlib
 import dataclasses
+import hashlib
 import json
 import os
 import queue
@@ -335,6 +336,13 @@ class ApiAgentLoop:
         tracker = _new_phase_tracker(max_turns=max_turns)
         # OVP-M (arm B) — requires the SM1 tracker for phase context.
         outcome_validator = _new_outcome_validator(tracker)
+        logger.info(
+            "[prompt] len=%d sha1=%s sm=%s ovpm=%s",
+            len(system_prompt or ""),
+            hashlib.sha1((system_prompt or "").encode()).hexdigest()[:12],
+            os.environ.get("RPENT_STRUCTURED_MEMORY") == "1",
+            outcome_validator is not None,
+        )
         agent = self._build_agent(
             system_prompt, toolkit, outcome_validator=outcome_validator
         )
