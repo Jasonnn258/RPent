@@ -44,6 +44,12 @@ MAX_INFRA_RETRY = 3
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("PG_WORKERS_PER_GPU", "2"))
+# Dev-machine safety cap (2026-09-05): total rpent workers defaults to <= 8.
+# This box is a SHARED dev machine (8xH100, cgroup 200G RAM / 32-core quota);
+# 16-way pools have OOM-killed whole batches here. Raise only when resources
+# allow, via PG_MAX_WORKERS / DEV_MAX_WORKERS (e.g. on a dedicated node).
+MAX_WORKERS = int(os.environ.get("PG_MAX_WORKERS",
+                                 os.environ.get("DEV_MAX_WORKERS", "8")))
 GPU_IDLE_MB = int(os.environ.get("PG_GPU_IDLE_MB", "4000"))
 STATUS_INTERVAL = 300
 
@@ -482,6 +488,106 @@ def egl_ready():
     return False
 
 
+# ---------------- dev-machine preflight (shared 8xH100 dev box) ----------------
+# Mirrors /workspace/yjx/bin/dev_preflight.sh so all Python schedulers
+# (ovpm/dual_route/structured_memory import this module as pg) refuse to
+# start under memory/load/disk pressure, and refuse to double-launch.
+
+_PF_LOCK_FILE = None  # module-global: holds the advisory lock for process lifetime
+
+
+def _cgroup_mem_gib():
+    """(anon_used_GiB, limit_GiB) from cgroup v2, page cache excluded."""
+    try:
+        limit_s = open("/sys/fs/cgroup/memory.max").read().strip()
+        if limit_s == "max":
+            return 0.0, 0.0
+        limit = int(limit_s)
+        cur = int(open("/sys/fs/cgroup/memory.current").read())
+        file_cache = 0
+        for line in open("/sys/fs/cgroup/memory.stat"):
+            k, _, v = line.partition(" ")
+            if k in ("active_file", "inactive_file"):
+                file_cache += int(v)
+        return max(0, cur - file_cache) / 2**30, limit / 2**30
+    except Exception:
+        return 0.0, 0.0
+
+
+def _cpu_quota_cores():
+    """Effective cores from cgroup cpu.max (nproc reports 96; quota is 32)."""
+    try:
+        q, p = open("/sys/fs/cgroup/cpu.max").read().split()
+        if q != "max":
+            return max(1, (int(q) + int(p) - 1) // int(p))
+    except Exception:
+        pass
+    return os.cpu_count() or 8
+
+
+def preflight(label="task", lock_name=None):
+    """Refuse to start when the shared dev machine is under pressure.
+
+    Checks cgroup RAM (page cache excluded), host load vs our CPU quota, and
+    free space on / and /workspace. DEV_PREFLIGHT_OVERRIDE=1 forces through
+    resource refusals (never through the duplicate-launch lock).
+    """
+    import fcntl
+    global _PF_LOCK_FILE
+    min_avail = float(os.environ.get("PF_MIN_MEM_AVAIL_GB", "20"))
+    refuse_pct = float(os.environ.get("PF_REFUSE_MEM_PCT", "85"))
+    load_ratio = float(os.environ.get("PF_LOAD_REFUSE_RATIO", "2.0"))
+    root_min = float(os.environ.get("PF_ROOT_MIN_FREE_GB", "8"))
+    ws_min = float(os.environ.get("PF_WS_MIN_FREE_GB", "50"))
+    reasons = []
+
+    used, limit = _cgroup_mem_gib()
+    if limit:
+        avail = limit - used
+        log(f"[preflight] mem: cgroup anon={used:.1f}G / limit={limit:.1f}G "
+            f"({used / limit * 100:.0f}%), avail={avail:.1f}G (min {min_avail:.0f}G)")
+        if used / limit * 100 >= refuse_pct or avail < min_avail:
+            reasons.append(f"memory {used:.1f}G/{limit:.1f}G used, avail {avail:.1f}G")
+    load1 = float(open("/proc/loadavg").read().split()[0])
+    cores = _cpu_quota_cores()
+    log(f"[preflight] load: load1={load1} vs cpu quota={cores} cores")
+    if load1 > cores * load_ratio:
+        reasons.append(f"load1={load1} > {cores} cores x {load_ratio}")
+    for path, min_gb in (("/", root_min), ("/workspace", ws_min)):
+        try:
+            st = os.statvfs(path)
+            avail_gb = st.f_bavail * st.f_frsize / 2**30
+            log(f"[preflight] disk: {path} avail={avail_gb:.0f}G (min {min_gb:.0f}G)")
+            if avail_gb < min_gb:
+                reasons.append(f"disk {path} only {avail_gb:.0f}G free < {min_gb:.0f}G")
+        except OSError:
+            pass
+
+    if reasons:
+        if os.environ.get("DEV_PREFLIGHT_OVERRIDE") == "1":
+            log("[preflight] *** DEV_PREFLIGHT_OVERRIDE=1: forcing through: "
+                + "; ".join(reasons) + " — watch mem/disk, stop if it worsens! ***")
+        else:
+            log("[preflight] REFUSE (shared dev machine under pressure): "
+                + "; ".join(reasons)
+                + " — free resources / wait for running tasks to finish; "
+                  "DEV_PREFLIGHT_OVERRIDE=1 to force.")
+            sys.exit(1)
+
+    if lock_name:
+        os.makedirs("/workspace/yjx/.runlocks", exist_ok=True)
+        lf = open(f"/workspace/yjx/.runlocks/{lock_name}.lock", "a+")
+        try:
+            fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            log(f"[preflight] REFUSE: '{lock_name}' is already running (lock "
+                "held). Do not double-launch heavy tasks.")
+            sys.exit(1)
+        _PF_LOCK_FILE = lf  # keep open for process lifetime
+        log(f"[preflight] lock acquired: {lock_name}")
+    log(f"[preflight] OK — starting {label}")
+
+
 def ensure_egl():
     """Self-heal the GL/EGL stack at startup (same guard as gap_fill.sh)."""
     if egl_ready():
@@ -496,6 +602,7 @@ def ensure_egl():
 
 
 def main():
+    preflight(label="progress_gate", lock_name="progress_gate")
     ensure_egl()
     os.makedirs(PG_DIR, exist_ok=True)
     os.makedirs(SNAP_DIR, exist_ok=True)
@@ -528,16 +635,15 @@ def main():
             snapshot(state, f"{state['phase']}_empty")
             advance_phase(state)
             continue
-        n_workers = len(gpus) * WORKERS_PER_GPU
+        n_workers = min(len(gpus) * WORKERS_PER_GPU, MAX_WORKERS)
         q = queue.Queue()
         for e in eps:
             q.put(e)
-        log(f"=== {state['phase']}: {q.qsize()} episodes on gpus={gpus} ({n_workers} workers) ===")
+        log(f"=== {state['phase']}: {q.qsize()} episodes on gpus={gpus} ({n_workers} workers, cap {MAX_WORKERS}) ===")
         shared = {"retry": {}, "consec_err": 0}
         workers = []
-        for gi in gpus:
-            for _ in range(WORKERS_PER_GPU):
-                workers.append(Worker(gi, q, state, shared))
+        for i in range(n_workers):
+            workers.append(Worker(gpus[i % len(gpus)], q, state, shared))
         for w in workers:
             w.start()
         for w in workers:

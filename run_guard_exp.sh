@@ -9,6 +9,10 @@
 set -uo pipefail
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock guard_exp || exit 1
+
 SCRATCH="/vla_test/yjx/workspace/RPent/.gap_run"
 EXPDIR="$SCRATCH/guard_exp"; mkdir -p "$EXPDIR"
 SUITE="libero_spatial_task"

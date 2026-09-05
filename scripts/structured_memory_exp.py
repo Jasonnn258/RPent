@@ -31,6 +31,11 @@ MAX_INFRA_RETRY = 3
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("SM_WORKERS_PER_GPU", "2"))
+# Dev-machine safety cap (2026-09-05): shared dev box (cgroup 200G RAM / 32-core
+# quota); total workers default <= 8. Override with SM_MAX_WORKERS / DEV_MAX_WORKERS
+# only when resources allow (dedicated node).
+MAX_WORKERS = int(os.environ.get("SM_MAX_WORKERS",
+                                 os.environ.get("DEV_MAX_WORKERS", "8")))
 GPU_IDLE_MB = int(os.environ.get("SM_GPU_IDLE_MB", "4000"))
 STATUS_INTERVAL = 300
 
@@ -287,6 +292,7 @@ def status_loop(stop_evt):
 
 
 def main():
+    pg.preflight(label="structured_memory", lock_name="structured_memory")
     pg.ensure_egl()
     os.makedirs(SM_DIR, exist_ok=True)
     state = load_state()
@@ -310,16 +316,15 @@ def main():
         log("all episodes already recorded; nothing to run")
         write_status()
         return
-    n_workers = len(gpus) * WORKERS_PER_GPU
+    n_workers = min(len(gpus) * WORKERS_PER_GPU, MAX_WORKERS)
     q = queue.Queue()
     for e in eps:
         q.put(e)
     log(f"=== {STAGE}: {q.qsize()} episodes on gpus={gpus} ({n_workers} workers) ===")
     shared = {"retry": {}, "consec_err": 0}
     workers = []
-    for gi in gpus:
-        for _ in range(WORKERS_PER_GPU):
-            workers.append(Worker(gi, q, state, shared))
+    for i in range(n_workers):  # round-robin GPUs over the capped worker count
+        workers.append(Worker(gpus[i % len(gpus)], q, state, shared))
     for w in workers:
         w.start()
     for w in workers:

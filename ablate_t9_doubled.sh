@@ -7,6 +7,10 @@
 set -o pipefail
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock ablate_t9 || exit 1
+
 SEED_LO=${1:-1}; SEED_HI=${2:-10}; shift 2
 GPUS=("$@"); [ ${#GPUS[@]} -eq 0 ] && GPUS=(0 1 2 3)
 N_EVAL=10; EVAL_TURNS=40

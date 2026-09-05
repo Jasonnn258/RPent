@@ -6,6 +6,10 @@
 set -uo pipefail
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock rerun_t37_evals || exit 1
+
 SCRATCH="/vla_test/yjx/workspace/RPent/.gap_run"
 TASKS="${*:-3 7}"
 SUITE="libero_spatial_task"

@@ -9,6 +9,10 @@ set -uo pipefail
 
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock rerun_missing || exit 1
+
 # ---- env (same as harness_auto.sh) ----
 PLANNER=kimi
 N_EVAL=10

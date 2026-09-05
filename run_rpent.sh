@@ -10,6 +10,10 @@ set -euo pipefail
 
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight: refuse to start under RAM/load/disk pressure ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_check "run_rpent" || exit 1
+
 # --------------------------- config ---------------------------
 PLANNER=${PLANNER:-glm}
 export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05

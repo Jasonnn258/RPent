@@ -51,10 +51,18 @@ MAX_INFRA_RETRY = 3
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("OVPM_WORKERS_PER_GPU", "2"))
-# 2 workers/GPU x 8 GPUs = 16 — the historical density that saturated all
-# eight cards (~36-44 ep/h). Override with OVPM_MAX_WORKERS if the server
-# shows memory pressure.
-MAX_WORKERS = int(os.environ.get("OVPM_MAX_WORKERS", "16"))
+# Dev-machine safety cap (2026-09-05): this box is a SHARED dev machine
+# (8xH100, cgroup 200G RAM / 32-core quota), NOT a training node — total
+# workers default to <= 8. The historical 16 (2/GPU x 8 cards, ~36-44 ep/h)
+# belongs on a dedicated benchmark node: set OVPM_MAX_WORKERS=16 (or
+# DEV_MAX_WORKERS=16) there when memory headroom allows.
+MAX_WORKERS = int(os.environ.get("OVPM_MAX_WORKERS",
+                                 os.environ.get("DEV_MAX_WORKERS", "8")))
+# Cold-start stagger: this container has a 200GB cgroup RAM ceiling;
+# simultaneous (Pi0.5 + SAM3 + env) loads mass-SIGKILL. Worker i waits
+# i*STAGGER before its first episode so at most one model load is in
+# flight per interval.
+STAGGER_S = int(os.environ.get("OVPM_STAGGER_S", "90"))
 GPU_IDLE_MB = int(os.environ.get("OVPM_GPU_IDLE_MB", "4000"))
 STATUS_INTERVAL = 300
 
@@ -281,13 +289,18 @@ def build_episodes(args, done):
 # ---------------------------------------------------------------- workers
 
 class Worker(threading.Thread):
-    def __init__(self, gpu, q, shared):
+    def __init__(self, gpu, q, shared, index=0):
         super().__init__(daemon=True)
         self.gpu = gpu
         self.q = q
         self.shared = shared  # {"retry": {key: n}, "consec_err": int}
+        self.index = index
 
     def run(self):
+        if self.index and STAGGER_S:
+            log(f"worker{self.index} gpu{self.gpu}: cold-start stagger "
+                f"{self.index * STAGGER_S}s")
+            time.sleep(self.index * STAGGER_S)
         while True:
             try:
                 ep = self.q.get_nowait()
@@ -367,7 +380,23 @@ def main():
     ap.add_argument("--repeats", type=int, help="number of repeats (1..N)")
     args = ap.parse_args()
 
-    pg.ensure_egl()
+    pg.preflight(label="ovpm", lock_name="ovpm")
+
+    # egl_ready() is false forever on this container (0 EGL devices) and
+    # ensure_egl() sys.exits when its apt reinstall fails — we render with
+    # osmesa, so probe that directly with a tiny render instead.
+    probe = subprocess.run(
+        [sys.executable, "-c",
+         "import os; os.environ['MUJOCO_GL']='osmesa';"
+         "os.environ['PYOPENGL_PLATFORM']='osmesa';"
+         "import mujoco; m = mujoco.MjModel.from_xml_string('<mujoco/>');"
+         "r = mujoco.Renderer(m, 32, 32); r._scene  # force context"],
+        capture_output=True, text=True, timeout=120)
+    if probe.returncode == 0:
+        log("GL check: osmesa render probe OK (EGL not needed)")
+    else:
+        log(f"FATAL: osmesa render probe failed: {probe.stderr[-400:]}")
+        sys.exit(1)
     os.makedirs(OVPM_DIR, exist_ok=True)
     stop_evt = threading.Event()
     threading.Thread(target=status_loop, args=(stop_evt,),
@@ -396,7 +425,7 @@ def main():
     workers = []
     # round-robin GPUs over the capped worker count
     for i in range(n_workers):
-        workers.append(Worker(gpus[i % len(gpus)], q, shared))
+        workers.append(Worker(gpus[i % len(gpus)], q, shared, index=i))
     for w in workers:
         w.start()
     for w in workers:

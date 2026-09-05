@@ -8,6 +8,10 @@
 set -uo pipefail
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock rerun_t37 || exit 1
+
 SCRATCH="/vla_test/yjx/workspace/RPent/.gap_run"; mkdir -p "$SCRATCH"
 PLANNER=kimi; N_EVAL=10; BOOT_TURNS=60; EVAL_TURNS=40
 export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05

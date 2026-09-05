@@ -10,6 +10,10 @@ set -o pipefail
 
 export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
+# ---- dev-machine preflight + singleton lock (no double gap_fill) ----
+source /workspace/yjx/bin/dev_preflight.sh
+preflight_lock gap_fill || exit 1
+
 # Runtime scratch (queue/locks/logs) lives in the repo, NOT /tmp: a tmp cleaner
 # wiped /tmp once mid-run and silently killed the whole batch (WORK_Q vanished ->
 # workers all exit empty). Keep it durable.
@@ -35,6 +39,14 @@ for _g in $GPU_SUBSET; do
 done
 GPU_SUBSET="$(echo $_expanded | xargs)"
 MAX_CONC=$(echo "$GPU_SUBSET" | wc -w)
+# Dev-machine safety cap (2026-09-05): 8 GPUs x 2 workers = 16 rpent processes
+# OOM-kills the 200G cgroup on this shared dev box. Default total <= 8;
+# raise with MAX_CONC_CAP only on a dedicated node with headroom.
+MAX_CONC_CAP="${MAX_CONC_CAP:-8}"
+if [ "$MAX_CONC" -gt "$MAX_CONC_CAP" ]; then
+    GPU_SUBSET=$(echo "$GPU_SUBSET" | cut -d' ' -f1-"$MAX_CONC_CAP")
+    MAX_CONC=$MAX_CONC_CAP
+fi
 export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05
 export SAM3_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt
 export ROBOT_PLATFORM=LIBERO LIBERO_TYPE=pro
