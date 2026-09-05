@@ -8,7 +8,7 @@
 """
 import os, re, glob, json, shutil, csv, sys
 
-REPO = "/hw-tbo/yjx/workspace/RPent"
+REPO = "/vla_test/yjx/workspace/RPent"
 LOGS = os.path.join(REPO, "logs")
 EXPORT = os.path.join(REPO, "artifacts", "final_export")
 MEM = os.path.join(EXPORT, "memories")

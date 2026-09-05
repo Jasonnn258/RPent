@@ -5,8 +5,8 @@
 # push needs user auth, attempted with timeout).
 # Usage: nohup bash data_guardian.sh > /tmp/data_guardian.log 2>&1 &
 set -o pipefail
-export PATH=/hw-tbo/yjx/miniconda3/envs/vla/bin:$PATH
-REPO=/hw-tbo/yjx/workspace/RPent
+export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
+REPO=/vla_test/yjx/workspace/RPent
 INTERVAL=${1:-3600}
 EXPORT="$REPO/artifacts/final_export"
 mkdir -p "$EXPORT" "$REPO/analysis"
@@ -18,7 +18,7 @@ while true; do
   sleep "$INTERVAL"
   TS=$(date '+%Y-%m-%d %H:%M')
   # ---- 1. aggregate suites -> benchmark_summary.csv ----
-  "$PY" 2>/dev/null || PY="/hw-tbo/yjx/miniconda3/envs/vla/bin/python"
+  "$PY" 2>/dev/null || PY="/vla_test/yjx/miniconda3/envs/vla/bin/python"
   $PY - "$REPO" <<'PY' > "$REPO/analysis/benchmark_summary.csv" 2>/dev/null
 import os, re, glob, json, sys
 from collections import defaultdict

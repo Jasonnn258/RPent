@@ -7,26 +7,26 @@
 # Bootstrap memory for t0/t7/t9 already exists (results_*_pert).
 # Usage: nohup bash run_guard_exp.sh >> .gap_run/guard_exp/super.log 2>&1 &
 set -uo pipefail
-export PATH=/hw-tbo/yjx/miniconda3/envs/vla/bin:$PATH
+export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
-SCRATCH="/hw-tbo/yjx/workspace/RPent/.gap_run"
+SCRATCH="/vla_test/yjx/workspace/RPent/.gap_run"
 EXPDIR="$SCRATCH/guard_exp"; mkdir -p "$EXPDIR"
 SUITE="libero_spatial_task"
 TASKS="0 7 9"
 SEEDS="1 2 3 4 5 6 7 8 9 10"
 EVAL_TURNS=40
 GPU="0"
-export PI05_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT
-export SAM3_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/sam3/sam3.pt
+export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05
+export SAM3_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt
 export ROBOT_PLATFORM=LIBERO LIBERO_TYPE=pro
-export OPENPI_DATA_HOME=/hw-tbo/yjx/.cache/openpi
-export LIBERO_CONFIG_PATH=/hw-tbo/yjx/.libero
+export OPENPI_DATA_HOME=/vla_test/yjx/rpent_data/.cache/openpi
+export LIBERO_CONFIG_PATH=/vla_test/yjx/rpent_data/.libero
 export HF_HUB_OFFLINE=1
 export OMP_NUM_THREADS=4 TORCHINDUCTOR_COMPILE_WORKERS=4
 # ---- the intervention ----
 export RPENT_BLOCK_REPEATED_PERCEPTION=1
 export RPENT_PERCEPTION_STREAK=3
-export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /hw-tbo/yjx/workspace/commodity-attribute/configs/config.env | cut -d= -f2-)
+export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /vla_test/yjx/rpent_data/rpent_env.sh | cut -d= -f2-)
 P_MODEL="anthropic:kimi-k3"; P_BASE="--base-url https://dwai-data.shizhuang-inc.com/anthropic"; P_IMG=""
 PLANNER_TIMEOUT_S=2400
 LOG="$EXPDIR/exp.log"

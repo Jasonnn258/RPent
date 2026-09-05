@@ -16,7 +16,7 @@ CLI: python progress_gate_analysis.py            # write summary from runs.csv
 """
 import csv, os, re, glob, json, sys, datetime, statistics, collections
 
-ROOT = "/hw-tbo/yjx/workspace/RPent"
+ROOT = "/vla_test/yjx/workspace/RPent"
 LOGS = os.path.join(ROOT, "logs")
 RUNS_CSV = os.path.join(ROOT, "analysis", "progress_gate_runs.csv")
 SUMMARY_MD = os.path.join(ROOT, "analysis", "progress_gate_summary.md")

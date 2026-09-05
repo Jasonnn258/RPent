@@ -1,0 +1,1538 @@
+[
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "2",
+  "succ": "20260814-19:21:22_baseline_libero_spatial_task_t0_s2_r3",
+  "fail": "20260812-23:47:59_libero_spatial_task_t0_s2",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 7,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The image is small but I can see the layout. Let me note: this is the **calibration frame**. I see a cabinet (left), sto",
+  "think_b": "Now I can see the scene clearly. Let me analyze the layout:\n- **Stove** (dark, left) with burner\n- **Black cabinet/drawe"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "5",
+  "succ": "20260814-19:57:23_baseline_libero_spatial_task_t0_s5_r2",
+  "fail": "20260813-12:58:33_libero_spatial_task_t0_s5",
+  "succ_turns": 31,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. I'll start by reading the memory index and the ",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. I'll do the independent reads in parallel. "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260813-13:01:06_libero_spatial_task_t0_s6",
+  "fail": "20260814-20:10:51_baseline_libero_spatial_task_t0_s6_r2",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory, guides, and the initial state. I'll do these in parallel where possible. I'll start ",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. I'll do these in parallel since they're ind"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "1",
+  "succ": "20260814-18:26:09_libero_spatial_task_t7_s1",
+  "fail": "20260814-21:18:43_baseline_libero_spatial_task_t7_s1_r3",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "OBSERVE",
+   [
+    "read_image",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_image"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The task is: \"Pick the akita black bowl on the top of the cabinet and place it on the plate\"\n\nSo I need to:\n1. Find the ",
+  "think_b": "Task: \"Pick the akita black bowl on the top of the cabinet and place it on the plate\"\n\nSo this is a libero_spatial task."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260814-14:09:41_libero_spatial_task_t7_s10",
+  "fail": "20260814-23:26:36_baseline_libero_spatial_task_t7_s10_r2",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and initial state. I'll do these in parallel where possible. I'll star",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll make parallel calls for the independent re"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260814-18:26:09_libero_spatial_task_t7_s2",
+  "fail": "20260814-21:34:48_baseline_libero_spatial_task_t7_s2_r3",
+  "succ_turns": 37,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and the initial state. I'll make these independent calls in parall",
+  "think_b": "Let me start by reading the memory index, the guides, and then the initial state. I'll start by reading the memory index"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "3",
+  "succ": "20260814-21:49:17_baseline_libero_spatial_task_t7_s3_r2",
+  "fail": "20260814-18:33:48_libero_spatial_task_t7_s3",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The memory is fresh. Let me read the guides and check the seed-0 reference for this task (t7). The suite is `libero_spat",
+  "think_b": "The parallel calls failed with \"another tool operation is still active\". Let me call them one at a time."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260814-22:16:24_baseline_libero_spatial_task_t7_s5_r2",
+  "fail": "20260814-18:38:33_libero_spatial_task_t7_s5",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The view_driver_state failed because another tool operation is still active (the read_text_file maybe). Let me retry vie",
+  "think_b": "The view_driver_state failed because another tool operation is still active. Let me wait and retry. Let me read the guid"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "6",
+  "succ": "20260814-18:43:42_libero_spatial_task_t7_s6",
+  "fail": "20260814-22:31:45_baseline_libero_spatial_task_t7_s6_r2",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": "Now let me read the other two guides and view the driver state. Now let me read the other guides and the initial state."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260814-23:13:47_baseline_libero_spatial_task_t7_s9_r2",
+  "fail": "20260814-18:51:14_libero_spatial_task_t7_s9",
+  "succ_turns": 35,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and then the initial state. I'll start by reading the memory index and",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. Let me begin with parallel reads of the key"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "10",
+  "succ": "20260813-16:08:46_libero_spatial_task_t9_s10",
+  "fail": "20260815-01:40:28_baseline_libero_spatial_task_t9_s10_r3",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_image",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": "The task is: \"Pick the akita black bowl on the stove and place it on the plate\"\n\nObjects:\n- akita_black_bowl_1\n- akita_b"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "2",
+  "succ": "20260813-15:38:56_libero_spatial_task_t9_s2",
+  "fail": "20260814-23:56:05_baseline_libero_spatial_task_t9_s2_r3",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The tools seem to need to be called one at a time or there's a concurrency issue. Let me retry them sequentially. The pa",
+  "think_b": "The memory is empty (fresh reproduction run). The view_driver_state returned an error \"another tool operation is still a"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260815-00:09:44_baseline_libero_spatial_task_t9_s3_r2",
+  "fail": "20260813-15:42:48_libero_spatial_task_t9_s3",
+  "succ_turns": 36,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The view_driver_state failed because another tool operation was still active. Let me retry it. Also the MEMORY.md is fre",
+  "think_b": "It seems parallel calls have issues. Let me retry them one at a time. Parallel calls seem blocked. Let me retry sequenti"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "7",
+  "succ": "20260813-15:56:15_libero_spatial_task_t9_s7",
+  "fail": "20260815-01:01:39_baseline_libero_spatial_task_t9_s7_r3",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 4,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260815-01:12:59_baseline_libero_spatial_task_t9_s8_r2",
+  "fail": "20260813-16:06:42_libero_spatial_task_t9_s8",
+  "succ_turns": 31,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and the initial state. I'll do these in parallel where possible. I",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll make these independent calls in parallel. "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260813-16:07:13_libero_spatial_task_t9_s9",
+  "fail": "20260815-01:25:39_baseline_libero_spatial_task_t9_s9_r2",
+  "succ_turns": 32,
+  "fail_turns": 40,
+  "turn": 7,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": "Now let me read the recipe for t9 seed 0, and also check the current initial state. Note: this is `libero_spatial_task` "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "1",
+  "succ": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s1_r3",
+  "fail": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s1_r2",
+  "succ_turns": 37,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory, guides, and initial state. Let me make independent calls in parallel. I'll start by ",
+  "think_b": "Let me start by reading the memory index, guides, and then the initial state. I'll start by reading the memory index and"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "2",
+  "succ": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s2_r1",
+  "fail": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s2_r2",
+  "succ_turns": 39,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. I'll do these in parallel where possible. I'll ",
+  "think_b": "Let me start by reading the memory index and guides, then inspect the initial state. I'll start by reading the memory in"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "5",
+  "succ": "20260817-16:26:02_hardcap_libero_spatial_task_t0_s5_r3",
+  "fail": "20260817-16:24:41_hardcap_libero_spatial_task_t0_s5_r1",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory, guides, and initial state. I'll make independent calls in parallel. I'll start by re",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. I'll batch independent reads. I'll start by"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260817-16:26:34_hardcap_libero_spatial_task_t0_s6_r1",
+  "fail": "20260817-16:33:01_hardcap_libero_spatial_task_t0_s6_r3",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and then inspecting the initial state. I'll start by reading the m",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. Let me do these in parallel where possible.\n\nFi"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "8",
+  "succ": "20260817-16:40:36_hardcap_libero_spatial_task_t0_s8_r2",
+  "fail": "20260817-16:41:52_hardcap_libero_spatial_task_t0_s8_r3",
+  "succ_turns": 30,
+  "fail_turns": 40,
+  "turn": 15,
+  "a": [
+   "OBSERVE",
+   [
+    "back_project"
+   ]
+  ],
+  "b": [
+   "ACT",
+   [
+    "move_to"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "9",
+  "succ": "20260817-16:47:33_hardcap_libero_spatial_task_t0_s9_r2",
+  "fail": "20260817-16:41:55_hardcap_libero_spatial_task_t0_s9_r1",
+  "succ_turns": 36,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and then inspecting the initial state. Let me do these in parallel",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll start by reading the memory index, guides,"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "1",
+  "succ": "20260817-16:56:36_hardcap_libero_spatial_task_t7_s1_r2",
+  "fail": "20260817-16:55:37_hardcap_libero_spatial_task_t7_s1_r1",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_image"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The task: \"Pick the akita black bowl on the top of the cabinet and place it on the plate\"\n\nThis is libero_spatial task 7",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260817-17:38:14_hardcap_libero_spatial_task_t7_s10_r1",
+  "fail": "20260817-17:39:05_hardcap_libero_spatial_task_t7_s10_r2",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and initial state. I'll do these in parallel where possible. I'll star",
+  "think_b": "Let me start by reading the memory index, guides, and initial state. I'll batch independent reads. I'll start by reading"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260817-16:59:57_hardcap_libero_spatial_task_t7_s2_r1",
+  "fail": "20260817-17:03:49_hardcap_libero_spatial_task_t7_s2_r2",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and the initial state. I'll do these in parallel since they're ind",
+  "think_b": "Let me start by reading the memory files and guides, then inspect the initial state.\n\nLet me begin by reading MEMORY.md,"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "3",
+  "succ": "20260817-17:08:48_hardcap_libero_spatial_task_t7_s3_r3",
+  "fail": "20260817-17:06:51_hardcap_libero_spatial_task_t7_s3_r1",
+  "succ_turns": 37,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory files, guides, and inspecting the initial state. I'll start by reading the memory ind",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll do these in parallel where possible.\n\nLet "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260817-17:15:31_hardcap_libero_spatial_task_t7_s5_r2",
+  "fail": "20260817-17:15:07_hardcap_libero_spatial_task_t7_s5_r1",
+  "succ_turns": 32,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The memory is fresh. Let me check the guides and the initial state. There was an error \"another tool operation is still ",
+  "think_b": "It seems the parallel calls had an issue \u2014 only one tool operation at a time may be allowed. Let me retry sequentially. "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "7",
+  "succ": "20260817-17:25:15_hardcap_libero_spatial_task_t7_s7_r2",
+  "fail": "20260817-17:25:58_hardcap_libero_spatial_task_t7_s7_r3",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The MEMORY.md is fresh \u2014 no prior memories. Let me check the memory directory and read the guides. Also retry view_drive",
+  "think_b": "The view_driver_state failed because another tool operation is active. Let me retry the view_driver_state and also read "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "8",
+  "succ": "20260817-17:29:33_hardcap_libero_spatial_task_t7_s8_r1",
+  "fail": "20260817-17:34:58_hardcap_libero_spatial_task_t7_s8_r3",
+  "succ_turns": 27,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Task: **\"Pick the akita black bowl on the top of the cabinet and place it on the plate\"**. Let me read the guides and in",
+  "think_b": "Task: \"Pick the akita black bowl on the top of the cabinet and place it on the plate\"\n\nObjects: akita_black_bowl_1, akit"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260817-17:36:24_hardcap_libero_spatial_task_t7_s9_r2",
+  "fail": "20260817-17:35:56_hardcap_libero_spatial_task_t7_s9_r1",
+  "succ_turns": 37,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The memory is fresh (no prior memories). The view_driver_state call failed because another tool operation was active. Le",
+  "think_b": "It seems only one tool operation can run at a time. Let me do them sequentially. MEMORY.md is already read. Let me read "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "10",
+  "succ": "20260818-10:38:24_hardcap_libero_spatial_task_t9_s10_r2",
+  "fail": "20260818-10:37:13_hardcap_libero_spatial_task_t9_s10_r1",
+  "succ_turns": 30,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The memory is fresh (no prior memories). Let me retry view_driver_state and also read the guides. Memory is fresh (no pr",
+  "think_b": "Memory is essentially empty (fresh run). Let me read the guides and view the initial state. Let me retry view_driver_sta"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260818-10:06:51_hardcap_libero_spatial_task_t9_s3_r1",
+  "fail": "20260818-10:06:51_hardcap_libero_spatial_task_t9_s3_r2",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory files, guides, and then inspecting the initial state. I'll start by reading the memor",
+  "think_b": "Let me start by reading the memory index, guides, and then the initial state. Let me begin with the memory file and guid"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "4",
+  "succ": "20260818-10:17:46_hardcap_libero_spatial_task_t9_s4_r3",
+  "fail": "20260818-10:15:25_hardcap_libero_spatial_task_t9_s4_r1",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory files, guides, and the initial state. Let me do these in parallel where possible. I'l",
+  "think_b": "Let me start by reading the memory files and guides, then inspect the initial state.\n\nFirst, let me read MEMORY.md and t"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "6",
+  "succ": "20260818-10:24:06_hardcap_libero_spatial_task_t9_s6_r3",
+  "fail": "20260818-10:19:49_hardcap_libero_spatial_task_t9_s6_r1",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and then inspect the initial state. I'll start by reading the memo",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. I'll start by reading the memory index and "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260818-10:29:41_hardcap_libero_spatial_task_t9_s8_r1",
+  "fail": "20260818-10:29:57_hardcap_libero_spatial_task_t9_s8_r2",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and then the initial state. Let me do these in parallel where possible",
+  "think_b": "Let me start by reading the memory index, the guides, and then inspect the initial state.\n\nThis is task 9 of libero_spat"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260818-10:35:25_hardcap_libero_spatial_task_t9_s9_r2",
+  "fail": "20260818-10:33:23_hardcap_libero_spatial_task_t9_s9_r1",
+  "succ_turns": 26,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "OBSERVE",
+   [
+    "read_image"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "0",
+  "seed": "3",
+  "succ": "20260817-14:00:33_ours_libero_spatial_task_t0_s3_r3",
+  "fail": "20260817-13:51:45_ours_libero_spatial_task_t0_s3_r2",
+  "succ_turns": 36,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. I'll do these in parallel since they're indepen",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. Let me do these in parallel where possible."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260817-14:11:20_ours_libero_spatial_task_t0_s6_r3",
+  "fail": "20260817-14:04:58_ours_libero_spatial_task_t0_s6_r1",
+  "succ_turns": 32,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_image"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The task: \"Pick the akita black bowl not between the plate and the ramekin and place it on the plate\"\n\nSo there are TWO ",
+  "think_b": "Task: \"Pick the akita black bowl not between the plate and the ramekin and place it on the plate\"\n\nSo there are TWO akit"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "0",
+  "seed": "7",
+  "succ": "20260817-14:14:12_ours_libero_spatial_task_t0_s7_r3",
+  "fail": "20260817-14:12:49_ours_libero_spatial_task_t0_s7_r1",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory files and guides as instructed, then view the initial state. I'll start by reading th",
+  "think_b": "Let me start by reading the memory index, the guides, and then inspecting the initial state. I'll do these in parallel w"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260817-15:11:28_ours_libero_spatial_task_t7_s10_r2",
+  "fail": "20260817-15:08:33_ours_libero_spatial_task_t7_s10_r1",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. I'll do these in parallel where possible.\n\nLet ",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll do these in parallel where possible. I'll "
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260817-14:37:11_ours_libero_spatial_task_t7_s2_r2",
+  "fail": "20260817-14:34:19_ours_libero_spatial_task_t7_s2_r1",
+  "succ_turns": 31,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and then inspecting the initial state. I'll start by reading the memor",
+  "think_b": "Let me start by reading the memory index, the guides, and then the initial state. I'll start by reading the memory index"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "3",
+  "succ": "20260817-14:38:12_ours_libero_spatial_task_t7_s3_r1",
+  "fail": "20260817-14:41:03_ours_libero_spatial_task_t7_s3_r3",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": "Only MEMORY.md exists. No leaf memories. Let me check the results dirs for seed-0 references."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "4",
+  "succ": "20260817-14:45:45_ours_libero_spatial_task_t7_s4_r3",
+  "fail": "20260817-14:45:05_ours_libero_spatial_task_t7_s4_r2",
+  "succ_turns": 36,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and the initial state. I'll start by reading the memory index, gui",
+  "think_b": "Let me start by reading the memory index, guides, and initial state. I'll start by reading the memory index, guides, and"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260817-14:48:17_ours_libero_spatial_task_t7_s5_r2",
+  "fail": "20260817-14:47:25_ours_libero_spatial_task_t7_s5_r1",
+  "succ_turns": 38,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "The memory index says no prior memories. Let me list the memory directory to see if there are any files, and read the gu",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260817-15:07:40_ours_libero_spatial_task_t7_s9_r2",
+  "fail": "20260817-15:06:31_ours_libero_spatial_task_t7_s9_r1",
+  "succ_turns": 32,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and then inspecting the initial state. I'll make the independent c",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. Let me do these in parallel where possible."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "1",
+  "succ": "20260817-15:13:52_ours_libero_spatial_task_t9_s1_r1",
+  "fail": "20260817-15:18:31_ours_libero_spatial_task_t9_s1_r3",
+  "succ_turns": 37,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. This is libero_spatial_task task 9, seed 1. Fro",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll start by reading the memory index and guid"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "10",
+  "succ": "20260817-15:53:23_ours_libero_spatial_task_t9_s10_r1",
+  "fail": "20260817-15:54:16_ours_libero_spatial_task_t9_s10_r3",
+  "succ_turns": 39,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and the initial state. I'll start by reading the memory index and guid",
+  "think_b": "Let me start by reading the memory index, the guides, and then the initial state. I'll do these in parallel where possib"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "2",
+  "succ": "20260817-15:20:00_ours_libero_spatial_task_t9_s2_r2",
+  "fail": "20260817-15:19:00_ours_libero_spatial_task_t9_s2_r1",
+  "succ_turns": 39,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Some calls failed due to a concurrency limitation. Let me retry them one at a time. The MEMORY.md read succeeded \u2014 it's ",
+  "think_b": "The parallel calls partially failed. Let me retry one at a time."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260817-15:24:11_ours_libero_spatial_task_t9_s3_r3",
+  "fail": "20260817-15:21:41_ours_libero_spatial_task_t9_s3_r1",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": "It seems there was a conflict \u2014 two of the calls failed with \"another tool operation is still active\". Let me retry them"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "4",
+  "succ": "20260817-15:27:21_ours_libero_spatial_task_t9_s4_r1",
+  "fail": "20260817-15:29:54_ours_libero_spatial_task_t9_s4_r2",
+  "succ_turns": 36,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, the guides, and the initial state. Let me begin with the memory index and guid",
+  "think_b": "Let me start by reading the memory index, guides, and the initial state. I'll start by reading the memory index, guides,"
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "5",
+  "succ": "20260817-15:31:54_ours_libero_spatial_task_t9_s5_r3",
+  "fail": "20260817-15:31:20_ours_libero_spatial_task_t9_s5_r1",
+  "succ_turns": 34,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and initial state. I'll do these in parallel where possible. I'll star",
+  "think_b": "Let me start by reading the memory index, the guides, and the initial state. This is libero_spatial_task task 9, seed 5."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "6",
+  "succ": "20260817-15:35:40_ours_libero_spatial_task_t9_s6_r2",
+  "fail": "20260817-15:33:11_ours_libero_spatial_task_t9_s6_r1",
+  "succ_turns": 40,
+  "fail_turns": 40,
+  "turn": 1,
+  "a": [
+   "OBSERVE",
+   [
+    "read_text_file",
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "MEMORY",
+   [
+    "list_dir",
+    "read_text_file"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Let me start by reading the memory index, guides, and then the initial state. I'll start by reading the memory index, gu",
+  "think_b": "Let me start by reading the memory index, guides, and then the initial state."
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260817-15:43:57_ours_libero_spatial_task_t9_s8_r2",
+  "fail": "20260817-15:43:44_ours_libero_spatial_task_t9_s8_r1",
+  "succ_turns": 29,
+  "fail_turns": 40,
+  "turn": 3,
+  "a": [
+   "OBSERVE",
+   [
+    "read_image",
+    "read_text_file"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "read_image"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "",
+  "think_b": ""
+ },
+ {
+  "exp": "progress_gate",
+  "cond": "ours",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260817-15:46:00_ours_libero_spatial_task_t9_s9_r1",
+  "fail": "20260817-15:47:15_ours_libero_spatial_task_t9_s9_r2",
+  "succ_turns": 29,
+  "fail_turns": 40,
+  "turn": 2,
+  "a": [
+   "OBSERVE",
+   [
+    "view_driver_state"
+   ]
+  ],
+  "b": [
+   "OBSERVE",
+   [
+    "list_dir",
+    "view_driver_state"
+   ]
+  ],
+  "phase_a": null,
+  "phase_b": null,
+  "think_a": "Two of my parallel calls failed because \"another tool operation is still active\". It seems the tools need to be called o",
+  "think_b": "The MEMORY.md says no prior manipulation memories. Let me check the guides and list the memory dir, results dirs. But fi"
+ }
+]

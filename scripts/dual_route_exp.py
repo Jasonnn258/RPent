@@ -19,7 +19,7 @@ Usage: nohup python scripts/dual_route_exp.py >> .gap_run/dr_super.log 2>&1 &
 import os, sys, time, json, csv, queue, threading, subprocess
 import datetime, traceback
 
-ROOT = "/hw-tbo/yjx/workspace/RPent"
+ROOT = "/vla_test/yjx/workspace/RPent"
 LOGS_DIR = os.path.join(ROOT, "logs")
 DR_DIR = os.path.join(LOGS_DIR, "dr_exp")
 STATE_FILE = os.path.join(ROOT, ".gap_run", "dr_state.json")

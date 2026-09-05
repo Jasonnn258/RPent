@@ -19,7 +19,7 @@ CLI: python structured_memory_analysis.py
 """
 import csv, os, re, json, sys, datetime, statistics, collections
 
-ROOT = "/hw-tbo/yjx/workspace/RPent"
+ROOT = "/vla_test/yjx/workspace/RPent"
 RUNS_CSV = os.path.join(ROOT, "analysis", "structured_memory_runs.csv")
 PAIRED_CSV = os.path.join(ROOT, "analysis", "structured_memory_paired.csv")
 REPORT_MD = os.path.join(ROOT, "analysis", "structured_memory_report.md")

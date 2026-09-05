@@ -1,6 +1,6 @@
 #!/bin/bash
 rm -f /tmp/gap_plan_v2.txt
-nohup bash /hw-tbo/yjx/workspace/RPent/gap_fill.sh > /tmp/gap_fill.log 2>&1 &
+nohup bash /vla_test/yjx/workspace/RPent/gap_fill.sh > /tmp/gap_fill.log 2>&1 &
 echo "gap_fill pid=$!"
 sleep 8
 echo "=== 启动日志 ==="; cat /tmp/gap_fill.log 2>/dev/null | head -20

@@ -11,7 +11,7 @@ Writes analysis/failure_analysis_t0_t7_t9.csv (one row per sampled run).
 """
 import os, re, glob, json, sys, csv
 
-LOGS = "/hw-tbo/yjx/workspace/RPent/logs"
+LOGS = "/vla_test/yjx/workspace/RPent/logs"
 PERCEPTION = {"segment", "read_image", "back_project", "view_driver_state", "view_camera_meta", "read_depth"}
 ACTIONS = {"move_to", "move_pose", "pi0_pick", "pi0_doubled", "release", "set_gripper", "rotate_pitch", "rotate_yaw", "rotate_roll", "back_project_action"}
 
@@ -131,7 +131,7 @@ def main():
             r["label"] = "success" if term else "fail"
             out.append(r)
     # write CSV
-    path = "/hw-tbo/yjx/workspace/RPent/analysis/failure_analysis_t0_t7_t9.csv"
+    path = "/vla_test/yjx/workspace/RPent/analysis/failure_analysis_t0_t7_t9.csv"
     cols = ["task","label","run","outcome","n_turns","n_calls","perc","act","other",
             "perc_ratio","max_redundant_perc","retried","ground_seg_hits","first_action_turn"]
     with open(path, "w", newline="") as f:

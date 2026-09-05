@@ -14,8 +14,8 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from compare_suites import analyze, load_states, parse_turns
 
-LOGS = "/hw-tbo/yjx/workspace/RPent/logs"
-EXPDIR = "/hw-tbo/yjx/workspace/RPent/.gap_run/guard_exp"
+LOGS = "/vla_test/yjx/workspace/RPent/logs"
+EXPDIR = "/vla_test/yjx/workspace/RPent/.gap_run/guard_exp"
 SUITE = "libero_spatial_task"
 KEY = "spatial_task"
 TASKS = (0, 7, 9)

@@ -7,31 +7,31 @@
 # Run (background): nohup bash rerun_missing.sh >/dev/null 2>&1 &
 set -uo pipefail
 
-export PATH=/hw-tbo/yjx/miniconda3/envs/vla/bin:$PATH
+export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
 # ---- env (same as harness_auto.sh) ----
 PLANNER=kimi
 N_EVAL=10
 BOOT_TURNS=60
 EVAL_TURNS=40
-export PI05_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT
-export SAM3_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/sam3/sam3.pt
+export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05
+export SAM3_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt
 export ROBOT_PLATFORM=LIBERO LIBERO_TYPE=pro
-export OPENPI_DATA_HOME=/hw-tbo/yjx/.cache/openpi
-export LIBERO_CONFIG_PATH=/hw-tbo/yjx/.libero
+export OPENPI_DATA_HOME=/vla_test/yjx/rpent_data/.cache/openpi
+export LIBERO_CONFIG_PATH=/vla_test/yjx/rpent_data/.libero
 export HF_HUB_OFFLINE=1
 export OMP_NUM_THREADS=8 TORCHINDUCTOR_COMPILE_WORKERS=8
-LOGS_DIR="/hw-tbo/yjx/workspace/RPent/logs"
-REPORT="/hw-tbo/yjx/workspace/RPent/logs/rerun_report.jsonl"
-RES_BASE="/hw-tbo/yjx/workspace/RPent/resources/libero"
-export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /hw-tbo/yjx/workspace/commodity-attribute/configs/config.env | cut -d= -f2-)
+LOGS_DIR="/vla_test/yjx/workspace/RPent/logs"
+REPORT="/vla_test/yjx/workspace/RPent/logs/rerun_report.jsonl"
+RES_BASE="/vla_test/yjx/workspace/RPent/resources/libero"
+export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /vla_test/yjx/rpent_data/rpent_env.sh | cut -d= -f2-)
 P_MODEL="anthropic:kimi-k3"; P_BASE="--base-url https://dwai-data.shizhuang-inc.com/anthropic"; P_IMG=""
 PLANNER_TIMEOUT_S=2400
 
 # ---- helpers (copied from harness_auto.sh) ----
 run_one() {
     local suite=$1 task=$2 seed=$3 turns=$4
-    cd /hw-tbo/yjx/workspace/RPent
+    cd /vla_test/yjx/workspace/RPent
     xvfb-run -a -s "-screen 0 640x480x24" \
       env MUJOCO_GL=egl LIBGL_ALWAYS_SOFTWARE=1 OMP_NUM_THREADS=8 TORCHINDUCTOR_COMPILE_WORKERS=8 \
       ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-}" \
@@ -49,7 +49,7 @@ run_one() {
 check_ok() {
     local dir=$1
     [ -f "$dir/states.json" ] || return 1
-    /hw-tbo/yjx/miniconda3/envs/vla/bin/python -c "
+    /vla_test/yjx/miniconda3/envs/vla/bin/python -c "
 import json,sys
 st=json.load(open('$dir/states.json'))
 sys.exit(0 if (st and st[-1].get('libero_terminated')) else 1)"

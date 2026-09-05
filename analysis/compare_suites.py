@@ -15,7 +15,7 @@ Usage: python analysis/compare_suites.py [--out analysis/suite_comparison.csv]
 import os, re, glob, json, sys, csv
 from collections import Counter, defaultdict
 
-LOGS = "/hw-tbo/yjx/workspace/RPent/logs"
+LOGS = "/vla_test/yjx/workspace/RPent/logs"
 PERCEPTION = {"segment", "read_image", "back_project", "view_driver_state",
               "view_camera_meta", "read_depth"}
 ACTIONS = {"move_to", "move_pose", "pi0_pick", "pi0_doubled", "release",

@@ -16,7 +16,7 @@ Usage: nohup python scripts/structured_memory_exp.py >> .gap_run/sm_super.log 2>
 import os, sys, time, json, csv, queue, threading, subprocess
 import datetime, traceback
 
-ROOT = "/hw-tbo/yjx/workspace/RPent"
+ROOT = "/vla_test/yjx/workspace/RPent"
 LOGS_DIR = os.path.join(ROOT, "logs")
 SM_DIR = os.path.join(LOGS_DIR, "sm_exp")
 STATE_FILE = os.path.join(ROOT, ".gap_run", "sm_state.json")

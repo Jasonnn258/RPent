@@ -2,12 +2,12 @@
 # Persistent harness monitor: writes progress to a file every N min.
 # Survives Claude sessions (run with nohup). Any session can read the log.
 # Usage: nohup bash monitor_harness.sh >/dev/null 2>&1 &
-# Progress file: /hw-tbo/yjx/workspace/RPent/logs/harness_progress.log
+# Progress file: /vla_test/yjx/workspace/RPent/logs/harness_progress.log
 set -uo pipefail
 
-LOGS=/hw-tbo/yjx/workspace/RPent/logs
+LOGS=/vla_test/yjx/workspace/RPent/logs
 PROG="$LOGS/harness_progress.log"
-PY=/hw-tbo/yjx/miniconda3/envs/vla/bin/python
+PY=/vla_test/yjx/miniconda3/envs/vla/bin/python
 INTERVAL=${1:-600}   # seconds between checks (default 10 min)
 
 mkdir -p "$LOGS"
@@ -24,7 +24,7 @@ while true; do
 import os, re, glob, json
 from collections import defaultdict
 allruns = {}
-for d in glob.glob("/hw-tbo/yjx/workspace/RPent/logs/*_libero_*_t*_s*/"):
+for d in glob.glob("/vla_test/yjx/workspace/RPent/logs/*_libero_*_t*_s*/"):
     b = os.path.basename(d.rstrip("/"))
     m = re.match(r"^[\d:-]+_libero_([a-z_]+)_t(\d+)_s(\d+)$", b)
     if not m: continue

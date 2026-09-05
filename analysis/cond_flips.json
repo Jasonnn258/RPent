@@ -1,0 +1,330 @@
+[
+ {
+  "task": "0",
+  "seed": "10",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260817-16:51:54_hardcap_libero_spatial_task_t0_s10_r2",
+  "base_run": "20260814-21:06:12_baseline_libero_spatial_task_t0_s10_r3"
+ },
+ {
+  "task": "0",
+  "seed": "10",
+  "cond": "ours",
+  "base_win": true,
+  "run": "20260817-14:24:50_ours_libero_spatial_task_t0_s10_r1",
+  "base_run": "20260814-21:06:12_baseline_libero_spatial_task_t0_s10_r3"
+ },
+ {
+  "task": "0",
+  "seed": "3",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-16:20:16_hardcap_libero_spatial_task_t0_s3_r3",
+  "base_run": "20260814-19:31:14_baseline_libero_spatial_task_t0_s3_r3"
+ },
+ {
+  "task": "0",
+  "seed": "3",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-14:00:33_ours_libero_spatial_task_t0_s3_r3",
+  "base_run": "20260814-19:31:14_baseline_libero_spatial_task_t0_s3_r3"
+ },
+ {
+  "task": "0",
+  "seed": "3",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-15:51:59_structured_libero_spatial_task_t0_s3_r1",
+  "base_run": "20260814-19:31:14_baseline_libero_spatial_task_t0_s3_r3"
+ },
+ {
+  "task": "0",
+  "seed": "5",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260817-16:26:02_hardcap_libero_spatial_task_t0_s5_r2",
+  "base_run": "20260818-16:35:53_baseline_libero_spatial_task_t0_s5_r2"
+ },
+ {
+  "task": "0",
+  "seed": "5",
+  "cond": "ours",
+  "base_win": true,
+  "run": "20260817-14:04:08_ours_libero_spatial_task_t0_s5_r3",
+  "base_run": "20260818-16:35:53_baseline_libero_spatial_task_t0_s5_r2"
+ },
+ {
+  "task": "0",
+  "seed": "6",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-14:11:20_ours_libero_spatial_task_t0_s6_r3",
+  "base_run": "20260814-20:10:51_baseline_libero_spatial_task_t0_s6_r2"
+ },
+ {
+  "task": "0",
+  "seed": "6",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-15:51:59_structured_libero_spatial_task_t0_s6_r1",
+  "base_run": "20260814-20:10:51_baseline_libero_spatial_task_t0_s6_r2"
+ },
+ {
+  "task": "0",
+  "seed": "7",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-14:14:12_ours_libero_spatial_task_t0_s7_r3",
+  "base_run": "20260814-20:27:16_baseline_libero_spatial_task_t0_s7_r3"
+ },
+ {
+  "task": "0",
+  "seed": "7",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-15:51:59_structured_libero_spatial_task_t0_s7_r1",
+  "base_run": "20260814-20:27:16_baseline_libero_spatial_task_t0_s7_r3"
+ },
+ {
+  "task": "0",
+  "seed": "8",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260817-16:41:52_hardcap_libero_spatial_task_t0_s8_r3",
+  "base_run": "20260814-20:39:31_baseline_libero_spatial_task_t0_s8_r3"
+ },
+ {
+  "task": "0",
+  "seed": "8",
+  "cond": "structured",
+  "base_win": true,
+  "run": "20260818-15:51:59_structured_libero_spatial_task_t0_s8_r1",
+  "base_run": "20260814-20:39:31_baseline_libero_spatial_task_t0_s8_r3"
+ },
+ {
+  "task": "0",
+  "seed": "9",
+  "cond": "structured",
+  "base_win": true,
+  "run": "20260818-15:59:58_structured_libero_spatial_task_t0_s9_r1",
+  "base_run": "20260814-20:53:05_baseline_libero_spatial_task_t0_s9_r3"
+ },
+ {
+  "task": "7",
+  "seed": "1",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-16:56:36_hardcap_libero_spatial_task_t7_s1_r2",
+  "base_run": "20260814-21:18:36_baseline_libero_spatial_task_t7_s1_r2"
+ },
+ {
+  "task": "7",
+  "seed": "1",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:04:34_structured_libero_spatial_task_t7_s1_r1",
+  "base_run": "20260814-21:18:36_baseline_libero_spatial_task_t7_s1_r2"
+ },
+ {
+  "task": "7",
+  "seed": "10",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-17:42:02_hardcap_libero_spatial_task_t7_s10_r3",
+  "base_run": "20260814-23:27:05_baseline_libero_spatial_task_t7_s10_r3"
+ },
+ {
+  "task": "7",
+  "seed": "10",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:17:27_structured_libero_spatial_task_t7_s10_r1",
+  "base_run": "20260814-23:27:05_baseline_libero_spatial_task_t7_s10_r3"
+ },
+ {
+  "task": "7",
+  "seed": "2",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260817-17:05:04_hardcap_libero_spatial_task_t7_s2_r3",
+  "base_run": "20260818-16:34:28_baseline_libero_spatial_task_t7_s2_r2"
+ },
+ {
+  "task": "7",
+  "seed": "3",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:04:49_structured_libero_spatial_task_t7_s3_r1",
+  "base_run": "20260814-21:49:17_baseline_libero_spatial_task_t7_s3_r2"
+ },
+ {
+  "task": "7",
+  "seed": "4",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-17:13:09_hardcap_libero_spatial_task_t7_s4_r3",
+  "base_run": "20260814-22:04:40_baseline_libero_spatial_task_t7_s4_r3"
+ },
+ {
+  "task": "7",
+  "seed": "4",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-14:45:45_ours_libero_spatial_task_t7_s4_r3",
+  "base_run": "20260814-22:04:40_baseline_libero_spatial_task_t7_s4_r3"
+ },
+ {
+  "task": "7",
+  "seed": "5",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260817-17:15:07_hardcap_libero_spatial_task_t7_s5_r1",
+  "base_run": "20260814-22:17:53_baseline_libero_spatial_task_t7_s5_r3"
+ },
+ {
+  "task": "7",
+  "seed": "5",
+  "cond": "structured",
+  "base_win": true,
+  "run": "20260818-16:05:43_structured_libero_spatial_task_t7_s5_r1",
+  "base_run": "20260814-22:17:53_baseline_libero_spatial_task_t7_s5_r3"
+ },
+ {
+  "task": "7",
+  "seed": "6",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:08:38_structured_libero_spatial_task_t7_s6_r1",
+  "base_run": "20260814-22:32:56_baseline_libero_spatial_task_t7_s6_r3"
+ },
+ {
+  "task": "7",
+  "seed": "8",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-17:31:19_hardcap_libero_spatial_task_t7_s8_r2",
+  "base_run": "20260814-22:59:19_baseline_libero_spatial_task_t7_s8_r2"
+ },
+ {
+  "task": "7",
+  "seed": "9",
+  "cond": "hardcap",
+  "base_win": false,
+  "run": "20260817-17:37:21_hardcap_libero_spatial_task_t7_s9_r3",
+  "base_run": "20260814-23:15:13_baseline_libero_spatial_task_t7_s9_r3"
+ },
+ {
+  "task": "7",
+  "seed": "9",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:16:53_structured_libero_spatial_task_t7_s9_r1",
+  "base_run": "20260814-23:15:13_baseline_libero_spatial_task_t7_s9_r3"
+ },
+ {
+  "task": "9",
+  "seed": "10",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-15:53:55_ours_libero_spatial_task_t9_s10_r2",
+  "base_run": "20260815-01:40:28_baseline_libero_spatial_task_t9_s10_r3"
+ },
+ {
+  "task": "9",
+  "seed": "2",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-15:20:23_ours_libero_spatial_task_t9_s2_r3",
+  "base_run": "20260814-23:56:05_baseline_libero_spatial_task_t9_s2_r3"
+ },
+ {
+  "task": "9",
+  "seed": "2",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:21:43_structured_libero_spatial_task_t9_s2_r1",
+  "base_run": "20260814-23:56:05_baseline_libero_spatial_task_t9_s2_r3"
+ },
+ {
+  "task": "9",
+  "seed": "3",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260818-10:15:13_hardcap_libero_spatial_task_t9_s3_r3",
+  "base_run": "20260815-00:09:44_baseline_libero_spatial_task_t9_s3_r2"
+ },
+ {
+  "task": "9",
+  "seed": "3",
+  "cond": "structured",
+  "base_win": true,
+  "run": "20260818-16:22:16_structured_libero_spatial_task_t9_s3_r1",
+  "base_run": "20260815-00:09:44_baseline_libero_spatial_task_t9_s3_r2"
+ },
+ {
+  "task": "9",
+  "seed": "4",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260818-10:17:46_hardcap_libero_spatial_task_t9_s4_r3",
+  "base_run": "20260815-00:23:23_baseline_libero_spatial_task_t9_s4_r3"
+ },
+ {
+  "task": "9",
+  "seed": "5",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260818-10:19:45_hardcap_libero_spatial_task_t9_s5_r3",
+  "base_run": "20260815-00:35:13_baseline_libero_spatial_task_t9_s5_r3"
+ },
+ {
+  "task": "9",
+  "seed": "5",
+  "cond": "ours",
+  "base_win": true,
+  "run": "20260817-15:31:37_ours_libero_spatial_task_t9_s5_r2",
+  "base_run": "20260815-00:35:13_baseline_libero_spatial_task_t9_s5_r3"
+ },
+ {
+  "task": "9",
+  "seed": "6",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:27:59_structured_libero_spatial_task_t9_s6_r1",
+  "base_run": "20260815-00:47:37_baseline_libero_spatial_task_t9_s6_r3"
+ },
+ {
+  "task": "9",
+  "seed": "7",
+  "cond": "ours",
+  "base_win": false,
+  "run": "20260817-15:42:00_ours_libero_spatial_task_t9_s7_r2",
+  "base_run": "20260815-01:01:39_baseline_libero_spatial_task_t9_s7_r3"
+ },
+ {
+  "task": "9",
+  "seed": "7",
+  "cond": "structured",
+  "base_win": false,
+  "run": "20260818-16:28:06_structured_libero_spatial_task_t9_s7_r1",
+  "base_run": "20260815-01:01:39_baseline_libero_spatial_task_t9_s7_r3"
+ },
+ {
+  "task": "9",
+  "seed": "9",
+  "cond": "hardcap",
+  "base_win": true,
+  "run": "20260818-10:35:50_hardcap_libero_spatial_task_t9_s9_r3",
+  "base_run": "20260818-16:37:46_baseline_libero_spatial_task_t9_s9_r2"
+ },
+ {
+  "task": "9",
+  "seed": "9",
+  "cond": "ours",
+  "base_win": true,
+  "run": "20260817-15:52:26_ours_libero_spatial_task_t9_s9_r3",
+  "base_run": "20260818-16:37:46_baseline_libero_spatial_task_t9_s9_r2"
+ }
+]

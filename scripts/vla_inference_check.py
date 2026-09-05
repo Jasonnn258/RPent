@@ -26,13 +26,13 @@ import time
 import imageio.v2 as imageio
 import numpy as np
 
-REPO = "/hw-tbo/yjx/workspace/RPent"
+REPO = "/vla_test/yjx/workspace/RPent"
 sys.path.insert(0, REPO)
 os.environ.setdefault("ROBOT_PLATFORM", "LIBERO")
 
 CKPT = os.environ.get(
     "PI05_CHECKPOINT_PATH",
-    "/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT",
+    "/vla_test/yjx/rpent_data/checkpoints/pi05",
 )
 
 IMG_H = IMG_W = 224

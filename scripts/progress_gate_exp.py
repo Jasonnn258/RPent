@@ -24,7 +24,7 @@ Usage: nohup python scripts/progress_gate_exp.py >> .gap_run/pg_super.log 2>&1 &
 import os, sys, time, json, csv, glob, re, queue, threading, subprocess
 import datetime, traceback
 
-ROOT = "/hw-tbo/yjx/workspace/RPent"
+ROOT = "/vla_test/yjx/workspace/RPent"
 LOGS_DIR = os.path.join(ROOT, "logs")
 PG_DIR = os.path.join(LOGS_DIR, "pg_exp")
 STATE_FILE = os.path.join(ROOT, ".gap_run", "pg_state.json")
@@ -78,14 +78,14 @@ def base_env():
     global BASE_ENV
     if BASE_ENV is None:
         e = os.environ.copy()
-        e["PATH"] = "/hw-tbo/yjx/miniconda3/envs/vla/bin:" + e.get("PATH", "")
+        e["PATH"] = "/vla_test/yjx/miniconda3/envs/vla/bin:" + e.get("PATH", "")
         e.update({
-            "PI05_CHECKPOINT_PATH": "/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT",
-            "SAM3_CHECKPOINT_PATH": "/hw-tbo/yjx/checkpoints/sam3/sam3.pt",
+            "PI05_CHECKPOINT_PATH": "/vla_test/yjx/rpent_data/checkpoints/pi05",
+            "SAM3_CHECKPOINT_PATH": "/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt",
             "ROBOT_PLATFORM": "LIBERO",
             "LIBERO_TYPE": "pro",
-            "OPENPI_DATA_HOME": "/hw-tbo/yjx/.cache/openpi",
-            "LIBERO_CONFIG_PATH": "/hw-tbo/yjx/.libero",
+            "OPENPI_DATA_HOME": "/vla_test/yjx/rpent_data/.cache/openpi",
+            "LIBERO_CONFIG_PATH": "/vla_test/yjx/rpent_data/.libero",
             "HF_HUB_OFFLINE": "1",
             "OMP_NUM_THREADS": "4",
             "TORCHINDUCTOR_COMPILE_WORKERS": "4",
@@ -94,7 +94,7 @@ def base_env():
             "LIBGL_ALWAYS_SOFTWARE": "1",
         })
         try:
-            with open("/hw-tbo/yjx/workspace/commodity-attribute/configs/config.env") as f:
+            with open("/vla_test/yjx/rpent_data/rpent_env.sh") as f:
                 for line in f:
                     if line.startswith("DW_KEY="):
                         e["ANTHROPIC_API_KEY"] = line.split("=", 1)[1].strip()

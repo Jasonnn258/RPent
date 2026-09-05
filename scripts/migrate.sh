@@ -32,8 +32,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MIG_DIR="$REPO_ROOT/migration"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-PI05_CHECKPOINT_PATH="${PI05_CHECKPOINT_PATH:-/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT}"
-SAM3_CHECKPOINT_PATH="${SAM3_CHECKPOINT_PATH:-/hw-tbo/yjx/checkpoints/sam3/sam3.pt}"
+PI05_CHECKPOINT_PATH="${PI05_CHECKPOINT_PATH:-/vla_test/yjx/rpent_data/checkpoints/pi05}"
+SAM3_CHECKPOINT_PATH="${SAM3_CHECKPOINT_PATH:-/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt}"
 LIBERO_ASSETS_DIR="${LIBERO_ASSETS_DIR:-}"
 
 PY="${VLA_PYTHON:-python3}"

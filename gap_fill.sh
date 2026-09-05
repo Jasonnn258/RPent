@@ -8,12 +8,12 @@
 # Usage: nohup bash gap_fill.sh >> "$SCRATCH/gap_fill.log" 2>&1 &
 set -o pipefail
 
-export PATH=/hw-tbo/yjx/miniconda3/envs/vla/bin:$PATH
+export PATH=/vla_test/yjx/miniconda3/envs/vla/bin:$PATH
 
 # Runtime scratch (queue/locks/logs) lives in the repo, NOT /tmp: a tmp cleaner
 # wiped /tmp once mid-run and silently killed the whole batch (WORK_Q vanished ->
 # workers all exit empty). Keep it durable.
-SCRATCH="${SCRATCH:-/hw-tbo/yjx/workspace/RPent/.gap_run}"; mkdir -p "$SCRATCH"
+SCRATCH="${SCRATCH:-/vla_test/yjx/workspace/RPent/.gap_run}"; mkdir -p "$SCRATCH"
 PLANNER=kimi; N_EVAL=10; BOOT_TURNS=60; EVAL_TURNS=40
 DEADLINE="2026-08-14 20:00"
 FINAL_STOP="${FINAL_STOP:-2026-08-14 20:00}"     # no new episode after this (local time)
@@ -35,16 +35,16 @@ for _g in $GPU_SUBSET; do
 done
 GPU_SUBSET="$(echo $_expanded | xargs)"
 MAX_CONC=$(echo "$GPU_SUBSET" | wc -w)
-export PI05_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/RLinf-Pi05-LIBERO-130-fullshot-SFT
-export SAM3_CHECKPOINT_PATH=/hw-tbo/yjx/checkpoints/sam3/sam3.pt
+export PI05_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/pi05
+export SAM3_CHECKPOINT_PATH=/vla_test/yjx/rpent_data/checkpoints/sam3/sam3.pt
 export ROBOT_PLATFORM=LIBERO LIBERO_TYPE=pro
-export OPENPI_DATA_HOME=/hw-tbo/yjx/.cache/openpi
-export LIBERO_CONFIG_PATH=/hw-tbo/yjx/.libero
+export OPENPI_DATA_HOME=/vla_test/yjx/rpent_data/.cache/openpi
+export LIBERO_CONFIG_PATH=/vla_test/yjx/rpent_data/.libero
 export HF_HUB_OFFLINE=1
 export OMP_NUM_THREADS=4 TORCHINDUCTOR_COMPILE_WORKERS=4
-LOGS_DIR="/hw-tbo/yjx/workspace/RPent/logs"
-RES_BASE="/hw-tbo/yjx/workspace/RPent/resources/libero"
-export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /hw-tbo/yjx/workspace/commodity-attribute/configs/config.env | cut -d= -f2-)
+LOGS_DIR="/vla_test/yjx/workspace/RPent/logs"
+RES_BASE="/vla_test/yjx/workspace/RPent/resources/libero"
+export ANTHROPIC_API_KEY=$(grep "^DW_KEY=" /vla_test/yjx/rpent_data/rpent_env.sh | cut -d= -f2-)
 P_MODEL="anthropic:kimi-k3"; P_BASE="--base-url https://dwai-data.shizhuang-inc.com/anthropic"; P_IMG=""; PLANNER_TIMEOUT_S=2400
 LOCKROOT="$SCRATCH/locks"; mkdir -p "$LOCKROOT"; rm -f "$LOCKROOT"/*.lock  # clear stale locks (orphan flock from a killed run)
 WORK_Q="$SCRATCH/work_queue.txt"; Q_LOCK="$SCRATCH/q.lock"
@@ -55,7 +55,7 @@ if [ ! -s /usr/lib/x86_64-linux-gnu/libEGL.so.1 ] || [ "$(stat -c%s /usr/lib/x86
     echo "[setup] reinstalling mesa + xvfb ..."
     apt-get install -y libegl1 libegl-mesa0 libgles2 libosmesa6 xvfb >/dev/null 2>&1
 fi
-LP="/hw-tbo/yjx/miniconda3/envs/vla/lib/python3.10/site-packages"
+LP="/vla_test/yjx/miniconda3/envs/vla/lib/python3.11/site-packages"
 [ -e "$LP/libero/libero/assets" ] || ln -sfn "$LP/liberopro/liberopro/assets" "$LP/libero/libero/assets"
 
 echo "=== gap_fill v4 start $(date '+%F %T') | GPU=$N_GPU conc=$MAX_CONC | deadline=$DEADLINE ==="
@@ -88,7 +88,7 @@ run_one() {
     echo "$dir"
 }
 
-check_ok() { local d=$1; [ -f "$d/states.json" ] || return 1; /hw-tbo/yjx/miniconda3/envs/vla/bin/python -c "
+check_ok() { local d=$1; [ -f "$d/states.json" ] || return 1; /vla_test/yjx/miniconda3/envs/vla/bin/python -c "
 import json,sys; st=json.load(open('$d/states.json'))
 sys.exit(0 if (st and st[-1].get('libero_terminated')) else 1)"; }
 
@@ -103,7 +103,7 @@ classify() {
     local d=$1
     [ -n "$d" ] || { echo missing; return; }
     [ -f "$d/states.json" ] || { echo infra_crash; return; }
-    if /hw-tbo/yjx/miniconda3/envs/vla/bin/python -c "
+    if /vla_test/yjx/miniconda3/envs/vla/bin/python -c "
 import json,sys; st=json.load(open('$d/states.json'))
 sys.exit(0 if (st and st[-1].get('libero_terminated')) else 1)" 2>/dev/null; then echo success; return; fi
     if [ -f "$d/run.log" ] && grep -q "API planner timed out" "$d/run.log" 2>/dev/null; then echo infra_timeout; return; fi
@@ -184,7 +184,7 @@ spawn_pool() {
 echo "=== detecting gaps ==="
 : > "$WORK_Q"
 for suite in $P1_SUITES; do
-  /hw-tbo/yjx/miniconda3/envs/vla/bin/python - "$suite" "$LOGS_DIR" >> "$WORK_Q" <<'PY'
+  /vla_test/yjx/miniconda3/envs/vla/bin/python - "$suite" "$LOGS_DIR" >> "$WORK_Q" <<'PY'
 import os, re, glob, sys, json
 suite, logs = sys.argv[1], sys.argv[2]
 def latest(s, t, sd):

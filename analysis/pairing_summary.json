@@ -1,0 +1,1652 @@
+[
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "5",
+  "succ": "20260814-19:57:23_baseline_libero_spatial_task_t0_s5_r2",
+  "fail": "20260813-12:58:33_libero_spatial_task_t0_s5",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.00987460557371378
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004705994855612516
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260813-13:01:06_libero_spatial_task_t0_s6",
+  "fail": "20260814-20:10:51_baseline_libero_spatial_task_t0_s6_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004972402006387711
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.01606169156730175
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "0",
+  "seed": "8",
+  "succ": "20260814-20:39:11_baseline_libero_spatial_task_t0_s8_r2",
+  "fail": "20260813-13:07:35_libero_spatial_task_t0_s8",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004884467460215092
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.003822511527687311
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260814-14:09:41_libero_spatial_task_t7_s10",
+  "fail": "20260814-23:26:36_baseline_libero_spatial_task_t7_s10_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 25,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004790773149579763
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.07990407198667526
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260814-18:26:09_libero_spatial_task_t7_s2",
+  "fail": "20260814-21:34:48_baseline_libero_spatial_task_t7_s2_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0048731425777077675
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.008844892494380474
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260814-22:17:53_baseline_libero_spatial_task_t7_s5_r3",
+  "fail": "20260814-18:38:33_libero_spatial_task_t7_s5",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004528609104454517
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0019502376671880484
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "6",
+  "succ": "20260814-18:43:42_libero_spatial_task_t7_s6",
+  "fail": "20260814-22:31:45_baseline_libero_spatial_task_t7_s6_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.013038916513323784
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 34,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.04134899377822876
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "7",
+  "succ": "20260814-22:43:36_baseline_libero_spatial_task_t7_s7_r2",
+  "fail": "20260814-18:43:55_libero_spatial_task_t7_s7",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004273386672139168
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0051673054695129395
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260814-23:13:47_baseline_libero_spatial_task_t7_s9_r2",
+  "fail": "20260814-18:51:14_libero_spatial_task_t7_s9",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0034365751780569553
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 27,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.003965956624597311
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "2",
+  "succ": "20260813-15:38:56_libero_spatial_task_t9_s2",
+  "fail": "20260814-23:56:05_baseline_libero_spatial_task_t9_s2_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004290712531656027
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004383702762424946
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260815-00:09:44_baseline_libero_spatial_task_t9_s3_r2",
+  "fail": "20260813-15:42:48_libero_spatial_task_t9_s3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0221309382468462
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 32,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01909894123673439
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "7",
+  "succ": "20260815-00:59:15_baseline_libero_spatial_task_t9_s7_r2",
+  "fail": "20260813-15:56:15_libero_spatial_task_t9_s7",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.01391519419848919
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.015139389783143997
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260815-01:12:59_baseline_libero_spatial_task_t9_s8_r2",
+  "fail": "20260813-16:06:42_libero_spatial_task_t9_s8",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.018511051312088966
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0059564607217907906
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "baseline",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260813-16:07:13_libero_spatial_task_t9_s9",
+  "fail": "20260815-01:25:39_baseline_libero_spatial_task_t9_s9_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.008200510405004025
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.007359315641224384
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "1",
+  "succ": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s1_r3",
+  "fail": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s1_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0040998514741659164
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 30,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0039780535735189915
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "10",
+  "succ": "20260817-16:50:31_hardcap_libero_spatial_task_t0_s10_r1",
+  "fail": "20260817-16:51:56_hardcap_libero_spatial_task_t0_s10_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.013886431232094765
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 27,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004918745718896389
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "2",
+  "succ": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s2_r1",
+  "fail": "20260817-16:09:57_hardcap_libero_spatial_task_t0_s2_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.003960742615163326
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.017645390704274178
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "5",
+  "succ": "20260817-16:26:02_hardcap_libero_spatial_task_t0_s5_r3",
+  "fail": "20260817-16:24:41_hardcap_libero_spatial_task_t0_s5_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.016311608254909515
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004691164940595627
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260817-16:26:34_hardcap_libero_spatial_task_t0_s6_r1",
+  "fail": "20260817-16:33:01_hardcap_libero_spatial_task_t0_s6_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004611806012690067
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0043959468603134155
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "8",
+  "succ": "20260817-16:40:36_hardcap_libero_spatial_task_t0_s8_r2",
+  "fail": "20260817-16:41:52_hardcap_libero_spatial_task_t0_s8_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.014370126649737358
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004860535264015198
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "0",
+  "seed": "9",
+  "succ": "20260817-16:47:33_hardcap_libero_spatial_task_t0_s9_r2",
+  "fail": "20260817-16:41:55_hardcap_libero_spatial_task_t0_s9_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004955735523253679
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0047900741919875145
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "1",
+  "succ": "20260817-16:56:36_hardcap_libero_spatial_task_t7_s1_r2",
+  "fail": "20260817-16:55:37_hardcap_libero_spatial_task_t7_s1_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.005074797663837671
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 26,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0014524363214150071
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260817-17:42:02_hardcap_libero_spatial_task_t7_s10_r3",
+  "fail": "20260817-17:38:14_hardcap_libero_spatial_task_t7_s10_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004795266315340996
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.07294963300228119
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260817-16:59:57_hardcap_libero_spatial_task_t7_s2_r1",
+  "fail": "20260817-17:03:49_hardcap_libero_spatial_task_t7_s2_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 15,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01007551047950983
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 16,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.07709753513336182
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "3",
+  "succ": "20260817-17:08:48_hardcap_libero_spatial_task_t7_s3_r3",
+  "fail": "20260817-17:06:51_hardcap_libero_spatial_task_t7_s3_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.07701180875301361
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.00502056535333395
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260817-17:15:31_hardcap_libero_spatial_task_t7_s5_r2",
+  "fail": "20260817-17:15:07_hardcap_libero_spatial_task_t7_s5_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.00406802911311388
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.000999788986518979
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "7",
+  "succ": "20260817-17:25:15_hardcap_libero_spatial_task_t7_s7_r2",
+  "fail": "20260817-17:25:58_hardcap_libero_spatial_task_t7_s7_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004235574975609779
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 17,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004186650738120079
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "8",
+  "succ": "20260817-17:29:33_hardcap_libero_spatial_task_t7_s8_r1",
+  "fail": "20260817-17:34:58_hardcap_libero_spatial_task_t7_s8_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 16,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.00226578488945961
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": null,
+    "succ": null,
+    "grip": null
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260817-17:36:24_hardcap_libero_spatial_task_t7_s9_r2",
+  "fail": "20260817-17:35:56_hardcap_libero_spatial_task_t7_s9_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 12,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.008473658934235573
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": null,
+    "succ": null,
+    "grip": null
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "10",
+  "succ": "20260818-10:38:24_hardcap_libero_spatial_task_t9_s10_r2",
+  "fail": "20260818-10:37:13_hardcap_libero_spatial_task_t9_s10_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 12,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0019775088876485825
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.003979346714913845
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260818-10:06:51_hardcap_libero_spatial_task_t9_s3_r1",
+  "fail": "20260818-10:06:51_hardcap_libero_spatial_task_t9_s3_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 17,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.00942259281873703
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.013483673334121704
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "6",
+  "succ": "20260818-10:24:06_hardcap_libero_spatial_task_t9_s6_r3",
+  "fail": "20260818-10:19:49_hardcap_libero_spatial_task_t9_s6_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01662466675043106
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 25,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.019351443275809288
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "7",
+  "succ": "20260818-10:27:39_hardcap_libero_spatial_task_t9_s7_r3",
+  "fail": "20260818-10:27:11_hardcap_libero_spatial_task_t9_s7_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 25,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.010492142289876938
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 12,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004981848411262035
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260818-10:29:41_hardcap_libero_spatial_task_t9_s8_r1",
+  "fail": "20260818-10:29:57_hardcap_libero_spatial_task_t9_s8_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 17,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004124020226299763
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.007550138048827648
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "hardcap",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260818-10:35:25_hardcap_libero_spatial_task_t9_s9_r2",
+  "fail": "20260818-10:33:23_hardcap_libero_spatial_task_t9_s9_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 13,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.00971207581460476
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004993523471057415
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "0",
+  "seed": "3",
+  "succ": "20260817-14:00:33_ours_libero_spatial_task_t0_s3_r3",
+  "fail": "20260817-13:51:45_ours_libero_spatial_task_t0_s3_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.009567747823894024
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 39,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.00496807461604476
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "0",
+  "seed": "5",
+  "succ": "20260817-14:02:52_ours_libero_spatial_task_t0_s5_r1",
+  "fail": "20260817-14:04:08_ours_libero_spatial_task_t0_s5_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 16,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.016901321709156036
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004438160452991724
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "0",
+  "seed": "6",
+  "succ": "20260817-14:11:20_ours_libero_spatial_task_t0_s6_r3",
+  "fail": "20260817-14:04:58_ours_libero_spatial_task_t0_s6_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 18,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.008595135062932968
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.013200351037085056
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "0",
+  "seed": "7",
+  "succ": "20260817-14:14:12_ours_libero_spatial_task_t0_s7_r3",
+  "fail": "20260817-14:12:49_ours_libero_spatial_task_t0_s7_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.005834370851516724
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 34,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": null,
+    "succ": null,
+    "grip": null
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "0",
+  "seed": "8",
+  "succ": "20260817-14:16:14_ours_libero_spatial_task_t0_s8_r2",
+  "fail": "20260817-14:17:36_ours_libero_spatial_task_t0_s8_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004837271757423878
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 28,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.016518032178282738
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "10",
+  "succ": "20260817-15:11:28_ours_libero_spatial_task_t7_s10_r2",
+  "fail": "20260817-15:08:33_ours_libero_spatial_task_t7_s10_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.029375696554780006
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": null,
+    "succ": null,
+    "grip": null
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "2",
+  "succ": "20260817-14:37:11_ours_libero_spatial_task_t7_s2_r2",
+  "fail": "20260817-14:34:19_ours_libero_spatial_task_t7_s2_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004324400797486305
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": null,
+    "succ": null,
+    "grip": null
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "3",
+  "succ": "20260817-14:39:35_ours_libero_spatial_task_t7_s3_r2",
+  "fail": "20260817-14:38:12_ours_libero_spatial_task_t7_s3_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.015234526246786118
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 25,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0052435556426644325
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "4",
+  "succ": "20260817-14:45:45_ours_libero_spatial_task_t7_s4_r3",
+  "fail": "20260817-14:45:05_ours_libero_spatial_task_t7_s4_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": false,
+    "succ": false,
+    "grip": 0.07401105016469955
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0033762245438992977
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "5",
+  "succ": "20260817-14:48:17_ours_libero_spatial_task_t7_s5_r2",
+  "fail": "20260817-14:47:25_ours_libero_spatial_task_t7_s5_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004093710333108902
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0050455378368496895
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "7",
+  "seed": "9",
+  "succ": "20260817-15:07:40_ours_libero_spatial_task_t7_s9_r2",
+  "fail": "20260817-15:06:31_ours_libero_spatial_task_t7_s9_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004946902394294739
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0016861949115991592
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "1",
+  "succ": "20260817-15:13:52_ours_libero_spatial_task_t9_s1_r1",
+  "fail": "20260817-15:18:31_ours_libero_spatial_task_t9_s1_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01737804524600506
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01727326586842537
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "10",
+  "succ": "20260817-15:53:23_ours_libero_spatial_task_t9_s10_r1",
+  "fail": "20260817-15:54:16_ours_libero_spatial_task_t9_s10_r3",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.003922803793102503
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.005206640809774399
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "2",
+  "succ": "20260817-15:20:00_ours_libero_spatial_task_t9_s2_r2",
+  "fail": "20260817-15:19:00_ours_libero_spatial_task_t9_s2_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004817882552742958
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 24,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004002903588116169
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "3",
+  "succ": "20260817-15:24:11_ours_libero_spatial_task_t9_s3_r3",
+  "fail": "20260817-15:21:41_ours_libero_spatial_task_t9_s3_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 22,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.007329056039452553
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.01964581571519375
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "4",
+  "succ": "20260817-15:27:21_ours_libero_spatial_task_t9_s4_r1",
+  "fail": "20260817-15:29:54_ours_libero_spatial_task_t9_s4_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 21,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004824299830943346
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 15,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.014362865127623081
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "5",
+  "succ": "20260817-15:31:54_ours_libero_spatial_task_t9_s5_r3",
+  "fail": "20260817-15:31:20_ours_libero_spatial_task_t9_s5_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.004609317518770695
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 29,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.004857673309743404
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "6",
+  "succ": "20260817-15:35:40_ours_libero_spatial_task_t9_s6_r2",
+  "fail": "20260817-15:33:11_ours_libero_spatial_task_t9_s6_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.010688135400414467
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 23,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.009600089862942696
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "8",
+  "succ": "20260817-15:43:57_ours_libero_spatial_task_t9_s8_r2",
+  "fail": "20260817-15:43:44_ours_libero_spatial_task_t9_s8_r1",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 11,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": true,
+    "grip": 0.0042602913454174995
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 20,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.019161634147167206
+   }
+  }
+ },
+ {
+  "exp": "pg",
+  "cond": "ours",
+  "task": "9",
+  "seed": "9",
+  "succ": "20260817-15:46:00_ours_libero_spatial_task_t9_s9_r1",
+  "fail": "20260817-15:47:15_ours_libero_spatial_task_t9_s9_r2",
+  "where": "outcome",
+  "idx": 0,
+  "a": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0047973692417144775
+   }
+  },
+  "b": {
+   "m": "pick1",
+   "turn": 19,
+   "tool": "pi0_pick",
+   "out": {
+    "hold": true,
+    "succ": false,
+    "grip": 0.0018920914735645056
+   }
+  }
+ }
+]
