@@ -332,11 +332,15 @@ class ApiAgentLoop:
         max_turns: int,
         input_queue: queue.Queue[str | None] | None = None,
     ) -> PlannerResult:
-        agent = self._build_agent(system_prompt, toolkit)
+        tracker = _new_phase_tracker(max_turns=max_turns)
+        # OVP-M (arm B) — requires the SM1 tracker for phase context.
+        outcome_validator = _new_outcome_validator(tracker)
+        agent = self._build_agent(
+            system_prompt, toolkit, outcome_validator=outcome_validator
+        )
 
         interactive = input_queue is not None
         messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
-        tracker = _new_phase_tracker(max_turns=max_turns)
         observer = _ApiRunObserver(
             dashboard_events=self._dashboard_events,
             messages=messages,
@@ -420,6 +424,17 @@ class ApiAgentLoop:
                         tracker.on_tool_result(
                             action.name, result_text, "error" in result.result
                         )
+                        # OVP-M: fast steps get the same verdict treatment.
+                        action_summary = action.summary
+                        if outcome_validator is not None:
+                            vline = outcome_validator.observe_result(
+                                action.name,
+                                action.args,
+                                result_text,
+                                is_error="error" in result.result,
+                            )
+                            if vline:
+                                action_summary = f"{action.summary}\n\n{vline}"
                         router.observe_fast(action, result.result)
                         logger.info(
                             "[fast] %s(%s)",
@@ -436,8 +451,8 @@ class ApiAgentLoop:
                             action.name,
                             _clip(result_text, _TOOL_LOG_LIMIT),
                         )
-                        messages.append({"role": "user", "content": action.summary})
-                        history = _merge_into_tail(history, action.summary)
+                        messages.append({"role": "user", "content": action_summary})
+                        history = _merge_into_tail(history, action_summary)
                         if result.is_finish:
                             observer.finish_result = result.result
                             logger.info(
@@ -480,6 +495,17 @@ class ApiAgentLoop:
                             # with every perception).
                             if tracker is not None and observer.finish_result is None:
                                 block = tracker.current_block(total_steps)
+                                # OVP-M: a MATCHED verdict that has not been
+                                # acted on gets one throttled commit reminder,
+                                # riding the same injection machinery.
+                                if outcome_validator is not None:
+                                    hint = outcome_validator.turn_boundary_hint()
+                                    if hint:
+                                        block = (
+                                            f"{block}\n{hint}"
+                                            if block
+                                            else hint
+                                        )
                                 if block is not None:
                                     if dual_route:
                                         # run.enqueue dies with the run on
@@ -576,6 +602,7 @@ class ApiAgentLoop:
                 success=(observer.finish_result or {}).get("status") == "success",
                 fast_steps=fast_steps,
                 slow_reasons=router.slow_reasons if router is not None else None,
+                outcome_validator=outcome_validator,
             )
 
         return PlannerResult(
@@ -663,12 +690,22 @@ class ApiAgentLoop:
             error=error or session.error,
         )
 
-    def _build_agent(self, system_prompt: str, toolkit: Toolkit) -> Agent:
+    def _build_agent(
+        self,
+        system_prompt: str,
+        toolkit: Toolkit,
+        *,
+        outcome_validator: Any = None,
+    ) -> Agent:
         """Build an Agent for terminal or Dashboard execution."""
         return Agent(
             self._model,
             instructions=system_prompt or None,
-            tools=_build_tools(toolkit, no_images=self._no_images),
+            tools=_build_tools(
+                toolkit,
+                no_images=self._no_images,
+                outcome_validator=outcome_validator,
+            ),
             model_settings=_build_model_settings(self._model, self._max_tokens),
             capabilities=[
                 Thinking(effort="high"),
@@ -824,12 +861,41 @@ def _new_phase_tracker(*, max_turns: int) -> Any:
     )
 
 
+def _new_outcome_validator(tracker: Any) -> Any:
+    """Build the OVP-M OutcomeValidator when the gate is on, else None.
+
+    Gate: ``RPENT_OVPM=1`` (requires the Structured Memory tracker — phase
+    context comes from it; ``RPENT_STRUCTURED_MEMORY=1`` must also be set).
+    Contracts come from ``RPENT_OVPM_CONTRACTS`` (absolute path) or the v2
+    rules document at ``analysis/structured_rules_v2.json``; a missing file
+    degrades to a no-op validator with a warning, never a mid-episode crash.
+    """
+    if os.environ.get("RPENT_OVPM") != "1" or tracker is None:
+        return None
+    from rpent.memory.ovpm import OutcomeValidator, load_contracts
+    from rpent.memory.structured import detect_task
+
+    contracts_path = os.environ.get("RPENT_OVPM_CONTRACTS") or str(
+        Path(get_repo_root()) / "analysis" / "structured_rules_v2.json"
+    )
+    contracts = load_contracts(contracts_path)
+    task = detect_task()
+    logger.info(
+        "[ovpm] outcome validation ON — contracts=%s n=%d task=%s",
+        contracts_path,
+        len(contracts),
+        task,
+    )
+    return OutcomeValidator(contracts, tracker=tracker, task=task)
+
+
 def _write_structured_metrics(
     tracker: Any,
     *,
     success: bool,
     fast_steps: int = 0,
     slow_reasons: list[str] | None = None,
+    outcome_validator: Any = None,
 ) -> None:
     """Write per-episode Structured Memory metrics into the run output dir.
 
@@ -840,6 +906,8 @@ def _write_structured_metrics(
         snap = tracker.snapshot(success=success)
         snap["fast_steps"] = fast_steps
         snap["slow_reasons"] = slow_reasons
+        if outcome_validator is not None:
+            snap["ovpm"] = outcome_validator.snapshot(success=success)
         (out / "structured_metrics.json").write_text(
             json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8"
         )
@@ -1108,7 +1176,12 @@ def _api_error_text(error: Exception, *, no_images: bool) -> str:
     return text
 
 
-def _build_tools(toolkit: Toolkit, *, no_images: bool = False) -> list[Tool]:
+def _build_tools(
+    toolkit: Toolkit,
+    *,
+    no_images: bool = False,
+    outcome_validator: Any = None,
+) -> list[Tool]:
     """Build the API-only image reader plus pydantic-ai toolkit wrappers."""
     guard = _PerceptionGuard.make()
     image_reader = read_image_text_only if no_images else read_image
@@ -1140,7 +1213,11 @@ def _build_tools(toolkit: Toolkit, *, no_images: bool = False) -> list[Tool]:
         tools.append(
             Tool.from_schema(
                 function=_make_tool_function(
-                    toolkit, name, no_images=no_images, perception_guard=guard
+                    toolkit,
+                    name,
+                    no_images=no_images,
+                    perception_guard=guard,
+                    outcome_validator=outcome_validator,
                 ),
                 name=name,
                 description=spec.get("description", ""),
@@ -1191,6 +1268,7 @@ def _make_tool_function(
     *,
     no_images: bool = False,
     perception_guard: _PerceptionGuard | None = None,
+    outcome_validator: Any = None,
 ):
     """Return a callable that dispatches one tool call to the toolkit."""
 
@@ -1205,6 +1283,18 @@ def _make_tool_function(
                 }
         result = toolkit.execute_tool(name, kwargs)
         text, images = _content_blocks_to_pydantic(result.content_blocks)
+        # OVP-M: append the outcome verdict to the tool result the model
+        # already reads — zero extra turns, zero extra requests.
+        if outcome_validator is not None:
+            line = outcome_validator.observe_result(
+                name,
+                kwargs,
+                text,
+                is_error=isinstance(result.result, dict)
+                and "error" in result.result,
+            )
+            if line:
+                text = f"{text}\n\n{line}"
         if perception_guard is not None:
             post = perception_guard.observe_after(name, kwargs, text)
             if post is not None:

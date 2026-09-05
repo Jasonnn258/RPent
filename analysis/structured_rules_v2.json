@@ -1,0 +1,327 @@
+{
+  "version": 2,
+  "description": "Structured Global Memory v2 = frozen v1 (phases byte-identical) + online outcome contracts for OVP-M (arm B, RPENT_OVPM=1). Each contract turns one action's expected outcome into a runtime verify: MATCHED -> commit hint (no re-confirmation), MISMATCH -> recovery hint (no unchanged repeats). Ground truth comes only from the tool result itself (proprioception / executed-skill self-report / official termination flag) — no benchmark GT. on_match/on_mismatch must avoid the substrings 'fail'/'error' (PhaseTracker heuristics grep them).",
+  "outcome_contracts": [
+    {
+      "id": "OC-MOVE",
+      "tool": "move_to",
+      "phases": [
+        "P_transport",
+        "P_place"
+      ],
+      "action": "scripted EEF servo to a world-frame target",
+      "expected_outcome": "arrived at target (final_dist_m <= 0.03)",
+      "verify": {
+        "kind": "moved_to_target"
+      },
+      "on_match": "arrival confirmed — proceed directly to the next step (no extra repositioning).",
+      "on_mismatch": "approach did not converge. Per R3: re-localize the target ONCE (one back_project), then ONE deliberate move_to straight to it — repeated travel burns turns.",
+      "next_phase": "",
+      "scope": "GLOBAL",
+      "source": "R3 + tools.move_to (final_dist_m, servo tol 0.012)"
+    },
+    {
+      "id": "OC-PICK",
+      "tool": "pi0_pick",
+      "phases": [
+        "P_grasp",
+        "P_place"
+      ],
+      "action": "closed-loop VLA grasp",
+      "expected_outcome": "object held (success=true or min_gripper_opening < 0.03)",
+      "verify": {
+        "kind": "pick_holding"
+      },
+      "on_match": "transport to the place target — the grasp needs no re-check.",
+      "on_mismatch": "grasp did not hold. Per R4: inspect pre-grasp (wrist pitch / clearance) ONCE, retry at most once more, then report honestly via finish — do not loop.",
+      "next_phase": "P_place",
+      "scope": "GLOBAL",
+      "source": "R4 + tools.pi0_pick (success/min_gripper_opening; pairing_analysis holds() heuristic)"
+    },
+    {
+      "id": "OC-RELEASE",
+      "tool": "release",
+      "phases": [
+        "P_place"
+      ],
+      "action": "open gripper to place the held object",
+      "expected_outcome": "gripper opened (peak_gripper_opening > 0.05)",
+      "verify": {
+        "kind": "released"
+      },
+      "on_match": "confirm the final state once (view_driver_state) and finish — no re-placement.",
+      "on_mismatch": "gripper did not open. One re-attempt with set_gripper(open), then escalate per R5 to double-stage placement (pi0_doubled) — unchanged repeats are discouraged.",
+      "next_phase": "P_verify",
+      "scope": "GLOBAL",
+      "source": "tools.release (peak_gripper_opening) + R5 escalation"
+    },
+    {
+      "id": "OC-RELEASE-T9",
+      "tool": "release",
+      "phases": [
+        "P_place"
+      ],
+      "action": "final placement on the target",
+      "expected_outcome": "gripper opened (peak_gripper_opening > 0.05) with placement satisfying the task",
+      "verify": {
+        "kind": "released"
+      },
+      "on_match": "confirm the final state once and finish — no re-placement.",
+      "on_mismatch": "single-release placement precision is insufficient on this task. Per R5: escalate to pi0_doubled double-stage placement now — the successful chain is segment->back_project->move_to->pi0_pick->set_gripper->pi0_doubled.",
+      "next_phase": "P_verify",
+      "scope": "task9",
+      "source": "R5 (H2: t9 success relies on double-stage placement)"
+    },
+    {
+      "id": "OC-DOUBLED",
+      "tool": "pi0_doubled",
+      "phases": [
+        "P_place",
+        "P_verify"
+      ],
+      "action": "double-stage contact placement via the VLA",
+      "expected_outcome": "task satisfied (libero_terminated=true)",
+      "verify": {
+        "kind": "task_terminated"
+      },
+      "on_match": "task condition met — confirm once and call finish(status='success') now.",
+      "on_mismatch": "double-stage placement did not satisfy the task. Per R6: confirm the placement once; if still unmet, make ONE corrective attempt then report honestly via finish — placement loops burn the budget.",
+      "next_phase": "finish",
+      "scope": "GLOBAL",
+      "source": "R6 + tools.pi0_doubled (success mirrors official termination)"
+    },
+    {
+      "id": "OC-SETGRIP",
+      "tool": "set_gripper",
+      "phases": [
+        "ANY"
+      ],
+      "action": "drive the gripper while holding pose",
+      "expected_outcome": "task satisfied (libero_terminated=true) — silent otherwise",
+      "verify": {
+        "kind": "task_terminated_opt"
+      },
+      "on_match": "task condition met — confirm once and call finish(status='success') now.",
+      "on_mismatch": "unused (verify stays silent when the task is not yet terminated)",
+      "next_phase": "finish",
+      "scope": "GLOBAL",
+      "source": "tools.set_gripper (libero_terminated); mirrors the t9 success chain step before pi0_doubled"
+    },
+    {
+      "id": "OC-VERIFY",
+      "tool": "view_driver_state",
+      "phases": [
+        "P_verify"
+      ],
+      "action": "confirm final placement against the task language",
+      "expected_outcome": "task satisfied (libero_terminated=true)",
+      "verify": {
+        "kind": "task_terminated"
+      },
+      "on_match": "call finish(status='success') now — do not re-open perception or re-place (R7).",
+      "on_mismatch": "placement not yet satisfied. Make ONE corrective attempt (per R5: double-stage placement for precision), then report honestly via finish — no re-verification loops.",
+      "next_phase": "finish",
+      "scope": "GLOBAL",
+      "source": "R7 + H1 (post-placement convergence stalls)"
+    },
+    {
+      "id": "OC-STATE-PLACE",
+      "tool": "view_driver_state",
+      "phases": [
+        "P_place"
+      ],
+      "action": "check state after a placement attempt",
+      "expected_outcome": "task satisfied (libero_terminated=true) — silent otherwise",
+      "verify": {
+        "kind": "task_terminated_opt"
+      },
+      "on_match": "placement satisfied — call finish(status='success') now; do not re-open perception or re-place (R7).",
+      "on_mismatch": "unused (verify stays silent while the task is not yet terminated)",
+      "next_phase": "finish",
+      "scope": "GLOBAL",
+      "source": "R7/H1 + phase model note: P_verify needs two placements, so the post-single-release state check lives in P_place"
+    }
+  ],
+  "phases": [
+    {
+      "phase": "P_look",
+      "hint": "perceiving / localizing — resolve a target xyz, then act. Never loop perception.",
+      "rules": [
+        {
+          "id": "R1",
+          "phase": "P_look",
+          "trigger": "连续感知无动作（consecutive perception >= 7）",
+          "precondition": {
+            "consecutive_perception_ge": 7
+          },
+          "expected_result": "planner 在 2 次调用内 commit 一个目标 xyz 并执行动作（move_to / pi0_pick / pi0_doubled）",
+          "success_check": {
+            "actions_after_fire_ge": 1
+          },
+          "failure_pattern": "F1 感知循环：连续感知无动作 >=10（t9 fail max_redundant 16-22）",
+          "recovery": "Commit now: pick one target xyz from what you already saw. The very next tool call must be an action primitive (move_to / pi0_pick / pi0_doubled) — do not sample again.",
+          "next_phase": "P_transport",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md F1 (§1 t9 fail max_redundant 16-22; §2 t9 失败链 6×back_project+3×segment→pi0_pick×4)"
+        }
+      ]
+    },
+    {
+      "phase": "P_transport",
+      "hint": "travelling to the target — one deliberate approach, then pick.",
+      "rules": [
+        {
+          "id": "R3",
+          "phase": "P_transport",
+          "trigger": "move_to 重定位循环（move_to >= 7）",
+          "precondition": {
+            "move_to_calls_ge": 7
+          },
+          "expected_result": "planner 重新定位一次后一次性移动到位，进入 P_grasp",
+          "success_check": {
+            "pick_calls_ge": 1,
+            "phase_ne": "P_transport"
+          },
+          "failure_pattern": "F2 重定位循环：move_to >=7（t7 fail move_to×7-10 / t0 fail move_to×17）",
+          "recovery": "Stop repositioning. Re-localize the target once (one back_project), then ONE deliberate move_to straight to it, then pick. Repeated travel burns turns (F2).",
+          "next_phase": "P_grasp",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md F2 (§1 t7 fail move_to×7-10 / t0 fail move_to×17; §2 t7 失败链 6×back_project→move_to×10)"
+        }
+      ]
+    },
+    {
+      "phase": "P_grasp",
+      "hint": "grasping — fix pre-grasp (wrist pitch / clearance), retry at most twice.",
+      "rules": [
+        {
+          "id": "R4",
+          "phase": "P_grasp",
+          "trigger": "抓取反复重试（pi0_pick >= 3）",
+          "precondition": {
+            "pick_calls_ge": 3
+          },
+          "expected_result": "planner 检查 pre-grasp（wrist pitch / clearance）后一次成功，或诚实上报停止循环",
+          "success_check": {
+            "phase_in": [
+              "P_place",
+              "P_verify"
+            ]
+          },
+          "failure_pattern": "F3 执行精度重试：pi0_pick >=3（t9 fail pi0_pick×2-4）",
+          "recovery": "Repeated pi0_pick means the pre-grasp is wrong. Check wrist pitch / clearance once, retry at most once more, then if still failing report honestly via finish — do not loop.",
+          "next_phase": "P_place",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md F3 (§1 t9 fail pi0_pick×2-4)"
+        }
+      ]
+    },
+    {
+      "phase": "P_place",
+      "hint": "placing — t9: prefer pi0_doubled double-stage placement; cap placement retries.",
+      "rules": [
+        {
+          "id": "R5",
+          "phase": "P_place",
+          "trigger": "t9 进入 P_place 且尚未使用 pi0_doubled（单次 release 精度不足）",
+          "precondition": {
+            "release_calls_ge": 1,
+            "tool_count": {
+              "pi0_doubled": 0
+            }
+          },
+          "expected_result": "planner 用 pi0_doubled 双段放置完成最终放置",
+          "success_check": {
+            "doubled_calls_ge": 1
+          },
+          "failure_pattern": "t9 成功靠双段放置补精度；单次 release 精度不足（H2 强支持）",
+          "recovery": "t9 placement precision: use pi0_doubled (double-stage placement) for the final placement instead of a single release — the successful t9 chain is segment→back_project→move_to→pi0_pick→set_gripper→pi0_doubled.",
+          "next_phase": "P_verify",
+          "scope": "task9",
+          "source": "failure_analysis_t0_t7_t9.md H2 + §2 t9 OK 链"
+        }
+      ]
+    },
+    {
+      "phase": "P_verify",
+      "hint": "confirm final placement, then call finish — do not re-open perception.",
+      "rules": [
+        {
+          "id": "R7",
+          "phase": "P_verify",
+          "trigger": "进入 P_verify（已完成两次放置）",
+          "precondition": {
+            "phase": "P_verify"
+          },
+          "expected_result": "planner 检查最终状态并 call finish(status='success')",
+          "success_check": {
+            "finish_called": true
+          },
+          "failure_pattern": "H1 收敛：放置完成后仍回感知/重放（t0 执行后 recovery 循环）",
+          "recovery": "Placement is done. Check the last view_driver_state for episode_terminated / task-language satisfied; if satisfied call finish(status='success') now — do not re-open perception or re-place.",
+          "next_phase": "finish",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md H1 + MEMORY.md step 5"
+        }
+      ]
+    },
+    {
+      "phase": "ANY",
+      "hint": "any phase — over-reading memory, placement-retry loops and budget exhaustion are phase-independent failure modes.",
+      "rules": [
+        {
+          "id": "R6",
+          "phase": "ANY",
+          "trigger": "放置循环（pi0_doubled >= 3）",
+          "precondition": {
+            "doubled_calls_ge": 3
+          },
+          "expected_result": "planner 确认最终放置一次后诚实 finish，不再重试",
+          "success_check": {
+            "phase_ne": "P_place",
+            "finish_called": true
+          },
+          "failure_pattern": "F3 放置重试：pi0_doubled >=3（t0 fail pi0_doubled×12）",
+          "recovery": "Placement is looping (pi0_doubled >= 3). Confirm the last placement once, then call finish honestly — repeated placement retries waste the turn budget.",
+          "next_phase": "P_verify",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md F3 (§1 t0 fail pi0_doubled×12)"
+        },
+        {
+          "id": "R8",
+          "phase": "ANY",
+          "trigger": "过度阅读 memory（read_text_file >= 10）",
+          "precondition": {
+            "read_text_file_calls_ge": 10
+          },
+          "expected_result": "planner 停止读 memory，用当前知识行动",
+          "success_check": {
+            "actions_after_fire_ge": 1
+          },
+          "failure_pattern": "F4 过度阅读：read_text_file >=10（t0 fail 20+ reads）",
+          "recovery": "Stop reading memory files — you have enough. Act now with current knowledge; re-reading is a known failure loop (F4).",
+          "next_phase": "ANY",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md F4 (§2 t0 B 20+×read_text_file→12×pi0_doubled)"
+        },
+        {
+          "id": "R9",
+          "phase": "ANY",
+          "trigger": "预算将尽（剩余 <= 5 回合）",
+          "precondition": {
+            "max_turns_left_le": 5
+          },
+          "expected_result": "planner 做一次决定性尝试；任务语言无法满足则诚实 finish，不烧光剩余回合",
+          "success_check": {
+            "finish_called": true
+          },
+          "failure_pattern": "F2/F3/F5 失败终点 max_turns / infra_timeout",
+          "recovery": "Budget nearly exhausted. Make one final decisive attempt; if the task language is not satisfiable, call finish honestly — do not burn the remaining turns.",
+          "next_phase": "finish",
+          "scope": "GLOBAL",
+          "source": "failure_analysis_t0_t7_t9.md §1 失败终点 max_turns / infra_timeout"
+        }
+      ]
+    }
+  ]
+}

@@ -37,6 +37,16 @@ def system_prompt() -> PromptNode:
         node["STRUCTURED MEMORY (v1) — obey CURRENT PHASE + phase rules"] = (
             sm.STRUCTURED_MEMORY
         )
+    # OVP-M (arm B) — gated, so the SM1 baseline prompt stays byte-identical
+    # when the gate is off. Mirrors the validator gate: needs the tracker.
+    if os.environ.get("RPENT_OVPM") == "1" and (
+        os.environ.get("RPENT_STRUCTURED_MEMORY") == "1"
+    ):
+        from robots.libero.prompts import ovpm as _ovpm
+
+        node["OUTCOME-VALIDATED MEMORY — obey [ovpm] verdicts (commit/recover)"] = (
+            _ovpm.OVPM
+        )
     return node
 
 
