@@ -51,7 +51,10 @@ MAX_INFRA_RETRY = 3
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("OVPM_WORKERS_PER_GPU", "2"))
-MAX_WORKERS = int(os.environ.get("OVPM_MAX_WORKERS", "12"))  # server safety cap
+# 2 workers/GPU x 8 GPUs = 16 — the historical density that saturated all
+# eight cards (~36-44 ep/h). Override with OVPM_MAX_WORKERS if the server
+# shows memory pressure.
+MAX_WORKERS = int(os.environ.get("OVPM_MAX_WORKERS", "16"))
 GPU_IDLE_MB = int(os.environ.get("OVPM_GPU_IDLE_MB", "4000"))
 STATUS_INTERVAL = 300
 
@@ -110,7 +113,8 @@ def base_env():
         with open("/workspace/yjx/rpent_data/rpent_env.sh") as f:
             for line in f:
                 if line.startswith("GLM_API_KEY="):
-                    env["ANTHROPIC_API_KEY"] = line.split("=", 1)[1].strip()
+                    env["ANTHROPIC_API_KEY"] = (
+                        line.split("=", 1)[1].strip().strip('"').strip("'"))
     except Exception as ex:
         log(f"WARN reading GLM_API_KEY: {ex}")
     if not env.get("ANTHROPIC_API_KEY"):

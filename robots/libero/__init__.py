@@ -182,7 +182,9 @@ def init_task_runtime(
                 ],
                 env=_subprocess_env(
                     LIBERO_TYPE=libero_type,
-                    MUJOCO_GL="egl",
+                    # respect an explicit parent override (e.g. osmesa on
+                    # containers with 0 EGL devices); default stays egl
+                    MUJOCO_GL=os.environ.get("MUJOCO_GL") or "egl",
                     ROBOT_PLATFORM="LIBERO",
                 ),
                 log_path=str(Path(output_dir) / "env_server.log"),
@@ -391,7 +393,9 @@ def _init_runtime(
                 ],
                 env=_subprocess_env(
                     LIBERO_TYPE=libero_type,
-                    MUJOCO_GL="egl",
+                    # respect an explicit parent override (e.g. osmesa on
+                    # containers with 0 EGL devices); default stays egl
+                    MUJOCO_GL=os.environ.get("MUJOCO_GL") or "egl",
                     ROBOT_PLATFORM="LIBERO",
                 ),
                 log_path=str(Path(output_dir) / "env_server.log"),
