@@ -133,6 +133,14 @@ def base_env():
     env["PYOPENGL_PLATFORM"] = "osmesa"
     env.pop("MUJOCO_EGL_DEVICE_ID", None)
     env.pop("LIBGL_ALWAYS_SOFTWARE", None)
+    # 2b) ambient http_proxy must never intercept loopback RPC (the GLM
+    # proxy returns 503 for 127.0.0.1 → healthz starves); HttpRpcClient
+    # already bypasses via its own opener — this covers any other urllib
+    # user on loopback. External calls (open.bigmodel.cn) keep the proxy.
+    loopback = "127.0.0.1,localhost"
+    env["no_proxy"] = (env.get("no_proxy") and
+                       f"{env['no_proxy']},{loopback}") or loopback
+    env["NO_PROXY"] = env["no_proxy"]
     # 3) repo path (old scripts hardcode the /vla_test bind)
     return env
 

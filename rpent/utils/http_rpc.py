@@ -25,6 +25,11 @@ DEFAULT_TIMEOUT_S = 30.0
 
 logger = get_logger("rpc")
 
+# RPC is always loopback; never let ambient http_proxy/HTTP_PROXY env vars
+# intercept it (a corporate proxy answers 503 for 127.0.0.1 URLs, which
+# silently starves healthz/wait_for_ready — seen 2026-09-05).
+_NO_PROXY_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
 
 def _from_json(obj: Any) -> Any:
     """Rehydrate ``{"__ndarray__": <b64>, "dtype": ..., "shape": [...]}``
@@ -82,7 +87,7 @@ class HttpRpcClient:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=request_timeout) as resp:
+            with _NO_PROXY_OPENER.open(req, timeout=request_timeout) as resp:
                 raw = resp.read()
         except urllib.error.HTTPError as exc:
             # HTTPError is an OSError subclass; catch first so we can parse
