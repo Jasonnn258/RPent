@@ -48,6 +48,17 @@ N_EVAL = 10
 EVAL_TURNS = 40
 PLANNER_TIMEOUT_S = 2400
 MAX_INFRA_RETRY = 3
+
+# Planner output cap. Thinking(effort='high') maps to budget_tokens=16384
+# (pydantic-ai ANTHROPIC_THINKING_BUDGET_MAP); with the old 8192 cap the
+# budget exceeded max_tokens and GLM (unlike Anthropic, no validation)
+# returned zero-content max_tokens finishes — arm C's per-turn restarts hit
+# it at 41% vs arm B's 3%. 24576 = 16384 budget + response headroom.
+PLANNER_MAX_TOKENS = 24576
+
+# pydantic-ai raises this when a model burns the whole output cap before
+# emitting any content; it is an infra defect, never the policy's fault.
+_TOKEN_LIMIT_FATAL = "token limit ({}) exceeded before any response was generated"
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("OVPM_WORKERS_PER_GPU", "2"))
@@ -169,6 +180,7 @@ def run_episode(ep, gpu):
         "--base-url", GLM_BASE_URL,
         "--planner-timeout-s", str(PLANNER_TIMEOUT_S),
         "--max-turns", str(EVAL_TURNS),
+        "--max-tokens", str(PLANNER_MAX_TOKENS),
     ]
     log(f"gpu{gpu} {ep['stage']} {tier} {cond} {suite} t{task} s{seed} "
         f"r{repeat} start")
@@ -183,6 +195,18 @@ def run_episode(ep, gpu):
         rc = -1
     wall = round(time.time() - t0, 1)
     result = pg.classify_dir(outdir)
+    # Planner-side zero-content truncation (thinking budget burnout) is an
+    # infra defect: reclassify so the retry path and the analysis treat it
+    # as what it is, never as the policy failing the task.
+    if result not in ("success", "infra_crash", "infra_timeout"):
+        rl = os.path.join(outdir, "run.log")
+        try:
+            with open(rl, errors="replace") as f:
+                if _TOKEN_LIMIT_FATAL.format(PLANNER_MAX_TOKENS) in f.read() or \
+                        _TOKEN_LIMIT_FATAL.format("8192") in f.read():
+                    result = "infra_crash"
+        except OSError:
+            pass
     log(f"gpu{gpu} {ep['stage']} {tier} {cond} {suite} t{task} s{seed} "
         f"r{repeat} done rc={rc} result={result} wall={wall}s")
     return dict(ts=ts, dir=outdir, rc=rc, wall_s=wall, result=result)
