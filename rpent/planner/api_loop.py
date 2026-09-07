@@ -336,12 +336,28 @@ class ApiAgentLoop:
         tracker = _new_phase_tracker(max_turns=max_turns)
         # OVP-M (arm B) — requires the SM1 tracker for phase context.
         outcome_validator = _new_outcome_validator(tracker)
+        # Arm C — event-triggered reasoning: COMMIT turns run on a constrained
+        # agent (trimmed instructions, action tools only, pruned history);
+        # every other turn runs the full REASON agent. Requires arm B.
+        reason_mode = (
+            outcome_validator is not None
+            and os.environ.get("RPENT_REASON_MODE") == "1"
+        )
+        commit_agent = (
+            self._build_commit_agent(toolkit, outcome_validator=outcome_validator)
+            if reason_mode
+            else None
+        )
+        commit_mode_steps = 0
+        reason_mode_steps = 0
+        mode_tokens = {"commit": [0, 0], "reason": [0, 0]}  # [in, out]
         logger.info(
-            "[prompt] len=%d sha1=%s sm=%s ovpm=%s",
+            "[prompt] len=%d sha1=%s sm=%s ovpm=%s reason=%s",
             len(system_prompt or ""),
             hashlib.sha1((system_prompt or "").encode()).hexdigest()[:12],
             os.environ.get("RPENT_STRUCTURED_MEMORY") == "1",
             outcome_validator is not None,
+            reason_mode,
         )
         agent = self._build_agent(
             system_prompt, toolkit, outcome_validator=outcome_validator
@@ -469,14 +485,33 @@ class ApiAgentLoop:
                             break
                         continue
 
-                # Dual-route resumes with no new prompt: the merged tail (tool
-                # results + pending block / fast summary) is popped and reused
-                # by pydantic-ai's resume-without-prompt path. The first run
-                # (history is None) still starts from the seed.
-                _resume = dual_route and history is not None
+                # Dual-route / reason-mode resume with no new prompt: the merged
+                # tail (tool results + pending block / fast summary) is popped
+                # and reused by pydantic-ai's resume-without-prompt path. The
+                # first run (history is None) still starts from the seed.
+                _resume = (dual_route or reason_mode) and history is not None
+                # Arm C mode selection at this turn boundary: an open
+                # verified-MATCHED commit (and nothing anomalous pending)
+                # routes this one turn to the constrained COMMIT agent; every
+                # other boundary runs the full REASON agent.
+                commit_ctx = None
+                if reason_mode and history is not None:
+                    commit_ctx = outcome_validator.commit_mode_ctx()
+                mode = "commit" if commit_ctx is not None else "reason"
+                if mode == "commit":
+                    commit_mode_steps += 1
+                    logger.info(
+                        "[reason-mode] COMMIT turn — target=%s (from %s#%s)",
+                        commit_ctx["target"],
+                        commit_ctx["tool"],
+                        commit_ctx["step"],
+                    )
+                else:
+                    reason_mode_steps += 1
+                active_agent = commit_agent if mode == "commit" else agent
                 # request_limit overrides pydantic-ai's default (50) so the
                 # manual max_turns break below is what bounds each run.
-                async with agent.iter(
+                async with active_agent.iter(
                     None if _resume else seed,
                     message_history=history,
                     usage_limits=UsageLimits(request_limit=max_turns + 1),
@@ -515,7 +550,7 @@ class ApiAgentLoop:
                                             else hint
                                         )
                                 if block is not None:
-                                    if dual_route:
+                                    if dual_route or reason_mode:
                                         # run.enqueue dies with the run on
                                         # restart — stash it and merge it into
                                         # the tail request instead.
@@ -539,19 +574,19 @@ class ApiAgentLoop:
                                     "reached max_turns=%d. Stopping.", max_turns
                                 )
                                 break
-                            # Dual-route (non-interactive): end this agent.iter
-                            # after exactly one model turn so the outer loop can
-                            # run the Fast/Slow decision. pydantic-ai only
-                            # commits this turn's tool results to
-                            # message_history when the *next* ModelRequestNode
-                            # runs; breaking out now would leave a
-                            # ModelResponse-with-tool_calls tail, and the resume
-                            # path would then re-execute the tools (double robot
-                            # actions). CallToolsNode has already built the
-                            # tool-result request as node._next_node.request —
-                            # commit it so the Fast branch / next model run
-                            # resumes on a clean ModelRequest tail.
-                            if dual_route and not interactive:
+                            # Dual-route / reason-mode (non-interactive): end
+                            # this agent.iter after exactly one model turn so
+                            # the outer loop can run the Fast/Slow or
+                            # COMMIT/REASON decision. pydantic-ai only commits
+                            # this turn's tool results to message_history when
+                            # the *next* ModelRequestNode runs; breaking out
+                            # now would leave a ModelResponse-with-tool_calls
+                            # tail, and the resume path would then re-execute
+                            # the tools (double robot actions). CallToolsNode
+                            # has already built the tool-result request as
+                            # node._next_node.request — commit it so the next
+                            # model run resumes on a clean ModelRequest tail.
+                            if (dual_route or reason_mode) and not interactive:
                                 next_node = getattr(node, "_next_node", None)
                                 if getattr(next_node, "request", None) is not None:
                                     run.ctx.state.message_history.append(
@@ -568,7 +603,7 @@ class ApiAgentLoop:
                                 logger.info(
                                     "model ended turn without a tool call. Stopping."
                                 )
-                                if dual_route:
+                                if dual_route or reason_mode:
                                     # Restarting on a bare ModelResponse tail
                                     # re-emits it forever (_agent_graph.py) —
                                     # end the session instead.
@@ -576,18 +611,24 @@ class ApiAgentLoop:
                             break
 
                     history = run.all_messages()
-                    if dual_route and pending_block is not None:
+                    if reason_mode:
+                        # Honest per-mode accounting: one model request per
+                        # restarted run, so run.usage is that turn's usage.
+                        mode_tokens[mode][0] += int(run.usage.input_tokens or 0)
+                        mode_tokens[mode][1] += int(run.usage.output_tokens or 0)
+                    if (dual_route or reason_mode) and pending_block is not None:
                         history = _merge_into_tail(history, pending_block)
                         pending_block = None
 
-                # finish, quit, end-node (dual-route), non-interactive, or the
-                # cumulative step budget is spent => end the whole session so
-                # max_turns is enforced across every run, not per run.
+                # finish, quit, end-node (dual-route/reason-mode),
+                # non-interactive, or the cumulative step budget is spent =>
+                # end the whole session so max_turns is enforced across every
+                # run, not per run.
                 if (
                     observer.finish_result is not None
                     or quit_requested
                     or session_over
-                    or (not interactive and not dual_route)
+                    or (not interactive and not (dual_route or reason_mode))
                     or total_steps >= max_turns
                 ):
                     break
@@ -611,6 +652,10 @@ class ApiAgentLoop:
                 fast_steps=fast_steps,
                 slow_reasons=router.slow_reasons if router is not None else None,
                 outcome_validator=outcome_validator,
+                reason_mode=reason_mode,
+                commit_mode_steps=commit_mode_steps,
+                reason_mode_steps=reason_mode_steps,
+                mode_tokens=mode_tokens if reason_mode else None,
             )
 
         return PlannerResult(
@@ -718,6 +763,31 @@ class ApiAgentLoop:
             capabilities=[
                 Thinking(effort="high"),
                 ProcessHistory(processor=_prune_history_images),
+            ],
+        )
+
+    def _build_commit_agent(
+        self,
+        toolkit: Toolkit,
+        *,
+        outcome_validator: Any = None,
+    ) -> Agent:
+        """Arm C COMMIT-MODE agent: shared model, trimmed instructions,
+        action-tools-only. Verdict target rides the tool-result tail."""
+        from robots.libero.prompts.reason_mode import COMMIT_AGENT
+
+        return Agent(
+            self._model,
+            instructions=COMMIT_AGENT,
+            tools=_build_tools(
+                toolkit,
+                no_images=True,  # commit mode forbids perception anyway
+                outcome_validator=outcome_validator,
+                action_tools_only=True,
+            ),
+            model_settings=_build_model_settings(self._model, self._max_tokens),
+            capabilities=[
+                ProcessHistory(processor=_prune_commit_history),
             ],
         )
 
@@ -904,6 +974,10 @@ def _write_structured_metrics(
     fast_steps: int = 0,
     slow_reasons: list[str] | None = None,
     outcome_validator: Any = None,
+    reason_mode: bool = False,
+    commit_mode_steps: int = 0,
+    reason_mode_steps: int = 0,
+    mode_tokens: dict[str, list[int]] | None = None,
 ) -> None:
     """Write per-episode Structured Memory metrics into the run output dir.
 
@@ -916,16 +990,30 @@ def _write_structured_metrics(
         snap["slow_reasons"] = slow_reasons
         if outcome_validator is not None:
             snap["ovpm"] = outcome_validator.snapshot(success=success)
+        if reason_mode:
+            # Arm C per-mode accounting (flat keys for the scheduler's
+            # metric_fields extraction). Tokens are per mode, not per
+            # request — both modes still cost one model call per turn.
+            mt = mode_tokens or {}
+            snap["reason_mode_enabled"] = True
+            snap["commit_mode_steps"] = commit_mode_steps
+            snap["reason_mode_steps"] = reason_mode_steps
+            snap["commit_tokens_in"] = int(mt.get("commit", [0, 0])[0])
+            snap["commit_tokens_out"] = int(mt.get("commit", [0, 0])[1])
+            snap["reason_tokens_in"] = int(mt.get("reason", [0, 0])[0])
+            snap["reason_tokens_out"] = int(mt.get("reason", [0, 0])[1])
         (out / "structured_metrics.json").write_text(
             json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         logger.info(
             "[phase] metrics written — fired=%s injections=%s success=%s "
-            "fast_steps=%s",
+            "fast_steps=%s commit_steps=%s reason_steps=%s",
             snap["fired_rules"],
             snap["injections"],
             success,
             fast_steps,
+            commit_mode_steps if reason_mode else "-",
+            reason_mode_steps if reason_mode else "-",
         )
     except Exception as e:  # noqa: BLE001 - metrics must never break the run
         logger.warning("[phase] failed to write structured metrics: %s", e)
@@ -1189,35 +1277,46 @@ def _build_tools(
     *,
     no_images: bool = False,
     outcome_validator: Any = None,
+    action_tools_only: bool = False,
 ) -> list[Tool]:
-    """Build the API-only image reader plus pydantic-ai toolkit wrappers."""
-    guard = _PerceptionGuard.make()
-    image_reader = read_image_text_only if no_images else read_image
-    if guard is not None:
-        base_reader = image_reader  # capture pre-rebind reference
+    """Build the API-only image reader plus pydantic-ai toolkit wrappers.
 
-        def _guarded_read_image(path: str):
-            pre = guard.check_before("read_image", {"path": path})
-            if pre is not None:
-                return {
-                    "perception_blocked": True,
-                    "repeated_perception": True,
-                    "note": pre,
-                }
-            res = base_reader(path)
-            post = guard.observe_after("read_image", {"path": path}, str(path))
-            if post is not None:
-                return {
-                    "perception_blocked": True,
-                    "repeated_perception": True,
-                    "note": post,
-                }
-            return res
+    ``action_tools_only`` (arm C COMMIT MODE) drops the image reader and all
+    perception/memory tools, keeping ACTION_TOOLS + finish only.
+    """
+    from rpent.memory.structured import ACTION_TOOLS
 
-        image_reader = _guarded_read_image
-    tools: list[Tool] = [Tool(image_reader, name="read_image")]
+    guard = None if action_tools_only else _PerceptionGuard.make()
+    tools: list[Tool] = []
+    if not action_tools_only:
+        image_reader = read_image_text_only if no_images else read_image
+        if guard is not None:
+            base_reader = image_reader  # capture pre-rebind reference
+
+            def _guarded_read_image(path: str):
+                pre = guard.check_before("read_image", {"path": path})
+                if pre is not None:
+                    return {
+                        "perception_blocked": True,
+                        "repeated_perception": True,
+                        "note": pre,
+                    }
+                res = base_reader(path)
+                post = guard.observe_after("read_image", {"path": path}, str(path))
+                if post is not None:
+                    return {
+                        "perception_blocked": True,
+                        "repeated_perception": True,
+                        "note": post,
+                    }
+                return res
+
+            image_reader = _guarded_read_image
+        tools.append(Tool(image_reader, name="read_image"))
     for spec in toolkit.get_tools_spec():
         name = spec["name"]
+        if action_tools_only and name not in ACTION_TOOLS and name != "finish":
+            continue
         tools.append(
             Tool.from_schema(
                 function=_make_tool_function(
@@ -1457,3 +1556,12 @@ def _clip(text: str, limit: int) -> str:
     if len(text) <= limit:
         return text
     return text[:limit] + "...(+%d)" % (len(text) - limit)
+
+
+def _prune_commit_history(messages: list[ModelMessage]) -> list[ModelMessage]:
+    """COMMIT-MODE history: last few messages only, images stripped.
+
+    The verdict-bearing tool result the commit turn must act on is at the
+    tail; everything older is context the full REASON agent already weighed.
+    """
+    return _prune_history_images(messages[-8:])

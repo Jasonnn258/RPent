@@ -285,6 +285,7 @@ class OutcomeValidator:
         self.n_uncertain = 0
         self.mismatch_escalations = 0
         self.repeated_same_strategy_after_mismatch = 0
+        self._last_is_error = False
 
     # ------------------------------------------------------------ selection
 
@@ -323,6 +324,7 @@ class OutcomeValidator:
         """
         self._step += 1
         self._tool_n[name] = self._tool_n.get(name, 0) + 1
+        self._last_is_error = bool(is_error)
         ph = phase if phase is not None else self._phase()
 
         contract = self._contract_for(name, ph)
@@ -496,6 +498,26 @@ class OutcomeValidator:
                     f"commit to {e['next_phase']} now; further confirmation "
                     "is redundant."
                 )
+        return None
+
+    def commit_mode_ctx(self) -> dict[str, Any] | None:
+        """Arm C (RPENT_REASON_MODE): COMMIT-MODE eligibility for one turn.
+
+        Eligible exactly when a verified-MATCHED commit is still open (the
+        next step is known), nothing anomalous is pending (no open recovery
+        events, last action result not an error), and this open event has
+        not already consumed a commit turn. If the model still does not
+        advance, later boundaries fall back to REASON MODE with the full
+        agent — self-correcting by construction.
+        """
+        if self._open_recovery or self._last_is_error:
+            return None
+        for e in self._open_commit:
+            if e.get("commit_turn_used") or not e.get("next_phase"):
+                continue
+            e["commit_turn_used"] = True
+            return {"target": e["next_phase"], "tool": e["tool"],
+                    "step": e["step"]}
         return None
 
     # --------------------------------------------------------------- output

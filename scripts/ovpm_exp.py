@@ -100,6 +100,10 @@ RUN_FIELDNAMES = [
     "ovpm_mismatch_escalations", "ovpm_repeated_same_strategy",
     "ovpm_commit_events", "ovpm_recovery_events",
     "ovpm_commit_latency_mean", "ovpm_recovery_latency_mean",
+    # reason mode (arm C) metrics — flat keys in structured_metrics.json
+    "commit_mode_steps", "reason_mode_steps",
+    "commit_tokens_in", "commit_tokens_out",
+    "reason_tokens_in", "reason_tokens_out",
 ]
 
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -227,10 +231,49 @@ def metric_fields(outdir):
         "ovpm_recovery_events": len(o.get("recovery_events") or []),
         "ovpm_commit_latency_mean": o.get("commit_latency_mean", ""),
         "ovpm_recovery_latency_mean": o.get("recovery_latency_mean", ""),
+        # arm C (empty for A/B rows — keys absent when the gate is off)
+        "commit_mode_steps": m.get("commit_mode_steps", ""),
+        "reason_mode_steps": m.get("reason_mode_steps", ""),
+        "commit_tokens_in": m.get("commit_tokens_in", ""),
+        "commit_tokens_out": m.get("commit_tokens_out", ""),
+        "reason_tokens_in": m.get("reason_tokens_in", ""),
+        "reason_tokens_out": m.get("reason_tokens_out", ""),
     }
 
 
 CSV_LOCK = threading.Lock()
+
+
+def _migrate_csv_header():
+    """One-time: extend the header when RUN_FIELDNAMES grew (arm C columns).
+
+    Existing rows keep their column count — short rows are re-serialized
+    with "" for the new fields. Rows already in the new width pass through.
+    """
+    if not os.path.exists(RUNS_CSV):
+        return
+    with open(RUNS_CSV, newline="") as f:
+        rows = list(csv.reader(f))
+    if not rows or rows[0] == RUN_FIELDNAMES:
+        return
+    old_header = rows[0]
+    out = [RUN_FIELDNAMES]
+    for r in rows[1:]:
+        if len(r) == len(old_header):
+            d = dict(zip(old_header, r))
+        elif len(r) == len(RUN_FIELDNAMES):  # written post-extension
+            d = dict(zip(RUN_FIELDNAMES, r))
+        else:
+            log(f"WARN csv row width {len(r)} matches neither header; "
+                "keeping raw")
+            out.append(r)
+            continue
+        out.append([d.get(k, "") for k in RUN_FIELDNAMES])
+    tmp = RUNS_CSV + ".tmp"
+    with open(tmp, "w", newline="") as f:
+        csv.writer(f).writerows(out)
+    os.replace(tmp, RUNS_CSV)
+    log(f"csv header migrated: {len(old_header)} -> {len(RUN_FIELDNAMES)} cols")
 
 
 def append_run(ep, res):
@@ -242,8 +285,9 @@ def append_run(ep, res):
         "result": res["result"],
     }
     row.update(metric_fields(res["dir"]))
-    fresh = not os.path.exists(RUNS_CSV)
     with CSV_LOCK:
+        _migrate_csv_header()
+        fresh = not os.path.exists(RUNS_CSV)
         with open(RUNS_CSV, "a", newline="") as f:
             w = csv.DictWriter(f, fieldnames=RUN_FIELDNAMES)
             if fresh:

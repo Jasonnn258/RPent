@@ -47,6 +47,14 @@ def system_prompt() -> PromptNode:
         node["OUTCOME-VALIDATED MEMORY — obey [ovpm] verdicts (commit/recover)"] = (
             _ovpm.OVPM
         )
+    # Arm C — event-triggered reasoning. Gated so arm B's prompt stays
+    # byte-identical; mirrors the RPENT_REASON_MODE validator gate.
+    if os.environ.get("RPENT_REASON_MODE") == "1" and (
+        os.environ.get("RPENT_OVPM") == "1"
+    ):
+        from robots.libero.prompts import reason_mode as _rm
+
+        node["EVENT-TRIGGERED REASONING — COMMIT/REASON modes"] = _rm.REASON_MODE
     return node
 
 

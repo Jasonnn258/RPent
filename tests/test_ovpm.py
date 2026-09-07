@@ -409,3 +409,73 @@ def test_end_to_end_t9_place_fail_recovers(contracts, rules):
     ev = snap["recovery_events"][0]
     assert ev["closed_by"] == "switch" and ev["latency_steps"] == 1
     assert snap["mismatch_escalations"] == 1
+
+
+# ------------------------------------------------------- arm C commit gate
+
+def test_commit_mode_ctx_after_matched(contracts):
+    v = validator(contracts, phase="P_verify")
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    assert v.commit_mode_ctx() == {
+        "target": "finish", "tool": "view_driver_state", "step": 1}
+
+
+def test_commit_mode_ctx_phase_target(contracts):
+    v = validator(contracts, phase="P_grasp")
+    v.observe_result("pi0_pick", {}, result(success=True))
+    assert v.commit_mode_ctx() == {
+        "target": "P_place", "tool": "pi0_pick", "step": 1}
+
+
+def test_commit_mode_ctx_once_per_event(contracts):
+    v = validator(contracts, phase="P_verify")
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    assert v.commit_mode_ctx() is not None
+    # the open event consumed its commit turn: no repeat until a NEW
+    # verified match (self-correcting — later boundaries run full REASON)
+    assert v.commit_mode_ctx() is None
+
+
+def test_commit_mode_ctx_new_event_rearms(contracts):
+    v = validator(contracts, phase="P_verify")
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    assert v.commit_mode_ctx() is not None
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    ctx = v.commit_mode_ctx()
+    assert ctx is not None and ctx["step"] == 2
+
+
+def test_commit_mode_ctx_blocked_by_open_recovery(contracts):
+    v = validator(contracts, phase="P_grasp")
+    v.observe_result("pi0_pick", {}, result(success=True))  # opens commit
+    v._tracker.phase = "P_transport"
+    v.observe_result("move_to", {}, result(final_dist_m=0.12))  # mismatch
+    assert v.commit_mode_ctx() is None  # recovery pending -> full REASON
+    # perception is diagnosis, not recovery: must NOT rearm commit mode
+    v.observe_result("view_driver_state", {}, result(step=3))
+    assert v.commit_mode_ctx() is None
+
+
+def test_commit_mode_ctx_blocked_by_last_error(contracts):
+    v = validator(contracts, phase="P_verify")
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    v.observe_result("read_image", {}, '{"error": "file not found"}',
+                     is_error=True)
+    assert v.commit_mode_ctx() is None  # anomalous: full REASON agent
+    # a later clean result clears the error flag
+    v.observe_result("view_driver_state", {}, result(libero_terminated=True))
+    assert v.commit_mode_ctx() is not None
+
+
+def test_commit_mode_ctx_advisory_match_not_eligible(contracts):
+    v = validator(contracts, phase="P_transport")
+    v.observe_result("move_to", {}, result(final_dist_m=0.005))  # advisory
+    assert v.commit_mode_ctx() is None  # no next_phase -> no commit turn
+
+
+def test_commit_mode_ctx_mismatch_invalidates_same_tool_commit(contracts):
+    v = validator(contracts, phase="P_grasp")
+    v.observe_result("pi0_pick", {}, result(success=True))
+    v.observe_result("pi0_pick", {}, result(success=False,
+                                             min_gripper_opening=0.08))
+    assert v.commit_mode_ctx() is None
