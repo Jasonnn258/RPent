@@ -46,7 +46,12 @@ V2_RULES = os.path.join(ROOT, "analysis", "structured_rules_v2.json")
 
 N_EVAL = 10
 EVAL_TURNS = 40
-PLANNER_TIMEOUT_S = 2400
+# 2026-09-08 mid-heldout incident: GLM morning latency ~87-150s/turn (vs
+# ~40-60s when 2400 was calibrated) killed healthy 25-30-turn episodes at
+# budget expiry (infra_timeout, auto-retried). Raised to 3600s mid-run —
+# wall-clock headroom only; the scientific control (EVAL_TURNS=40) and the
+# method are untouched. RUNTIME_S=4500 still > 3600 + ~90s startup.
+PLANNER_TIMEOUT_S = 3600
 MAX_INFRA_RETRY = 3
 
 # Planner output cap. Thinking(effort='high') maps to budget_tokens=16384

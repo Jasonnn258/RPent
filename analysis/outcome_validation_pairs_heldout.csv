@@ -1,0 +1,31 @@
+task,seed,repeat,a_result,b_result,a_mech,b_mech,a_turns,b_turns,a_wall,b_wall,b_matched,b_mismatched,b_escalations,b_commit_ev,b_recovery_ev,b_commit_lat,b_recovery_lat,b_repeat_same,flip,class,divergence
+1,1,1,success,success,success,success,39,26,1596.3,2100.9,2,3,1,1,3,11.0,1.33,0,none,both-success+faster,outcome@pick1:hold=False/term=None vs hold=False/term=None
+1,10,1,success,success,success,success,29,27,1274.4,2250.3,8,0,0,3,0,4.33,,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+1,2,1,success,success,success,success,40,25,1616.0,1918.4,2,3,2,1,3,5.0,1.67,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=False/term=None
+1,3,1,success,success,success,success,28,25,1514.9,1803.5,3,1,0,1,1,5.0,3.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+1,4,1,success,success,success,success,23,38,1399.6,2968.8,6,1,0,1,1,9.0,2.0,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+1,5,1,success,success,success,success,27,23,1689.4,1808.5,7,0,0,3,0,4.0,,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+1,6,1,success,success,success,success,34,39,2446.9,2007.7,7,0,0,3,0,5.0,,0,none,both-success+faster,outcome@pick1:hold=False/term=None vs hold=True/term=None
+1,7,1,success,policy_fail,success,place_fail,31,40,2461.3,1628.7,4,0,0,1,0,,,0,A-succ->B-fail,other-regression (manual review),outcome@pick1:hold=False/term=None vs hold=True/term=None
+1,8,1,success,success,success,success,28,28,2041.0,1637.6,1,3,2,1,3,5.0,1.67,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=False/term=None
+1,9,1,policy_fail,policy_fail,grasp_fail,place_fail,40,40,2437.8,1563.7,6,1,0,3,1,5.33,2.0,0,none,both-fail-same-class,outcome@pick1:hold=False/term=None vs hold=True/term=None
+4,1,1,success,success,success,success,26,33,1978.7,2912.0,3,1,0,1,1,14.0,2.0,0,none,both-success,outcome@pick1:hold=False/term=None vs hold=True/term=None
+4,10,1,success,success,success,success,36,26,2288.2,1421.4,5,0,0,3,0,4.33,,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+4,2,1,success,success,success,success,26,28,482.0,1864.0,3,1,0,1,1,9.0,2.0,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+4,3,1,success,policy_fail,success,place_fail,37,31,2395.6,2097.5,6,3,2,2,3,7.0,1.67,0,A-succ->B-fail,other-regression (manual review),outcome@pick1:hold=True/term=None vs hold=True/term=None
+4,4,1,success,success,success,success,27,28,1886.3,2236.1,3,0,0,1,0,13.0,,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+4,5,1,success,success,success,no_pick,38,0,2584.8,2487.5,,,,,,,,,none,both-success+faster,milestone-set@0:pick1/END
+4,6,1,success,policy_fail,no_pick,place_fail,0,40,2488.2,2189.7,6,0,0,3,0,5.67,,0,A-succ->B-fail,other-regression (manual review),milestone-set@0:END/pick1
+4,7,1,success,success,success,success,38,26,3204.2,1918.7,3,1,0,1,1,9.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+4,8,1,success,policy_fail,success,place_fail,24,36,1023.5,2421.9,3,2,2,0,2,,2.5,0,A-succ->B-fail,other-regression (manual review),outcome@pick1:hold=True/term=None vs hold=False/term=None
+4,9,1,success,success,success,success,26,30,1914.0,2449.5,3,1,0,1,1,10.0,2.0,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,1,1,success,success,success,success,38,32,2298.9,1835.3,3,1,0,1,1,7.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,10,1,success,success,success,success,30,16,1731.7,1097.1,3,1,0,1,1,6.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,2,1,success,success,success,success,39,33,1980.4,1479.8,3,1,0,1,1,10.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,3,1,success,success,success,success,25,37,1023.9,1964.5,3,1,1,2,1,4.5,2.0,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,4,1,success,success,success,success,27,39,1532.6,2278.2,3,1,0,1,1,9.0,2.0,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,5,1,success,success,success,success,32,26,1967.6,1815.1,2,1,0,1,1,7.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,6,1,success,success,success,success,27,26,1812.1,1486.6,3,1,0,1,1,8.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,7,1,success,success,success,success,23,26,1404.8,2132.8,4,0,0,3,0,3.0,,0,none,both-success,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,8,1,success,success,success,success,40,36,2396.8,2127.0,2,1,0,1,1,7.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None
+8,9,1,success,success,success,success,30,22,1779.8,1979.6,2,1,0,1,1,6.0,2.0,0,none,both-success+faster,outcome@pick1:hold=True/term=None vs hold=True/term=None

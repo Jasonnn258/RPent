@@ -110,6 +110,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", default="dev")
     ap.add_argument("--csv", default=RUNS_CSV)
+    ap.add_argument("--out", default=PAIRS_CSV,
+                    help="output pairs CSV (default overwrites the dev table)")
     args = ap.parse_args()
 
     rows = [r for r in csv.DictReader(open(args.csv))
@@ -151,11 +153,11 @@ def main():
                                       pair["b_turns"])
         out.append(pair)
 
-    with open(PAIRS_CSV, "w", newline="") as f:
+    with open(args.out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
         w.writerows(out)
-    print(f"{len(out)} pairs -> {PAIRS_CSV}")
+    print(f"{len(out)} pairs -> {args.out}")
     from collections import Counter
     for k, v in Counter(p["class"] for p in out).most_common():
         print(f"  {v:3d}  {k}")
