@@ -1184,6 +1184,35 @@ def _build_model_settings(model: Model, max_tokens: int) -> ModelSettings:
     """Build model settings, enabling prompt caching for Anthropic models."""
     from pydantic_ai.models.anthropic import AnthropicModel, AnthropicModelSettings
 
+    # RPENT_REASONING_EFFORT: OpenAI-compatible planner 的推理档位旋钮。
+    # GLM-5.3-Flash chat template 只认 low/high 两档,其余值(含未设)一律渲染
+    # Max — 本地部署默认想要 max,但 pydantic-ai Thinking 枚举没有 'max',
+    # 所以走显式 OpenAIChatModelSettings 字段直传。只收 {low,high,max},非法
+    # 值/误用于非 openai 模型(如远端 anthropic 端点)一律 fail-fast:模板会把
+    # 垃圾值静默当 Max,掩盖配置错误。不设此 env 时行为与以前完全一致。
+    effort = os.environ.get("RPENT_REASONING_EFFORT")
+    if effort is not None:
+        from pydantic_ai.models.openai import (
+            OpenAIChatModel,
+            OpenAIChatModelSettings,
+        )
+
+        if not isinstance(model, OpenAIChatModel):
+            raise ValueError(
+                f"RPENT_REASONING_EFFORT={effort!r} only applies to "
+                f"openai-chat: models (got {type(model).__name__})"
+            )
+        if effort not in ("low", "high", "max"):
+            raise ValueError(
+                f"RPENT_REASONING_EFFORT must be one of low/high/max, "
+                f"got {effort!r} (GLM template silently maps anything "
+                "else to max)"
+            )
+        return OpenAIChatModelSettings(
+            max_tokens=max_tokens,
+            openai_reasoning_effort=effort,
+        )
+
     if isinstance(model, AnthropicModel):
         return AnthropicModelSettings(
             max_tokens=max_tokens,
