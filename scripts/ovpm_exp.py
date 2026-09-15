@@ -9,6 +9,9 @@ arms comparable and strictly paired by (task, seed, repeat)):
   dev      armA (SM1) + armB (A+RPENT_OVPM) x t0/t7/t9 x s1-10 x r1-3 (180 ep)
   devC     armC (B+RPENT_REASON_MODE) same 90 pairing as dev  (only if B valid)
   heldout  armA+armB+armC x t1/t4/t8 x s1-10 x r1             (90 ep)
+  dev2     armB2 (A+RPENT_OVPM2, B2 state-transition verification) x
+           t0/t7/t9 x s1-10 x r1-3                             (90 ep)
+  stage1   armA+armB+armB2 x t2/t3/t5 x s1-10 x r1             (90 ep)
   smoke    --conds/--tasks/--seeds/--repeats overrides for one-off checks
 
 Everything vanilla/GLM/osmesa differs from the kimi-era scripts:
@@ -98,10 +101,18 @@ COND_ENV = {
              "RPENT_OVPM": "1",
              "RPENT_OVPM_CONTRACTS": V2_RULES,
              "RPENT_REASON_MODE": "1"},
+    # B2 = arm A + state-transition verification (independent of arm B's
+    # RPENT_OVPM gate; the SM1 tracker stays on for phase-context logging).
+    "armB2": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_OVPM2": "1"},
 }
 
 DEV_TASKS = [0, 7, 9]
 HELDOUT_TASKS = [1, 4, 8]
+# B2 Stage-1 tasks: t2/t3/t5 (t1/t4/t8 already consumed as OVP-M heldout;
+# t6 fully reserved; t2/t3/t5 have no A/B1 rows — Stage 1 runs all three
+# arms fresh on them).
+B2_NEW_TASKS = [2, 3, 5]
 P0_SUITE = "libero_spatial_task"
 
 RUN_FIELDNAMES = [
@@ -120,6 +131,11 @@ RUN_FIELDNAMES = [
     "commit_mode_steps", "reason_mode_steps",
     "commit_tokens_in", "commit_tokens_out",
     "reason_tokens_in", "reason_tokens_out",
+    # B2 (state-transition verification) metrics — nested under "b2"
+    "b2_n_success", "b2_n_failure", "b2_n_uncertain",
+    "b2_false_positive_caught", "b2_observe_directives",
+    "b2_reason_escalations", "b2_redundant_obs",
+    "b2_commit_latency_mean", "b2_recovery_latency_mean",
 ]
 
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -176,6 +192,10 @@ def run_episode(ep, gpu):
     env = base_env()
     env.update(COND_ENV.get(cond, {}))
     env["RPENT_TASK"] = str(task)
+    if cond == "armB2":
+        # B2 event logging fields (never read by any other arm's code path)
+        env["RPENT_B2_SEED"] = str(seed)
+        env["RPENT_B2_REPEAT"] = str(repeat)
     cvd = "0" if gpu == 0 else f"{gpu},0"
     env["CUDA_VISIBLE_DEVICES"] = cvd
     cmd = [
@@ -238,6 +258,7 @@ def metric_fields(outdir):
     except Exception:
         return {}
     o = m.get("ovpm") or {}
+    b = m.get("b2") or {}
     return {
         "rules_ver": m.get("rules_ver", ""),
         "injections": m.get("injections", ""),
@@ -267,6 +288,16 @@ def metric_fields(outdir):
         "commit_tokens_out": m.get("commit_tokens_out", ""),
         "reason_tokens_in": m.get("reason_tokens_in", ""),
         "reason_tokens_out": m.get("reason_tokens_out", ""),
+        # arm B2 (empty for other arms — key absent when the gate is off)
+        "b2_n_success": b.get("n_confirmed_success", ""),
+        "b2_n_failure": b.get("n_confirmed_failure", ""),
+        "b2_n_uncertain": b.get("n_uncertain", ""),
+        "b2_false_positive_caught": b.get("false_positive_caught", ""),
+        "b2_observe_directives": b.get("n_observe_directives", ""),
+        "b2_reason_escalations": b.get("n_reason_escalations", ""),
+        "b2_redundant_obs": b.get("n_redundant_observations", ""),
+        "b2_commit_latency_mean": b.get("commit_latency_mean", ""),
+        "b2_recovery_latency_mean": b.get("recovery_latency_mean", ""),
     }
 
 
@@ -348,6 +379,18 @@ def build_episodes(args, done):
     elif args.stage == "heldout":
         conds = conds or ["armA", "armB", "armC"]
         tasks = tasks or HELDOUT_TASKS
+        repeats = repeats or [1]
+    elif args.stage == "dev2":
+        # B2 development: t0/t7/t9 x s1-10 x r1-3, strictly paired with the
+        # existing dev armA/armB rows (same tier/tasks/seeds/repeats).
+        conds = conds or ["armB2"]
+        tasks = tasks or DEV_TASKS
+        repeats = repeats or [1, 2, 3]
+    elif args.stage == "stage1":
+        # B2 held-out: t2/t3/t5 x s1-10 x r1 across all three arms (t2/t3/t5
+        # have no prior A/B1 rows — Stage 1 runs them fresh for comparability).
+        conds = conds or ["armA", "armB", "armB2"]
+        tasks = tasks or B2_NEW_TASKS
         repeats = repeats or [1]
     else:  # smoke
         conds = conds or ["vanilla", "armA", "armB"]
@@ -453,7 +496,8 @@ def status_loop(stop_evt):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", required=True,
-                    choices=["sanity", "dev", "devC", "heldout", "smoke"])
+                    choices=["sanity", "dev", "devC", "heldout", "dev2",
+                             "stage1", "smoke"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")

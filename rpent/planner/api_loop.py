@@ -336,6 +336,9 @@ class ApiAgentLoop:
         tracker = _new_phase_tracker(max_turns=max_turns)
         # OVP-M (arm B) — requires the SM1 tracker for phase context.
         outcome_validator = _new_outcome_validator(tracker)
+        # B2 (arm B2) — evidence-sufficient state-transition verification.
+        # Runs alongside the tracker only; arms A/B never set its gate.
+        b2_verifier = _new_b2_verifier(tracker)
         # Arm C — event-triggered reasoning: COMMIT turns run on a constrained
         # agent (trimmed instructions, action tools only, pruned history);
         # every other turn runs the full REASON agent. Requires arm B.
@@ -360,7 +363,8 @@ class ApiAgentLoop:
             reason_mode,
         )
         agent = self._build_agent(
-            system_prompt, toolkit, outcome_validator=outcome_validator
+            system_prompt, toolkit, outcome_validator=outcome_validator,
+            b2_verifier=b2_verifier,
         )
 
         interactive = input_queue is not None
@@ -549,6 +553,14 @@ class ApiAgentLoop:
                                             if block
                                             else hint
                                         )
+                                if b2_verifier is not None:
+                                    hint2 = b2_verifier.turn_boundary_hint()
+                                    if hint2:
+                                        block = (
+                                            f"{block}\n{hint2}"
+                                            if block
+                                            else hint2
+                                        )
                                 if block is not None:
                                     if dual_route or reason_mode:
                                         # run.enqueue dies with the run on
@@ -656,6 +668,7 @@ class ApiAgentLoop:
                 commit_mode_steps=commit_mode_steps,
                 reason_mode_steps=reason_mode_steps,
                 mode_tokens=mode_tokens if reason_mode else None,
+                b2_verifier=b2_verifier,
             )
 
         return PlannerResult(
@@ -749,6 +762,7 @@ class ApiAgentLoop:
         toolkit: Toolkit,
         *,
         outcome_validator: Any = None,
+        b2_verifier: Any = None,
     ) -> Agent:
         """Build an Agent for terminal or Dashboard execution."""
         return Agent(
@@ -758,6 +772,7 @@ class ApiAgentLoop:
                 toolkit,
                 no_images=self._no_images,
                 outcome_validator=outcome_validator,
+                b2_verifier=b2_verifier,
             ),
             model_settings=_build_model_settings(self._model, self._max_tokens),
             capabilities=[
@@ -967,6 +982,24 @@ def _new_outcome_validator(tracker: Any) -> Any:
     return OutcomeValidator(contracts, tracker=tracker, task=task)
 
 
+def _new_b2_verifier(tracker: Any) -> Any:
+    """Build the B2 TransitionVerifier when the gate is on, else None.
+
+    Gate: ``RPENT_OVPM2=1`` (arm B2 = arm A + state-transition verification;
+    independent of arm B's ``RPENT_OVPM``). Requires the Structured Memory
+    tracker for phase context in logs and latency accounting — the rules
+    themselves are action-level and phase-free.
+    """
+    if os.environ.get("RPENT_OVPM2") != "1" or tracker is None:
+        return None
+    from rpent.memory.structured import detect_task
+    from rpent.memory.stv import TransitionVerifier
+
+    task = detect_task()
+    logger.info("[b2] state-transition verification ON — task=%s", task)
+    return TransitionVerifier(tracker=tracker, task=task)
+
+
 def _write_structured_metrics(
     tracker: Any,
     *,
@@ -978,6 +1011,7 @@ def _write_structured_metrics(
     commit_mode_steps: int = 0,
     reason_mode_steps: int = 0,
     mode_tokens: dict[str, list[int]] | None = None,
+    b2_verifier: Any = None,
 ) -> None:
     """Write per-episode Structured Memory metrics into the run output dir.
 
@@ -990,6 +1024,8 @@ def _write_structured_metrics(
         snap["slow_reasons"] = slow_reasons
         if outcome_validator is not None:
             snap["ovpm"] = outcome_validator.snapshot(success=success)
+        if b2_verifier is not None:
+            snap["b2"] = b2_verifier.snapshot(success=success)
         if reason_mode:
             # Arm C per-mode accounting (flat keys for the scheduler's
             # metric_fields extraction). Tokens are per mode, not per
@@ -1307,6 +1343,7 @@ def _build_tools(
     no_images: bool = False,
     outcome_validator: Any = None,
     action_tools_only: bool = False,
+    b2_verifier: Any = None,
 ) -> list[Tool]:
     """Build the API-only image reader plus pydantic-ai toolkit wrappers.
 
@@ -1354,6 +1391,7 @@ def _build_tools(
                     no_images=no_images,
                     perception_guard=guard,
                     outcome_validator=outcome_validator,
+                    b2_verifier=b2_verifier,
                 ),
                 name=name,
                 description=spec.get("description", ""),
@@ -1405,6 +1443,7 @@ def _make_tool_function(
     no_images: bool = False,
     perception_guard: _PerceptionGuard | None = None,
     outcome_validator: Any = None,
+    b2_verifier: Any = None,
 ):
     """Return a callable that dispatches one tool call to the toolkit."""
 
@@ -1431,6 +1470,17 @@ def _make_tool_function(
             )
             if line:
                 text = f"{text}\n\n{line}"
+        # B2: state-transition verdict, same zero-turn injection channel.
+        if b2_verifier is not None:
+            line2 = b2_verifier.observe_result(
+                name,
+                kwargs,
+                text,
+                is_error=isinstance(result.result, dict)
+                and "error" in result.result,
+            )
+            if line2:
+                text = f"{text}\n\n{line2}"
         if perception_guard is not None:
             post = perception_guard.observe_after(name, kwargs, text)
             if post is not None:

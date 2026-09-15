@@ -1,6 +1,6 @@
 # DEPLOY_GLM53_FLASH.md — 本地 GLM-5.3-Flash Planner 部署
 
-**状态: 交付(短 prompt 场景可用;episode 级使用被上游长 prompt bug 阻塞,见 §2.5/§4)** | 更新: 2026-09-14 深夜 | 目标: 用本地 GLM-5.3-Flash 替换远端 GLM planner
+**状态: 已退役(2026-09-15 按用户指示停用:服务 + watchdog 已停,显存清零,/dev/shm JIT 缓存已清;模型权重与脚本保留在盘,重启 = `scripts/start_glm53_flash.sh` + `scripts/health_cron_glm53.sh start`。此前的交付状态:短 prompt 场景可用,episode 级被上游长 prompt bug 阻塞,见 §2.5/§4)** | 更新: 2026-09-15 | 目标: 用本地 GLM-5.3-Flash 替换远端 GLM planner
 (实测 episode 97% 墙钟在等远端,账户级并发 ~8-9 是吞吐硬墙),质量对齐、延迟大降、
 保留 Pi0.5/SAM3/LIBERO 的 GPU 空间。
 
