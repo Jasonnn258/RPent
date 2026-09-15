@@ -47,6 +47,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -124,6 +125,67 @@ def _xyz(v: Any) -> tuple[float, float, float] | None:
     return None
 
 
+# --------------------------------------------------------------- label words
+# Smoke-run finding (2026-09-15): the planner segments the SAME object under
+# different wordings ("the black patterned bowl" pre-pick, "the black
+# patterned bowl held in the gripper" post-pick) and picks via natural
+# language ("grasp the upper right black bowl by the rim"). Exact-string
+# label equality therefore misses the evidence; match on shared content
+# words instead. Fallback labels ("segment@12") carry no semantics.
+
+_LABEL_STOP = frozenset({
+    "the", "a", "an", "of", "on", "in", "at", "to", "by", "with", "and",
+    "or", "not", "up", "held", "gripper", "robot", "its", "it", "this",
+    "that", "from", "for",
+})
+
+
+def _label_tokens(text: str) -> set[str]:
+    return {
+        w for w in re.findall(r"[a-z0-9]+", (text or "").lower())
+        if w not in _LABEL_STOP and len(w) > 2
+    }
+
+
+def _match_label(query: str, records: dict[str, dict[str, Any]]) -> str | None:
+    """Cached label sharing >=2 content tokens with *query* (max shared,
+    then most recently observed). None when nothing clears the bar."""
+    q = _label_tokens(query)
+    if not q:
+        return None
+    best: str | None = None
+    best_key = (1, -1)  # (shared tokens, recency) — 1 = below the bar
+    for lbl, rec in records.items():
+        if "@" in lbl:
+            continue
+        key = (len(q & _label_tokens(lbl)), rec.get("step", -1))
+        if key[0] >= 2 and key > best_key:
+            best, best_key = lbl, key
+    return best
+
+
+def _labels_related(a: str | None, b: str | None) -> bool:
+    """True when two labels plausibly name the same object (or either is a
+    semantic-free fallback), for gating which observations may consume a
+    pending verification round."""
+    if not a or not b or "@" in a or "@" in b:
+        return True
+    return a == b or len(_label_tokens(a) & _label_tokens(b)) >= 2
+
+
+def _is_grip_maintenance(name: str, kwargs: dict[str, Any]) -> bool:
+    """Closing actuation (``set_gripper`` gripper>0) is grip maintenance, not
+    a state-transition step: it must not overtake an open verification (the
+    smoke run showed the planner firming the grip BEFORE running the
+    directed observation — the evidence arrives one action later)."""
+    if name != "set_gripper":
+        return False
+    try:
+        return float(kwargs.get("gripper", -1.0)) > 0
+    except (TypeError, ValueError):
+        return False
+
+
 class TransitionVerifier:
     """Feed tool results in; get three-way verdict lines and metrics out.
 
@@ -196,13 +258,25 @@ class TransitionVerifier:
             "last_transport_target": list(self._target or ()),
         }
 
-    def _last_label(self) -> str | None:
+    def _last_label(self, real_only: bool = False) -> str | None:
         """Most recently observed object label (planners localize the grasp
-        target immediately before picking it — action-level, not task-level)."""
-        if not self._obj:
+        target immediately before picking it — action-level, not task-level).
+        ``real_only`` skips point-observation fallback labels ("segment@12")
+        that carry no reusable semantics."""
+        items = list(self._obj.items())
+        if real_only:
+            items = [(l, v) for l, v in items if "@" not in l]
+        if not items:
             return None
-        lbl, v = max(self._obj.items(), key=lambda kv: kv[1]["step"])
+        lbl, v = max(items, key=lambda kv: kv[1]["step"])
         return lbl if v["step"] >= 0 else None
+
+    @staticmethod
+    def _segment_directive(label: str | None) -> str:
+        """Actionable observation directive; never quotes a fallback label."""
+        if label and "@" not in label:
+            return f"segment(prompt='{label}', camera='agentview')"
+        return "segment the object in question (text prompt or point)"
 
     # ------------------------------------------------------------ events IO
 
@@ -309,8 +383,10 @@ class TransitionVerifier:
             return None
 
         # A new action while a verification is pending: the planner moved on
-        # without producing the requested evidence — record and clear.
-        if self._pending is not None:
+        # without producing the requested evidence — record and clear. Grip
+        # maintenance (closing set_gripper) is transparent: it answers no
+        # question but also does not advance the plan past one.
+        if self._pending is not None and not _is_grip_maintenance(name, kwargs):
             self._resolve_pending_overtaken(ph, by=name)
 
         pre = self._pre_state_summary()
@@ -374,7 +450,12 @@ class TransitionVerifier:
                     self.n_redundant_obs += 1
                 self._obj[label] = {"xyz": xyz, "step": self._step}
             elif self._pending and self._pending.get("wants") == "object_position":
-                return self._resolve_pending(ph, obs_xyz=None, obs_label=label)
+                # The directed observation ran but produced no position —
+                # a stall round only when it targeted the pending's object.
+                if _labels_related(self._pending.get("label"), label):
+                    return self._resolve_pending(
+                        ph, obs_xyz=None, obs_label=label
+                    )
             return self._maybe_resolve(ph)
         # view_driver_state: fresh proprioception for the cache
         st = payload.get("state") or {}
@@ -395,17 +476,45 @@ class TransitionVerifier:
         if not self._pending:
             return None
         if self._pending.get("wants") == "object_position":
-            label = self._pending.get("label") or self._last_label()
-            if label and label in self._obj:
-                rec = self._obj[label]
-                if rec["step"] > self._pending["open_step"]:
-                    self._pending["label"] = label  # adopt on first sighting
-                    return self._resolve_pending(ph, obs_xyz=rec["xyz"], obs_label=label)
+            label, rec = self._pending_target_record()
+            if rec is not None:
+                self._pending["label"] = label  # adopt on first sighting
+                return self._resolve_pending(ph, obs_xyz=rec["xyz"], obs_label=label)
             return None
         # wants == driver_state (set_gripper actuator check)
         if self._grip is not None and self._grip_step > self._pending["open_step"]:
             return self._resolve_pending(ph, obs_xyz=None, obs_label=None)
         return None
+
+    def _pending_target_record(
+        self,
+    ) -> tuple[str | None, dict[str, Any] | None]:
+        """Fresh (post-action) sighting of the object an open verification
+        asks about; ``(None, None)`` when nothing usable has arrived.
+
+        A semantically labeled pending resolves on its own label under any
+        wording (token match); an *unrelated* observation does not answer it.
+        A pending with no semantic label accepts the freshest sighting — the
+        directive told the planner which object to look at.
+        """
+        p = self._pending
+        if p is None:
+            return None, None
+        fresh = {
+            l: r for l, r in self._obj.items() if r["step"] > p["open_step"]
+        }
+        label = p.get("label")
+        if label and "@" not in label:
+            if label in fresh:
+                return label, fresh[label]
+            m = _match_label(label, fresh)
+            if m is not None:
+                return m, fresh[m]
+            return None, None
+        if fresh:
+            lbl = max(fresh, key=lambda l: fresh[l]["step"])
+            return lbl, fresh[lbl]
+        return None, None
 
     # ------------------------------------------------------------ actions
 
@@ -423,6 +532,8 @@ class TransitionVerifier:
         f = _fields_from_payload(payload or {})
 
         # set_gripper only counts as a PLACE attempt when opening
+        if payload is None and not is_error:
+            return None  # unparseable result — no state-transition question
         if name == "set_gripper":
             try:
                 g = float(kwargs.get("gripper", -1.0))
@@ -432,7 +543,7 @@ class TransitionVerifier:
                 return None  # closing actuation: no state-transition question
 
         if template == "GRASP":
-            return self._judge_grasp(name, ev, f, ph, is_error)
+            return self._judge_grasp(name, kwargs, ev, f, ph, is_error)
         if template == "PLACE":
             return self._judge_place(name, ev, f, ph, is_error)
         if template == "TRANSPORT":
@@ -444,6 +555,7 @@ class TransitionVerifier:
     def _judge_grasp(
         self,
         name: str,
+        kwargs: dict[str, Any],
         ev: dict[str, Any],
         f: dict[str, Any],
         ph: str,
@@ -535,7 +647,14 @@ class TransitionVerifier:
         # 0.001-0.019; successful episodes' picks reach 0.0010) — no
         # proprioceptive band separates them. Proprioception only grades
         # the hypothesis and can disprove (stayed open).
-        label = self._last_label()
+        # Object identity for the directed observation: the pick prompt's
+        # content words against cached perception labels (planners describe
+        # the same object differently across wordings), else the most recent
+        # real label. Never a point-observation fallback label.
+        label = (
+            _match_label(str(kwargs.get("prompt") or ""), self._obj)
+            or self._last_label(real_only=True)
+        )
         pre_pos = self._obj.get(label, {}).get("xyz") if label else None
         if mg is not None and mg <= FULLY_CLOSED_EPS:
             ev["evidence_for_failure"].append(
@@ -551,15 +670,13 @@ class TransitionVerifier:
             "object displacement: has the target left its original support "
             "and does it now move with the gripper?"
         )
-        directive = (
-            f"segment(prompt='{label}', camera='agentview')"
-            if label
-            else "segment the object you attempted to pick"
-        )
+        directive = self._segment_directive(label)
         directive += (
             " — if its position left the earlier spot and sits near the "
             "gripper, the hold is real; if it stayed put, the grasp did not "
-            "take."
+            "take. Closure width and lift cannot distinguish a real hold "
+            "from fingers closing on nothing, and firming the grip or moving "
+            "on does not answer this."
         )
         ev.update(
             verdict="UNCERTAIN",
@@ -637,15 +754,11 @@ class TransitionVerifier:
             )
         # Released at the actuator level; the object-level question (at rest
         # at the intended location, clear of the gripper) needs observation.
-        label = self._held or self._last_label()
+        label = self._held or self._last_label(real_only=True)
         wants = "object_position"
         if name == "set_gripper" and pg is None:
             wants = "driver_state"  # actuator confirmation first
-        directive = (
-            f"segment(prompt='{label}', camera='agentview')"
-            if label
-            else "segment the object that was held"
-        )
+        directive = self._segment_directive(label)
         directive += (
             " — confirm it now rests at the intended location and is clear "
             "of the gripper."
@@ -1223,6 +1336,7 @@ class TransitionVerifier:
             "n_confirmed_failure": self.n_failure,
             "n_uncertain": self.n_uncertain,
             "n_observe_directives": self.n_observe_directives,
+            "n_observe_obeyed": self.n_observe_obeyed,
             "n_reason_escalations": self.n_reason_escalations,
             "n_redundant_observations": self.n_redundant_obs,
             "false_positive_caught": self.false_positive_caught,

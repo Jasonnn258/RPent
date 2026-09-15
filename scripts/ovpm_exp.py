@@ -133,7 +133,7 @@ RUN_FIELDNAMES = [
     "reason_tokens_in", "reason_tokens_out",
     # B2 (state-transition verification) metrics — nested under "b2"
     "b2_n_success", "b2_n_failure", "b2_n_uncertain",
-    "b2_false_positive_caught", "b2_observe_directives",
+    "b2_false_positive_caught", "b2_observe_directives", "b2_observe_obeyed",
     "b2_reason_escalations", "b2_redundant_obs",
     "b2_commit_latency_mean", "b2_recovery_latency_mean",
 ]
@@ -294,6 +294,7 @@ def metric_fields(outdir):
         "b2_n_uncertain": b.get("n_uncertain", ""),
         "b2_false_positive_caught": b.get("false_positive_caught", ""),
         "b2_observe_directives": b.get("n_observe_directives", ""),
+        "b2_observe_obeyed": b.get("n_observe_obeyed", ""),
         "b2_reason_escalations": b.get("n_reason_escalations", ""),
         "b2_redundant_obs": b.get("n_redundant_observations", ""),
         "b2_commit_latency_mean": b.get("commit_latency_mean", ""),

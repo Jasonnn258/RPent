@@ -8,6 +8,10 @@ no model, no oracle — the same payloads the planner saw live.
 
 Usage:
   python scripts/replay_b2_offline.py <episode_dir> [<episode_dir> ...]
+
+An episode dir with a transcript_*.json (tool_use inputs + tool results)
+replays from the transcript; older dirs fall back to states.json
+command/result records.
 """
 from __future__ import annotations
 
@@ -49,8 +53,67 @@ class PhaseApprox:
             self.counts[name] = self.counts.get(name, 0) + 1
 
 
+def _first_json(text: str) -> str:
+    """Strip live-appended verdict lines ([b2]/[ovpm] injected AFTER the
+    result JSON) — the first JSON object is the raw tool result."""
+    try:
+        obj, _ = json.JSONDecoder().raw_decode(text.lstrip())
+        return json.dumps(obj)
+    except ValueError:
+        return text
+
+
+def transcript_stream(d: Path):
+    """(name, kwargs, result_text) stream from a transcript_*.json: assistant
+    tool_use inputs paired with the following role=tool results by call id."""
+    tpath = next(d.glob("transcript_*.json"))
+    t = json.loads(tpath.read_text())
+    pending: dict[str, tuple[str, dict]] = {}
+    for m in t.get("messages", []):
+        if m.get("role") == "assistant":
+            for b in m.get("content", []):
+                if isinstance(b, dict) and b.get("type") == "tool_use":
+                    pending[b.get("id")] = (
+                        b.get("name", ""), dict(b.get("input") or {}))
+        elif m.get("role") == "tool":
+            name = m.get("name") or ""
+            call = pending.pop(m.get("tool_call_id"), None)
+            kwargs = call[1] if call else {}
+            yield (call[0] if call else name), kwargs, _first_json(
+                str(m.get("content", "")))
+
+
+def replay_transcript(ep_dir: str) -> dict:
+    d = Path(ep_dir)
+    task = ""
+    m = d.name.split("_t")
+    task = m[1].split("_")[0] if len(m) > 1 else ""
+    ph = PhaseApprox()
+    v = TransitionVerifier(tracker=ph, task=task)
+    n_lines = 0
+    for name, kwargs, text in transcript_stream(d):
+        if not name:
+            continue
+        ph.on_call(name)
+        line = v.observe_result(name, kwargs, text, phase=ph.current_phase())
+        if line:
+            n_lines += 1
+            print(f"  [{name}] {line}")
+    snap = v.snapshot(success=False)
+    print(f"  metrics: S={snap['n_confirmed_success']} "
+          f"F={snap['n_confirmed_failure']} U={snap['n_uncertain']} "
+          f"fp_caught={snap['false_positive_caught']} "
+          f"observe={snap['n_observe_directives']} "
+          f"obeyed={snap['n_observe_obeyed']} "
+          f"reason={snap['n_reason_escalations']} lines={n_lines}")
+    print(f"  resolutions: {snap['uncertain_resolutions']}")
+    return snap
+
+
 def replay(ep_dir: str) -> dict:
     d = Path(ep_dir)
+    if next(d.glob("transcript_*.json"), None) is not None:
+        return replay_transcript(ep_dir)
     steps = json.loads((d / "states.json").read_text())
     segs = []
     segdir = d / "segments"

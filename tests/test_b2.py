@@ -199,6 +199,86 @@ def test_grasp_segment_not_found_escalates():
     assert line and "Reason explicitly" in line
 
 
+def test_smoke_pattern_firm_grip_then_reworded_segment_resolves():
+    """Exact smoke-run regression (2026-09-15 t0 s1 r1): pick with a natural-
+    language prompt, then set_gripper(firm grip) BEFORE the directed segment,
+    and the segment rewords the label ("... held in the gripper"). The firm
+    grip must not overtake; the reworded sighting must resolve CONFIRMED."""
+    v = verifier(phase="P_grasp")
+    # planner localized: plate, ramekin, then the target bowl by prompt, then
+    # two point-based segments (fallback labels).
+    v.observe_result("segment", {"prompt": "the white plate with the red rim"},
+                     seg("plate", (0.071, 0.108, 0.915)))
+    v.observe_result("segment", {"prompt": "the black patterned bowl"},
+                     seg("bowl", (-0.160, 0.266, 0.939)))
+    v.observe_result("segment", {"point": [620, 700]},
+                     seg("p1", (0.080, 0.072, 0.900)))
+    line = v.observe_result(
+        "pi0_pick", {"prompt": "grasp the upper right black bowl by the rim"},
+        result(success=True, min_gripper_opening=0.021,
+               final_gripper_opening=0.021, peak_lift_m=0.084,
+               libero_terminated=False),
+    )
+    # label came from token-matching the pick prompt, not the fallback labels
+    assert line and "the black patterned bowl" in line
+    assert "segment@" not in line
+    check_line_hygiene(line)
+    # firm grip: transparent — no overtake, no verdict of its own
+    firm = v.observe_result("set_gripper", {"gripper": 1},
+                            result(final_gripper_opening=0.021))
+    assert firm is None
+    assert v.uncertain_resolutions["overtaken"] == 0
+    assert v._pending is not None
+    # the directed observation, reworded
+    line = v.observe_result(
+        "segment", {"prompt": "the black patterned bowl held in the gripper"},
+        seg("bowl", (-0.262, -0.140, 0.931)),
+    )
+    assert line and "CONFIRMED" in line and "do not re-grasp" in line
+    check_line_hygiene(line)
+    assert v.uncertain_resolutions["resolved_success"] == 1
+    assert v.uncertain_resolutions["overtaken"] == 0
+    assert v.n_observe_obeyed == 1
+    assert v.false_positive_caught == 0
+
+
+def test_unrelated_observation_does_not_resolve_pending():
+    """Segmenting a different object while a labeled GRASP verification is
+    open neither resolves it nor consumes a stall round."""
+    v = verifier(phase="P_grasp")
+    v.observe_result("segment", {"prompt": "the black patterned bowl"},
+                     seg("bowl", (-0.160, 0.266, 0.939)))
+    v.observe_result(
+        "pi0_pick", {"prompt": "pick the black patterned bowl"},
+        result(success=True, min_gripper_opening=0.001,
+               final_gripper_opening=0.001, peak_lift_m=0.06,
+               libero_terminated=False),
+    )
+    line = v.observe_result("segment",
+                            {"prompt": "the white plate with the red rim"},
+                            seg("plate", (0.071, 0.108, 0.915)))
+    assert line is None
+    assert v._pending is not None
+    assert v._pending["rounds"] == 0
+    assert v.uncertain_resolutions["resolved_success"] == 0
+
+
+def test_directive_never_quotes_fallback_label():
+    """Only point-based observations on record: the directive goes generic
+    instead of instructing segment(prompt='segment@12')."""
+    v = verifier(phase="P_grasp")
+    v.observe_result("segment", {"point": [600, 740]},
+                     seg("p", (0.080, 0.072, 0.900)))
+    line = v.observe_result(
+        "pi0_pick", {"prompt": "pick the object"},
+        result(success=True, min_gripper_opening=0.001,
+               final_gripper_opening=0.001, peak_lift_m=0.06,
+               libero_terminated=False),
+    )
+    assert line and "segment@" not in line
+    assert "segment the object" in line
+
+
 # ------------------------------------------------------------------- PLACE
 
 def test_place_gripper_did_not_open_is_recover():
