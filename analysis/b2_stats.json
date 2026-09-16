@@ -1,0 +1,46 @@
+{
+  "dev2": {
+    "n_episodes": 90,
+    "SR_b2": "74/90 (82.2%)",
+    "false_success_episodes_b2": 0,
+    "fp_caught": 0,
+    "confirmed_success": 613,
+    "confirmed_failure": 33,
+    "uncertain": 134,
+    "observe_directives": 199,
+    "observe_obeyed": 98,
+    "obey_rate": "98/199 (49%)",
+    "reason_escalations": 30,
+    "redundant_obs": 0,
+    "uncertain_resolutions": {
+      "resolved_success": 2,
+      "resolved_failure": 1,
+      "resolved_reason": 30,
+      "overtaken": 100,
+      "unresolved": 1
+    },
+    "commit_latency_mean_of_means": 2.97,
+    "recovery_latency_mean_of_means": 2.38,
+    "same_tool_repeated": 0,
+    "n_picks_total": 131,
+    "metrics_sources": {
+      "structured_metrics": 86,
+      "transcript_replay": 4
+    },
+    "SR_armA": "72/90 (80.0%)",
+    "SR_armB": "77/90 (85.6%)",
+    "flips_vs_B1": {
+      "b2_win": 10,
+      "b2_loss": 13,
+      "tie": 67
+    },
+    "flips_vs_A": {
+      "b2_win": 15,
+      "b2_loss": 13,
+      "tie": 62
+    },
+    "false_success_episodes_armA": "0/62",
+    "false_success_episodes_armB": "0/61"
+  },
+  "_events_total": 1033
+}
