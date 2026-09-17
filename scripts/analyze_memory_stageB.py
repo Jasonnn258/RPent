@@ -356,6 +356,106 @@ def trigger_layer(events_by_ep, rows):
     return out
 
 
+# ------------------------------------------------------------ outcome layer
+def outcome_layer(events_by_ep):
+    """Per-event outcome proxies (post-hoc, semi-automated):
+
+    reFire     same trigger class re-fires within 3 turns -> recall did not
+               resolve the situation (memory wrong OR ignored — disambiguated
+               by adoption + ranking layers)
+    helped_c   followed a gold card AND no same-class re-fire AND episode
+               succeeded
+    harmful_c  followed a card AND a primitive is_error or a NEW failure
+               class appears within 2 turns (manual review flag)
+    Everything else neutral. Counts are candidates, verdicts manual.
+    """
+    out = {"helped_c": 0, "harmful_c": 0, "neutral": 0, "refire": 0}
+    for ep, events in events_by_ep.items():
+        succ = events[0].get("episode_result") if events else None
+        for i, e in enumerate(events):
+            refire = any(
+                abs(later["turn"] - e["turn"]) <= 3
+                and (later.get("trigger_reason") or "").startswith(
+                    e["trigger_reason"].split(":")[0])
+                for later in events[i + 1:])
+            out["refire"] += refire
+            followed = e.get("planner_followed_any_top3")
+            gold = e.get("gold_memory_ids")
+            if followed and gold and set(e["top3_memories"]) & set(gold) \
+                    and not refire and succ is True:
+                out["helped_c"] += 1
+            elif followed and refire:
+                out["harmful_c"] += 1  # acted on a card, situation worsened
+            else:
+                out["neutral"] += 1
+    return out
+
+
+# ----------------------------------------------------- failure decomposition
+def decompose(events_by_ep, rows):
+    """Eight-class per-episode decomposition (spec §8), priority order."""
+    counts = collections.Counter()
+    examples = collections.defaultdict(list)
+    row_by_dir = {r["dir"].rsplit("/", 1)[-1]: r for r in rows.values()}
+    for ep, events in events_by_ep.items():
+        r = row_by_dir.get(ep)
+        if r is None:
+            continue
+        if r["result"] == "success":
+            counts["SUCCESS"] += 1
+            continue
+        run_log = OVPM / ep / "run.log"
+        mom = should_retrieve_moments(run_log)
+        fired = bool(events)
+        gold_hits = any(
+            e.get("gold_memory_ids")
+            and set(e["top3_memories"]) & set(e["gold_memory_ids"])
+            for e in events)
+        followed = any(e.get("planner_followed_any_top3") for e in events)
+        if not mom and not fired:
+            cls = "EXECUTION_FAIL"
+        elif mom and not fired:
+            cls = "TRIGGER_MISS"
+        elif events and all(not e.get("gold_memory_ids")
+                            and e.get("gold_note") != "T7 phase_stalled: "
+                            "needs manual annotation" for e in events):
+            cls = "NO_RELEVANT_MEMORY"
+        elif not gold_hits and any(e.get("gold_memory_ids")
+                                   for e in events):
+            cls = "RETRIEVAL_WRONG"
+        elif gold_hits and not followed:
+            cls = "RETRIEVED_BUT_IGNORED"
+        elif gold_hits and followed:
+            cls = "MEMORY_WRONG"
+        else:
+            cls = "EXECUTION_FAIL"
+        counts[cls] += 1
+        if len(examples[cls]) < 5:
+            examples[cls].append(ep)
+    return dict(counts), dict(examples)
+
+
+def verdict(stats_pairs, cov, rank, adopt, decomp):
+    """Final call (spec §9) — printed, human confirms."""
+    trig_ok = cov.get("coverage") is not None and cov["coverage"] >= 0.5
+    rank_ok = (rank.get("relevant@3_rate") or 0) >= 0.4
+    lines = [
+        f"TRIGGER: coverage={cov.get('coverage')} "
+        f"(fires-without-should={cov.get('fires_without_should_signal')}) "
+        f"-> {'SUPPORTED' if trig_ok else 'NOT (yet) SUPPORTED'}",
+        f"RANKING: relevant@3={rank.get('relevant@3_rate')} "
+        f"-> {'SUPPORTED' if rank_ok else 'NOT (yet) SUPPORTED'}",
+        "Adoption bottleneck check (B3): followed_top1="
+        f"{adopt.get('followed_top1')}/{adopt.get('events')}, "
+        f"ignored={adopt.get('retrieved_but_ignored')}",
+        f"Decomposition: {decomp}",
+        "EXECUTABLE MEMORY NEXT: defer to the gate in the design doc "
+        "(gold-in-top3 high + adoption low + ignored-cards confirmed "
+        "applicable -> YES)",
+    ]
+    return "\n".join(lines)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gold", help="post-hoc gold annotation jsonl "
@@ -370,6 +470,8 @@ def main():
     adopt = adoption_layer(events)
     events = annotate_gold(events)
     rank = ranking_layer(events)
+    outc = outcome_layer(events)
+    decomp, examples = decompose(events, rows)
 
     print("== Task layer ==")
     print(json.dumps(stats, indent=2))
@@ -383,14 +485,24 @@ def main():
     print(json.dumps(adopt, indent=2))
     print("== Ranking layer (post-hoc gold) ==")
     print(json.dumps(rank, indent=2))
+    print("== Outcome layer (candidate proxies) ==")
+    print(json.dumps(outc, indent=2))
+    print("== Failure decomposition (episodes) ==")
+    print(json.dumps(decomp, indent=2))
+    for cls, eps in examples.items():
+        print(f"  {cls}: {', '.join(eps)}")
 
     if args.gold:
         print("(NOTE: --gold file override not implemented; auto annotation "
               "from trigger_reason used; T7 events need manual review)")
 
+    print("\n== VERDICT (auto-proposal; human confirms) ==")
+    print(verdict(pairs, cov, rank, adopt, decomp))
+
     out = REPO / "analysis" / "memory_stageB_results.json"
     json.dump({"task": stats, "pairs": pairs, "trigger": trig,
                "coverage": cov, "adoption": adopt, "ranking": rank,
+               "outcome": outc, "decomposition": decomp,
                "events": {ep: evs for ep, evs in events.items()}},
               open(out, "w"), indent=2, ensure_ascii=False)
     print("\nwrote", out)
