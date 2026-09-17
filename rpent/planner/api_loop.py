@@ -339,6 +339,9 @@ class ApiAgentLoop:
         # B2 (arm B2) — evidence-sufficient state-transition verification.
         # Runs alongside the tracker only; arms A/B never set its gate.
         b2_verifier = _new_b2_verifier(tracker)
+        # Stage B1 (arms memB2/memB3) — decision-point long-term memory
+        # recall. Soft context injection only; gated by RPENT_MEMORY_TRIGGER.
+        memory_recall = _new_memory_recall(tracker)
         # Arm C — event-triggered reasoning: COMMIT turns run on a constrained
         # agent (trimmed instructions, action tools only, pruned history);
         # every other turn runs the full REASON agent. Requires arm B.
@@ -374,6 +377,7 @@ class ApiAgentLoop:
             messages=messages,
             max_turns=max_turns,
             phase_tracker=tracker,
+            memory_recall=memory_recall,
         )
         last_error: str | None = None
         quit_requested = False
@@ -561,6 +565,25 @@ class ApiAgentLoop:
                                             if block
                                             else hint2
                                         )
+                                # Stage B1: decision-point memory recall.
+                                # Rides the same throttled injection path.
+                                if memory_recall is not None:
+                                    try:
+                                        fired = memory_recall.turn_boundary(
+                                            total_steps
+                                        )
+                                    except Exception as e:  # noqa: BLE001
+                                        fired = None
+                                        logger.warning(
+                                            "[memrecall] boundary failed: %s", e
+                                        )
+                                    if fired is not None:
+                                        mblock, _event = fired
+                                        block = (
+                                            f"{block}\n\n{mblock}"
+                                            if block
+                                            else mblock
+                                        )
                                 if block is not None:
                                     if dual_route or reason_mode:
                                         # run.enqueue dies with the run on
@@ -670,6 +693,14 @@ class ApiAgentLoop:
                 mode_tokens=mode_tokens if reason_mode else None,
                 b2_verifier=b2_verifier,
             )
+        if memory_recall is not None:
+            try:
+                memory_recall.finalize(
+                    success=(observer.finish_result or {}).get("status")
+                    == "success"
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning("[memrecall] finalize failed: %s", e)
 
         return PlannerResult(
             finish_result=observer.finish_result,
@@ -820,6 +851,8 @@ class _ApiRunObserver:
     # Structured Global Memory v1 — set by _solve when the gate is on. The
     # tracker is fed the exact same tool stream the observer already sees.
     phase_tracker: Any = None
+    # Stage B1 decision-point memory recall — same stream, same pattern.
+    memory_recall: Any = None
     # Usage accumulation across graph runs. Each ``agent.iter`` starts a fresh
     # per-run ``RunUsage`` (new run_id, no inheritance from message_history);
     # in dual-route the planner restarts the graph after every model turn, so
@@ -897,6 +930,14 @@ class _ApiRunObserver:
                 self.phase_tracker.on_tool_result(
                     part.tool_name, str(message.get("content", "")), is_error
                 )
+            if self.memory_recall is not None:
+                try:
+                    self.memory_recall.on_tool_result(
+                        part.tool_name, str(message.get("content", "")),
+                        is_error,
+                    )
+                except Exception as e:  # noqa: BLE001 - never break the run
+                    logger.warning("[memrecall] observe failed: %s", e)
             self.dashboard_events.emit(
                 TranscriptEvent(
                     {
@@ -998,6 +1039,22 @@ def _new_b2_verifier(tracker: Any) -> Any:
     task = detect_task()
     logger.info("[b2] state-transition verification ON — task=%s", task)
     return TransitionVerifier(tracker=tracker, task=task)
+
+
+def _new_memory_recall(tracker: Any) -> Any:
+    """Build the DecisionMemory recall component when the gate is on.
+
+    Gate: ``RPENT_MEMORY_TRIGGER=1`` (Stage B1 arms memB2/memB3). Requires
+    the Structured Memory tracker for the phase signal. Rank method comes
+    from ``RPENT_MEMORY_RANK`` (Q0_FIXED | Q3) — both frozen Stage A ports.
+    """
+    if os.environ.get("RPENT_MEMORY_TRIGGER") != "1" or tracker is None:
+        return None
+    from rpent.memory.retrieval import DecisionMemory
+
+    rank = os.environ.get("RPENT_MEMORY_RANK", "Q0_FIXED")
+    logger.info("[memrecall] decision-point memory recall ON — rank=%s", rank)
+    return DecisionMemory(tracker)
 
 
 def _write_structured_metrics(

@@ -401,8 +401,17 @@ ALGORITHM (run this BEFORE manipulating):
 directly comparable. Do NOT blindly average them — accept wrist coords only when
 consistent with the agentview anchor, or for basket/cavity geometry.)"""
 
-WORKFLOW_STEPS = (
-    """READ MEMORY FIRST — a general skill library (operating wisdom, magic numbers,
+def _memory_workflow_step() -> str:
+    """Workflow step 0 — the memory-library browse instruction.
+
+    Default is the historical wording verbatim (its paths do NOT exist on
+    disk — the Q0-audited ACCESS bug — kept so arm A / B0 behavior is
+    unchanged). ``RPENT_MEMORY_ACCESS_FIX=1`` (Stage B1 arm memB1+) rewrites
+    the paths to the real layered layout synced from the HF dataset.
+    """
+    import os
+
+    base = """READ MEMORY FIRST — a general skill library (operating wisdom, magic numbers,
 gotchas, and reusable manipulation patterns), indexed by:
   `resources/libero/memory/MEMORY.md`
 Scan the index, then `read_text_file` the few leaf memories most relevant to
@@ -426,7 +435,35 @@ commands, this memory gives the reasoning and failure-modes needed to adapt them
 so you must consult the memory too, not skip straight to replaying the recipe. In
 your final `strategy_notes`, RECORD the exact memory file name(s) you read (or
 state "no matching task memory found") so memory consultation is auditable.
-""",
+"""
+    if os.environ.get("RPENT_MEMORY_ACCESS_FIX") != "1":
+        return base
+    return (
+        base.replace(
+            "  `resources/libero/memory/MEMORY.md`\n"
+            "Scan the index, then `read_text_file` the few leaf memories most relevant to\n"
+            "your cell.",
+            "  `resources/libero/MEMORY.md`\n"
+            "The library is layered: `resources/libero/global/` holds general skill\n"
+            "cards, `resources/libero/suite/` per-suite pages, `resources/libero/task_only/`\n"
+            "per-task evidence. Scan the index, then `read_text_file` the few leaf\n"
+            "memories most relevant to your cell.",
+        )
+        .replace(
+            "`list_dir` `resources/libero/memory/` to see every\n"
+            "memory file,",
+            "`list_dir` `resources/libero/global/` and the `suite/`\n"
+            "page for your suite to see the memory files,",
+        )
+        .replace(
+            "resources/libero/memory/` jumps straight to the files",
+            "resources/libero/` jumps straight to the files",
+        )
+    )
+
+
+WORKFLOW_STEPS = (
+    _memory_workflow_step(),
     """READ THE GUIDES (the PERCEPTION-compatible guides — NOT hidden benchmark
 internals, which would tempt you to use GT coords) once each:
 - `robots/libero/guides/strict_hybrid_guide.md`

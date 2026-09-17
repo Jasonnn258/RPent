@@ -12,6 +12,10 @@ arms comparable and strictly paired by (task, seed, repeat)):
   dev2     armB2 (A+RPENT_OVPM2, B2 state-transition verification) x
            t0/t7/t9 x s1-10 x r1-3                             (90 ep)
   stage1   armA+armB+armB2 x t2/t3/t5 x s1-10 x r1             (90 ep)
+  memB     memB1/memB2/memB3 x t3/t5/t9 x s1-10 x r1           (90 ep)
+           Stage B1 decision-point memory study (tier glm-5.3-flash).
+           B0: t3/t5 reuse the 09-15/16 armA stage1 rows; t9 supplement
+           runs --conds memB0 --tasks 9 (10 ep).
   smoke    --conds/--tasks/--seeds/--repeats overrides for one-off checks
 
 Everything vanilla/GLM/osmesa differs from the kimi-era scripts:
@@ -105,6 +109,23 @@ COND_ENV = {
     # RPENT_OVPM gate; the SM1 tracker stays on for phase-context logging).
     "armB2": {"RPENT_STRUCTURED_MEMORY": "1",
               "RPENT_OVPM2": "1"},
+    # Stage B1 (2026-09-17): decision-point long-term memory retrieval.
+    # memB0 = historical armA behavior (t9-only supplement — the t3/t5 B0
+    # rows reuse the 2026-09-15/16 armA stage1 batch, same code+config).
+    "memB0": {"RPENT_STRUCTURED_MEMORY": "1"},
+    # memB1 = access fix only (real layered memory paths in WORKFLOW step 0).
+    "memB1": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1"},
+    # memB2 = + decision-time trigger + Q0-fixed lexical ranking (frozen).
+    "memB2": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "1",
+              "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    # memB3 = same trigger, Q3 structured ranking (frozen Stage A port).
+    "memB3": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "1",
+              "RPENT_MEMORY_RANK": "Q3"},
 }
 
 DEV_TASKS = [0, 7, 9]
@@ -113,6 +134,12 @@ HELDOUT_TASKS = [1, 4, 8]
 # t6 fully reserved; t2/t3/t5 have no A/B1 rows — Stage 1 runs all three
 # arms fresh on them).
 B2_NEW_TASKS = [2, 3, 5]
+# Stage B1 tasks (memory-relevant, from the Stage A decision-point dataset):
+# t3 = all five YES classes (predicate/grasp/pick/recovery/perception),
+# t5 = predicate timing + pick verification,
+# t9 = perception-heavy (diagnostic subset: offline Recall=0 expected to
+# reproduce online; no new features added to probe it).
+MEMB_TASKS = [3, 5, 9]
 P0_SUITE = "libero_spatial_task"
 
 RUN_FIELDNAMES = [
@@ -136,6 +163,8 @@ RUN_FIELDNAMES = [
     "b2_false_positive_caught", "b2_observe_directives", "b2_observe_obeyed",
     "b2_reason_escalations", "b2_redundant_obs",
     "b2_commit_latency_mean", "b2_recovery_latency_mean",
+    # Stage B1 (decision-point memory recall) — from memory_events.jsonl
+    "mem_triggers", "mem_latency_mean_ms", "mem_top1s",
 ]
 
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -177,7 +206,9 @@ def base_env():
     env["no_proxy"] = (env.get("no_proxy") and
                        f"{env['no_proxy']},{loopback}") or loopback
     env["NO_PROXY"] = env["no_proxy"]
-    # 3) repo path (old scripts hardcode the /vla_test bind)
+    # 3) Stage B1 memB3 embeds queries with a local bge-small encoder —
+    #    the hub is reachable only via the mirror through this proxy.
+    env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     return env
 
 
@@ -299,6 +330,34 @@ def metric_fields(outdir):
         "b2_redundant_obs": b.get("n_redundant_observations", ""),
         "b2_commit_latency_mean": b.get("commit_latency_mean", ""),
         "b2_recovery_latency_mean": b.get("recovery_latency_mean", ""),
+        # Stage B1 memory recall (empty for non-memB arms — file absent)
+        **_mem_recall_fields(outdir),
+    }
+
+
+def _mem_recall_fields(outdir):
+    """memory_events.jsonl -> CSV columns; {} when the file is absent."""
+    p = os.path.join(outdir, "memory_events.jsonl")
+    if not os.path.exists(p):
+        return {}
+    events = []
+    try:
+        with open(p) as f:
+            for line in f:
+                if line.strip():
+                    events.append(json.loads(line))
+    except Exception:
+        return {}
+    if not events:
+        return {"mem_triggers": 0, "mem_latency_mean_ms": "",
+                "mem_top1s": "[]"}
+    lats = [e.get("retrieval_latency_ms") for e in events
+            if isinstance(e.get("retrieval_latency_ms"), (int, float))]
+    return {
+        "mem_triggers": len(events),
+        "mem_latency_mean_ms": round(sum(lats) / len(lats), 1) if lats else "",
+        "mem_top1s": json.dumps([e.get("top1_memory") for e in events],
+                                ensure_ascii=False),
     }
 
 
@@ -392,6 +451,14 @@ def build_episodes(args, done):
         # have no prior A/B1 rows — Stage 1 runs them fresh for comparability).
         conds = conds or ["armA", "armB", "armB2"]
         tasks = tasks or B2_NEW_TASKS
+        repeats = repeats or [1]
+    elif args.stage == "memB":
+        # Stage B1: access-fix / +trigger+lexical / +trigger+Q3 over the
+        # three memory-relevant tasks; B0 = matched historical armA rows
+        # (t3/t5 from the 2026-09-15/16 stage1 batch) + a fresh memB0
+        # supplement on t9 (the old t9 batch predates --max-tokens 24576).
+        conds = conds or ["memB1", "memB2", "memB3"]
+        tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
     else:  # smoke
         conds = conds or ["vanilla", "armA", "armB"]
@@ -498,7 +565,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
-                             "stage1", "smoke"])
+                             "stage1", "memB", "smoke"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")
