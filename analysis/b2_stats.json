@@ -42,5 +42,48 @@
     "false_success_episodes_armA": "0/62",
     "false_success_episodes_armB": "0/61"
   },
-  "_events_total": 1033
+  "stage1": {
+    "n_episodes": 30,
+    "SR_b2": "26/30 (86.7%)",
+    "false_success_episodes_b2": 0,
+    "fp_caught": 0,
+    "confirmed_success": 154,
+    "confirmed_failure": 17,
+    "uncertain": 46,
+    "observe_directives": 61,
+    "observe_obeyed": 24,
+    "obey_rate": "24/61 (39%)",
+    "reason_escalations": 8,
+    "redundant_obs": 0,
+    "uncertain_resolutions": {
+      "resolved_success": 1,
+      "resolved_failure": 0,
+      "resolved_reason": 8,
+      "overtaken": 35,
+      "unresolved": 2
+    },
+    "commit_latency_mean_of_means": 2.46,
+    "recovery_latency_mean_of_means": 1.57,
+    "same_tool_repeated": 0,
+    "n_picks_total": 48,
+    "metrics_sources": {
+      "structured_metrics": 28,
+      "transcript_replay": 2
+    },
+    "SR_armA": "27/30 (90.0%)",
+    "SR_armB": "26/30 (86.7%)",
+    "flips_vs_B1": {
+      "b2_win": 1,
+      "b2_loss": 1,
+      "tie": 28
+    },
+    "flips_vs_A": {
+      "b2_win": 2,
+      "b2_loss": 3,
+      "tie": 25
+    },
+    "false_success_episodes_armA": "0/25",
+    "false_success_episodes_armB": "0/26"
+  },
+  "_events_total": 1341
 }
