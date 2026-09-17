@@ -1,0 +1,117 @@
+{
+  "trigger_q0_observed": {
+    "trigger_recall_yes": 0.0,
+    "trigger_recall_yes_slack3": 0.0,
+    "unnecessary_rate_no": 0.0,
+    "triggered_total": 0,
+    "trigger_precision": null,
+    "per_class_triggered": {
+      "predicate_timing": "0/30",
+      "pick_verify": "0/36",
+      "grasp": "0/7",
+      "recovery": "0/30",
+      "perception": "0/17"
+    },
+    "episodes": 102,
+    "eps_with_reads": 102,
+    "reads_before_first_action": 102,
+    "last_read_turn_hist": {
+      "3": 24,
+      "5": 6,
+      "4": 17,
+      "9": 10,
+      "11": 4,
+      "12": 3,
+      "6": 10,
+      "7": 8,
+      "0": 4,
+      "8": 6,
+      "13": 4,
+      "10": 4,
+      "1": 1,
+      "15": 1
+    }
+  },
+  "ranking": {
+    "Q0-fixed": {
+      "Recall@1": 0.0,
+      "Recall@3": 0.4,
+      "Recall@5": 0.7,
+      "MRR": 0.24361111111111083,
+      "irrelevant@3": 0.5972222222222219,
+      "applicable@1": 0.44166666666666665,
+      "applicable@3": 1.0,
+      "candidate_fail": 0.0,
+      "rank_fail": 0.3,
+      "hn_violation@3": 1.0,
+      "latency_ms": 0.7471978664398193,
+      "recall@3_by_class": {
+        "predicate_timing": "30/30",
+        "pick_verify": "0/36",
+        "grasp": "0/7",
+        "recovery": "18/30",
+        "perception": "0/17"
+      }
+    },
+    "Q1-semantic": {
+      "Recall@1": 0.30833333333333335,
+      "Recall@3": 0.4583333333333333,
+      "Recall@5": 0.5666666666666667,
+      "MRR": 0.3834722222222225,
+      "irrelevant@3": 0.7333333333333338,
+      "applicable@1": 0.30833333333333335,
+      "applicable@3": 0.5,
+      "candidate_fail": 0.0,
+      "rank_fail": 0.43333333333333335,
+      "hn_violation@3": 0.0,
+      "latency_ms": 1.3112068176269531,
+      "recall@3_by_class": {
+        "predicate_timing": "9/30",
+        "pick_verify": "36/36",
+        "grasp": "0/7",
+        "recovery": "10/30",
+        "perception": "0/17"
+      }
+    },
+    "Q2-phase": {
+      "Recall@1": 0.30833333333333335,
+      "Recall@3": 0.525,
+      "Recall@5": 0.725,
+      "MRR": 0.43708333333333355,
+      "irrelevant@3": 0.6916666666666668,
+      "applicable@1": 0.30833333333333335,
+      "applicable@3": 0.6,
+      "candidate_fail": 0.15,
+      "rank_fail": 0.125,
+      "hn_violation@3": 0.21428571428571427,
+      "latency_ms": 0.6462554136912028,
+      "recall@3_by_class": {
+        "predicate_timing": "18/30",
+        "pick_verify": "35/36",
+        "grasp": "0/7",
+        "recovery": "10/30",
+        "perception": "0/17"
+      }
+    },
+    "Q3-structured": {
+      "Recall@1": 0.475,
+      "Recall@3": 0.5916666666666667,
+      "Recall@5": 0.775,
+      "MRR": 0.551944444444445,
+      "irrelevant@3": 0.7805555555555557,
+      "applicable@1": 0.475,
+      "applicable@3": 0.5916666666666667,
+      "candidate_fail": 0.14166666666666666,
+      "rank_fail": 0.08333333333333333,
+      "hn_violation@3": 1.0,
+      "latency_ms": 1.453693707784017,
+      "recall@3_by_class": {
+        "predicate_timing": "30/30",
+        "pick_verify": "14/36",
+        "grasp": "7/7",
+        "recovery": "20/30",
+        "perception": "0/17"
+      }
+    }
+  }
+}
