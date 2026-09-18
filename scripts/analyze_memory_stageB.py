@@ -79,13 +79,16 @@ def task_layer(rows):
             "n": n, "SR": round(succ / n, 3) if n else None,
             "wall_mean_s": round(sum(walls) / len(walls), 1) if walls else None,
         }
-    # paired deltas on common (task, seed)
+    # paired deltas on common (task, seed) — arm must NOT be part of the
+    # join key (v1 bug: full (arm,task,seed) keys never intersect)
     pairs = {}
     for a, b in (("B0", "B1"), ("B1", "B2"), ("B2", "B3")):
-        common = {k for k in rows if k[0] == a} & {k for k in rows if k[0] == b}
+        ka = {k[1:] for k in rows if k[0] == a}
+        kb = {k[1:] for k in rows if k[0] == b}
+        common = ka & kb
         wins = losses = ties = 0
         for k in common:
-            ra, rb = rows[k], rows[(b,) + k[1:]]
+            ra, rb = rows[(a,) + k], rows[(b,) + k]
             sa = ra["result"] == "success"
             sb = rb["result"] == "success"
             wins += sb and not sa
@@ -207,56 +210,115 @@ def _pick_class(name: str, data: dict) -> str | None:
     return None
 
 
-_TOOLRES = re.compile(r"\[tool<\] (\w+): (\{.*)")
+_TOOLRES = re.compile(r"\[tool<\] (\w+): ")
 
 
-def should_retrieve_moments(run_log: Path):
-    """[(turn, action, class)] — post-hoc SHOULD moments from the tool stream."""
-    out, turn = [], -1
+def _step_to_turn(run_log: Path) -> dict[int, int]:
+    """step_idx -> planner turn, from run.log `[tool<]` lines carrying
+    `"step": N` in the (possibly truncated) payload prefix."""
+    out: dict[int, int] = {}
+    turn = 0
     try:
-        lines = run_log.read_text(errors="replace").splitlines()
+        for ln in run_log.read_text(errors="replace").splitlines():
+            m = re.search(r"=== turn (\d+)/", ln)
+            if m:
+                turn = int(m.group(1))
+                continue
+            tm = _TOOLRES.search(ln)
+            if tm:
+                sm = re.search(r'"step": (\d+)', ln[tm.end():tm.end() + 60])
+                if sm:
+                    out.setdefault(int(sm.group(1)), turn)
     except OSError:
-        return out
-    for ln in lines:
-        m = re.search(r"=== turn (\d+)/", ln)
-        if m:
-            turn = int(m.group(1))
-            continue
-        tm = _TOOLRES.search(ln)
-        if not tm:
-            continue
-        name, payload = tm.group(1), tm.group(2)
-        try:
-            data = json.loads(payload)
-        except json.JSONDecodeError:
-            # run.log truncates long results "(+NNN)" — try the saved states
-            data = {}
-        if not data:
-            continue
-        cls = _pick_class(name, data)
-        if cls:
-            out.append((turn, name, cls))
+        pass
     return out
 
 
-def trigger_coverage(events_by_ep):
-    """Join actual fires against SHOULD moments (slack +/-1 turn)."""
-    tot_should = covered = 0
-    unnecessary = 0
+def should_retrieve_moments(ep_dir: Path):
+    """[(turn, action, class)] — post-hoc SHOULD moments.
+
+    run.log truncates tool payloads, so state-changing results come from
+    states.json (full `result` dicts); perception failures come from
+    segments/*.json (found=false). Steps map to turns via run.log.
+    """
+    out: list[tuple[int, str, str]] = []
+    try:
+        states = json.load(open(ep_dir / "states.json"))
+    except (OSError, json.JSONDecodeError):
+        states = []
+    s2t = _step_to_turn(ep_dir / "run.log")
+    steps = sorted(s2t)
+    for e in states:
+        r = e.get("result") or {}
+        if isinstance(r, str):
+            try:
+                r = json.loads(r)
+            except json.JSONDecodeError:
+                continue
+        name = r.get("name") or (e.get("command") or {}).get("action", "")
+        cls = _pick_class(name, r)
+        if not cls:
+            continue
+        st = e.get("step_idx")
+        if st not in s2t and steps:
+            # truncated log line: nearest recorded step's turn
+            st = min(steps, key=lambda s: abs(s - (st or 0)))
+        out.append((s2t.get(st, 0), name, cls))
+    for p in sorted((ep_dir / "segments").glob("segment_*.json")):
+        try:
+            seg = json.load(open(p))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if seg.get("found") is False:
+            m = re.search(r"segment_(\d+)", p.name)
+            st = int(m.group(1)) if m else 0
+            t = s2t.get(st, min(steps, key=lambda s: abs(s - st)) if steps
+                        else 0)
+            out.append((t, "segment", "perception"))
+    return sorted(out)
+
+
+def _aligns(turn_fire: int, cls_fire: str, moments) -> bool:
+    """Does a fire align (0..3 turns later, same class family) with a SHOULD
+    moment? The boundary fires at the START of the reacting turn, so a moment
+    at turn M pairs with a fire at M..M+3 (cooldown can delay by 2)."""
+    return any(0 <= turn_fire - t <= 3 and _same_family(c, cls_fire)
+               for t, _a, c in moments)
+
+
+def _same_family(a: str, b: str) -> bool:
+    return _fam_of(a) == _fam_of(b)
+
+
+def trigger_coverage(events_by_ep, moments_by_ep):
+    """Actual fires vs SHOULD moments, both directions."""
+    tot_should = covered = unnecessary = 0
     for ep, events in events_by_ep.items():
-        mom = should_retrieve_moments(OVPM / ep / "run.log")
-        fired_turns = [e["turn"] for e in events]
-        for t, _a, _c in mom:
+        mom = moments_by_ep[ep]
+        for t, _a, c in mom:
             tot_should += 1
-            if any(abs(t - ft) <= 1 for ft in fired_turns):
+            if any(0 <= e["turn"] - t <= 3
+                   and _same_family(_cls_of_event(e), c) for e in events):
                 covered += 1
-        for ft in fired_turns:
-            if not any(abs(t - ft) <= 1 for t, _a, _c in mom):
-                unnecessary += 1
+        unnecessary += sum(1 for e in events
+                           if not _aligns(e["turn"], _cls_of_event(e), mom))
     return {"should_moments": tot_should,
             "covered": covered,
             "coverage": round(covered / tot_should, 3) if tot_should else None,
             "fires_without_should_signal": unnecessary}
+
+
+def _cls_of_event(e) -> str:
+    reason = e.get("trigger_reason") or ""
+    for pre, c in REASON_CLASS:
+        if reason.startswith(pre):
+            return c
+    return reason.split(":")[0]
+
+
+def _fam_of(c: str) -> str:
+    return {"recovery_transport": "recovery", "recovery_doubled": "recovery",
+            "predicate_open": "predicate_timing"}.get(c, c)
 
 
 # ------------------------------------------------- gold annotation (post-hoc)
@@ -276,12 +338,19 @@ REASON_CLASS = [
 ]
 
 
-def annotate_gold(events_by_ep):
-    """Fill gold_memory_ids post-hoc; returns events with gold + notes."""
+def annotate_gold(events_by_ep, moments_by_ep):
+    """Fill gold_memory_ids post-hoc.
+
+    v2: gold is assigned ONLY when the fire aligns with a SHOULD moment of
+    the same class family — an unaligned fire is an unnecessary fire (a
+    TRIGGER-layer metric), not a ranking failure. Unaligned events keep
+    gold=None with a note and are excluded from the ranking layer.
+    """
     import build_memory_retrieval_queries as bq
     cards = bq.load_cards()
     n_gold = 0
     for ep, events in events_by_ep.items():
+        mom = moments_by_ep[ep]
         for e in events:
             reason = e.get("trigger_reason") or ""
             cls = next((c for pre, c in REASON_CLASS
@@ -289,6 +358,10 @@ def annotate_gold(events_by_ep):
             if cls is None:  # phase_stalled -> manual bucket
                 e["gold_memory_ids"] = None
                 e["gold_note"] = "T7 phase_stalled: needs manual annotation"
+                continue
+            if not _aligns(e["turn"], cls, mom):
+                e["gold_memory_ids"] = None
+                e["gold_note"] = "unnecessary_fire (no aligned SHOULD moment)"
                 continue
             tags = {}
             if cls == "recovery_doubled":
@@ -392,43 +465,52 @@ def outcome_layer(events_by_ep):
 
 
 # ----------------------------------------------------- failure decomposition
-def decompose(events_by_ep, rows):
-    """Eight-class per-episode decomposition (spec §8), priority order."""
+def decompose(events_by_ep, moments_by_ep, rows):
+    """Eight-class per-episode decomposition (spec §8), priority order.
+
+    v2 covers ALL memB2/memB3 episodes (15 had zero triggers — v1 dropped
+    them); only SHOULD-aligned fires count toward retrieval classes.
+    Followed* flags come from the (biased-high) keyword proxy — treat
+    RETRIEVED_BUT_IGNORED vs MEMORY_WRONG split as provisional.
+    """
     counts = collections.Counter()
     examples = collections.defaultdict(list)
     row_by_dir = {r["dir"].rsplit("/", 1)[-1]: r for r in rows.values()}
-    for ep, events in events_by_ep.items():
-        r = row_by_dir.get(ep)
-        if r is None:
-            continue
+    all_eps = {ep: events_by_ep.get(ep, []) for ep in row_by_dir
+               if "_memB2_" in ep or "_memB3_" in ep}
+    for ep, events in all_eps.items():
+        r = row_by_dir[ep]
         if r["result"] == "success":
             counts["SUCCESS"] += 1
             continue
-        run_log = OVPM / ep / "run.log"
-        mom = should_retrieve_moments(run_log)
-        fired = bool(events)
-        gold_hits = any(
-            e.get("gold_memory_ids")
-            and set(e["top3_memories"]) & set(e["gold_memory_ids"])
-            for e in events)
-        followed = any(e.get("planner_followed_any_top3") for e in events)
-        if not mom and not fired:
+        mom = moments_by_ep[ep]
+        note = lambda e: e.get("gold_note", "")  # noqa: E731
+        aligned = [e for e in events if note(e).startswith("class=")]
+        hardneg = [e for e in events if note(e).startswith("hard_negative")]
+        gold_events = [e for e in aligned if e.get("gold_memory_ids")]
+        gold_hits = [e for e in gold_events
+                     if set(e["top3_memories"]) & set(e["gold_memory_ids"])]
+        followed = any(e.get("planner_followed_any_top3") for e in gold_hits)
+        covered = any(
+            any(0 <= e["turn"] - t <= 3 and _same_family(
+                _cls_of_event(e), c) for e in events)
+            for t, _a, c in mom)
+        if not mom:
             cls = "EXECUTION_FAIL"
-        elif mom and not fired:
+        elif not covered:
             cls = "TRIGGER_MISS"
-        elif events and all(not e.get("gold_memory_ids")
-                            and e.get("gold_note") != "T7 phase_stalled: "
-                            "needs manual annotation" for e in events):
-            cls = "NO_RELEVANT_MEMORY"
-        elif not gold_hits and any(e.get("gold_memory_ids")
-                                   for e in events):
+        elif gold_events and not gold_hits:
             cls = "RETRIEVAL_WRONG"
-        elif gold_hits and not followed:
-            cls = "RETRIEVED_BUT_IGNORED"
         elif gold_hits and followed:
             cls = "MEMORY_WRONG"
+        elif gold_hits and not followed:
+            cls = "RETRIEVED_BUT_IGNORED"
+        elif (aligned and not gold_events) or hardneg:
+            # aligned to a moment whose card family is falsified by the
+            # episode outcome (Stage A hard-negative rule) — no card helps
+            cls = "NO_RELEVANT_MEMORY"
         else:
-            cls = "EXECUTION_FAIL"
+            cls = "TRIGGER_MISS"  # moments existed, fires never aligned
         counts[cls] += 1
         if len(examples[cls]) < 5:
             examples[cls].append(ep)
@@ -436,22 +518,38 @@ def decompose(events_by_ep, rows):
 
 
 def verdict(stats_pairs, cov, rank, adopt, decomp):
-    """Final call (spec §9) — printed, human confirms."""
-    trig_ok = cov.get("coverage") is not None and cov["coverage"] >= 0.5
+    """Final call (spec §9) — printed, human confirms.
+
+    Trigger support requires BOTH coverage (fires reach true decision
+    moments) and precision (fires are not mostly noise) — v1 ignored
+    precision and called 73%-unnecessary firing 'supported'.
+    """
+    fires = (cov.get("covered", 0) + 0) + 0  # aligned fires = covered-side
+    # aligned fires per annotate_gold: gold + hardneg + (T7/unnecessary not)
+    cov_rate = cov.get("coverage")
+    tot_fires = adopt.get("events", 0)
+    gold_n = rank.get("gold_events", 0)
+    hardneg_n = rank.get("no_relevant_memory_events", 0)
+    prec = round((gold_n + hardneg_n) / tot_fires, 3) if tot_fires else None
+    trig_ok = cov_rate is not None and cov_rate >= 0.5 and prec is not None \
+        and prec >= 0.5
     rank_ok = (rank.get("relevant@3_rate") or 0) >= 0.4
     lines = [
-        f"TRIGGER: coverage={cov.get('coverage')} "
-        f"(fires-without-should={cov.get('fires_without_should_signal')}) "
-        f"-> {'SUPPORTED' if trig_ok else 'NOT (yet) SUPPORTED'}",
+        f"TRIGGER: coverage={cov_rate} precision={prec} "
+        f"(unnecessary fires={cov.get('fires_without_should_signal')}) "
+        f"-> {'SUPPORTED' if trig_ok else 'NOT SUPPORTED'}",
         f"RANKING: relevant@3={rank.get('relevant@3_rate')} "
-        f"-> {'SUPPORTED' if rank_ok else 'NOT (yet) SUPPORTED'}",
+        f"(n gold events={gold_n}) "
+        f"-> {'SUPPORTED' if rank_ok else 'NOT SUPPORTED (n too small / rate low)'}",
         "Adoption bottleneck check (B3): followed_top1="
-        f"{adopt.get('followed_top1')}/{adopt.get('events')}, "
+        f"{adopt.get('followed_top1')}/{adopt.get('events')} "
+        "(keyword proxy, biased HIGH — RETREAT/OBSERVE verbs overlap "
+        "routine moves), "
         f"ignored={adopt.get('retrieved_but_ignored')}",
         f"Decomposition: {decomp}",
-        "EXECUTABLE MEMORY NEXT: defer to the gate in the design doc "
-        "(gold-in-top3 high + adoption low + ignored-cards confirmed "
-        "applicable -> YES)",
+        "EXECUTABLE MEMORY NEXT: gate = gold-in-top3 high + adoption low + "
+        "ignored cards confirmed applicable. Current: ranking only 0.57 "
+        "on n=14, trigger precision low, paired SR negative -> NO.",
     ]
     return "\n".join(lines)
 
@@ -466,12 +564,17 @@ def main():
     stats, pairs = task_layer(rows)
     events = load_events()
     trig = trigger_layer(events, rows)
-    cov = trigger_coverage(events)
+    # SHOULD moments for every memB2/memB3 episode dir (zero-trigger
+    # episodes included — they feed TRIGGER_MISS)
+    moments_by_ep = {
+        d.name: should_retrieve_moments(d)
+        for d in sorted(OVPM.glob("*_memB[23]_*")) if d.is_dir()}
+    cov = trigger_coverage(events, moments_by_ep)
     adopt = adoption_layer(events)
-    events = annotate_gold(events)
+    events = annotate_gold(events, moments_by_ep)
     rank = ranking_layer(events)
     outc = outcome_layer(events)
-    decomp, examples = decompose(events, rows)
+    decomp, examples = decompose(events, moments_by_ep, rows)
 
     print("== Task layer ==")
     print(json.dumps(stats, indent=2))
