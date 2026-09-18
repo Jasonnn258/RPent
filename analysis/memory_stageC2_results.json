@@ -1,0 +1,42 @@
+{
+  "T0": {
+    "moments": 98,
+    "covered": 24,
+    "recall": 0.245,
+    "fires": 94,
+    "aligned": 25,
+    "precision": 0.266,
+    "F1": 0.255
+  },
+  "T1": {
+    "moments": 98,
+    "covered": 76,
+    "recall": 0.776,
+    "fires": 70,
+    "aligned": 69,
+    "precision": 0.986,
+    "F1": 0.868
+  },
+  "t0_unnecessary": 69,
+  "eliminated_any": 55,
+  "eliminated_same_cls": 69,
+  "labels": {
+    "PROGRESSING": 456,
+    "AMBIGUOUS": 119,
+    "STALLED": 59
+  },
+  "t1_fires_by_label": {
+    "STALLED": 53,
+    "AMBIGUOUS": 17
+  },
+  "t4_total": 73,
+  "t4_waypoint_false_alarm": 65,
+  "stalled_events": 59,
+  "stalled_fired": 53,
+  "gate": {
+    "precision_ok": true,
+    "recall_drop": -0.531,
+    "recall_ok": true,
+    "pass": true
+  }
+}

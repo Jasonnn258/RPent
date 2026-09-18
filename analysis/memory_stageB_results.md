@@ -90,6 +90,15 @@ RETRIEVAL_WRONG 的机制与 Stage A 结论一致:真 near-miss 恢复时刻
    adoption 显著偏低 + 被忽略卡事后确认适用"。前两条均不满足(合法时刻仅
    25/94 火;adoption 无瓶颈),强执行只会放大 73% 的噪声火。
 
+## 勘误(2026-09-18,Stage C2 期间发现)
+
+`should_retrieve_moments` 检查 result name=="pi0_pick",但 states.json 中
+pick 结果名为 "pick" → 全部 grasp/pick_verify SHOULD 时刻漏计(官方 60 集中
+48 个:37 grasp + 11 pick_verify)。修正后同口径(45 个有火集)SHOULD 时刻
+45→**84**,T0 coverage 24/45=.533 → **24/84=.286**;precision 25/94=.266
+不变(T0 本就无 pick 规则火)。判定(coverage、precision 双低)不变且加强;
+task/ranking 层不受影响。详见 `memory_stageC2_results.md`。
+
 ## 判定
 
 **NEITHER SUPPORTED**(trigger precision 0.266 且净 SR 为负;structured-vs-lexical
