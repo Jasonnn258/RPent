@@ -1,0 +1,470 @@
+{
+  "primary": {
+    "Q0_POOR": {
+      "grasp": {
+        "n": 7,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.103,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "perception": {
+        "n": 17,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "pick_verify": {
+        "n": 36,
+        "R@1": 0.0,
+        "R@3": 0.944,
+        "R@5": 0.972,
+        "MRR": 0.482,
+        "empty_top3": 0,
+        "irrelevant@3": 0.056,
+        "retreat_in_top3": 0
+      },
+      "predicate_timing": {
+        "n": 30,
+        "R@1": 0.933,
+        "R@3": 0.967,
+        "R@5": 1.0,
+        "MRR": 0.953,
+        "empty_top3": 0,
+        "irrelevant@3": 0.033,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 30,
+        "R@1": 0.0,
+        "R@3": 0.2,
+        "R@5": 0.2,
+        "MRR": 0.119,
+        "empty_top3": 0,
+        "irrelevant@3": 0.8,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 120,
+        "R@1": 0.233,
+        "R@3": 0.575,
+        "R@5": 0.592,
+        "MRR": 0.418,
+        "empty_top3": 0,
+        "irrelevant@3": 0.425,
+        "retreat_in_top3": 0
+      }
+    },
+    "Q1_EXECUTION": {
+      "grasp": {
+        "n": 7,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.286,
+        "MRR": 0.176,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "perception": {
+        "n": 17,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "pick_verify": {
+        "n": 36,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.167,
+        "MRR": 0.135,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "predicate_timing": {
+        "n": 30,
+        "R@1": 0.767,
+        "R@3": 0.767,
+        "R@5": 0.767,
+        "MRR": 0.8,
+        "empty_top3": 0,
+        "irrelevant@3": 0.233,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 30,
+        "R@1": 0.0,
+        "R@3": 0.2,
+        "R@5": 0.2,
+        "MRR": 0.107,
+        "empty_top3": 0,
+        "irrelevant@3": 0.8,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 120,
+        "R@1": 0.192,
+        "R@3": 0.242,
+        "R@5": 0.308,
+        "MRR": 0.278,
+        "empty_top3": 0,
+        "irrelevant@3": 0.758,
+        "retreat_in_top3": 0
+      }
+    },
+    "Q2_STATE_GROUNDED": {
+      "grasp": {
+        "n": 7,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.072,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "perception": {
+        "n": 17,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.019,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "pick_verify": {
+        "n": 36,
+        "R@1": 0.25,
+        "R@3": 0.972,
+        "R@5": 1.0,
+        "MRR": 0.618,
+        "empty_top3": 0,
+        "irrelevant@3": 0.028,
+        "retreat_in_top3": 0
+      },
+      "predicate_timing": {
+        "n": 30,
+        "R@1": 0.8,
+        "R@3": 1.0,
+        "R@5": 1.0,
+        "MRR": 0.9,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 30,
+        "R@1": 0.0,
+        "R@3": 0.2,
+        "R@5": 0.233,
+        "MRR": 0.161,
+        "empty_top3": 0,
+        "irrelevant@3": 0.8,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 120,
+        "R@1": 0.275,
+        "R@3": 0.592,
+        "R@5": 0.608,
+        "MRR": 0.458,
+        "empty_top3": 0,
+        "irrelevant@3": 0.408,
+        "retreat_in_top3": 0
+      }
+    }
+  },
+  "hardneg": {
+    "Q0_POOR": {
+      "hard_negative": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 14
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 14
+      }
+    },
+    "Q1_EXECUTION": {
+      "hard_negative": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 8
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 8
+      }
+    },
+    "Q2_STATE_GROUNDED": {
+      "hard_negative": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 14
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 14
+      }
+    }
+  },
+  "locus_by_class": {
+    "grasp": {
+      "GRASP": 6,
+      "UNKNOWN": 1
+    },
+    "perception": {
+      "PERCEPTION": 17
+    },
+    "pick_verify": {
+      "UNKNOWN": 28,
+      "GRASP": 6,
+      "PERCEPTION": 2
+    },
+    "predicate_timing": {
+      "UNKNOWN": 19,
+      "PLACE": 10,
+      "PERCEPTION": 1
+    },
+    "recovery": {
+      "PLACE": 2,
+      "UNKNOWN": 12,
+      "TRANSPORT": 15,
+      "PERCEPTION": 1
+    }
+  },
+  "secondary_gold": {
+    "Q0_POOR": {
+      "predicate_timing": {
+        "n": 8,
+        "R@1": 1.0,
+        "R@3": 1.0,
+        "R@5": 1.0,
+        "MRR": 1.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 6,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.032,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.571,
+        "R@3": 0.571,
+        "R@5": 0.571,
+        "MRR": 0.585,
+        "empty_top3": 0,
+        "irrelevant@3": 0.429,
+        "retreat_in_top3": 0
+      }
+    },
+    "Q1_EXECUTION": {
+      "predicate_timing": {
+        "n": 8,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.143,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 6,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.037,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.097,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      }
+    },
+    "Q2_STATE_GROUNDED": {
+      "predicate_timing": {
+        "n": 8,
+        "R@1": 1.0,
+        "R@3": 1.0,
+        "R@5": 1.0,
+        "MRR": 1.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 0
+      },
+      "recovery": {
+        "n": 6,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.063,
+        "empty_top3": 0,
+        "irrelevant@3": 1.0,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 14,
+        "R@1": 0.571,
+        "R@3": 0.571,
+        "R@5": 0.571,
+        "MRR": 0.599,
+        "empty_top3": 0,
+        "irrelevant@3": 0.429,
+        "retreat_in_top3": 0
+      }
+    }
+  },
+  "secondary_hardneg": {
+    "Q0_POOR": {
+      "hard_negative": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 11
+      },
+      "ALL": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 11
+      }
+    },
+    "Q1_EXECUTION": {
+      "hard_negative": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 0
+      },
+      "ALL": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 0
+      }
+    },
+    "Q2_STATE_GROUNDED": {
+      "hard_negative": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 11
+      },
+      "ALL": {
+        "n": 11,
+        "R@1": 0.0,
+        "R@3": 0.0,
+        "R@5": 0.0,
+        "MRR": 0.0,
+        "empty_top3": 0,
+        "irrelevant@3": 0.0,
+        "retreat_in_top3": 11
+      }
+    }
+  },
+  "secondary_n": {
+    "gold": 14,
+    "hardneg": 11
+  },
+  "perception17_hits": {
+    "Q0_POOR": {
+      "R@1": 0,
+      "R@3": 0,
+      "n": 17
+    },
+    "Q1_EXECUTION": {
+      "R@1": 0,
+      "R@3": 0,
+      "n": 17
+    },
+    "Q2_STATE_GROUNDED": {
+      "R@1": 0,
+      "R@3": 0,
+      "n": 17
+    }
+  }
+}
