@@ -1044,17 +1044,22 @@ def _new_b2_verifier(tracker: Any) -> Any:
 def _new_memory_recall(tracker: Any) -> Any:
     """Build the DecisionMemory recall component when the gate is on.
 
-    Gate: ``RPENT_MEMORY_TRIGGER=1`` (Stage B1 arms memB2/memB3). Requires
-    the Structured Memory tracker for the phase signal. Rank method comes
-    from ``RPENT_MEMORY_RANK`` (Q0_FIXED | Q3) — both frozen Stage A ports.
+    Gate: ``RPENT_MEMORY_TRIGGER`` in {"1", "progress"} (Stage B1 arms
+    memB2/memB3 used "1" — the frozen v1 trigger; Stage C3 arm O2 uses
+    "progress" — the Stage C2 frozen progress-aware rules). Requires the
+    Structured Memory tracker for the phase signal. Rank method comes from
+    ``RPENT_MEMORY_RANK`` (Q0_FIXED | Q3) — both frozen Stage A ports.
     """
-    if os.environ.get("RPENT_MEMORY_TRIGGER") != "1" or tracker is None:
+    mode = os.environ.get("RPENT_MEMORY_TRIGGER", "")
+    if mode not in ("1", "progress") or tracker is None:
         return None
     from rpent.memory.retrieval import DecisionMemory
 
     rank = os.environ.get("RPENT_MEMORY_RANK", "Q0_FIXED")
-    logger.info("[memrecall] decision-point memory recall ON — rank=%s", rank)
-    return DecisionMemory(tracker)
+    logger.info("[memrecall] decision-point memory recall ON — rank=%s "
+                "mode=%s", rank, mode)
+    return DecisionMemory(tracker, mode=("progress" if mode == "progress"
+                                         else "v1"))
 
 
 def _write_structured_metrics(

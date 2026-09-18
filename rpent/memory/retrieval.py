@@ -164,10 +164,26 @@ class _Embedder:
 
 
 class DecisionMemory:
-    """Frozen trigger + soft retrieval + event logging for one episode."""
+    """Frozen trigger + soft retrieval + event logging for one episode.
 
-    def __init__(self, tracker: Any) -> None:
+    mode="v1" (default, RPENT_MEMORY_TRIGGER=1): the frozen Stage B1
+    boundary trigger — DO NOT TOUCH (published behavior).
+
+    mode="progress" (RPENT_MEMORY_TRIGGER=progress, Stage C3 arm O2): the
+    Stage C2 frozen progress-aware rules (R1-R5), evaluated per tool result
+    (queued and flushed at the next boundary).  Rules mirror
+    scripts/memory_stagec2_benchmark.py exactly — including no
+    first-primitive gate (the C2 offline replay had none) and the frozen
+    thresholds MOVE_EPS=0.005 / MOVE_ARRIVED=0.03 / LIFT_OK=0.05.
+    """
+
+    MOVE_EPS = 0.005
+    MOVE_ARRIVED = 0.03
+    LIFT_OK = 0.05
+
+    def __init__(self, tracker: Any, mode: str = "v1") -> None:
         self.rank = os.environ.get("RPENT_MEMORY_RANK", "Q0_FIXED")
+        self.mode = mode
         self.tracker = tracker
         self.cards = load_cards()
         self.index = load_index()
@@ -196,6 +212,12 @@ class DecisionMemory:
         self._fresh_result = False  # a result arrived since last boundary
         self._last_scores: list[float] = []
         self._embedder = _Embedder()
+        # progress-mode state (Stage C2 frozen rules)
+        self._queued_fire: str | None = None   # reason of the pending fire
+        self._queued_result: dict | None = None
+        self._last_eef: list[float] | None = None  # last seen final_eef_pos
+        self._consec_pick_fails = 0
+        self._prev_prim_failed = False
 
     # ------------------------------------------------------------- observe
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
@@ -220,6 +242,66 @@ class DecisionMemory:
         self._last_result = {"name": name, "data": data, "is_error": is_error,
                              "text": content[:400]}
         self._fresh_result = True
+        if self.mode == "progress":
+            self._progress_observe(name, data, is_error)
+
+    # -------------------------------------- progress mode (Stage C2 frozen)
+    def _progress_observe(self, name: str, data: dict, is_error: bool) -> None:
+        """Evaluate the frozen C2 rules R1-R5 on THIS result (per-result
+        evaluation — the fix for the v1 boundary-overwrite signal loss)."""
+        fd = data.get("final_dist_m")
+        is_move = name in ("move_to", "move_pose")
+        # pre-eef for R2 = last known eef before this result updates it
+        pre_eef = self._last_eef
+        if isinstance(data.get("final_eef_pos"), list):
+            self._last_eef = data["final_eef_pos"]
+        reason = None
+        if name in PERCEPTION and (data.get("found") is False
+                                   or data.get("world_error")):
+            reason = (f"perception_progress_failure: {name} produced no "
+                      f"usable observation")
+        elif is_move and isinstance(fd, (int, float)) and fd > self.MOVE_ARRIVED:
+            tgt = data.get("target_xyz")
+            dpre = None
+            if pre_eef and isinstance(tgt, list) and len(tgt) >= 3:
+                dpre = sum((a - b) ** 2
+                           for a, b in zip(pre_eef[:3], tgt[:3])) ** 0.5
+            if dpre is None or dpre - fd <= self.MOVE_EPS:
+                reason = (f"move_stalled_no_progress: residual {fd:.3f} m, "
+                          f"no eef progress toward target")
+        elif name == "pi0_pick":
+            lift = (data.get("diagnostics") or {}).get("post_min_ascent_m")
+            # counter semantics mirror the frozen offline replay exactly:
+            # increment on success=False, reset on anything else
+            if data.get("success") is False:
+                self._consec_pick_fails += 1
+            else:
+                self._consec_pick_fails = 0
+            if data.get("success") is True \
+                    and isinstance(lift, (int, float)) \
+                    and lift < self.LIFT_OK:
+                reason = ("pick_reported_success_but_no_lift: expected "
+                          "ascent missing physically")
+            elif data.get("success") is False \
+                    and self._consec_pick_fails >= 2:
+                reason = ("repeated_failed_picks: 2nd+ consecutive "
+                          "failed pick, no grasp progress")
+        elif name == "pi0_doubled" and data.get("success") is False \
+                and data.get("libero_terminated") is not True:
+            if self._prev_prim_failed:
+                reason = ("recovery_no_change: contact skill failed after "
+                          "another failed primitive")
+        elif name == "release" and data.get("libero_terminated") is not True:
+            reason = ("predicate_progress_missing: release executed but "
+                      "task predicate not fired")
+        if reason and self._queued_fire is None:
+            self._queued_fire = reason
+            self._queued_result = dict(self._last_result)
+        # mirror the offline prev_prim_failed definition
+        if name in PRIMITIVES:
+            self._prev_prim_failed = data.get("success") is False or (
+                is_move and isinstance(fd, (int, float))
+                and fd > self.MOVE_ARRIVED)
 
     # ------------------------------------------------------------- trigger
     def _trigger_reason(self) -> str | None:
@@ -293,6 +375,8 @@ class DecisionMemory:
             if ph and ph != self.last_phase:
                 self.last_phase = ph
                 self.phase_steps = 0
+        if self.mode == "progress":
+            return self._progress_boundary(turn)
         if not self.saw_primitive or self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
         if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
@@ -346,6 +430,63 @@ class DecisionMemory:
                     top[:3])
         return block, event
 
+    def _progress_boundary(self, turn: int) -> tuple[str, dict] | None:
+        """Flush a queued per-result fire (Stage C2 frozen semantics: no
+        first-primitive gate — the offline replay had none; cooldown blocks
+        DROP the fire rather than deferring it)."""
+        if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
+            self._queued_fire = None
+            return None
+        if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
+            self._queued_fire = None
+            return None
+        if not self._queued_fire:
+            return None
+        reason, qr = self._queued_fire, self._queued_result or {}
+        self._queued_fire = None
+        self._queued_result = None
+        self.boundaries_since_trigger = 0
+        self.triggers_fired += 1
+        t0 = time.time()
+        obs = self._obs_summary_for(qr)
+        q = " | ".join([obs, reason])
+        top, cand = (self._q3(q, toks(reason)) if self.rank == "Q3"
+                     else self._q0_fixed(q))
+        latency_ms = (time.time() - t0) * 1000
+        if not top:
+            return None
+        block = self._block(reason, top)
+        event = {
+            "episode": "",
+            "task": os.environ.get("RPENT_TASK", ""),
+            "turn": turn,
+            "phase": self.last_phase,
+            "last_action": qr.get("name", ""),
+            "symptom": reason,
+            "observation_summary": obs,
+            "trigger_reason": reason,
+            "trigger_mode": "progress",
+            "retrieval_method": self.rank,
+            "candidate_memory_ids": cand,
+            "ranked_memory_ids": top,
+            "scores": [round(s, 4) for s in self._last_scores],
+            "top1_memory": top[0],
+            "top3_memories": top[:3],
+            "retrieval_latency_ms": round(latency_ms, 2),
+            "retrieval_tokens": len(block.split()),
+            "planner_context_memory_ids": top[:3],
+            "task_language": self.task_language,
+            "planner_next_action": None,
+            "planner_followed_top1": None,
+            "planner_followed_any_top3": None,
+            "verification_result": None,
+            "episode_result": None,
+        }
+        self.events.append(event)
+        logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
+                    top[:3])
+        return block, event
+
     # ------------------------------------------------------------ retrieval
     def _obs_summary(self) -> str:
         r = self._last_result
@@ -353,6 +494,16 @@ class DecisionMemory:
                 "world_error", "min_gripper_opening")
         fields = {k: r["data"][k] for k in keys if k in r["data"]}
         return (f"phase={self.last_phase}; last action={self.last_primitive}; "
+                f"result fields={fields}; task: {self.task_language[:110]}")
+
+    def _obs_summary_for(self, r: dict) -> str:
+        """Poor-format obs summary for a specific (queued) result — progress
+        mode fires on the result that broke, not the last one seen."""
+        data = r.get("data") or {}
+        keys = ("success", "libero_terminated", "final_dist_m", "found",
+                "world_error", "min_gripper_opening")
+        fields = {k: data[k] for k in keys if k in data}
+        return (f"phase={self.last_phase}; last action={r.get('name', '')}; "
                 f"result fields={fields}; task: {self.task_language[:110]}")
 
     def _query_text(self, reason: str) -> str:

@@ -126,6 +126,14 @@ COND_ENV = {
               "RPENT_MEMORY_ACCESS_FIX": "1",
               "RPENT_MEMORY_TRIGGER": "1",
               "RPENT_MEMORY_RANK": "Q3"},
+    # Stage C3 (2026-09-18): O2 = progress-aware trigger (Stage C2 frozen
+    # rules R1-R5) + poor query + Q0-fixed lexical + access fix + soft.
+    # O0 (OLD_TRIGGER+POOR_QUERY) == memB2 exactly -> reused, not re-run
+    # (analysis/stageC_compatibility_audit.md).
+    "memO2": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "progress",
+              "RPENT_MEMORY_RANK": "Q0_FIXED"},
 }
 
 DEV_TASKS = [0, 7, 9]
@@ -460,6 +468,13 @@ def build_episodes(args, done):
         conds = conds or ["memB1", "memB2", "memB3"]
         tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
+    elif args.stage == "memC":
+        # Stage C3: single-variable online O0 vs O2 (C1 query gate FAILED,
+        # C2 progress-trigger gate PASSED -> only the trigger arm runs).
+        # O0 == #49 memB2 rows (reused); only memO2 runs fresh.
+        conds = conds or ["memO2"]
+        tasks = tasks or MEMB_TASKS
+        repeats = repeats or [1]
     else:  # smoke
         conds = conds or ["vanilla", "armA", "armB"]
         tasks = tasks or [7]
@@ -565,7 +580,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
-                             "stage1", "memB", "smoke"])
+                             "stage1", "memB", "memC", "smoke"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")
