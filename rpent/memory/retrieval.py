@@ -188,6 +188,12 @@ class DecisionMemory:
         self.cards = load_cards()
         self.index = load_index()
         self.ids = sorted(self.cards)
+        # Stage G scale-test banks (stageG_subset_manifest.md §3): append
+        # REAL library pages as extra retrieval entries. Additive only —
+        # the 61 global cards and MEMORY.md index are never modified.
+        extra_bank = os.environ.get("RPENT_MEMORY_EXTRA_BANK", "")
+        if extra_bank:
+            self._load_extra_bank(extra_bank)
         self.body = {c: " ".join([self.cards[c]["title"],
                                   self.cards[c]["applies_when"],
                                   self.cards[c]["symptom"],
@@ -218,6 +224,17 @@ class DecisionMemory:
         self._last_eef: list[float] | None = None  # last seen final_eef_pos
         self._consec_pick_fails = 0
         self._prev_prim_failed = False
+        # Stage G baseline trigger params (frozen once on the DEV suite in
+        # analysis/stageG_trigger_baseline_config.md; never tuned on final
+        # suites). Only read when mode is a baseline mode.
+        self.periodic_n = int(os.environ.get("RPENT_MEMORY_PERIODIC_N", "6"))
+        self.mstuck_k = int(os.environ.get("RPENT_MSTUCK_K", "3"))
+        self.mstuck_move_m = float(os.environ.get("RPENT_MSTUCK_MOVE_M",
+                                                  "0.01"))
+        self.mstuck_prog_m = float(os.environ.get("RPENT_MSTUCK_PROG_M",
+                                                  "0.01"))
+        self._boundary_count = 0
+        self._mstuck_win: list[tuple[list[float], float | None]] = []
 
     # ------------------------------------------------------------- observe
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
@@ -244,6 +261,8 @@ class DecisionMemory:
         self._fresh_result = True
         if self.mode == "progress":
             self._progress_observe(name, data, is_error)
+        elif self.mode == "motion_stuck":
+            self._mstuck_observe(name, data)
 
     # -------------------------------------- progress mode (Stage C2 frozen)
     def _progress_observe(self, name: str, data: dict, is_error: bool) -> None:
@@ -363,6 +382,7 @@ class DecisionMemory:
         """Evaluate the frozen trigger; return (block, event) on fire."""
         self.turn = turn
         self.boundaries_since_trigger += 1
+        self._boundary_count += 1
         if self.tracker is not None:
             ph = ""
             try:
@@ -377,6 +397,10 @@ class DecisionMemory:
                 self.phase_steps = 0
         if self.mode == "progress":
             return self._progress_boundary(turn)
+        if self.mode == "periodic":
+            return self._periodic_boundary(turn)
+        if self.mode == "motion_stuck":
+            return self._mstuck_boundary(turn)
         if not self.saw_primitive or self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
         if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
@@ -486,6 +510,159 @@ class DecisionMemory:
         logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
                     top[:3])
         return block, event
+
+    # ------------------------------- Stage G baseline triggers (T2/T3)
+    # Baselines ONLY (stageG_trigger_baseline_config.md). The decision rule
+    # is the ONLY difference from the frozen modes: retrieval, injection
+    # path, cooldown and per-episode cap are identical. The frozen v1/progress
+    # code paths above are untouched.
+    def _mstuck_observe(self, name: str, data: dict) -> None:
+        """T3_MOTION_STUCK: generic spatial-stuck detector. Uses ONLY EEF
+        displacement between consecutive move results and (when on a common
+        target) final_dist_m improvement — no primitive-specific PICK/PLACE/
+        PERCEPTION logic. Evaluated only when a move result arrives."""
+        if name not in ("move_to", "move_pose"):
+            return
+        eef = data.get("final_eef_pos")
+        if not isinstance(eef, list) or len(eef) < 3:
+            return
+        fd = data.get("final_dist_m")
+        self._mstuck_win.append(
+            (eef[:3], fd if isinstance(fd, (int, float)) else None))
+        self._mstuck_win = self._mstuck_win[-self.mstuck_k:]
+        if len(self._mstuck_win) < self.mstuck_k:
+            return
+        for (p0, d0), (p1, d1) in zip(self._mstuck_win, self._mstuck_win[1:]):
+            disp = sum((a - b) ** 2 for a, b in zip(p0, p1)) ** 0.5
+            if disp >= self.mstuck_move_m:
+                return
+            if d0 is not None and d1 is not None \
+                    and d0 - d1 >= self.mstuck_prog_m:
+                return  # real progress toward the commanded target
+        if self._queued_fire is None:
+            self._queued_fire = (f"motion_stuck: k={self.mstuck_k} "
+                                 f"disp<{self.mstuck_move_m:.3f}m "
+                                 f"prog<{self.mstuck_prog_m:.3f}m")
+            self._queued_result = dict(self._last_result)
+            self._mstuck_win = []  # window resets once a fire is queued
+
+    def _periodic_boundary(self, turn: int) -> tuple[str, dict] | None:
+        """T2_PERIODIC: fire every N-th turn boundary (a timer, blind to
+        state). Ticks before the first primitive result are skipped."""
+        if not self.saw_primitive or self._boundary_count % self.periodic_n:
+            return None
+        reason = (f"periodic_tick: boundary={self._boundary_count} "
+                  f"N={self.periodic_n}")
+        return self._baseline_fire(turn, reason,
+                                   dict(self._last_result)
+                                   if self._last_result else {},
+                                   "periodic")
+
+    def _mstuck_boundary(self, turn: int) -> tuple[str, dict] | None:
+        """Flush a queued T3 fire at the boundary (drop-on-cooldown, like
+        the frozen progress semantics)."""
+        if not self._queued_fire:
+            return None
+        reason = self._queued_fire
+        qr = self._queued_result or {}
+        self._queued_fire = None
+        self._queued_result = None
+        return self._baseline_fire(turn, reason, qr, "motion_stuck")
+
+    def _baseline_fire(self, turn: int, reason: str, qr: dict,
+                       mode_label: str) -> tuple[str, dict] | None:
+        """Shared fire path for the Stage G baselines — same cooldown/cap/
+        retrieval/logging semantics as the frozen modes."""
+        if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
+            return None
+        if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
+            return None
+        self.boundaries_since_trigger = 0
+        self.triggers_fired += 1
+        t0 = time.time()
+        obs = self._obs_summary_for(qr)
+        q = " | ".join([obs, reason])
+        top, cand = (self._q3(q, toks(reason)) if self.rank == "Q3"
+                     else self._q0_fixed(q))
+        latency_ms = (time.time() - t0) * 1000
+        if not top:
+            return None
+        block = self._block(reason, top)
+        event = {
+            "episode": "",
+            "task": os.environ.get("RPENT_TASK", ""),
+            "turn": turn,
+            "phase": self.last_phase,
+            "last_action": qr.get("name", ""),
+            "symptom": reason,
+            "observation_summary": obs,
+            "trigger_reason": reason,
+            "trigger_mode": mode_label,
+            "retrieval_method": self.rank,
+            "candidate_memory_ids": cand,
+            "ranked_memory_ids": top,
+            "scores": [round(s, 4) for s in self._last_scores],
+            "top1_memory": top[0],
+            "top3_memories": top[:3],
+            "retrieval_latency_ms": round(latency_ms, 2),
+            "retrieval_tokens": len(block.split()),
+            "planner_context_memory_ids": top[:3],
+            "task_language": self.task_language,
+            "planner_next_action": None,
+            "planner_followed_top1": None,
+            "planner_followed_any_top3": None,
+            "verification_result": None,
+            "episode_result": None,
+        }
+        self.events.append(event)
+        logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
+                    top[:3])
+        return block, event
+
+    def _load_extra_bank(self, spec: str) -> None:
+        """Append real library pages (G4 distractor banks) as retrieval
+        entries. Page frontmatter supplies task_language (used as title);
+        the body supplies the lexical index line and the Q3 body text. No
+        card content is edited; global cards keep their exact index lines."""
+        n = 0
+        for d in spec.split(":"):
+            base = Path(d)
+            if not base.is_dir():
+                logger.warning("[memrecall] extra bank dir missing: %s", d)
+                continue
+            for p in sorted(base.glob("*.md")):
+                if p.stem in self.cards:
+                    continue
+                try:
+                    text = p.read_text(encoding="utf-8")
+                except OSError:
+                    continue
+                fm, _, body = text.partition("\n---")
+                card = {"id": p.stem, "kind": "suite_page",
+                        "title": p.stem.replace("_", " "),
+                        "applies_when": "", "symptom": "",
+                        "falsify": ""}
+                m = re.search(r"^task_language:\s*(.+)$", fm, re.M)
+                if m:
+                    card["title"] = m.group(1).strip()[:120]
+                # same "how_to" key (and the same 400-char cap) as the
+                # global cards, so _block() renders both uniformly.
+                card["how_to"] = re.sub(r"\s+", " ", body).strip()[:400]
+                self.cards[p.stem] = card
+                self.index[p.stem] = (card["title"] + " " +
+                                      card["how_to"])[:600]
+                n += 1
+        if n:
+            self.ids = sorted(self.cards)
+            self.body = {c: " ".join([self.cards[c]["title"],
+                                      self.cards[c]["applies_when"],
+                                      self.cards[c]["symptom"],
+                                      self.cards[c]["how_to"]])
+                         for c in self.ids}
+            self.phases = {c: card_phases(self.cards[c]) for c in self.ids}
+            self._emb_card = None
+            logger.info("[memrecall] extra bank: +%d real pages -> %d "
+                        "entries", n, len(self.ids))
 
     # ------------------------------------------------------------ retrieval
     def _obs_summary(self) -> str:

@@ -134,6 +134,55 @@ COND_ENV = {
               "RPENT_MEMORY_ACCESS_FIX": "1",
               "RPENT_MEMORY_TRIGGER": "progress",
               "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    # ---- Stage G (2026-09-20) -------------------------------------------
+    # G3 arm D: progress trigger + Q3 (two orthogonal frozen envs; no new
+    # method — stageG_subset_manifest.md §2).
+    "memO3": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "progress",
+              "RPENT_MEMORY_RANK": "Q3"},
+    # G2 T2_PERIODIC — params frozen on DEV only
+    # (analysis/stageG_trigger_baseline_config.md).
+    "trigT2": {"RPENT_STRUCTURED_MEMORY": "1",
+               "RPENT_MEMORY_ACCESS_FIX": "1",
+               "RPENT_MEMORY_TRIGGER": "periodic",
+               "RPENT_MEMORY_PERIODIC_N": "6",
+               "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    # G2 T3_MOTION_STUCK — generic EEF-displacement + goal-progress only.
+    "trigT3": {"RPENT_STRUCTURED_MEMORY": "1",
+               "RPENT_MEMORY_ACCESS_FIX": "1",
+               "RPENT_MEMORY_TRIGGER": "motion_stuck",
+               "RPENT_MSTUCK_K": "3",
+               "RPENT_MSTUCK_MOVE_M": "0.01",
+               "RPENT_MSTUCK_PROG_M": "0.01",
+               "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    # G4 scale banks — {suite} expanded at launch; dirs are built by
+    # scripts/build_stageG_banks.py (real other-suite pages only, sorted-id
+    # mechanical selection; global 61 cards untouched).
+    "bank2xB": {"RPENT_STRUCTURED_MEMORY": "1",
+                "RPENT_MEMORY_ACCESS_FIX": "1",
+                "RPENT_MEMORY_TRIGGER": "1",
+                "RPENT_MEMORY_RANK": "Q0_FIXED",
+                "RPENT_MEMORY_EXTRA_BANK":
+                    "analysis/stageG_banks/{suite}/bank_2x"},
+    "bank2xP": {"RPENT_STRUCTURED_MEMORY": "1",
+                "RPENT_MEMORY_ACCESS_FIX": "1",
+                "RPENT_MEMORY_TRIGGER": "progress",
+                "RPENT_MEMORY_RANK": "Q0_FIXED",
+                "RPENT_MEMORY_EXTRA_BANK":
+                    "analysis/stageG_banks/{suite}/bank_2x"},
+    "bankmxB": {"RPENT_STRUCTURED_MEMORY": "1",
+                "RPENT_MEMORY_ACCESS_FIX": "1",
+                "RPENT_MEMORY_TRIGGER": "1",
+                "RPENT_MEMORY_RANK": "Q0_FIXED",
+                "RPENT_MEMORY_EXTRA_BANK":
+                    "analysis/stageG_banks/{suite}/bank_max"},
+    "bankmxP": {"RPENT_STRUCTURED_MEMORY": "1",
+                "RPENT_MEMORY_ACCESS_FIX": "1",
+                "RPENT_MEMORY_TRIGGER": "progress",
+                "RPENT_MEMORY_RANK": "Q0_FIXED",
+                "RPENT_MEMORY_EXTRA_BANK":
+                    "analysis/stageG_banks/{suite}/bank_max"},
 }
 
 DEV_TASKS = [0, 7, 9]
@@ -149,6 +198,25 @@ B2_NEW_TASKS = [2, 3, 5]
 # reproduce online; no new features added to probe it).
 MEMB_TASKS = [3, 5, 9]
 P0_SUITE = "libero_spatial_task"
+
+# ---- Stage G grids (stageG_suite_audit.md / stageG_subset_manifest.md) ----
+# Final-test suites: same _task perturbation axis as the DEV suite, the
+# other three base families. libero_10_task t0 is a registry-level init
+# hole (0 states) — excluded mechanically, not by performance.
+G_SUITES = ["libero_object_task", "libero_goal_task", "libero_10_task"]
+G_TASKS_BY_SUITE = {
+    "libero_object_task": list(range(10)),
+    "libero_goal_task": list(range(10)),
+    "libero_10_task": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+}
+# G3/G4 subset: task indices [0,3,7]; unrunnable index -> next index
+# (libero_10_task t0 hole -> [1,3,7]). Seeds s1-s5, frozen pre-result.
+G_SUBSET_BY_SUITE = {
+    "libero_object_task": [0, 3, 7],
+    "libero_goal_task": [0, 3, 7],
+    "libero_10_task": [1, 3, 7],
+}
+G_SEEDS = range(1, 6)
 
 RUN_FIELDNAMES = [
     "ts", "stage", "tier", "model", "suite", "task", "seed", "cond",
@@ -229,7 +297,9 @@ def run_episode(ep, gpu):
         OVPM_DIR, f"{ts}_{tier}_{cond}_{suite}_t{task}_s{seed}_r{repeat}")
     os.makedirs(outdir, exist_ok=True)
     env = base_env()
-    env.update(COND_ENV.get(cond, {}))
+    # Stage G4 bank conds carry a "{suite}" template -> expand per episode.
+    env.update({k: v.replace("{suite}", suite)
+                for k, v in COND_ENV.get(cond, {}).items()})
     env["RPENT_TASK"] = str(task)
     if cond == "armB2":
         # B2 event logging fields (never read by any other arm's code path)
@@ -475,6 +545,39 @@ def build_episodes(args, done):
         conds = conds or ["memO2"]
         tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
+    elif args.stage in ("g1", "g2", "g3", "g4"):
+        # Stage G: multi-suite grids on the frozen final-test suites
+        # (stageG_subset_manifest.md). --suites/--tasks override for the
+        # DEV smoke only; never tuned after seeing final-suite results.
+        suites = (args.suites.split(",") if args.suites else G_SUITES)
+        if args.stage == "g1":
+            conds = conds or ["memB1", "memB2", "memO2"]
+            taskmap = G_TASKS_BY_SUITE
+        elif args.stage == "g2":
+            conds = conds or ["trigT2", "trigT3"]
+            taskmap = G_TASKS_BY_SUITE
+        elif args.stage == "g3":
+            conds = conds or ["memB3", "memO3"]
+            taskmap = G_SUBSET_BY_SUITE
+        else:  # g4
+            conds = conds or ["bank2xB", "bank2xP", "bankmxB", "bankmxP"]
+            taskmap = G_SUBSET_BY_SUITE
+        if args.seeds is None:
+            seeds = G_SEEDS
+        repeats = repeats or [1]
+        eps = []
+        for cond in conds:
+            for su in suites:
+                for t in (tasks if tasks else taskmap.get(su, [])):
+                    for sd in seeds:
+                        for r in repeats:
+                            k = (args.stage, args.tier, su, t, sd, cond, r)
+                            if k not in done:
+                                eps.append(dict(stage=args.stage,
+                                                tier=args.tier, suite=su,
+                                                task=t, seed=sd, cond=cond,
+                                                repeat=r))
+        return eps
     else:  # smoke
         conds = conds or ["vanilla", "armA", "armB"]
         tasks = tasks or [7]
@@ -580,10 +683,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
-                             "stage1", "memB", "memC", "smoke"])
+                             "stage1", "memB", "memC", "smoke",
+                             "g1", "g2", "g3", "g4"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")
+    ap.add_argument("--suites", help="comma list overriding stage suites "
+                                     "(Stage G; DEV smoke uses "
+                                     "libero_spatial_task)")
     ap.add_argument("--seeds", type=int, help="number of seeds (1..N)")
     ap.add_argument("--repeats", type=int, help="number of repeats (1..N)")
     args = ap.parse_args()

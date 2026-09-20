@@ -1,0 +1,1 @@
+/workspace/yjx/workspace/RPent/resources/libero/suite/suite_libero_goal_swap_t6.md

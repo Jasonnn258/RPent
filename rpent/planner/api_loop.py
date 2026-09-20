@@ -1049,17 +1049,20 @@ def _new_memory_recall(tracker: Any) -> Any:
     "progress" — the Stage C2 frozen progress-aware rules). Requires the
     Structured Memory tracker for the phase signal. Rank method comes from
     ``RPENT_MEMORY_RANK`` (Q0_FIXED | Q3) — both frozen Stage A ports.
+    Stage G baseline arms add "periodic"/"motion_stuck" (frozen in
+    analysis/stageG_trigger_baseline_config.md) — baseline decision rules
+    only; retrieval/injection/cooldown identical to the frozen modes.
     """
     mode = os.environ.get("RPENT_MEMORY_TRIGGER", "")
-    if mode not in ("1", "progress") or tracker is None:
+    if mode not in ("1", "progress", "periodic", "motion_stuck") \
+            or tracker is None:
         return None
     from rpent.memory.retrieval import DecisionMemory
 
     rank = os.environ.get("RPENT_MEMORY_RANK", "Q0_FIXED")
     logger.info("[memrecall] decision-point memory recall ON — rank=%s "
                 "mode=%s", rank, mode)
-    return DecisionMemory(tracker, mode=("progress" if mode == "progress"
-                                         else "v1"))
+    return DecisionMemory(tracker, mode=("v1" if mode == "1" else mode))
 
 
 def _write_structured_metrics(
