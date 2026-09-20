@@ -1,0 +1,766 @@
+{
+  "global_cards": 61,
+  "banks": [
+    {
+      "suite": "libero_object_task",
+      "bank": "bank_2x",
+      "requested": 61,
+      "loaded": 61,
+      "unreadable": 0,
+      "unique_entries": 61,
+      "bank_size_total": 122
+    },
+    {
+      "suite": "libero_object_task",
+      "bank": "bank_max",
+      "requested": 66,
+      "loaded": 66,
+      "unreadable": 0,
+      "unique_entries": 66,
+      "bank_size_total": 127
+    },
+    {
+      "suite": "libero_goal_task",
+      "bank": "bank_2x",
+      "requested": 61,
+      "loaded": 61,
+      "unreadable": 0,
+      "unique_entries": 61,
+      "bank_size_total": 122
+    },
+    {
+      "suite": "libero_goal_task",
+      "bank": "bank_max",
+      "requested": 65,
+      "loaded": 65,
+      "unreadable": 0,
+      "unique_entries": 65,
+      "bank_size_total": 126
+    },
+    {
+      "suite": "libero_10_task",
+      "bank": "bank_2x",
+      "requested": 61,
+      "loaded": 61,
+      "unreadable": 0,
+      "unique_entries": 61,
+      "bank_size_total": 122
+    },
+    {
+      "suite": "libero_10_task",
+      "bank": "bank_max",
+      "requested": 65,
+      "loaded": 65,
+      "unreadable": 0,
+      "unique_entries": 65,
+      "bank_size_total": 126
+    },
+    {
+      "suite": "libero_spatial_task",
+      "bank": "bank_2x",
+      "requested": 61,
+      "loaded": 61,
+      "unreadable": 0,
+      "unique_entries": 61,
+      "bank_size_total": 122
+    },
+    {
+      "suite": "libero_spatial_task",
+      "bank": "bank_max",
+      "requested": 65,
+      "loaded": 65,
+      "unreadable": 0,
+      "unique_entries": 65,
+      "bank_size_total": 126
+    }
+  ],
+  "duplicate_stems_across_banks": {
+    "suite_libero10_swap_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_swap_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero10_task_t9": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_swap_t9": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_goal_task_t9": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_swap_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t5": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t6": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t7": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t8": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_swap_t9": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t0": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t1": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t2": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t3": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t4": [
+      "libero_object_task/bank_2x",
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t5": [
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t6": [
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t7": [
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t8": [
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_spatial_task_t9": [
+      "libero_object_task/bank_max",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_max"
+    ],
+    "suite_libero_object_task_t0": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t1": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t2": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t3": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t4": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t5": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t7": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t8": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ],
+    "suite_libero_object_task_t9": [
+      "libero_goal_task/bank_2x",
+      "libero_goal_task/bank_max",
+      "libero_10_task/bank_2x",
+      "libero_10_task/bank_max",
+      "libero_spatial_task/bank_2x",
+      "libero_spatial_task/bank_max"
+    ]
+  },
+  "representation": {
+    "global": {
+      "n": 61,
+      "tok_mean": 20.0,
+      "tok_median": 20,
+      "tok_min": 13,
+      "tok_max": 32,
+      "vocab_size": 541
+    },
+    "extra": {
+      "n": 146,
+      "tok_mean": 40.0,
+      "tok_median": 40.0,
+      "tok_min": 31,
+      "tok_max": 46,
+      "vocab_size": 650
+    },
+    "query_overlap_global": {
+      "n_queries": 134,
+      "mean": 0.584,
+      "median": 0.612,
+      "p90": 0.654,
+      "zero_overlap_rate": 0.0
+    },
+    "query_overlap_extra": {
+      "n_queries": 134,
+      "mean": 0.574,
+      "median": 0.593,
+      "p90": 0.63,
+      "zero_overlap_rate": 0.0
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "g2": {
+    "trigger": {
+      "T0": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_recall_per_ep": null,
+        "unnecessary_by_phase": {}
+      },
+      "T1": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_recall_per_ep": null,
+        "unnecessary_by_phase": {}
+      },
+      "T2": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_recall_per_ep": null,
+        "unnecessary_by_phase": {}
+      },
+      "T3": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_recall_per_ep": null,
+        "unnecessary_by_phase": {}
+      },
+      "T4": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_recall_per_ep": null,
+        "unnecessary_by_phase": {}
+      }
+    },
+    "ranking": {
+      "T0": {
+        "irrelevant_injection_per_ep": null,
+        "injections_per_ep": null,
+        "latency_mean_ms": null
+      },
+      "T1": {
+        "irrelevant_injection_per_ep": null,
+        "injections_per_ep": null,
+        "latency_mean_ms": null
+      },
+      "T2": {
+        "note": "class-agnostic trigger: no gold annotation"
+      },
+      "T3": {
+        "note": "class-agnostic trigger: no gold annotation"
+      },
+      "T4": {
+        "irrelevant_injection_per_ep": null,
+        "injections_per_ep": null,
+        "latency_mean_ms": null
+      }
+    },
+    "sr": {
+      "T0": {
+        "n": 0
+      },
+      "T1": {
+        "n": 0
+      },
+      "T2": {
+        "n": 0
+      },
+      "T3": {
+        "n": 0
+      },
+      "T4": {
+        "n": 0
+      }
+    }
+  }
+}

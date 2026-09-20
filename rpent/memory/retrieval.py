@@ -221,6 +221,7 @@ class DecisionMemory:
         # progress-mode state (Stage C2 frozen rules)
         self._queued_fire: str | None = None   # reason of the pending fire
         self._queued_result: dict | None = None
+        self._queued_phase = ""  # tracker phase at queue time (G0-C)
         self._last_eef: list[float] | None = None  # last seen final_eef_pos
         self._consec_pick_fails = 0
         self._prev_prim_failed = False
@@ -234,7 +235,26 @@ class DecisionMemory:
         self.mstuck_prog_m = float(os.environ.get("RPENT_MSTUCK_PROG_M",
                                                   "0.01"))
         self._boundary_count = 0
-        self._mstuck_win: list[tuple[list[float], float | None]] = []
+        # G0-D: window entries are (eef[:3], final_dist_m | None, target_key)
+        # — final_dist_m progress is only comparable within ONE commanded
+        # target (3-decimal key). Phase the window opened under is tracked
+        # separately; a phase transition resets the window.
+        self._mstuck_win: list[tuple[list[float], float | None,
+                                     tuple]] = []
+        self._mstuck_phase = ""
+        # G0-A/B: query mode. "native" = historical behavior (query =
+        # observation + trigger reason). "common" = WHEN/WHAT decoupled for
+        # the causal audit: the query carries ONLY phase / trigger-result
+        # action / trigger-result fields / task_language — the trigger
+        # reason is logged but never enters retrieval scoring (lexical
+        # query text AND the Q3 structured reason term).
+        self.query_mode = os.environ.get("RPENT_MEMORY_QUERY_MODE",
+                                         "native")
+        if self.query_mode not in ("native", "common"):
+            raise ValueError(
+                f"RPENT_MEMORY_QUERY_MODE={self.query_mode!r} must be "
+                "'native' or 'common' — fail fast rather than silently "
+                "contaminating an arm")
 
     # ------------------------------------------------------------- observe
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
@@ -261,6 +281,8 @@ class DecisionMemory:
         self._fresh_result = True
         if self.mode == "progress":
             self._progress_observe(name, data, is_error)
+        elif self.mode == "v1_per_result":
+            self._v1pr_observe(name, data, is_error)
         elif self.mode == "motion_stuck":
             self._mstuck_observe(name, data)
 
@@ -322,12 +344,43 @@ class DecisionMemory:
                 is_move and isinstance(fd, (int, float))
                 and fd > self.MOVE_ARRIVED)
 
+    def _v1pr_observe(self, name: str, data: dict, is_error: bool) -> None:
+        """G0-A experimental mode "v1_per_result": the frozen v1 trigger
+        RULES (T1-T7, untouched) evaluated at EACH tool result's arrival,
+        queued on hit, flushed at the next boundary.
+
+        Isolates signal preservation: v1_original loses a hit whenever a
+        later result arrives before the boundary (last-result-at-boundary
+        overwrite); this mode keeps it. Queue/cooldown semantics are the
+        PROGRESS flush semantics (drop-on-cooldown, drop at cap) so that
+        v1_per_result -> progress differs by rule content only. The v1
+        saw_primitive gate is applied at EVAL time (skipped until any
+        primitive has run), mirroring where v1 applies it."""
+        if not self.saw_primitive:
+            return
+        reason = self._v1_rules_for(name, data, is_error)
+        if reason and self._queued_fire is None:
+            self._queued_fire = reason
+            self._queued_result = dict(self._last_result)
+            self._queued_phase = self.last_phase
+
     # ------------------------------------------------------------- trigger
     def _trigger_reason(self) -> str | None:
         r = self._last_result
         if not r:
             return None
-        name, data, is_error = r["name"], r["data"], r["is_error"]
+        return self._v1_rules_for(r["name"], r["data"], r["is_error"])
+
+    def _v1_rules_for(self, name: str, data: dict,
+                      is_error: bool) -> str | None:
+        """The frozen v1 trigger rules T1-T7, evaluated for ONE result.
+
+        G0-A: body is VERBATIM the historical _trigger_reason logic — same
+        rules, same accumulated state reads (recent_primitives,
+        release_open, picks_failed, phase_steps, tracker). The only change
+        is that the result under judgment is an explicit argument, so
+        v1_per_result can evaluate each result at arrival time.
+        """
         if name not in PRIMITIVES + PERCEPTION:
             return None
         # T1 primitive failure
@@ -395,11 +448,13 @@ class DecisionMemory:
             if ph and ph != self.last_phase:
                 self.last_phase = ph
                 self.phase_steps = 0
-        if self.mode == "progress":
-            return self._progress_boundary(turn)
+        if self.mode in ("progress", "v1_per_result"):
+            return self._flush_boundary(turn)
         if self.mode == "periodic":
             return self._periodic_boundary(turn)
         if self.mode == "motion_stuck":
+            if self._mstuck_win and self.last_phase != self._mstuck_phase:
+                self._mstuck_win = []  # G0-D: phase transition resets window
             return self._mstuck_boundary(turn)
         if not self.saw_primitive or self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
@@ -421,9 +476,6 @@ class DecisionMemory:
         t0 = time.time()
         top, cand = self._retrieve(reason)
         latency_ms = (time.time() - t0) * 1000
-        if not top:
-            return None
-        block = self._block(reason, top)
         event = {
             "episode": "",  # filled at finalize from the output dir
             "task": os.environ.get("RPENT_TASK", ""),
@@ -433,15 +485,18 @@ class DecisionMemory:
             "symptom": reason,
             "observation_summary": self._obs_summary(),
             "trigger_reason": reason,
+            "trigger_mode": "v1",
+            "query_mode": self.query_mode,
             "retrieval_method": self.rank,
             "candidate_memory_ids": cand,
-            "ranked_memory_ids": top,
-            "scores": [round(s, 4) for s in self._last_scores],
-            "top1_memory": top[0],
-            "top3_memories": top[:3],
+            "retrieval_status": "MATCH" if top else "EMPTY",
+            "retrieval_empty": not bool(top),
+            "trigger_fired": True,
+            "scores": [],
+            "ranked_memory_ids": [],
+            "top1_memory": "",
+            "top3_memories": [],
             "retrieval_latency_ms": round(latency_ms, 2),
-            "retrieval_tokens": len(block.split()),
-            "planner_context_memory_ids": top[:3],
             "task_language": self.task_language,
             "planner_next_action": None,   # post-hoc, filled by analysis
             "planner_followed_top1": None,  # post-hoc
@@ -449,15 +504,32 @@ class DecisionMemory:
             "verification_result": None,    # post-hoc
             "episode_result": None,        # post-hoc
         }
+        # G0-E applies to the frozen v1 path too: every attempt is logged;
+        # EMPTY writes the event but injects nothing. Policy unchanged.
+        if not top:
+            self.events.append(event)
+            logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
+                        "(logged, no injection)", turn, reason)
+            return None
+        block = self._block(reason, top)
+        event["scores"] = [round(s, 4) for s in self._last_scores]
+        event["ranked_memory_ids"] = top
+        event["top1_memory"] = top[0]
+        event["top3_memories"] = top[:3]
+        event["retrieval_tokens"] = len(block.split())
+        event["planner_context_memory_ids"] = top[:3]
         self.events.append(event)
         logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
                     top[:3])
         return block, event
 
-    def _progress_boundary(self, turn: int) -> tuple[str, dict] | None:
-        """Flush a queued per-result fire (Stage C2 frozen semantics: no
-        first-primitive gate — the offline replay had none; cooldown blocks
-        DROP the fire rather than deferring it)."""
+    def _flush_boundary(self, turn: int) -> tuple[str, dict] | None:
+        """Flush a queued per-result fire. Shared by mode="progress"
+        (Stage C2 frozen rules; no first-primitive gate — the offline
+        replay had none) and mode="v1_per_result" (G0-A; the gate applies
+        at eval time instead). Cooldown blocks DROP the fire rather than
+        deferring it — the frozen progress semantics, adopted by
+        v1_per_result so the two differ by rule content only."""
         if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             self._queued_fire = None
             return None
@@ -467,38 +539,44 @@ class DecisionMemory:
         if not self._queued_fire:
             return None
         reason, qr = self._queued_fire, self._queued_result or {}
+        phase = self._queued_phase or self.last_phase
         self._queued_fire = None
         self._queued_result = None
+        self._queued_phase = ""
         self.boundaries_since_trigger = 0
         self.triggers_fired += 1
         t0 = time.time()
         obs = self._obs_summary_for(qr)
-        q = " | ".join([obs, reason])
-        top, cand = (self._q3(q, toks(reason)) if self.rank == "Q3"
+        # G0-B: common query = WHEN/WHAT decoupled — the reason never
+        # enters the query (lexical text) or the structured reason term.
+        reason_toks = toks(reason) if self.query_mode == "native" else set()
+        q = " | ".join([obs, reason]) if self.query_mode == "native" \
+            else obs
+        top, cand = (self._q3(q, reason_toks, obs, qr.get("name", ""),
+                              phase) if self.rank == "Q3"
                      else self._q0_fixed(q))
         latency_ms = (time.time() - t0) * 1000
-        if not top:
-            return None
-        block = self._block(reason, top)
         event = {
             "episode": "",
             "task": os.environ.get("RPENT_TASK", ""),
             "turn": turn,
-            "phase": self.last_phase,
+            "phase": phase,
             "last_action": qr.get("name", ""),
             "symptom": reason,
             "observation_summary": obs,
             "trigger_reason": reason,
-            "trigger_mode": "progress",
+            "trigger_mode": self.mode,
+            "query_mode": self.query_mode,
             "retrieval_method": self.rank,
             "candidate_memory_ids": cand,
-            "ranked_memory_ids": top,
-            "scores": [round(s, 4) for s in self._last_scores],
-            "top1_memory": top[0],
-            "top3_memories": top[:3],
+            "retrieval_status": "MATCH" if top else "EMPTY",
+            "retrieval_empty": not bool(top),
+            "trigger_fired": True,
+            "scores": [],
+            "ranked_memory_ids": [],
+            "top1_memory": "",
+            "top3_memories": [],
             "retrieval_latency_ms": round(latency_ms, 2),
-            "retrieval_tokens": len(block.split()),
-            "planner_context_memory_ids": top[:3],
             "task_language": self.task_language,
             "planner_next_action": None,
             "planner_followed_top1": None,
@@ -506,6 +584,20 @@ class DecisionMemory:
             "verification_result": None,
             "episode_result": None,
         }
+        # G0-E: EVERY trigger attempt is logged. An EMPTY retrieval writes
+        # the event (retrieval_empty=True) but injects nothing.
+        if not top:
+            self.events.append(event)
+            logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
+                        "(logged, no injection)", turn, reason)
+            return None
+        block = self._block(reason, top)
+        event["scores"] = [round(s, 4) for s in self._last_scores]
+        event["ranked_memory_ids"] = top
+        event["top1_memory"] = top[0]
+        event["top3_memories"] = top[:3]
+        event["retrieval_tokens"] = len(block.split())
+        event["planner_context_memory_ids"] = top[:3]
         self.events.append(event)
         logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
                     top[:3])
@@ -517,33 +609,56 @@ class DecisionMemory:
     # path, cooldown and per-episode cap are identical. The frozen v1/progress
     # code paths above are untouched.
     def _mstuck_observe(self, name: str, data: dict) -> None:
-        """T3_MOTION_STUCK: generic spatial-stuck detector. Uses ONLY EEF
-        displacement between consecutive move results and (when on a common
-        target) final_dist_m improvement — no primitive-specific PICK/PLACE/
-        PERCEPTION logic. Evaluated only when a move result arrives."""
-        if name not in ("move_to", "move_pose"):
+        """T3_MOTION_STUCK: generic spatial-stuck detector (G0-D hardened).
+        Uses ONLY EEF displacement between consecutive move results and
+        final_dist_m improvement — the latter comparable ONLY between two
+        results commanded to the SAME target (target_xyz key, 3 decimals).
+        No primitive-specific PICK/PLACE/PERCEPTION logic. Window resets
+        on: a non-move primitive interleaved, a commanded-target change, a
+        missing target (no progress anchor), or a phase transition (checked
+        at the boundary). Evaluated only when a move result arrives."""
+        if name in PRIMITIVES and name not in ("move_to", "move_pose"):
+            self._mstuck_win = []   # pick/release/... between moves: reset
             return
+        if name not in ("move_to", "move_pose"):
+            return                  # perception/memory results: no reset
         eef = data.get("final_eef_pos")
+        tgt = data.get("target_xyz")
         if not isinstance(eef, list) or len(eef) < 3:
             return
+        if not isinstance(tgt, list) or len(tgt) < 3:
+            self._mstuck_win = []   # no target -> no progress anchor
+            return
+        tkey = tuple(round(v, 3) for v in tgt[:3])
+        if self._mstuck_win and self._mstuck_win[-1][2] != tkey:
+            self._mstuck_win = []   # commanded target changed
         fd = data.get("final_dist_m")
         self._mstuck_win.append(
-            (eef[:3], fd if isinstance(fd, (int, float)) else None))
+            (eef[:3], fd if isinstance(fd, (int, float)) else None, tkey))
         self._mstuck_win = self._mstuck_win[-self.mstuck_k:]
+        if len(self._mstuck_win) == 1:
+            self._mstuck_phase = self.last_phase
         if len(self._mstuck_win) < self.mstuck_k:
             return
-        for (p0, d0), (p1, d1) in zip(self._mstuck_win, self._mstuck_win[1:]):
+        for (p0, d0, _t0), (p1, d1, _t1) in zip(self._mstuck_win,
+                                                self._mstuck_win[1:]):
             disp = sum((a - b) ** 2 for a, b in zip(p0, p1)) ** 0.5
             if disp >= self.mstuck_move_m:
                 return
+            # window entries share tkey by construction; progress is
+            # same-target by design. Unknown dist (None) -> cannot verify
+            # progress, displacement evidence still stands (kept from the
+            # frozen DEV calibration semantics).
             if d0 is not None and d1 is not None \
                     and d0 - d1 >= self.mstuck_prog_m:
                 return  # real progress toward the commanded target
         if self._queued_fire is None:
             self._queued_fire = (f"motion_stuck: k={self.mstuck_k} "
                                  f"disp<{self.mstuck_move_m:.3f}m "
-                                 f"prog<{self.mstuck_prog_m:.3f}m")
+                                 f"prog<{self.mstuck_prog_m:.3f}m "
+                                 f"same-target")
             self._queued_result = dict(self._last_result)
+            self._queued_phase = self.last_phase
             self._mstuck_win = []  # window resets once a fire is queued
 
     def _periodic_boundary(self, turn: int) -> tuple[str, dict] | None:
@@ -567,12 +682,14 @@ class DecisionMemory:
         qr = self._queued_result or {}
         self._queued_fire = None
         self._queued_result = None
+        self._queued_phase = ""
         return self._baseline_fire(turn, reason, qr, "motion_stuck")
 
     def _baseline_fire(self, turn: int, reason: str, qr: dict,
                        mode_label: str) -> tuple[str, dict] | None:
         """Shared fire path for the Stage G baselines — same cooldown/cap/
-        retrieval/logging semantics as the frozen modes."""
+        retrieval/logging semantics as the frozen modes (incl. G0-B query
+        mode and G0-E attempt logging)."""
         if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
         if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
@@ -581,32 +698,35 @@ class DecisionMemory:
         self.triggers_fired += 1
         t0 = time.time()
         obs = self._obs_summary_for(qr)
-        q = " | ".join([obs, reason])
-        top, cand = (self._q3(q, toks(reason)) if self.rank == "Q3"
+        reason_toks = toks(reason) if self.query_mode == "native" else set()
+        q = " | ".join([obs, reason]) if self.query_mode == "native" \
+            else obs
+        phase = self._queued_phase or self.last_phase
+        top, cand = (self._q3(q, reason_toks, obs, qr.get("name", ""),
+                              phase) if self.rank == "Q3"
                      else self._q0_fixed(q))
         latency_ms = (time.time() - t0) * 1000
-        if not top:
-            return None
-        block = self._block(reason, top)
         event = {
             "episode": "",
             "task": os.environ.get("RPENT_TASK", ""),
             "turn": turn,
-            "phase": self.last_phase,
+            "phase": phase,
             "last_action": qr.get("name", ""),
             "symptom": reason,
             "observation_summary": obs,
             "trigger_reason": reason,
             "trigger_mode": mode_label,
+            "query_mode": self.query_mode,
             "retrieval_method": self.rank,
             "candidate_memory_ids": cand,
-            "ranked_memory_ids": top,
-            "scores": [round(s, 4) for s in self._last_scores],
-            "top1_memory": top[0],
-            "top3_memories": top[:3],
+            "retrieval_status": "MATCH" if top else "EMPTY",
+            "retrieval_empty": not bool(top),
+            "trigger_fired": True,
+            "scores": [],
+            "ranked_memory_ids": [],
+            "top1_memory": "",
+            "top3_memories": [],
             "retrieval_latency_ms": round(latency_ms, 2),
-            "retrieval_tokens": len(block.split()),
-            "planner_context_memory_ids": top[:3],
             "task_language": self.task_language,
             "planner_next_action": None,
             "planner_followed_top1": None,
@@ -614,6 +734,18 @@ class DecisionMemory:
             "verification_result": None,
             "episode_result": None,
         }
+        if not top:
+            self.events.append(event)
+            logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
+                        "(logged, no injection)", turn, reason)
+            return None
+        block = self._block(reason, top)
+        event["scores"] = [round(s, 4) for s in self._last_scores]
+        event["ranked_memory_ids"] = top
+        event["top1_memory"] = top[0]
+        event["top3_memories"] = top[:3]
+        event["retrieval_tokens"] = len(block.split())
+        event["planner_context_memory_ids"] = top[:3]
         self.events.append(event)
         logger.info("[memrecall] turn=%s trigger=%s top3=%s", turn, reason,
                     top[:3])
@@ -621,9 +753,12 @@ class DecisionMemory:
 
     def _load_extra_bank(self, spec: str) -> None:
         """Append real library pages (G4 distractor banks) as retrieval
-        entries. Page frontmatter supplies task_language (used as title);
-        the body supplies the lexical index line and the Q3 body text. No
-        card content is edited; global cards keep their exact index lines."""
+        entries. G0-F: IDs are NAMESPACED as extra::<dir>::<stem> so pages
+        from different bank directories can never collide (the global 61
+        card ids are untouched). Page frontmatter supplies task_language
+        (used as title); the body supplies the lexical index line and the
+        Q3 body text. No card content is edited; global cards keep their
+        exact index lines."""
         n = 0
         for d in spec.split(":"):
             base = Path(d)
@@ -631,14 +766,16 @@ class DecisionMemory:
                 logger.warning("[memrecall] extra bank dir missing: %s", d)
                 continue
             for p in sorted(base.glob("*.md")):
-                if p.stem in self.cards:
+                cid = f"extra::{base.name}::{p.stem}"
+                if cid in self.cards:
                     continue
                 try:
                     text = p.read_text(encoding="utf-8")
                 except OSError:
                     continue
                 fm, _, body = text.partition("\n---")
-                card = {"id": p.stem, "kind": "suite_page",
+                card = {"id": cid, "kind": "suite_page", "dir": base.name,
+                        "stem": p.stem,
                         "title": p.stem.replace("_", " "),
                         "applies_when": "", "symptom": "",
                         "falsify": ""}
@@ -648,9 +785,9 @@ class DecisionMemory:
                 # same "how_to" key (and the same 400-char cap) as the
                 # global cards, so _block() renders both uniformly.
                 card["how_to"] = re.sub(r"\s+", " ", body).strip()[:400]
-                self.cards[p.stem] = card
-                self.index[p.stem] = (card["title"] + " " +
-                                      card["how_to"])[:600]
+                self.cards[cid] = card
+                self.index[cid] = (card["title"] + " " +
+                                   card["how_to"])[:600]
                 n += 1
         if n:
             self.ids = sorted(self.cards)
@@ -662,7 +799,8 @@ class DecisionMemory:
             self.phases = {c: card_phases(self.cards[c]) for c in self.ids}
             self._emb_card = None
             logger.info("[memrecall] extra bank: +%d real pages -> %d "
-                        "entries", n, len(self.ids))
+                        "entries (namespaced extra::<dir>::<stem>)", n,
+                        len(self.ids))
 
     # ------------------------------------------------------------ retrieval
     def _obs_summary(self) -> str:
@@ -683,26 +821,42 @@ class DecisionMemory:
         return (f"phase={self.last_phase}; last action={r.get('name', '')}; "
                 f"result fields={fields}; task: {self.task_language[:110]}")
 
-    def _query_text(self, reason: str) -> str:
-        return " | ".join([self._obs_summary(), reason])
-
     def _retrieve(self, reason: str) -> tuple[list[str], list[str]]:
-        q = self._query_text(reason)
+        """v1 boundary retrieval. The v1 boundary fires on the LAST result,
+        so the structured Q3 terms (obs text / action / phase) are that
+        result's values — consistent with the G0-C explicit-state fix."""
+        obs = self._obs_summary()
+        reason_toks = toks(reason) if self.query_mode == "native" else set()
+        q = " | ".join([obs, reason]) if self.query_mode == "native" \
+            else obs
         if self.rank == "Q3":
-            return self._q3(q, toks(reason))
+            return self._q3(q, reason_toks, obs, self.last_primitive,
+                            self.last_phase)
         return self._q0_fixed(q)
 
     def _q0_fixed(self, q: str) -> tuple[list[str], list[str]]:
         qt = toks(q) | toks(self.task_language)
+        # G0-F: namespaced extra ids score by their STEM tokens only (the
+        # extra::<dir>:: prefix contributes nothing); global cards, which
+        # carry no "::", are scored exactly as before.
         scored = sorted(
             ((len(qt & (toks(self.index.get(c, self.cards[c]["title"]))
-                        | toks(c.replace("-", " ")))), c) for c in self.ids),
+                        | toks(c.split("::")[-1].replace("-", " ")))), c)
+             for c in self.ids),
             reverse=True)
         self._last_scores = [float(s) for s, _ in scored[:5]]
         top = [c for s, c in scored if s > 0][:3]
         return top, self.ids
 
-    def _q3(self, q: str, reason_toks: set[str]) -> tuple[list[str], list[str]]:
+    def _q3(self, q: str, reason_toks: set[str], obs_text: str,
+            action: str, phase: str) -> tuple[list[str], list[str]]:
+        """Q3 structured rerank — FROZEN weights / pool size / encoder /
+        phase map (Stage A port, unchanged).
+
+        G0-C: every structured term (observation tokens, action, phase)
+        comes in EXPLICITLY from the result the trigger fired on, so a
+        queued fire can no longer be rescored against a LATER result's
+        state. Weights and the semantic pool are untouched."""
         if self._emb_card is None:
             vecs = self._embedder.embed([self.body[c] for c in self.ids])
             self._emb_card = dict(zip(self.ids, vecs))
@@ -711,8 +865,8 @@ class DecisionMemory:
                       for c in self.ids), reverse=True)
         pool = sem[:20]
         cand = [c for _, c in pool]
-        qt_obs = toks(self._obs_summary())
-        act = (self.last_primitive or "").lower().replace("pi0_", "")
+        qt_obs = toks(obs_text)
+        act = (action or "").lower().replace("pi0_", "")
         rescored = []
         for s, c in pool:
             card = self.cards[c]
@@ -722,7 +876,7 @@ class DecisionMemory:
                   + (W_ACTION if act and act in (
                       card["applies_when"] + " " + card["symptom"]).lower()
                      else 0.0)
-                  + (W_PHASE if self.last_phase in self.phases[c] else 0.0))
+                  + (W_PHASE if phase in self.phases[c] else 0.0))
             rescored.append((sc, c))
         rescored.sort(reverse=True)
         self._last_scores = [float(s) for s, _ in rescored[:5]]

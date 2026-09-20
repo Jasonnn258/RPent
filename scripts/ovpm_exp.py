@@ -135,6 +135,25 @@ COND_ENV = {
               "RPENT_MEMORY_TRIGGER": "progress",
               "RPENT_MEMORY_RANK": "Q0_FIXED"},
     # ---- Stage G (2026-09-20) -------------------------------------------
+    # G0 causal audit arms (analysis/stageG0_manifest.md): B isolates the
+    # signal-preservation effect (frozen v1 rules, per-result evaluation),
+    # D/E decouple WHEN from WHAT (common retrieval query — the trigger
+    # reason never enters retrieval scoring).
+    "g0B": {"RPENT_STRUCTURED_MEMORY": "1",
+            "RPENT_MEMORY_ACCESS_FIX": "1",
+            "RPENT_MEMORY_TRIGGER": "v1_per_result",
+            "RPENT_MEMORY_QUERY_MODE": "native",
+            "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    "g0D": {"RPENT_STRUCTURED_MEMORY": "1",
+            "RPENT_MEMORY_ACCESS_FIX": "1",
+            "RPENT_MEMORY_TRIGGER": "v1_per_result",
+            "RPENT_MEMORY_QUERY_MODE": "common",
+            "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    "g0E": {"RPENT_STRUCTURED_MEMORY": "1",
+            "RPENT_MEMORY_ACCESS_FIX": "1",
+            "RPENT_MEMORY_TRIGGER": "progress",
+            "RPENT_MEMORY_QUERY_MODE": "common",
+            "RPENT_MEMORY_RANK": "Q0_FIXED"},
     # G3 arm D: progress trigger + Q3 (two orthogonal frozen envs; no new
     # method — stageG_subset_manifest.md §2).
     "memO3": {"RPENT_STRUCTURED_MEMORY": "1",
@@ -545,6 +564,13 @@ def build_episodes(args, done):
         conds = conds or ["memO2"]
         tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
+    elif args.stage == "g0":
+        # Stage G0 causal audit (DEV suite only): A = historical memB2
+        # rows (v1+native), C = historical memO2 rows (progress+native)
+        # — both REUSED, never re-run. B/D/E are the fresh arms.
+        conds = conds or ["g0B", "g0D", "g0E"]
+        tasks = tasks or MEMB_TASKS
+        repeats = repeats or [1]
     elif args.stage in ("g1", "g2", "g3", "g4"):
         # Stage G: multi-suite grids on the frozen final-test suites
         # (stageG_subset_manifest.md). --suites/--tasks override for the
@@ -684,7 +710,7 @@ def main():
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
                              "stage1", "memB", "memC", "smoke",
-                             "g1", "g2", "g3", "g4"])
+                             "g0", "g1", "g2", "g3", "g4"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")

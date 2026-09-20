@@ -1052,16 +1052,21 @@ def _new_memory_recall(tracker: Any) -> Any:
     Stage G baseline arms add "periodic"/"motion_stuck" (frozen in
     analysis/stageG_trigger_baseline_config.md) — baseline decision rules
     only; retrieval/injection/cooldown identical to the frozen modes.
+    Stage G0-A adds the experimental "v1_per_result" mode (frozen v1
+    rules, per-result evaluation — causal audit only, never a method
+    change). Query mode (native|common) comes from
+    RPENT_MEMORY_QUERY_MODE (G0-B) and is validated inside DecisionMemory.
     """
     mode = os.environ.get("RPENT_MEMORY_TRIGGER", "")
-    if mode not in ("1", "progress", "periodic", "motion_stuck") \
-            or tracker is None:
+    if mode not in ("1", "progress", "v1_per_result", "periodic",
+                    "motion_stuck") or tracker is None:
         return None
     from rpent.memory.retrieval import DecisionMemory
 
     rank = os.environ.get("RPENT_MEMORY_RANK", "Q0_FIXED")
+    qmode = os.environ.get("RPENT_MEMORY_QUERY_MODE", "native")
     logger.info("[memrecall] decision-point memory recall ON — rank=%s "
-                "mode=%s", rank, mode)
+                "mode=%s query=%s", rank, mode, qmode)
     return DecisionMemory(tracker, mode=("v1" if mode == "1" else mode))
 
 
