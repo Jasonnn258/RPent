@@ -1,0 +1,4030 @@
+{
+  "version": "retrieval_aliases_v1",
+  "generated": "2026-09-20",
+  "policy": {
+    "layers": [
+      "R1:symptom<=5",
+      "R3a:task_only-field-harvest",
+      "R5:recipe-prompts<=2-perception-only"
+    ],
+    "global_cap_per_card": 8,
+    "alias_max_tokens": 12,
+    "compact_max_chars": 90,
+    "marker_wordlist": [
+      "back_project",
+      "carried",
+      "carry",
+      "collide",
+      "collision",
+      "coordinates",
+      "descend",
+      "descent",
+      "distractor",
+      "drift",
+      "drifted",
+      "duplicate",
+      "false",
+      "grabbed",
+      "grasp",
+      "gripper",
+      "held",
+      "holding",
+      "hover",
+      "hovering",
+      "lift",
+      "lifted",
+      "liner",
+      "mask",
+      "masked",
+      "occluded",
+      "occludes",
+      "opening",
+      "perched",
+      "pixel",
+      "pixels",
+      "predicate",
+      "prompt",
+      "prompted",
+      "relocate",
+      "retreat",
+      "rim",
+      "roll",
+      "rolled",
+      "segment",
+      "segmentation",
+      "segmented",
+      "slide",
+      "slip",
+      "slipped",
+      "snag",
+      "snagged",
+      "stall",
+      "stalled",
+      "success",
+      "terminated",
+      "tip",
+      "tipped",
+      "true",
+      "wall",
+      "wrong"
+    ],
+    "no_hand_written_phrase_grammar": true,
+    "sources_read": [
+      "resources/libero/global/*.md",
+      "resources/libero/task_only/*.json",
+      "resources/libero/task_only/*_recipe.jsonl"
+    ],
+    "leakage_firewall": "script never reads Stage A/C1/C3 query or failure artifacts; aliases are frozen after audit; no test-driven iteration"
+  },
+  "n_cards": 61,
+  "n_aliases_total": 468,
+  "cards": [
+    {
+      "memory_id": "avoid-full-task-prompt-after-miss",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_task_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "missed grasp",
+        "rogue place",
+        "full task prompt",
+        "tipped object",
+        "pi0 opened gripper",
+        "missed clean setup before retry",
+        "visual/proprioceptive successful grasp despite heuristic success=false",
+        "the successful manipulation sequence was: move to the bottle pre grasp at"
+      ],
+      "alias_sources": [
+        {
+          "alias": "missed grasp",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "missed grasp"
+        },
+        {
+          "alias": "rogue place",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rogue place"
+        },
+        {
+          "alias": "full task prompt",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "full task prompt"
+        },
+        {
+          "alias": "tipped object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tipped object"
+        },
+        {
+          "alias": "pi0 opened gripper",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0 opened gripper"
+        },
+        {
+          "alias": "missed clean setup before retry",
+          "source_cell": "goal_task_t6_s0",
+          "source_field": "goal_task_t6_s0:pick_result.bottle_pi0_pick_step16.used_as",
+          "source_excerpt": "missed clean setup before retry"
+        },
+        {
+          "alias": "visual/proprioceptive successful grasp despite heuristic success=false",
+          "source_cell": "goal_task_t6_s0",
+          "source_field": "goal_task_t6_s0:pick_result.bottle_pi0_pick_step17.used_as",
+          "source_excerpt": "visual/proprioceptive successful grasp despite heuristic success=false"
+        },
+        {
+          "alias": "the successful manipulation sequence was: move to the bottle pre grasp at",
+          "source_cell": "goal_task_t6_s0",
+          "source_field": "goal_task_t6_s0:strategy_notes",
+          "source_excerpt": "The successful manipulation sequence was: move_to the bottle pre-grasp at [-0.166,-0.047,1.08] with gripper open;"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-insertion-open-retreat",
+      "kind": "strategy",
+      "source_cells": [
+        "object_task_t4_s0"
+      ],
+      "retrieval_aliases": [
+        "basket",
+        "perched",
+        "rim",
+        "liner",
+        "release false",
+        "object inside",
+        "wrist high and agentview showed milk carton raised in gripper",
+        "gripper gap indicated object held"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "perched"
+        },
+        {
+          "alias": "rim",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim"
+        },
+        {
+          "alias": "liner",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "liner"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release false"
+        },
+        {
+          "alias": "object inside",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object inside"
+        },
+        {
+          "alias": "wrist high and agentview showed milk carton raised in gripper",
+          "source_cell": "object_task_t4_s0",
+          "source_field": "object_task_t4_s0:pick_result.milk_pi0_pick_step2.verified_by",
+          "source_excerpt": "wrist_high and agentview showed milk carton raised in gripper;"
+        },
+        {
+          "alias": "gripper gap indicated object held",
+          "source_cell": "object_task_t4_s0",
+          "source_field": "object_task_t4_s0:pick_result.milk_pi0_pick_step2.verified_by",
+          "source_excerpt": "gripper gap indicated object held"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-release-retreat-settle",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "basket release false",
+        "object in basket",
+        "settle",
+        "rim snag",
+        "despite heuristic success=false, wrist and agentview showed the alphabet soup can held",
+        "the blue and yellow alphabet soup can",
+        "same blue/yellow can visible under wrist after pre position, no semantic override",
+        "open white lined woven basket on image right; place into visible interior,"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket release false"
+        },
+        {
+          "alias": "object in basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object in basket"
+        },
+        {
+          "alias": "settle",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "settle"
+        },
+        {
+          "alias": "rim snag",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim snag"
+        },
+        {
+          "alias": "despite heuristic success=false, wrist and agentview showed the alphabet soup can held",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:pick_result.alphabet_soup_pi0_pick_step2.visual_judgement",
+          "source_excerpt": "Despite heuristic success=false, wrist and agentview showed the alphabet soup can held in the gripper and already above the basket mouth."
+        },
+        {
+          "alias": "the blue and yellow alphabet soup can",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:localization.alphabet_soup_agentview.sam_prompt",
+          "source_excerpt": "the blue and yellow alphabet soup can"
+        },
+        {
+          "alias": "same blue/yellow can visible under wrist after pre position, no semantic override",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:localization.alphabet_soup_wrist_refine_step1.evidence",
+          "source_excerpt": "same blue/yellow can visible under wrist after pre-position, no semantic override"
+        },
+        {
+          "alias": "open white lined woven basket on image right; place into visible interior,",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:localization.basket_cavity.evidence",
+          "source_excerpt": "open white-lined woven basket on image right; place into visible interior, not outer rim"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-two-cans-wedge-not-stack",
+      "kind": "strategy",
+      "source_cells": [
+        "10_swap_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "second object rolls out of basket",
+        "lands outside in region",
+        "predicate never fires",
+        "can rolled to corner",
+        "placed on top and slipped",
+        "both in basket wont terminate",
+        "success perception judged : peak lift 0.211m, min gripper opening 0.063 can",
+        "eef drifted +y to 0.042 pi0 trained place drift"
+      ],
+      "alias_sources": [
+        {
+          "alias": "second object rolls out of basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "second object rolls out of basket"
+        },
+        {
+          "alias": "lands outside in region",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "lands outside In-region"
+        },
+        {
+          "alias": "predicate never fires",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "predicate never fires"
+        },
+        {
+          "alias": "can rolled to corner",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "can rolled to corner"
+        },
+        {
+          "alias": "placed on top and slipped",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "placed on top and slipped"
+        },
+        {
+          "alias": "both in basket wont terminate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "both-in-basket wont terminate"
+        },
+        {
+          "alias": "success perception judged : peak lift 0.211m, min gripper opening 0.063 can",
+          "source_cell": "10_swap_t0_s0",
+          "source_field": "10_swap_t0_s0:pick_result.tomato_pi0_pick_step2",
+          "source_excerpt": "success (perception-judged): peak_lift 0.211m, min_gripper_opening 0.063 (can diameter, holding)."
+        },
+        {
+          "alias": "eef drifted +y to 0.042 pi0 trained place drift",
+          "source_cell": "10_swap_t0_s0",
+          "source_field": "10_swap_t0_s0:pick_result.tomato_pi0_pick_step2",
+          "source_excerpt": "eef drifted +y to 0.042 (Pi0 trained place drift)."
+        }
+      ]
+    },
+    {
+      "memory_id": "box-vs-can-lid-wrist-disambiguation",
+      "kind": "perception",
+      "source_cells": [
+        "10_swap_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "gripper landed over the wrong object",
+        "box top reads as can lid",
+        "region back project captured the lid",
+        "standing box next to can",
+        "basket cavity ~ x= 0.04,y=0.235 with a fabric liner whose surface sits"
+      ],
+      "alias_sources": [
+        {
+          "alias": "gripper landed over the wrong object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper landed over the wrong object"
+        },
+        {
+          "alias": "box top reads as can lid",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "box top reads as can lid"
+        },
+        {
+          "alias": "region back project captured the lid",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "region back_project captured the lid"
+        },
+        {
+          "alias": "standing box next to can",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "standing box next to can"
+        },
+        {
+          "alias": "basket cavity ~ x= 0.04,y=0.235 with a fabric liner whose surface sits",
+          "source_cell": "10_swap_t1_s0",
+          "source_field": "10_swap_t1_s0:strategy_notes",
+          "source_excerpt": "Basket cavity ~(x=-0.04,y=0.235) with a fabric liner whose surface sits high (z~0.51-0.55), so the basket is shallow."
+        }
+      ]
+    },
+    {
+      "memory_id": "boxes-tolerate-stacking-in-basket",
+      "kind": "strategy",
+      "source_cells": [
+        "10_swap_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "descent stalled high in basket",
+        "box resting on other box",
+        "in predicate",
+        "two items one small basket",
+        "release without reaching floor",
+        "basket cavity ~ x= 0.04,y=0.235 with a fabric liner whose surface sits"
+      ],
+      "alias_sources": [
+        {
+          "alias": "descent stalled high in basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "descent stalled high in basket"
+        },
+        {
+          "alias": "box resting on other box",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "box resting on other box"
+        },
+        {
+          "alias": "in predicate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "In predicate"
+        },
+        {
+          "alias": "two items one small basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "two items one small basket"
+        },
+        {
+          "alias": "release without reaching floor",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release without reaching floor"
+        },
+        {
+          "alias": "basket cavity ~ x= 0.04,y=0.235 with a fabric liner whose surface sits",
+          "source_cell": "10_swap_t1_s0",
+          "source_field": "10_swap_t1_s0:strategy_notes",
+          "source_excerpt": "Basket cavity ~(x=-0.04,y=0.235) with a fabric liner whose surface sits high (z~0.51-0.55), so the basket is shallow."
+        }
+      ]
+    },
+    {
+      "memory_id": "brand-label-over-segmentation",
+      "kind": "perception",
+      "source_cells": [
+        "object_task_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "wrong object",
+        "low score segment",
+        "brand confusion",
+        "similar cans",
+        "pick up the alphabet soup can",
+        "a region back project over the visible opening/rim gave usable interior near",
+        "segmentation prompt: the alphabet soup can",
+        "segmentation prompt: the basket interior"
+      ],
+      "alias_sources": [
+        {
+          "alias": "wrong object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong-object"
+        },
+        {
+          "alias": "low score segment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "low-score-segment"
+        },
+        {
+          "alias": "brand confusion",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "brand-confusion"
+        },
+        {
+          "alias": "similar cans",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "similar-cans"
+        },
+        {
+          "alias": "pick up the alphabet soup can",
+          "source_cell": "object_task_t1_s0",
+          "source_field": "object_task_t1_s0:pick_result.alphabet_soup_pi0_pick_step2.instruction",
+          "source_excerpt": "pick up the alphabet soup can"
+        },
+        {
+          "alias": "a region back project over the visible opening/rim gave usable interior near",
+          "source_cell": "object_task_t1_s0",
+          "source_field": "object_task_t1_s0:strategy_notes",
+          "source_excerpt": "a region back_project over the visible opening/rim gave usable interior near [-0.055,0.276]."
+        },
+        {
+          "alias": "segmentation prompt: the alphabet soup can",
+          "source_cell": "object_task_t1_s0",
+          "source_field": "object_task_t1_s0:recipe",
+          "source_excerpt": "segmentation prompt: the alphabet soup can"
+        },
+        {
+          "alias": "segmentation prompt: the basket interior",
+          "source_cell": "object_task_t1_s0",
+          "source_field": "object_task_t1_s0:recipe",
+          "source_excerpt": "segmentation prompt: the basket interior"
+        }
+      ]
+    },
+    {
+      "memory_id": "caddy-back-is-near-robot-pocket",
+      "kind": "perception",
+      "source_cells": [
+        "10_task_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "back compartment",
+        "front compartment",
+        "caddy",
+        "organizer",
+        "which pocket",
+        "deep pocket wont fire",
+        "segmentation prompt: white and yellow mug"
+      ],
+      "alias_sources": [
+        {
+          "alias": "back compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "back compartment"
+        },
+        {
+          "alias": "front compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "front compartment"
+        },
+        {
+          "alias": "caddy",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "caddy"
+        },
+        {
+          "alias": "organizer",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "organizer"
+        },
+        {
+          "alias": "which pocket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "which pocket"
+        },
+        {
+          "alias": "deep pocket wont fire",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "deep pocket wont fire"
+        },
+        {
+          "alias": "segmentation prompt: white and yellow mug",
+          "source_cell": "10_task_t5_s0",
+          "source_field": "10_task_t5_s0:recipe",
+          "source_excerpt": "segmentation prompt: white and yellow mug"
+        }
+      ]
+    },
+    {
+      "memory_id": "can-pick-visual-confirmation",
+      "kind": "perception",
+      "source_cells": [
+        "object_swap_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 false negative",
+        "gripper threshold",
+        "can held",
+        "pick success false",
+        "despite heuristic success=false, wrist and agentview showed the alphabet soup can held",
+        "the blue and yellow alphabet soup can",
+        "segmentation prompt: the blue and yellow alphabet soup can",
+        "segmentation prompt: the inside of the basket"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 false negative",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0 false negative"
+        },
+        {
+          "alias": "gripper threshold",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper threshold"
+        },
+        {
+          "alias": "can held",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "can held"
+        },
+        {
+          "alias": "pick success false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pick success false"
+        },
+        {
+          "alias": "despite heuristic success=false, wrist and agentview showed the alphabet soup can held",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:pick_result.alphabet_soup_pi0_pick_step2.visual_judgement",
+          "source_excerpt": "Despite heuristic success=false, wrist and agentview showed the alphabet soup can held in the gripper and already above the basket mouth."
+        },
+        {
+          "alias": "the blue and yellow alphabet soup can",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:localization.alphabet_soup_agentview.sam_prompt",
+          "source_excerpt": "the blue and yellow alphabet soup can"
+        },
+        {
+          "alias": "segmentation prompt: the blue and yellow alphabet soup can",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: the blue and yellow alphabet soup can"
+        },
+        {
+          "alias": "segmentation prompt: the inside of the basket",
+          "source_cell": "object_swap_t0_s0",
+          "source_field": "object_swap_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: the inside of the basket"
+        }
+      ]
+    },
+    {
+      "memory_id": "closed-gripper-container-insertion",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "object over basket",
+        "release not firing",
+        "rim catch",
+        "held can over container",
+        "pick up the tomato sauce can",
+        "heuristic success was false only because gripper opening was slightly above threshold",
+        "image evidence showed the tomato sauce can held by the gripper over",
+        "sam3 the tomato sauce can mask highlighted the can, not the nearby"
+      ],
+      "alias_sources": [
+        {
+          "alias": "object over basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object over basket"
+        },
+        {
+          "alias": "release not firing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release not firing"
+        },
+        {
+          "alias": "rim catch",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim catch"
+        },
+        {
+          "alias": "held can over container",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held can over container"
+        },
+        {
+          "alias": "pick up the tomato sauce can",
+          "source_cell": "object_swap_t5_s0",
+          "source_field": "object_swap_t5_s0:pick_result.tomato_pi0_pick_step2.instruction",
+          "source_excerpt": "pick up the tomato sauce can"
+        },
+        {
+          "alias": "heuristic success was false only because gripper opening was slightly above threshold",
+          "source_cell": "object_swap_t5_s0",
+          "source_field": "object_swap_t5_s0:pick_result.tomato_pi0_pick_step2.interpretation",
+          "source_excerpt": "Heuristic success was false only because gripper opening was slightly above threshold;"
+        },
+        {
+          "alias": "image evidence showed the tomato sauce can held by the gripper over",
+          "source_cell": "object_swap_t5_s0",
+          "source_field": "object_swap_t5_s0:pick_result.tomato_pi0_pick_step2.interpretation",
+          "source_excerpt": "image evidence showed the tomato sauce can held by the gripper over the basket."
+        },
+        {
+          "alias": "sam3 the tomato sauce can mask highlighted the can, not the nearby",
+          "source_cell": "object_swap_t5_s0",
+          "source_field": "object_swap_t5_s0:localization.tomato_sauce.agentview_evidence",
+          "source_excerpt": "SAM3 'the tomato sauce can' mask highlighted the can, not the nearby orange juice or milk cartons."
+        }
+      ]
+    },
+    {
+      "memory_id": "co-vary-pitch-clears-yawed-reach-wall",
+      "kind": "primitive",
+      "source_cells": [
+        "10_swap_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "yawed reach wall",
+        "final distance 5 cm",
+        "carry stalls",
+        "handle unreachable",
+        "osc stall",
+        "manual handle grasp",
+        "agentview showed right pot lifted and original spot cleared",
+        "agentview and wrist showed left pot lifted"
+      ],
+      "alias_sources": [
+        {
+          "alias": "yawed reach wall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "yawed reach wall"
+        },
+        {
+          "alias": "final distance 5 cm",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "final distance 5 cm"
+        },
+        {
+          "alias": "carry stalls",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "carry stalls"
+        },
+        {
+          "alias": "handle unreachable",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "handle unreachable"
+        },
+        {
+          "alias": "osc stall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "OSC stall"
+        },
+        {
+          "alias": "manual handle grasp",
+          "source_cell": "10_swap_t8_s0",
+          "source_field": "10_swap_t8_s0:pick_result.right_handle_set_gripper_step13.method",
+          "source_excerpt": "manual handle grasp"
+        },
+        {
+          "alias": "agentview showed right pot lifted and original spot cleared",
+          "source_cell": "10_swap_t8_s0",
+          "source_field": "10_swap_t8_s0:pick_result.right_handle_set_gripper_step13.verified",
+          "source_excerpt": "agentview showed right pot lifted and original spot cleared"
+        },
+        {
+          "alias": "agentview and wrist showed left pot lifted",
+          "source_cell": "10_swap_t8_s0",
+          "source_field": "10_swap_t8_s0:pick_result.left_handle_set_gripper_step24.verified",
+          "source_excerpt": "agentview and wrist showed left pot lifted"
+        }
+      ]
+    },
+    {
+      "memory_id": "contact-skill-state-change",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_task_t7_s0"
+      ],
+      "retrieval_aliases": [
+        "no object target",
+        "stove knob",
+        "peak lift zero",
+        "contact task",
+        "turn off the stove",
+        "kitchen, inferred from initial robot0 eef pos z=1.1733",
+        "the black stove control knob",
+        "top knob pixels can back project to background"
+      ],
+      "alias_sources": [
+        {
+          "alias": "no object target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "no object target"
+        },
+        {
+          "alias": "stove knob",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "stove knob"
+        },
+        {
+          "alias": "peak lift zero",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "peak_lift_zero"
+        },
+        {
+          "alias": "contact task",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "contact task"
+        },
+        {
+          "alias": "turn off the stove",
+          "source_cell": "goal_task_t7_s0",
+          "source_field": "goal_task_t7_s0:pick_result.stove_contact_pi0_pick_step1.instruction",
+          "source_excerpt": "turn off the stove"
+        },
+        {
+          "alias": "kitchen, inferred from initial robot0 eef pos z=1.1733",
+          "source_cell": "goal_task_t7_s0",
+          "source_field": "goal_task_t7_s0:localization.frame",
+          "source_excerpt": "kitchen, inferred from initial robot0_eef_pos z=1.1733"
+        },
+        {
+          "alias": "the black stove control knob",
+          "source_cell": "goal_task_t7_s0",
+          "source_field": "goal_task_t7_s0:localization.stove_knob.segment_prompt",
+          "source_excerpt": "the black stove control knob"
+        },
+        {
+          "alias": "top knob pixels can back project to background",
+          "source_cell": "goal_task_t7_s0",
+          "source_field": "goal_task_t7_s0:localization.stove_knob.uncertainty",
+          "source_excerpt": "Top knob pixels can back-project to background;"
+        }
+      ]
+    },
+    {
+      "memory_id": "container-slide-axis-toward-fixture-body",
+      "kind": "strategy",
+      "source_cells": [
+        "10_swap_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "drawer will not close",
+        "push does nothing",
+        "drawer floor edge unchanged after pushing",
+        "pi0 doubled close the drawer does nothing",
+        "container coordinates identical across many pushes",
+        "drawer never moves no matter the force",
+        "fully closed, flush with cabinet",
+        "inside the closed bottom drawer"
+      ],
+      "alias_sources": [
+        {
+          "alias": "drawer will not close",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drawer will not close"
+        },
+        {
+          "alias": "push does nothing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "push does nothing"
+        },
+        {
+          "alias": "drawer floor edge unchanged after pushing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drawer floor edge unchanged after pushing"
+        },
+        {
+          "alias": "pi0 doubled close the drawer does nothing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0_doubled close the drawer does nothing"
+        },
+        {
+          "alias": "container coordinates identical across many pushes",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "container coordinates identical across many pushes"
+        },
+        {
+          "alias": "drawer never moves no matter the force",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drawer never moves no matter the force"
+        },
+        {
+          "alias": "fully closed, flush with cabinet",
+          "source_cell": "10_swap_t3_s0",
+          "source_field": "10_swap_t3_s0:final_state.drawer",
+          "source_excerpt": "fully closed, flush with cabinet"
+        },
+        {
+          "alias": "inside the closed bottom drawer",
+          "source_cell": "10_swap_t3_s0",
+          "source_field": "10_swap_t3_s0:final_state.bowl",
+          "source_excerpt": "inside the closed bottom drawer"
+        }
+      ]
+    },
+    {
+      "memory_id": "drawer-top-contact-before-release",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_swap_t2_s0"
+      ],
+      "retrieval_aliases": [
+        "release not needed",
+        "top placement",
+        "tall object",
+        "drawer top",
+        "held object terminates",
+        "pick up the wine bottle",
+        "command sequence: move to 0.075, 0.005,1.2 with gripper open",
+        "pi0 pick pick up the wine bottle with max chunks 20, lift"
+      ],
+      "alias_sources": [
+        {
+          "alias": "release not needed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release-not-needed"
+        },
+        {
+          "alias": "top placement",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "top-placement"
+        },
+        {
+          "alias": "tall object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tall-object"
+        },
+        {
+          "alias": "drawer top",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drawer-top"
+        },
+        {
+          "alias": "held object terminates",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held-object-terminates"
+        },
+        {
+          "alias": "pick up the wine bottle",
+          "source_cell": "goal_swap_t2_s0",
+          "source_field": "goal_swap_t2_s0:pick_result.wine_bottle_pi0_pick_step2.instruction",
+          "source_excerpt": "pick up the wine bottle"
+        },
+        {
+          "alias": "command sequence: move to 0.075, 0.005,1.2 with gripper open",
+          "source_cell": "goal_swap_t2_s0",
+          "source_field": "goal_swap_t2_s0:strategy_notes",
+          "source_excerpt": "Command sequence: move_to [-0.075,-0.005,1.2] with gripper open;"
+        },
+        {
+          "alias": "pi0 pick pick up the wine bottle with max chunks 20, lift",
+          "source_cell": "goal_swap_t2_s0",
+          "source_field": "goal_swap_t2_s0:strategy_notes",
+          "source_excerpt": "pi0_pick 'pick up the wine bottle' with max_chunks 20, lift_thresh 0.08, gripper_closed_thresh 0.06;"
+        }
+      ]
+    },
+    {
+      "memory_id": "flat-box-basket-interior-drop",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "basket",
+        "flat box",
+        "perched",
+        "liner",
+        "release false",
+        "pushed out",
+        "pick up the chocolate pudding",
+        "successful trajectory after reset: move to over the perceived chocolate pudding at"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "flat box",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "flat box"
+        },
+        {
+          "alias": "perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "perched"
+        },
+        {
+          "alias": "liner",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "liner"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release false"
+        },
+        {
+          "alias": "pushed out",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pushed out"
+        },
+        {
+          "alias": "pick up the chocolate pudding",
+          "source_cell": "object_swap_t8_s0",
+          "source_field": "object_swap_t8_s0:pick_result.pudding_pi0_pick_step13.instruction",
+          "source_excerpt": "pick up the chocolate pudding"
+        },
+        {
+          "alias": "successful trajectory after reset: move to over the perceived chocolate pudding at",
+          "source_cell": "object_swap_t8_s0",
+          "source_field": "object_swap_t8_s0:strategy_notes",
+          "source_excerpt": "Successful trajectory after reset: move_to over the perceived chocolate pudding at [0.1377,-0.207,0.18] with gripper open;"
+        }
+      ]
+    },
+    {
+      "memory_id": "flat-box-rigid-bowl-seat",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_swap_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "flat box",
+        "bowl rim",
+        "release false",
+        "perched",
+        "edge bias",
+        "confirmed grasp from gripper gap and wrist view",
+        "small blue rectangular box with readable cream cheese label at upper right",
+        "black/white patterned bowl near table center left, behind plate and left of"
+      ],
+      "alias_sources": [
+        {
+          "alias": "flat box",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "flat box"
+        },
+        {
+          "alias": "bowl rim",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "bowl rim"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release false"
+        },
+        {
+          "alias": "perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "perched"
+        },
+        {
+          "alias": "edge bias",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "edge bias"
+        },
+        {
+          "alias": "confirmed grasp from gripper gap and wrist view",
+          "source_cell": "goal_swap_t6_s0",
+          "source_field": "goal_swap_t6_s0:pick_result.cream_cheese_pi0_pick_step2.used_as",
+          "source_excerpt": "confirmed grasp from gripper gap and wrist view"
+        },
+        {
+          "alias": "small blue rectangular box with readable cream cheese label at upper right",
+          "source_cell": "goal_swap_t6_s0",
+          "source_field": "goal_swap_t6_s0:localization.cream_cheese.agentview_evidence",
+          "source_excerpt": "small blue rectangular box with readable cream cheese label at upper-right table"
+        },
+        {
+          "alias": "black/white patterned bowl near table center left, behind plate and left of",
+          "source_cell": "goal_swap_t6_s0",
+          "source_field": "goal_swap_t6_s0:localization.bowl.agentview_evidence",
+          "source_excerpt": "black/white patterned bowl near table center-left, behind plate and left of wine bottle"
+        }
+      ]
+    },
+    {
+      "memory_id": "held-contact-container-insertion",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "held object",
+        "basket",
+        "outside rim",
+        "release false",
+        "contact skill",
+        "gripper closed",
+        "pick up the brown bbq labeled bottle behind the green bottle",
+        "agentview and wrist showed the bbq bottle lifted"
+      ],
+      "alias_sources": [
+        {
+          "alias": "held object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held object"
+        },
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "outside rim",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "outside rim"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release false"
+        },
+        {
+          "alias": "contact skill",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "contact skill"
+        },
+        {
+          "alias": "gripper closed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper closed"
+        },
+        {
+          "alias": "pick up the brown bbq labeled bottle behind the green bottle",
+          "source_cell": "object_swap_t3_s0",
+          "source_field": "object_swap_t3_s0:pick_result.bbq_pi0_pick_step24.prompt",
+          "source_excerpt": "pick up the brown BBQ labeled bottle behind the green bottle"
+        },
+        {
+          "alias": "agentview and wrist showed the bbq bottle lifted",
+          "source_cell": "object_swap_t3_s0",
+          "source_field": "object_swap_t3_s0:pick_result.bbq_pi0_pick_step24.verified_by",
+          "source_excerpt": "agentview and wrist showed the BBQ bottle lifted;"
+        }
+      ]
+    },
+    {
+      "memory_id": "held-offset-rotation-reach",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t4_s0"
+      ],
+      "retrieval_aliases": [
+        "payload center unreachable",
+        "held offset consumes reach",
+        "mug hangs off plate",
+        "far plate placement",
+        "handle loop grasp, airborne",
+        "wide exterior/handle root grasp, airborne",
+        "winning recipe order: 1 pre position at the yellow handle, pi0 grasp",
+        "2 rotate +90deg to redirect the held offset, carry via move pose"
+      ],
+      "alias_sources": [
+        {
+          "alias": "payload center unreachable",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "payload center unreachable"
+        },
+        {
+          "alias": "held offset consumes reach",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held offset consumes reach"
+        },
+        {
+          "alias": "mug hangs off plate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "mug hangs off plate"
+        },
+        {
+          "alias": "far plate placement",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "far plate placement"
+        },
+        {
+          "alias": "handle loop grasp, airborne",
+          "source_cell": "10_task_t4_s0",
+          "source_field": "10_task_t4_s0:pick_result.yellow_pi0_pick_step2.perception",
+          "source_excerpt": "handle-loop grasp, airborne"
+        },
+        {
+          "alias": "wide exterior/handle root grasp, airborne",
+          "source_cell": "10_task_t4_s0",
+          "source_field": "10_task_t4_s0:pick_result.porcelain_pi0_pick_step13.perception",
+          "source_excerpt": "wide exterior/handle-root grasp, airborne"
+        },
+        {
+          "alias": "winning recipe order: 1 pre position at the yellow handle, pi0 grasp",
+          "source_cell": "10_task_t4_s0",
+          "source_field": "10_task_t4_s0:strategy_notes",
+          "source_excerpt": "Winning recipe order: (1) pre-position at the yellow handle, pi0 grasp handle loop (step 2), firm and lift;"
+        },
+        {
+          "alias": "2 rotate +90deg to redirect the held offset, carry via move pose",
+          "source_cell": "10_task_t4_s0",
+          "source_field": "10_task_t4_s0:strategy_notes",
+          "source_excerpt": "(2) rotate +90deg to redirect the held offset, carry via move_pose to the viewer-left/world -y plate, descend supported, release (step 9);"
+        }
+      ]
+    },
+    {
+      "memory_id": "high-drop-over-cavity",
+      "kind": "strategy",
+      "source_cells": [
+        "object_task_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "rim perched",
+        "basket",
+        "box",
+        "release false",
+        "cannot descend",
+        "pick the cream cheese and place it in the basket",
+        "small blue/white cream cheese box; butter decoy is red/yellow to its right",
+        "woven basket with white fabric liner on robot left / image right"
+      ],
+      "alias_sources": [
+        {
+          "alias": "rim perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim-perched"
+        },
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "box",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "box"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release-false"
+        },
+        {
+          "alias": "cannot descend",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "cannot-descend"
+        },
+        {
+          "alias": "pick the cream cheese and place it in the basket",
+          "source_cell": "object_task_t0_s0",
+          "source_field": "object_task_t0_s0:localization.task_language",
+          "source_excerpt": "Pick the cream cheese and place it in the basket"
+        },
+        {
+          "alias": "small blue/white cream cheese box; butter decoy is red/yellow to its right",
+          "source_cell": "object_task_t0_s0",
+          "source_field": "object_task_t0_s0:localization.target.agentview_evidence",
+          "source_excerpt": "small blue/white Cream Cheese box; butter decoy is red/yellow to its right"
+        },
+        {
+          "alias": "woven basket with white fabric liner on robot left / image right",
+          "source_cell": "object_task_t0_s0",
+          "source_field": "object_task_t0_s0:localization.destination.agentview_evidence",
+          "source_excerpt": "woven basket with white fabric liner on robot-left / image-right"
+        }
+      ]
+    },
+    {
+      "memory_id": "knob-side-front-zone",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_swap_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "front of stove",
+        "burner edge nonterminal",
+        "under platform",
+        "wrong surface",
+        "hidden region",
+        "valid rim/contact hold by gripper gap and wrist image showing the red",
+        "white plate with red rings, visually distinct from gray burner and bowl",
+        "successful trajectory after the final reset: visually identified the target as the"
+      ],
+      "alias_sources": [
+        {
+          "alias": "front of stove",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "front of stove"
+        },
+        {
+          "alias": "burner edge nonterminal",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "burner edge nonterminal"
+        },
+        {
+          "alias": "under platform",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "under platform"
+        },
+        {
+          "alias": "wrong surface",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong surface"
+        },
+        {
+          "alias": "hidden region",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "hidden region"
+        },
+        {
+          "alias": "valid rim/contact hold by gripper gap and wrist image showing the red",
+          "source_cell": "goal_swap_t5_s0",
+          "source_field": "goal_swap_t5_s0:pick_result.plate_pi0_pick_step13.judgement",
+          "source_excerpt": "valid rim/contact hold by gripper gap and wrist image showing the red-rim plate captured at the fingers"
+        },
+        {
+          "alias": "white plate with red rings, visually distinct from gray burner and bowl",
+          "source_cell": "goal_swap_t5_s0",
+          "source_field": "goal_swap_t5_s0:localization.plate_agentview_anchor.evidence",
+          "source_excerpt": "white plate with red rings, visually distinct from gray burner and bowl"
+        },
+        {
+          "alias": "successful trajectory after the final reset: visually identified the target as the",
+          "source_cell": "goal_swap_t5_s0",
+          "source_field": "goal_swap_t5_s0:strategy_notes",
+          "source_excerpt": "Successful trajectory after the final reset: visually identified the target as the red-rim white plate and the destination as the stove with…"
+        }
+      ]
+    },
+    {
+      "memory_id": "leaned-contact-before-policy-push",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_task_t4_s0"
+      ],
+      "retrieval_aliases": [
+        "airborne release falls back",
+        "y wall",
+        "held object offset",
+        "raised surface",
+        "contact skill",
+        "put the plate on the top of the drawer",
+        "successful post reset trajectory: call pi0 pick from the default home pose",
+        "verify the upright plate rim hold from gripper opening about 0.010 m"
+      ],
+      "alias_sources": [
+        {
+          "alias": "airborne release falls back",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "airborne release falls back"
+        },
+        {
+          "alias": "y wall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "y wall"
+        },
+        {
+          "alias": "held object offset",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held object offset"
+        },
+        {
+          "alias": "raised surface",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "raised surface"
+        },
+        {
+          "alias": "contact skill",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "contact skill"
+        },
+        {
+          "alias": "put the plate on the top of the drawer",
+          "source_cell": "goal_task_t4_s0",
+          "source_field": "goal_task_t4_s0:pick_result.plate_pi0_pick_step8.prompt",
+          "source_excerpt": "Put the plate on the top of the drawer"
+        },
+        {
+          "alias": "successful post reset trajectory: call pi0 pick from the default home pose",
+          "source_cell": "goal_task_t4_s0",
+          "source_field": "goal_task_t4_s0:strategy_notes",
+          "source_excerpt": "Successful post-reset trajectory: call pi0_pick from the default home pose with the full task prompt 'Put the plate on the top of the drawer…"
+        },
+        {
+          "alias": "verify the upright plate rim hold from gripper opening about 0.010 m",
+          "source_cell": "goal_task_t4_s0",
+          "source_field": "goal_task_t4_s0:strategy_notes",
+          "source_excerpt": "verify the upright plate rim hold from gripper opening about 0.010 m and wrist/agentview images."
+        }
+      ]
+    },
+    {
+      "memory_id": "learned-contact-after-near-placement",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_task_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "near miss",
+        "on plate false",
+        "rim supported",
+        "tipped near target",
+        "scripted push failed",
+        "pick up the black bowl next to the ramekin",
+        "the lower bowl was the distractor",
+        "put the black bowl on the plate"
+      ],
+      "alias_sources": [
+        {
+          "alias": "near miss",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "near miss"
+        },
+        {
+          "alias": "on plate false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "on plate false"
+        },
+        {
+          "alias": "rim supported",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim supported"
+        },
+        {
+          "alias": "tipped near target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tipped near target"
+        },
+        {
+          "alias": "scripted push failed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "scripted push failed"
+        },
+        {
+          "alias": "pick up the black bowl next to the ramekin",
+          "source_cell": "spatial_task_t8_s0",
+          "source_field": "spatial_task_t8_s0:pick_result.bowl_pi0_pick_step44.prompt",
+          "source_excerpt": "pick up the black bowl next to the ramekin"
+        },
+        {
+          "alias": "the lower bowl was the distractor",
+          "source_cell": "spatial_task_t8_s0",
+          "source_field": "spatial_task_t8_s0:localization",
+          "source_excerpt": "the lower bowl was the distractor."
+        },
+        {
+          "alias": "put the black bowl on the plate",
+          "source_cell": "spatial_task_t8_s0",
+          "source_field": "spatial_task_t8_s0:contact_result.plate_settle_pi0_doubled_step49.prompt",
+          "source_excerpt": "put the black bowl on the plate"
+        }
+      ]
+    },
+    {
+      "memory_id": "libero-in-predicate-fires-while-grasped",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "wrong compartment",
+        "which container",
+        "ambiguous target",
+        "place predicate not firing",
+        "cannot re grasp",
+        "tipped after release",
+        "rim grasp from pre positioned pose above open table mug; opening 0.011,",
+        "lowered held mug into caddy center front pocket at eef 0.4, 0.09,1.06"
+      ],
+      "alias_sources": [
+        {
+          "alias": "wrong compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong compartment"
+        },
+        {
+          "alias": "which container",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "which container"
+        },
+        {
+          "alias": "ambiguous target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "ambiguous target"
+        },
+        {
+          "alias": "place predicate not firing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "place predicate not firing"
+        },
+        {
+          "alias": "cannot re grasp",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "cannot re-grasp"
+        },
+        {
+          "alias": "tipped after release",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tipped after release"
+        },
+        {
+          "alias": "rim grasp from pre positioned pose above open table mug; opening 0.011,",
+          "source_cell": "10_task_t5_s0",
+          "source_field": "10_task_t5_s0:pick_result.mug_pi0_pick_step42",
+          "source_excerpt": "rim grasp from pre-positioned pose above open-table mug; opening 0.011, peak_lift 0.094"
+        },
+        {
+          "alias": "lowered held mug into caddy center front pocket at eef 0.4, 0.09,1.06",
+          "source_cell": "10_task_t5_s0",
+          "source_field": "10_task_t5_s0:pick_result.place_move_to_step47",
+          "source_excerpt": "lowered held mug into caddy center-front pocket at eef (-0.4,-0.09,1.06); predicate fired"
+        }
+      ]
+    },
+    {
+      "memory_id": "libero10-left-right-sign-verify-empirically",
+      "kind": "perception",
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "put to the right of the plate",
+        "left/right of",
+        "egocentric",
+        "geometrically clean placement no termination",
+        "wrong side",
+        "pudding first, mug last so nothing is carried over the placed mug",
+        "2 pi0 pick pick up the chocolate pudding box max chunks14 >"
+      ],
+      "alias_sources": [
+        {
+          "alias": "put to the right of the plate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "put to the right of the plate"
+        },
+        {
+          "alias": "left/right of",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "left/right of"
+        },
+        {
+          "alias": "egocentric",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "egocentric"
+        },
+        {
+          "alias": "geometrically clean placement no termination",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "geometrically clean placement no termination"
+        },
+        {
+          "alias": "wrong side",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong side"
+        },
+        {
+          "alias": "pudding first, mug last so nothing is carried over the placed mug",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "PUDDING FIRST, MUG LAST so nothing is carried over the placed mug."
+        },
+        {
+          "alias": "2 pi0 pick pick up the chocolate pudding box max chunks14 >",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "(2) pi0_pick 'pick up the chocolate pudding box' max_chunks14 -> grasp+lift (~0.08, grip~0.047)."
+        }
+      ]
+    },
+    {
+      "memory_id": "low-contact-seat-after-release",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "release false",
+        "rim perched",
+        "on predicate not firing",
+        "object upright on target",
+        "pick up the black bowl on the ramekin",
+        "pick the akita black bowl on the ramekin and place it on",
+        "duplicate bowl at table level lower right was rejected by relation",
+        "step 2 refined from the wrist and moved to a +y rim"
+      ],
+      "alias_sources": [
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release_false"
+        },
+        {
+          "alias": "rim perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim_perched"
+        },
+        {
+          "alias": "on predicate not firing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "on_predicate_not_firing"
+        },
+        {
+          "alias": "object upright on target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object_upright_on_target"
+        },
+        {
+          "alias": "pick up the black bowl on the ramekin",
+          "source_cell": "spatial_swap_t5_s0",
+          "source_field": "spatial_swap_t5_s0:pick_result.initial_pi0_pick_step3.prompt",
+          "source_excerpt": "pick up the black bowl on the ramekin"
+        },
+        {
+          "alias": "pick the akita black bowl on the ramekin and place it on",
+          "source_cell": "spatial_swap_t5_s0",
+          "source_field": "spatial_swap_t5_s0:pick_result.successful_pi0_pick_step5.prompt",
+          "source_excerpt": "Pick the akita black bowl on the ramekin and place it on the plate"
+        },
+        {
+          "alias": "duplicate bowl at table level lower right was rejected by relation",
+          "source_cell": "spatial_swap_t5_s0",
+          "source_field": "spatial_swap_t5_s0:localization.target_bowl_on_ramekin.agentview_evidence",
+          "source_excerpt": "duplicate bowl at table level lower right was rejected by relation."
+        },
+        {
+          "alias": "step 2 refined from the wrist and moved to a +y rim",
+          "source_cell": "spatial_swap_t5_s0",
+          "source_field": "spatial_swap_t5_s0:strategy_notes",
+          "source_excerpt": "Step 2 refined from the wrist and moved to a +y rim-biased pick pose [-0.218,0.224,1.08]."
+        }
+      ]
+    },
+    {
+      "memory_id": "low-pose-settle-regrasp",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "released on target but terminated false",
+        "partly on plate",
+        "predicate did not fire after release",
+        "wrist view at step 1 confirmed the same bowl and refined visible",
+        "destination classified semantically as the white plate with red concentric rim on",
+        "shifted to the open/table side at 0.055, 0.015,1.06 and used prompt pick",
+        "this grasp lifted the correct bowl with final gripper opening 0.0145"
+      ],
+      "alias_sources": [
+        {
+          "alias": "released on target but terminated false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "released on target but terminated false"
+        },
+        {
+          "alias": "partly on plate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "partly on plate"
+        },
+        {
+          "alias": "predicate did not fire after release",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "predicate did not fire after release"
+        },
+        {
+          "alias": "wrist view at step 1 confirmed the same bowl and refined visible",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:localization.target_bowl_notes",
+          "source_excerpt": "Wrist view at step 1 confirmed the same bowl and refined visible bowl pixels near world xy 0.05-0.09, 0.02-0.04."
+        },
+        {
+          "alias": "destination classified semantically as the white plate with red concentric rim on",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:localization.plate_notes",
+          "source_excerpt": "Destination classified semantically as the white plate with red concentric rim on the left;"
+        },
+        {
+          "alias": "shifted to the open/table side at 0.055, 0.015,1.06 and used prompt pick",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:strategy_notes",
+          "source_excerpt": "Shifted to the open/table side at [0.055,-0.015,1.06] and used prompt 'pick up the patterned bowl' with max_chunks 16;"
+        },
+        {
+          "alias": "this grasp lifted the correct bowl with final gripper opening 0.0145",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:strategy_notes",
+          "source_excerpt": "this grasp lifted the correct bowl with final gripper opening 0.0145."
+        }
+      ]
+    },
+    {
+      "memory_id": "moka-pot-grasp-the-handle-not-the-body",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "moka pot",
+        "pi0 never closes",
+        "gripper opening 0.078",
+        "descent stalls on shoulder",
+        "cap grasp slips",
+        "wide body grasp",
+        "closed to ~0.020 gap on the handle tube not cap/air",
+        "pot clearly off table, hanging upright by handle, gap held ~0.016"
+      ],
+      "alias_sources": [
+        {
+          "alias": "moka pot",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "moka pot"
+        },
+        {
+          "alias": "pi0 never closes",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0 never closes"
+        },
+        {
+          "alias": "gripper opening 0.078",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper opening 0.078"
+        },
+        {
+          "alias": "descent stalls on shoulder",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "descent stalls on shoulder"
+        },
+        {
+          "alias": "cap grasp slips",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "cap grasp slips"
+        },
+        {
+          "alias": "wide body grasp",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wide body grasp"
+        },
+        {
+          "alias": "closed to ~0.020 gap on the handle tube not cap/air",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:pick_result.handle_set_gripper_step24",
+          "source_excerpt": "closed to ~0.020 gap on the handle tube (not cap/air)"
+        },
+        {
+          "alias": "pot clearly off table, hanging upright by handle, gap held ~0.016",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:pick_result.lift_confirm_step26",
+          "source_excerpt": "pot clearly off table, hanging upright by handle, gap held ~0.016"
+        }
+      ]
+    },
+    {
+      "memory_id": "named-compartment-via-front-back-pair",
+      "kind": "perception",
+      "source_cells": [
+        "10_swap_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "back compartment",
+        "front compartment",
+        "which compartment",
+        "caddy",
+        "desk organizer",
+        "multiple openings",
+        "success, peak lift 0.07m, gripper opening 0.03, grasped near top of standing",
+        "caddy back compartment = the middle column rear opening its front counterpart"
+      ],
+      "alias_sources": [
+        {
+          "alias": "back compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "back compartment"
+        },
+        {
+          "alias": "front compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "front compartment"
+        },
+        {
+          "alias": "which compartment",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "which compartment"
+        },
+        {
+          "alias": "caddy",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "caddy"
+        },
+        {
+          "alias": "desk organizer",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "desk organizer"
+        },
+        {
+          "alias": "multiple openings",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "multiple openings"
+        },
+        {
+          "alias": "success, peak lift 0.07m, gripper opening 0.03, grasped near top of standing",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:pick_result.book_pi0_pick_step1",
+          "source_excerpt": "success, peak_lift 0.07m, gripper opening 0.03, grasped near top of standing binder"
+        },
+        {
+          "alias": "caddy back compartment = the middle column rear opening its front counterpart",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:localization",
+          "source_excerpt": "Caddy back compartment = the middle-column REAR opening (its front counterpart is the small middle-front compartment);"
+        }
+      ]
+    },
+    {
+      "memory_id": "near-goal-contact-regrasp",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "nonterminal release",
+        "edge perched",
+        "predicate false",
+        "duplicate object",
+        "near goal",
+        "the first relation prompt grasp made only a shallow rim catch and"
+      ],
+      "alias_sources": [
+        {
+          "alias": "nonterminal release",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "nonterminal-release"
+        },
+        {
+          "alias": "edge perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "edge-perched"
+        },
+        {
+          "alias": "predicate false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "predicate-false"
+        },
+        {
+          "alias": "duplicate object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "duplicate-object"
+        },
+        {
+          "alias": "near goal",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "near-goal"
+        },
+        {
+          "alias": "the first relation prompt grasp made only a shallow rim catch and",
+          "source_cell": "spatial_swap_t6_s0",
+          "source_field": "spatial_swap_t6_s0:strategy_notes",
+          "source_excerpt": "The first relation-prompt grasp made only a shallow rim catch and was released cleanly."
+        }
+      ]
+    },
+    {
+      "memory_id": "near-miss-corrective-pick",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "near miss",
+        "rim placement",
+        "release false",
+        "visual overlap",
+        "push failed",
+        "peak lift m 0.0535, final gripper opening 0.0044",
+        "tight rim pinch but visually held",
+        "after release left bowl partly on plate/rim, reissuing the same short pick/contact"
+      ],
+      "alias_sources": [
+        {
+          "alias": "near miss",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "near miss"
+        },
+        {
+          "alias": "rim placement",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim placement"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release false"
+        },
+        {
+          "alias": "visual overlap",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "visual overlap"
+        },
+        {
+          "alias": "push failed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "push failed"
+        },
+        {
+          "alias": "peak lift m 0.0535, final gripper opening 0.0044",
+          "source_cell": "spatial_swap_t8_s0",
+          "source_field": "spatial_swap_t8_s0:pick_result.bowl_pi0_pick_step2",
+          "source_excerpt": "peak_lift_m 0.0535, final_gripper_opening 0.0044;"
+        },
+        {
+          "alias": "tight rim pinch but visually held",
+          "source_cell": "spatial_swap_t8_s0",
+          "source_field": "spatial_swap_t8_s0:pick_result.bowl_pi0_pick_step2",
+          "source_excerpt": "tight rim pinch but visually held."
+        },
+        {
+          "alias": "after release left bowl partly on plate/rim, reissuing the same short pick/contact",
+          "source_cell": "spatial_swap_t8_s0",
+          "source_field": "spatial_swap_t8_s0:pick_result.corrective_pi0_pick_step8",
+          "source_excerpt": "After release left bowl partly on plate/rim, reissuing the same short pick/contact prompt from the near-plate pose caused the official predi…"
+        }
+      ]
+    },
+    {
+      "memory_id": "near-target-repick",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_task_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "release false",
+        "near miss",
+        "upright object",
+        "placement short",
+        "the visually identical bowl farther back near the ramekin is a distractor",
+        "destination is the white plate with red rim rings, not the stove",
+        "used plate semantic center from red rim plate and bowl y offset",
+        "back projected multiple high res target bowl and plate pixels, then moved"
+      ],
+      "alias_sources": [
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release_false"
+        },
+        {
+          "alias": "near miss",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "near_miss"
+        },
+        {
+          "alias": "upright object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "upright_object"
+        },
+        {
+          "alias": "placement short",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "placement_short"
+        },
+        {
+          "alias": "the visually identical bowl farther back near the ramekin is a distractor",
+          "source_cell": "spatial_task_t1_s0",
+          "source_field": "spatial_task_t1_s0:localization.task_semantics",
+          "source_excerpt": "the visually identical bowl farther back near the ramekin is a distractor."
+        },
+        {
+          "alias": "destination is the white plate with red rim rings, not the stove",
+          "source_cell": "spatial_task_t1_s0",
+          "source_field": "spatial_task_t1_s0:localization.task_semantics",
+          "source_excerpt": "Destination is the white plate with red rim rings, not the stove burner disc."
+        },
+        {
+          "alias": "used plate semantic center from red rim plate and bowl y offset",
+          "source_cell": "spatial_task_t1_s0",
+          "source_field": "spatial_task_t1_s0:localization.final_place_strategy",
+          "source_excerpt": "Used plate semantic center from red-rim plate and bowl y-offset;"
+        },
+        {
+          "alias": "back projected multiple high res target bowl and plate pixels, then moved",
+          "source_cell": "spatial_task_t1_s0",
+          "source_field": "spatial_task_t1_s0:strategy_notes",
+          "source_excerpt": "Back-projected multiple high-res target-bowl and plate pixels, then moved near the target and accepted wrist samples within the same local n…"
+        }
+      ]
+    },
+    {
+      "memory_id": "object-frame-box-to-basket",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "basket",
+        "box",
+        "rim",
+        "object frame",
+        "grocery",
+        "wrist high showed the butter raised between fingers; gripper gap remained about",
+        "placement used interior cavity, avoiding rim biased samples"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "box",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "box"
+        },
+        {
+          "alias": "rim",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim"
+        },
+        {
+          "alias": "object frame",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object-frame"
+        },
+        {
+          "alias": "grocery",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "grocery"
+        },
+        {
+          "alias": "wrist high showed the butter raised between fingers; gripper gap remained about",
+          "source_cell": "object_swap_t6_s0",
+          "source_field": "object_swap_t6_s0:pick_result.butter_pi0_pick_step2.grasp_verified_by",
+          "source_excerpt": "wrist_high showed the butter raised between fingers; gripper gap remained about 0.039 m"
+        },
+        {
+          "alias": "placement used interior cavity, avoiding rim biased samples",
+          "source_cell": "object_swap_t6_s0",
+          "source_field": "object_swap_t6_s0:localization.basket",
+          "source_excerpt": "placement used interior cavity, avoiding rim-biased samples"
+        }
+      ]
+    },
+    {
+      "memory_id": "open-retreat-settles-container",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t4_s0"
+      ],
+      "retrieval_aliases": [
+        "release false",
+        "object inside container",
+        "wedged object",
+        "predicate on retreat",
+        "pick up the ketchup",
+        "object low table frame; initial robot0 eef pos z≈0.261",
+        "wrist xy stayed within 1 cm of the agentview identity anchor",
+        "woven basket with white cloth liner on image right; open interior visible"
+      ],
+      "alias_sources": [
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release_false"
+        },
+        {
+          "alias": "object inside container",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object_inside_container"
+        },
+        {
+          "alias": "wedged object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wedged_object"
+        },
+        {
+          "alias": "predicate on retreat",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "predicate_on_retreat"
+        },
+        {
+          "alias": "pick up the ketchup",
+          "source_cell": "object_swap_t4_s0",
+          "source_field": "object_swap_t4_s0:pick_result.ketchup_pi0_pick_step2.instruction",
+          "source_excerpt": "pick up the ketchup"
+        },
+        {
+          "alias": "object low table frame; initial robot0 eef pos z≈0.261",
+          "source_cell": "object_swap_t4_s0",
+          "source_field": "object_swap_t4_s0:localization.frame",
+          "source_excerpt": "object low-table frame; initial robot0_eef_pos z≈0.261"
+        },
+        {
+          "alias": "wrist xy stayed within 1 cm of the agentview identity anchor",
+          "source_cell": "object_swap_t4_s0",
+          "source_field": "object_swap_t4_s0:localization.target_ketchup.wrist_refine.reason",
+          "source_excerpt": "wrist xy stayed within 1 cm of the agentview identity anchor"
+        },
+        {
+          "alias": "woven basket with white cloth liner on image right; open interior visible",
+          "source_cell": "object_swap_t4_s0",
+          "source_field": "object_swap_t4_s0:localization.basket_cavity.agentview_evidence",
+          "source_excerpt": "woven basket with white cloth liner on image-right; open interior visible"
+        }
+      ]
+    },
+    {
+      "memory_id": "open-side-bowl-grasp",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 contacts bowl but no lift",
+        "gripper reopens",
+        "crowded bowl grasp",
+        "handle blocks bowl",
+        "wrist view at step 1 confirmed the same bowl and refined visible",
+        "destination classified semantically as the white plate with red concentric rim on",
+        "shifted to the open/table side at 0.055, 0.015,1.06 and used prompt pick",
+        "this grasp lifted the correct bowl with final gripper opening 0.0145"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 contacts bowl but no lift",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "Pi0 contacts bowl but no lift"
+        },
+        {
+          "alias": "gripper reopens",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper reopens"
+        },
+        {
+          "alias": "crowded bowl grasp",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "crowded bowl grasp"
+        },
+        {
+          "alias": "handle blocks bowl",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "handle blocks bowl"
+        },
+        {
+          "alias": "wrist view at step 1 confirmed the same bowl and refined visible",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:localization.target_bowl_notes",
+          "source_excerpt": "Wrist view at step 1 confirmed the same bowl and refined visible bowl pixels near world xy 0.05-0.09, 0.02-0.04."
+        },
+        {
+          "alias": "destination classified semantically as the white plate with red concentric rim on",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:localization.plate_notes",
+          "source_excerpt": "Destination classified semantically as the white plate with red concentric rim on the left;"
+        },
+        {
+          "alias": "shifted to the open/table side at 0.055, 0.015,1.06 and used prompt pick",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:strategy_notes",
+          "source_excerpt": "Shifted to the open/table side at [0.055,-0.015,1.06] and used prompt 'pick up the patterned bowl' with max_chunks 16;"
+        },
+        {
+          "alias": "this grasp lifted the correct bowl with final gripper opening 0.0145",
+          "source_cell": "spatial_swap_t3_s0",
+          "source_field": "spatial_swap_t3_s0:strategy_notes",
+          "source_excerpt": "this grasp lifted the correct bowl with final gripper opening 0.0145."
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-grasp-tall-mug-by-handle",
+      "kind": "primitive",
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 descends into mug",
+        "gripper stays open ~0.06",
+        "peak lift ~0",
+        "grabbed air",
+        "mug not lifted",
+        "cup interior visible in wrist",
+        "pudding first, mug last so nothing is carried over the placed mug",
+        "2 pi0 pick pick up the chocolate pudding box max chunks14 >"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 descends into mug",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0 descends into mug"
+        },
+        {
+          "alias": "gripper stays open ~0.06",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper stays open ~0.06"
+        },
+        {
+          "alias": "peak lift ~0",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "peak_lift ~0"
+        },
+        {
+          "alias": "grabbed air",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "grabbed air"
+        },
+        {
+          "alias": "mug not lifted",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "mug not lifted"
+        },
+        {
+          "alias": "cup interior visible in wrist",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "cup interior visible in wrist"
+        },
+        {
+          "alias": "pudding first, mug last so nothing is carried over the placed mug",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "PUDDING FIRST, MUG LAST so nothing is carried over the placed mug."
+        },
+        {
+          "alias": "2 pi0 pick pick up the chocolate pudding box max chunks14 >",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "(2) pi0_pick 'pick up the chocolate pudding box' max_chunks14 -> grasp+lift (~0.08, grip~0.047)."
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-pick-carries-past-lift-judge-by-grip",
+      "kind": "perception",
+      "source_cells": [
+        "10_task_t7_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 pick success false",
+        "descent done false",
+        "eef jumped to another region",
+        "gripper opening ~0.03",
+        "object missing from table",
+        "flag false but pi0 carried bottle to basket",
+        "gripper opening 0.034 confirms hold",
+        "peak lift 0.231"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 pick success false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0_pick success false"
+        },
+        {
+          "alias": "descent done false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "descent_done false"
+        },
+        {
+          "alias": "eef jumped to another region",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "eef jumped to another region"
+        },
+        {
+          "alias": "gripper opening ~0.03",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper opening ~0.03"
+        },
+        {
+          "alias": "object missing from table",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object missing from table"
+        },
+        {
+          "alias": "flag false but pi0 carried bottle to basket",
+          "source_cell": "10_task_t7_s0",
+          "source_field": "10_task_t7_s0:pick_result.ketchup_pi0_pick_step10.note",
+          "source_excerpt": "flag false but Pi0 carried bottle to basket;"
+        },
+        {
+          "alias": "gripper opening 0.034 confirms hold",
+          "source_cell": "10_task_t7_s0",
+          "source_field": "10_task_t7_s0:pick_result.ketchup_pi0_pick_step10.note",
+          "source_excerpt": "gripper opening 0.034 confirms hold;"
+        },
+        {
+          "alias": "peak lift 0.231",
+          "source_cell": "10_task_t7_s0",
+          "source_field": "10_task_t7_s0:pick_result.ketchup_pi0_pick_step10.note",
+          "source_excerpt": "peak_lift 0.231"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-pick-may-place-at-trained-left",
+      "kind": "primitive",
+      "source_cells": [
+        "10_task_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 lifted but eef moved sideways",
+        "gripper still holding",
+        "success flag false",
+        "can carried",
+        "drifted to left",
+        "success, box lifted 0.108m, held opening 0.043",
+        "pi0 success flag false but grasp valid opening 0.067 ~ can dia",
+        "pi0 also carried can over basket"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 lifted but eef moved sideways",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0 lifted but eef moved sideways"
+        },
+        {
+          "alias": "gripper still holding",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper still holding"
+        },
+        {
+          "alias": "success flag false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "success flag false"
+        },
+        {
+          "alias": "can carried",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "can carried"
+        },
+        {
+          "alias": "drifted to left",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drifted to left"
+        },
+        {
+          "alias": "success, box lifted 0.108m, held opening 0.043",
+          "source_cell": "10_task_t0_s0",
+          "source_field": "10_task_t0_s0:pick_result.cream_cheese_pi0_pick_step1",
+          "source_excerpt": "success, box lifted 0.108m, held (opening 0.043)"
+        },
+        {
+          "alias": "pi0 success flag false but grasp valid opening 0.067 ~ can dia",
+          "source_cell": "10_task_t0_s0",
+          "source_field": "10_task_t0_s0:pick_result.tomato_sauce_pi0_pick_step10",
+          "source_excerpt": "pi0 success flag false but grasp valid (opening 0.067 ~ can dia);"
+        },
+        {
+          "alias": "pi0 also carried can over basket",
+          "source_cell": "10_task_t0_s0",
+          "source_field": "10_task_t0_s0:pick_result.tomato_sauce_pi0_pick_step10",
+          "source_excerpt": "pi0 also carried can over basket"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-prepositioned-simple-basket",
+      "kind": "strategy",
+      "source_cells": [
+        "object_swap_t7_s0"
+      ],
+      "retrieval_aliases": [
+        "basket",
+        "grocery",
+        "milk",
+        "pi0 pick",
+        "pre position",
+        "gripper gap did not indicate a held object after release, consistent with",
+        "pick the milk and place it in the basket",
+        "object low table; initial eef z approximately 0.261"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "grocery",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "grocery"
+        },
+        {
+          "alias": "milk",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "milk"
+        },
+        {
+          "alias": "pi0 pick",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0_pick"
+        },
+        {
+          "alias": "pre position",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pre-position"
+        },
+        {
+          "alias": "gripper gap did not indicate a held object after release, consistent with",
+          "source_cell": "object_swap_t7_s0",
+          "source_field": "object_swap_t7_s0:pick_result.milk_pi0_pick_step2.grasp_confirmed_by",
+          "source_excerpt": "gripper gap did not indicate a held object after release, consistent with completion"
+        },
+        {
+          "alias": "pick the milk and place it in the basket",
+          "source_cell": "object_swap_t7_s0",
+          "source_field": "object_swap_t7_s0:perception.task_language",
+          "source_excerpt": "Pick the milk and place it in the basket"
+        },
+        {
+          "alias": "object low table; initial eef z approximately 0.261",
+          "source_cell": "object_swap_t7_s0",
+          "source_field": "object_swap_t7_s0:perception.frame",
+          "source_excerpt": "object low table; initial eef z approximately 0.261"
+        }
+      ]
+    },
+    {
+      "memory_id": "pick-before-contact-skill-keeps-wrist-clean",
+      "kind": "strategy",
+      "source_cells": [
+        "10_swap_t2_s0"
+      ],
+      "retrieval_aliases": [
+        "pi0 pick descends onto the object but the gripper never closes",
+        "gripper stays open 0.06 0.08 through the whole pick",
+        "manual close slips off a smooth/wide object on lift",
+        "wrist has a persistent tilt large quat x/y component that rotate pitch/rotate",
+        "pick up the moka pot",
+        "pi0 pick.success=false is a heuristic",
+        "the grasp actually succeeded gripper closed 0.047, 12cm lift and pi0 carried",
+        "3 set gripper +1 steps=6 to firm"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pi0 pick descends onto the object but the gripper never closes",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pi0_pick descends onto the object but the gripper never closes"
+        },
+        {
+          "alias": "gripper stays open 0.06 0.08 through the whole pick",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper stays open (0.06-0.08) through the whole pick"
+        },
+        {
+          "alias": "manual close slips off a smooth/wide object on lift",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "manual close slips off a smooth/wide object on lift"
+        },
+        {
+          "alias": "wrist has a persistent tilt large quat x/y component that rotate pitch/rotate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrist has a persistent tilt (large quat x/y component) that rotate_pitch/rotate_wrist/move_pose"
+        },
+        {
+          "alias": "pick up the moka pot",
+          "source_cell": "10_swap_t2_s0",
+          "source_field": "10_swap_t2_s0:pick_result.instruction",
+          "source_excerpt": "pick up the moka pot"
+        },
+        {
+          "alias": "pi0 pick.success=false is a heuristic",
+          "source_cell": "10_swap_t2_s0",
+          "source_field": "10_swap_t2_s0:pick_result.note",
+          "source_excerpt": "pi0_pick.success=false is a heuristic;"
+        },
+        {
+          "alias": "the grasp actually succeeded gripper closed 0.047, 12cm lift and pi0 carried",
+          "source_cell": "10_swap_t2_s0",
+          "source_field": "10_swap_t2_s0:pick_result.note",
+          "source_excerpt": "the grasp actually succeeded (gripper closed 0.047, 12cm lift) and Pi0 carried the pot over the stove."
+        },
+        {
+          "alias": "3 set gripper +1 steps=6 to firm",
+          "source_cell": "10_swap_t2_s0",
+          "source_field": "10_swap_t2_s0:strategy_notes",
+          "source_excerpt": "(3) set_gripper +1 steps=6 to firm;"
+        }
+      ]
+    },
+    {
+      "memory_id": "pitched-side-grasp-overedge-release",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_swap_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "deep insertion stalls",
+        "bowl braced on lip",
+        "drawer lip collision",
+        "release outside",
+        "failed as a pick but opened the top drawer partway, which became",
+        "held target bowl; verified by gripper gap and wrist image",
+        "identified the patterned black/white bowl and the top drawer handle/cavity in agentview",
+        "wrist view was used only to confirm the chosen bowl under the"
+      ],
+      "alias_sources": [
+        {
+          "alias": "deep insertion stalls",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "deep insertion stalls"
+        },
+        {
+          "alias": "bowl braced on lip",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "bowl braced on lip"
+        },
+        {
+          "alias": "drawer lip collision",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "drawer lip collision"
+        },
+        {
+          "alias": "release outside",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release outside"
+        },
+        {
+          "alias": "failed as a pick but opened the top drawer partway, which became",
+          "source_cell": "goal_swap_t3_s0",
+          "source_field": "goal_swap_t3_s0:pick_result.task_language_pi0_pick_step1",
+          "source_excerpt": "failed as a pick but opened the top drawer partway, which became useful setup"
+        },
+        {
+          "alias": "held target bowl; verified by gripper gap and wrist image",
+          "source_cell": "goal_swap_t3_s0",
+          "source_field": "goal_swap_t3_s0:pick_result.side_bowl_pi0_pick_step3",
+          "source_excerpt": "held target bowl; verified by gripper gap and wrist image"
+        },
+        {
+          "alias": "identified the patterned black/white bowl and the top drawer handle/cavity in agentview",
+          "source_cell": "goal_swap_t3_s0",
+          "source_field": "goal_swap_t3_s0:localization.method",
+          "source_excerpt": "Identified the patterned black/white bowl and the top drawer handle/cavity in agentview_high, then sampled multiple hi-res pixels with back_…"
+        },
+        {
+          "alias": "wrist view was used only to confirm the chosen bowl under the",
+          "source_cell": "goal_swap_t3_s0",
+          "source_field": "goal_swap_t3_s0:localization.method",
+          "source_excerpt": "wrist view was used only to confirm the chosen bowl under the gripper."
+        }
+      ]
+    },
+    {
+      "memory_id": "place-order-never-carry-over-placed-object",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "tipped mug",
+        "knocked over placed object",
+        "second carry clipped first placement",
+        "unrecoverable side lying cylinder",
+        "pudding first, mug last so nothing is carried over the placed mug",
+        "2 pi0 pick pick up the chocolate pudding box max chunks14 >"
+      ],
+      "alias_sources": [
+        {
+          "alias": "tipped mug",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tipped mug"
+        },
+        {
+          "alias": "knocked over placed object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "knocked over placed object"
+        },
+        {
+          "alias": "second carry clipped first placement",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "second carry clipped first placement"
+        },
+        {
+          "alias": "unrecoverable side lying cylinder",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "unrecoverable side-lying cylinder"
+        },
+        {
+          "alias": "pudding first, mug last so nothing is carried over the placed mug",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "PUDDING FIRST, MUG LAST so nothing is carried over the placed mug."
+        },
+        {
+          "alias": "2 pi0 pick pick up the chocolate pudding box max chunks14 >",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "(2) pi0_pick 'pick up the chocolate pudding box' max_chunks14 -> grasp+lift (~0.08, grip~0.047)."
+        }
+      ]
+    },
+    {
+      "memory_id": "point-prompt-after-text-misground",
+      "kind": "perception",
+      "source_cells": [
+        "spatial_swap_t2_s0"
+      ],
+      "retrieval_aliases": [
+        "wrong mask",
+        "duplicate object",
+        "look alike surface",
+        "relation ignored",
+        "agentview and wrist showed the center patterned bowl lifted and held at",
+        "the matching patterned bowl on the right is a distractor",
+        "text prompt the patterned black bowl at the table center selected the",
+        "text prompt the patterned black bowl in the center of the table"
+      ],
+      "alias_sources": [
+        {
+          "alias": "wrong mask",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong-mask"
+        },
+        {
+          "alias": "duplicate object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "duplicate-object"
+        },
+        {
+          "alias": "look alike surface",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "look-alike-surface"
+        },
+        {
+          "alias": "relation ignored",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "relation-ignored"
+        },
+        {
+          "alias": "agentview and wrist showed the center patterned bowl lifted and held at",
+          "source_cell": "spatial_swap_t2_s0",
+          "source_field": "spatial_swap_t2_s0:pick_result.center_bowl_pi0_pick_step3.visual_confirmation",
+          "source_excerpt": "agentview and wrist showed the center patterned bowl lifted and held at the rim"
+        },
+        {
+          "alias": "the matching patterned bowl on the right is a distractor",
+          "source_cell": "spatial_swap_t2_s0",
+          "source_field": "spatial_swap_t2_s0:localization.target_center_bowl.agentview_evidence",
+          "source_excerpt": "the matching patterned bowl on the right is a distractor."
+        },
+        {
+          "alias": "text prompt the patterned black bowl at the table center selected the",
+          "source_cell": "spatial_swap_t2_s0",
+          "source_field": "spatial_swap_t2_s0:localization.target_center_bowl.rejected_segment_prompts",
+          "source_excerpt": "text prompt 'the patterned black bowl at the table center' selected the right distractor bowl"
+        },
+        {
+          "alias": "text prompt the patterned black bowl in the center of the table",
+          "source_cell": "spatial_swap_t2_s0",
+          "source_field": "spatial_swap_t2_s0:localization.target_center_bowl.rejected_segment_prompts",
+          "source_excerpt": "text prompt 'the patterned black bowl in the center of the table' selected the stove burner"
+        }
+      ]
+    },
+    {
+      "memory_id": "post-grasp-yaw-offset",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_swap_t9_s0"
+      ],
+      "retrieval_aliases": [
+        "held offset",
+        "workspace edge",
+        "bowl beside plate",
+        "gripper center wrong",
+        "placement misses",
+        "cabinet edge agentview pixels were rejected as invalid because they back projected",
+        "white ceramic plate with red rings on the table, not the metal",
+        "the predicate fired after 5 release steps"
+      ],
+      "alias_sources": [
+        {
+          "alias": "held offset",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held offset"
+        },
+        {
+          "alias": "workspace edge",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "workspace edge"
+        },
+        {
+          "alias": "bowl beside plate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "bowl beside plate"
+        },
+        {
+          "alias": "gripper center wrong",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper center wrong"
+        },
+        {
+          "alias": "placement misses",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "placement misses"
+        },
+        {
+          "alias": "cabinet edge agentview pixels were rejected as invalid because they back projected",
+          "source_cell": "spatial_swap_t9_s0",
+          "source_field": "spatial_swap_t9_s0:localization.target_anchor",
+          "source_excerpt": "cabinet-edge agentview pixels were rejected as invalid because they back-projected off-table"
+        },
+        {
+          "alias": "white ceramic plate with red rings on the table, not the metal",
+          "source_cell": "spatial_swap_t9_s0",
+          "source_field": "spatial_swap_t9_s0:localization.plate_identity",
+          "source_excerpt": "white ceramic plate with red rings on the table, not the metal stove burner or ramekin"
+        },
+        {
+          "alias": "the predicate fired after 5 release steps",
+          "source_cell": "spatial_swap_t9_s0",
+          "source_field": "spatial_swap_t9_s0:strategy_notes",
+          "source_excerpt": "the predicate fired after 5 release steps."
+        }
+      ]
+    },
+    {
+      "memory_id": "predicate-fires-after-gripper-retreat",
+      "kind": "strategy",
+      "source_cells": [
+        "10_swap_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "predicate false after release",
+        "release did not terminate",
+        "placed but not registered",
+        "in predicate not firing",
+        "success, peak lift 0.07m, gripper opening 0.03, grasped near top of standing",
+        "caddy back compartment = the middle column rear opening its front counterpart",
+        "interior center via region back project = 0.454, 0.152 , rim ~z1.01",
+        "predicate fired on straight up retreat after release"
+      ],
+      "alias_sources": [
+        {
+          "alias": "predicate false after release",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "predicate false after release"
+        },
+        {
+          "alias": "release did not terminate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release did not terminate"
+        },
+        {
+          "alias": "placed but not registered",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "placed but not registered"
+        },
+        {
+          "alias": "in predicate not firing",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "In predicate not firing"
+        },
+        {
+          "alias": "success, peak lift 0.07m, gripper opening 0.03, grasped near top of standing",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:pick_result.book_pi0_pick_step1",
+          "source_excerpt": "success, peak_lift 0.07m, gripper opening 0.03, grasped near top of standing binder"
+        },
+        {
+          "alias": "caddy back compartment = the middle column rear opening its front counterpart",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:localization",
+          "source_excerpt": "Caddy back compartment = the middle-column REAR opening (its front counterpart is the small middle-front compartment);"
+        },
+        {
+          "alias": "interior center via region back project = 0.454, 0.152 , rim ~z1.01",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:localization",
+          "source_excerpt": "interior center via region back_project = (-0.454,-0.152), rim ~z1.01-1.05."
+        },
+        {
+          "alias": "predicate fired on straight up retreat after release",
+          "source_cell": "10_swap_t5_s0",
+          "source_field": "10_swap_t5_s0:final_state.note",
+          "source_excerpt": "predicate fired on straight-up retreat after release"
+        }
+      ]
+    },
+    {
+      "memory_id": "predicate-gated-by-eef-proximity-retreat-clear",
+      "kind": "failure",
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "retrieval_aliases": [
+        "placed object looks correct",
+        "mug on plate centered",
+        "libero terminated false",
+        "gripper hovering over placement",
+        "no fire after dwell",
+        "pudding first, mug last so nothing is carried over the placed mug",
+        "2 pi0 pick pick up the chocolate pudding box max chunks14 >"
+      ],
+      "alias_sources": [
+        {
+          "alias": "placed object looks correct",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "placed object looks correct"
+        },
+        {
+          "alias": "mug on plate centered",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "mug on plate centered"
+        },
+        {
+          "alias": "libero terminated false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "libero_terminated false"
+        },
+        {
+          "alias": "gripper hovering over placement",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper hovering over placement"
+        },
+        {
+          "alias": "no fire after dwell",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "no fire after dwell"
+        },
+        {
+          "alias": "pudding first, mug last so nothing is carried over the placed mug",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "PUDDING FIRST, MUG LAST so nothing is carried over the placed mug."
+        },
+        {
+          "alias": "2 pi0 pick pick up the chocolate pudding box max chunks14 >",
+          "source_cell": "10_task_t6_s0",
+          "source_field": "10_task_t6_s0:strategy_notes",
+          "source_excerpt": "(2) pi0_pick 'pick up the chocolate pudding box' max_chunks14 -> grasp+lift (~0.08, grip~0.047)."
+        }
+      ]
+    },
+    {
+      "memory_id": "pregrasp-yaw-recenter",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_task_t9_s0"
+      ],
+      "retrieval_aliases": [
+        "yaw drift",
+        "wrong neighborhood",
+        "rim hook",
+        "bowl beside plate",
+        "pre grasp rotation",
+        "pick up the bowl on the stove",
+        "the release fired the official predicate after 8 steps"
+      ],
+      "alias_sources": [
+        {
+          "alias": "yaw drift",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "yaw drift"
+        },
+        {
+          "alias": "wrong neighborhood",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong neighborhood"
+        },
+        {
+          "alias": "rim hook",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim hook"
+        },
+        {
+          "alias": "bowl beside plate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "bowl beside plate"
+        },
+        {
+          "alias": "pre grasp rotation",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pre-grasp rotation"
+        },
+        {
+          "alias": "pick up the bowl on the stove",
+          "source_cell": "spatial_task_t9_s0",
+          "source_field": "spatial_task_t9_s0:pick_result.bowl_pi0_pick_step4.instruction",
+          "source_excerpt": "pick up the bowl on the stove"
+        },
+        {
+          "alias": "the release fired the official predicate after 8 steps",
+          "source_cell": "spatial_task_t9_s0",
+          "source_field": "spatial_task_t9_s0:strategy_notes",
+          "source_excerpt": "The release fired the official predicate after 8 steps."
+        }
+      ]
+    },
+    {
+      "memory_id": "probe-container-floor-by-stall-height",
+      "kind": "perception",
+      "source_cells": [
+        "10_swap_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "descend into basket stalls high above floor",
+        "cannot tell floor from wall",
+        "object placed on rim not floor",
+        "second object lands on first",
+        "unsure if seated",
+        "success perception judged : peak lift 0.211m, min gripper opening 0.063 can",
+        "segmentation prompt: soup can",
+        "segmentation prompt: basket"
+      ],
+      "alias_sources": [
+        {
+          "alias": "descend into basket stalls high above floor",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "descend into basket stalls high above floor"
+        },
+        {
+          "alias": "cannot tell floor from wall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "cannot tell floor from wall"
+        },
+        {
+          "alias": "object placed on rim not floor",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object placed on rim not floor"
+        },
+        {
+          "alias": "second object lands on first",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "second object lands on first"
+        },
+        {
+          "alias": "unsure if seated",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "unsure if seated"
+        },
+        {
+          "alias": "success perception judged : peak lift 0.211m, min gripper opening 0.063 can",
+          "source_cell": "10_swap_t0_s0",
+          "source_field": "10_swap_t0_s0:pick_result.tomato_pi0_pick_step2",
+          "source_excerpt": "success (perception-judged): peak_lift 0.211m, min_gripper_opening 0.063 (can diameter, holding)."
+        },
+        {
+          "alias": "segmentation prompt: soup can",
+          "source_cell": "10_swap_t0_s0",
+          "source_field": "10_swap_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: soup can"
+        },
+        {
+          "alias": "segmentation prompt: basket",
+          "source_cell": "10_swap_t0_s0",
+          "source_field": "10_swap_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: basket"
+        }
+      ]
+    },
+    {
+      "memory_id": "relation-anchored-wrist-refine",
+      "kind": "perception",
+      "source_cells": [
+        "spatial_swap_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "wrong duplicate",
+        "wrist ambiguity",
+        "stale coordinates",
+        "relation target",
+        "segmentation outlier",
+        "wrist and agentview showed the ramekin adjacent bowl in the gripper",
+        "lower duplicate remained on table",
+        "agentview identified the duplicate relation and the red ring plate"
+      ],
+      "alias_sources": [
+        {
+          "alias": "wrong duplicate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong duplicate"
+        },
+        {
+          "alias": "wrist ambiguity",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrist ambiguity"
+        },
+        {
+          "alias": "stale coordinates",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "stale coordinates"
+        },
+        {
+          "alias": "relation target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "relation target"
+        },
+        {
+          "alias": "segmentation outlier",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "segmentation outlier"
+        },
+        {
+          "alias": "wrist and agentview showed the ramekin adjacent bowl in the gripper",
+          "source_cell": "spatial_swap_t1_s0",
+          "source_field": "spatial_swap_t1_s0:pick_result.target_bowl_pi0_pick_step3.perception_confirmed",
+          "source_excerpt": "wrist and agentview showed the ramekin-adjacent bowl in the gripper;"
+        },
+        {
+          "alias": "lower duplicate remained on table",
+          "source_cell": "spatial_swap_t1_s0",
+          "source_field": "spatial_swap_t1_s0:pick_result.target_bowl_pi0_pick_step3.perception_confirmed",
+          "source_excerpt": "lower duplicate remained on table"
+        },
+        {
+          "alias": "agentview identified the duplicate relation and the red ring plate",
+          "source_cell": "spatial_swap_t1_s0",
+          "source_field": "spatial_swap_t1_s0:strategy_notes",
+          "source_excerpt": "Agentview identified the duplicate relation and the red-ring plate;"
+        }
+      ]
+    },
+    {
+      "memory_id": "relation-selected-identical-object",
+      "kind": "perception",
+      "source_cells": [
+        "spatial_swap_t7_s0"
+      ],
+      "retrieval_aliases": [
+        "duplicate object",
+        "wrong target",
+        "relation",
+        "swap",
+        "look alike",
+        "pick up the black bowl on the stove",
+        "step 1: moved open gripper above the stove bowl at 0.282, 0.100,1.08",
+        "step 2: ran pi0 pick with prompt pick up the black bowl"
+      ],
+      "alias_sources": [
+        {
+          "alias": "duplicate object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "duplicate object"
+        },
+        {
+          "alias": "wrong target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong target"
+        },
+        {
+          "alias": "relation",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "relation"
+        },
+        {
+          "alias": "swap",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "swap"
+        },
+        {
+          "alias": "look alike",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "look-alike"
+        },
+        {
+          "alias": "pick up the black bowl on the stove",
+          "source_cell": "spatial_swap_t7_s0",
+          "source_field": "spatial_swap_t7_s0:pick_result.bowl_pi0_pick_step2.instruction",
+          "source_excerpt": "pick up the black bowl on the stove"
+        },
+        {
+          "alias": "step 1: moved open gripper above the stove bowl at 0.282, 0.100,1.08",
+          "source_cell": "spatial_swap_t7_s0",
+          "source_field": "spatial_swap_t7_s0:strategy_notes",
+          "source_excerpt": "Step 1: moved open gripper above the stove bowl at [-0.282,-0.100,1.08]."
+        },
+        {
+          "alias": "step 2: ran pi0 pick with prompt pick up the black bowl",
+          "source_cell": "spatial_swap_t7_s0",
+          "source_field": "spatial_swap_t7_s0:strategy_notes",
+          "source_excerpt": "Step 2: ran pi0_pick with prompt 'pick up the black bowl on the stove' for grasp only;"
+        }
+      ]
+    },
+    {
+      "memory_id": "remeasure-loaded-offset-before-descent",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t2_s0"
+      ],
+      "retrieval_aliases": [
+        "payload offset changed",
+        "centered before move but off target",
+        "loaded servo changed hang",
+        "yawed reach wall",
+        "grasp the pan handle",
+        "turn on the stove",
+        "localized pan/handle, burner, knob, and moka distractor from reset step agentview hi",
+        "move above burner stalled but yielded valid wrist burner geometry"
+      ],
+      "alias_sources": [
+        {
+          "alias": "payload offset changed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "payload offset changed"
+        },
+        {
+          "alias": "centered before move but off target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "centered before move but off target"
+        },
+        {
+          "alias": "loaded servo changed hang",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "loaded servo changed hang"
+        },
+        {
+          "alias": "yawed reach wall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "yawed reach wall"
+        },
+        {
+          "alias": "grasp the pan handle",
+          "source_cell": "10_task_t2_s0",
+          "source_field": "10_task_t2_s0:pick_result.pan_pi0_pick_step765.prompt",
+          "source_excerpt": "grasp the pan handle"
+        },
+        {
+          "alias": "turn on the stove",
+          "source_cell": "10_task_t2_s0",
+          "source_field": "10_task_t2_s0:pick_result.stove_contact_steps759_762.prompt",
+          "source_excerpt": "turn on the stove"
+        },
+        {
+          "alias": "localized pan/handle, burner, knob, and moka distractor from reset step agentview hi",
+          "source_cell": "10_task_t2_s0",
+          "source_field": "10_task_t2_s0:strategy_notes",
+          "source_excerpt": "Localized pan/handle, burner, knob, and moka distractor from reset-step agentview hi-res and accepted wrist refinements only when consistent…"
+        },
+        {
+          "alias": "move above burner stalled but yielded valid wrist burner geometry",
+          "source_cell": "10_task_t2_s0",
+          "source_field": "10_task_t2_s0:strategy_notes",
+          "source_excerpt": "move above burner (stalled but yielded valid wrist burner geometry);"
+        }
+      ]
+    },
+    {
+      "memory_id": "retreat-high-before-lateral-near-lined-basket",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t1_s0"
+      ],
+      "retrieval_aliases": [
+        "basket dragged",
+        "basket lifted",
+        "container moved",
+        "liner snagged",
+        "gripper hooked cloth",
+        "object displaced between placements",
+        "2 pi0 pick pick up the can max chunks 14 > grasped",
+        "pi0 flagged success:false purely on the opening heuristic, but agentview confirmed the"
+      ],
+      "alias_sources": [
+        {
+          "alias": "basket dragged",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket dragged"
+        },
+        {
+          "alias": "basket lifted",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket lifted"
+        },
+        {
+          "alias": "container moved",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "container moved"
+        },
+        {
+          "alias": "liner snagged",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "liner snagged"
+        },
+        {
+          "alias": "gripper hooked cloth",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper hooked cloth"
+        },
+        {
+          "alias": "object displaced between placements",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object displaced between placements"
+        },
+        {
+          "alias": "2 pi0 pick pick up the can max chunks 14 > grasped",
+          "source_cell": "10_task_t1_s0",
+          "source_field": "10_task_t1_s0:strategy_notes",
+          "source_excerpt": "(2) pi0_pick 'pick up the can' max_chunks 14 -> grasped the can (peak_lift 0.257, final gripper opening 0.0625;"
+        },
+        {
+          "alias": "pi0 flagged success:false purely on the opening heuristic, but agentview confirmed the",
+          "source_cell": "10_task_t1_s0",
+          "source_field": "10_task_t1_s0:strategy_notes",
+          "source_excerpt": "pi0 flagged success:false purely on the opening heuristic, but agentview confirmed the can lifted into the gripper and its table spot empty)…"
+        }
+      ]
+    },
+    {
+      "memory_id": "reverse-entry-corridor-clearance",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t9_s0"
+      ],
+      "retrieval_aliases": [
+        "wrist trapped",
+        "object extracted",
+        "asymmetric opening",
+        "retreat stall",
+        "wrist refinement accepted the target and rejected a distractor cavity view",
+        "recipe steps 1 3: yaw0.8/pitch0.15 prepose, concise pi0 grasp, and +1 firming"
+      ],
+      "alias_sources": [
+        {
+          "alias": "wrist trapped",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrist trapped"
+        },
+        {
+          "alias": "object extracted",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object extracted"
+        },
+        {
+          "alias": "asymmetric opening",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "asymmetric opening"
+        },
+        {
+          "alias": "retreat stall",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "retreat stall"
+        },
+        {
+          "alias": "wrist refinement accepted the target and rejected a distractor cavity view",
+          "source_cell": "10_task_t9_s0",
+          "source_field": "10_task_t9_s0:strategy_notes",
+          "source_excerpt": "wrist refinement accepted the target and rejected a distractor cavity view."
+        },
+        {
+          "alias": "recipe steps 1 3: yaw0.8/pitch0.15 prepose, concise pi0 grasp, and +1 firming",
+          "source_cell": "10_task_t9_s0",
+          "source_field": "10_task_t9_s0:strategy_notes",
+          "source_excerpt": "Recipe steps 1-3: yaw0.8/pitch0.15 prepose, concise Pi0 grasp, and +1 firming."
+        }
+      ]
+    },
+    {
+      "memory_id": "right-front-perimeter-contact",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_task_t5_s0"
+      ],
+      "retrieval_aliases": [
+        "central band false",
+        "front of fixture false",
+        "held descent",
+        "perimeter zone",
+        "pick up the cream cheese",
+        "wrist high showed the cream cheese held between the gripper fingers",
+        "winning sequence after the last reset: run pi0 pick with prompt pick",
+        "confirm the box is held by wrist image and gripper gap around"
+      ],
+      "alias_sources": [
+        {
+          "alias": "central band false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "central_band_false"
+        },
+        {
+          "alias": "front of fixture false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "front_of_fixture_false"
+        },
+        {
+          "alias": "held descent",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "held_descent"
+        },
+        {
+          "alias": "perimeter zone",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "perimeter_zone"
+        },
+        {
+          "alias": "pick up the cream cheese",
+          "source_cell": "goal_task_t5_s0",
+          "source_field": "goal_task_t5_s0:pick_result.cream_cheese_pi0_pick_step26.prompt",
+          "source_excerpt": "pick up the cream cheese"
+        },
+        {
+          "alias": "wrist high showed the cream cheese held between the gripper fingers",
+          "source_cell": "goal_task_t5_s0",
+          "source_field": "goal_task_t5_s0:pick_result.cream_cheese_pi0_pick_step26.visual_confirmation",
+          "source_excerpt": "wrist_high showed the cream cheese held between the gripper fingers"
+        },
+        {
+          "alias": "winning sequence after the last reset: run pi0 pick with prompt pick",
+          "source_cell": "goal_task_t5_s0",
+          "source_field": "goal_task_t5_s0:strategy_notes",
+          "source_excerpt": "Winning sequence after the last reset: run pi0_pick with prompt \"pick up the cream cheese\", max_chunks=12, lift_thresh=0.05, gripper_closed_…"
+        },
+        {
+          "alias": "confirm the box is held by wrist image and gripper gap around",
+          "source_cell": "goal_task_t5_s0",
+          "source_field": "goal_task_t5_s0:strategy_notes",
+          "source_excerpt": "confirm the box is held by wrist image and gripper gap around 0.042 m."
+        }
+      ]
+    },
+    {
+      "memory_id": "rim-perch-contact-seat",
+      "kind": "strategy",
+      "source_cells": [
+        "object_task_t2_s0"
+      ],
+      "retrieval_aliases": [
+        "rim perched",
+        "basket",
+        "release false",
+        "push failed",
+        "can",
+        "pick up the tomato sauce can",
+        "target tomato sauce can was visibly held in the gripper over the",
+        "gripper opening stayed about 0.063 m"
+      ],
+      "alias_sources": [
+        {
+          "alias": "rim perched",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rim-perched"
+        },
+        {
+          "alias": "basket",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "basket"
+        },
+        {
+          "alias": "release false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "release-false"
+        },
+        {
+          "alias": "push failed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "push-failed"
+        },
+        {
+          "alias": "can",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "can"
+        },
+        {
+          "alias": "pick up the tomato sauce can",
+          "source_cell": "object_task_t2_s0",
+          "source_field": "object_task_t2_s0:pick_result.tomato_pi0_pick_step2.prompt",
+          "source_excerpt": "pick up the tomato sauce can"
+        },
+        {
+          "alias": "target tomato sauce can was visibly held in the gripper over the",
+          "source_cell": "object_task_t2_s0",
+          "source_field": "object_task_t2_s0:pick_result.tomato_pi0_pick_step2.visual_result",
+          "source_excerpt": "target tomato sauce can was visibly held in the gripper over the basket;"
+        },
+        {
+          "alias": "gripper opening stayed about 0.063 m",
+          "source_cell": "object_task_t2_s0",
+          "source_field": "object_task_t2_s0:pick_result.tomato_pi0_pick_step2.visual_result",
+          "source_excerpt": "gripper opening stayed about 0.063 m"
+        }
+      ]
+    },
+    {
+      "memory_id": "rotate-wrist-90deg-drifts-eef-recenter-after",
+      "kind": "primitive",
+      "source_cells": [
+        "10_task_t8_s0"
+      ],
+      "retrieval_aliases": [
+        "rotate wrist moved eef",
+        "yaw rotation drift",
+        "gripper off target after yaw",
+        "position changed after rotate wrist",
+        "closed to ~0.020 gap on the handle tube not cap/air",
+        "pot clearly off table, hanging upright by handle, gap held ~0.016",
+        "predicate fired on release, gap 0.0184",
+        "left =robot left=+y=image right pot"
+      ],
+      "alias_sources": [
+        {
+          "alias": "rotate wrist moved eef",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "rotate_wrist moved eef"
+        },
+        {
+          "alias": "yaw rotation drift",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "yaw rotation drift"
+        },
+        {
+          "alias": "gripper off target after yaw",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper off target after yaw"
+        },
+        {
+          "alias": "position changed after rotate wrist",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "position changed after rotate_wrist"
+        },
+        {
+          "alias": "closed to ~0.020 gap on the handle tube not cap/air",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:pick_result.handle_set_gripper_step24",
+          "source_excerpt": "closed to ~0.020 gap on the handle tube (not cap/air)"
+        },
+        {
+          "alias": "pot clearly off table, hanging upright by handle, gap held ~0.016",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:pick_result.lift_confirm_step26",
+          "source_excerpt": "pot clearly off table, hanging upright by handle, gap held ~0.016"
+        },
+        {
+          "alias": "predicate fired on release, gap 0.0184",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:pick_result.place_release_step32",
+          "source_excerpt": "predicate fired on release, gap 0.0184"
+        },
+        {
+          "alias": "left =robot left=+y=image right pot",
+          "source_cell": "10_task_t8_s0",
+          "source_field": "10_task_t8_s0:localization.target_left_moka_pot_body.note",
+          "source_excerpt": "'left'=robot-left=+y=image-RIGHT pot"
+        }
+      ]
+    },
+    {
+      "memory_id": "sam3-brand-noun-can-collision",
+      "kind": "perception",
+      "source_cells": [
+        "10_task_t0_s0"
+      ],
+      "retrieval_aliases": [
+        "same box for different prompts",
+        "two cans",
+        "wrong can grabbed",
+        "sam3 low score",
+        "brand noun",
+        "tomato sauce",
+        "segmentation prompt: tomato sauce can",
+        "segmentation prompt: cream cheese box"
+      ],
+      "alias_sources": [
+        {
+          "alias": "same box for different prompts",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "same box for different prompts"
+        },
+        {
+          "alias": "two cans",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "two cans"
+        },
+        {
+          "alias": "wrong can grabbed",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong can grabbed"
+        },
+        {
+          "alias": "sam3 low score",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "sam3 low score"
+        },
+        {
+          "alias": "brand noun",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "brand noun"
+        },
+        {
+          "alias": "tomato sauce",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "tomato sauce"
+        },
+        {
+          "alias": "segmentation prompt: tomato sauce can",
+          "source_cell": "10_task_t0_s0",
+          "source_field": "10_task_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: tomato sauce can"
+        },
+        {
+          "alias": "segmentation prompt: cream cheese box",
+          "source_cell": "10_task_t0_s0",
+          "source_field": "10_task_t0_s0:recipe",
+          "source_excerpt": "segmentation prompt: cream cheese box"
+        }
+      ]
+    },
+    {
+      "memory_id": "spatial-qualified-repick",
+      "kind": "strategy",
+      "source_cells": [
+        "goal_swap_t9_s0"
+      ],
+      "retrieval_aliases": [
+        "contact only",
+        "gripper open",
+        "no lift",
+        "prompt ladder",
+        "repick",
+        "failed contact only setup: gripper remained open, no lift, bottle still upright",
+        "successful grasp and delivery: gripper gap about 0.024 m, bottle visible held",
+        "step 8 ran pi0 pick with prompt pick up the wine bottle"
+      ],
+      "alias_sources": [
+        {
+          "alias": "contact only",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "contact-only"
+        },
+        {
+          "alias": "gripper open",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "gripper-open"
+        },
+        {
+          "alias": "no lift",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "no-lift"
+        },
+        {
+          "alias": "prompt ladder",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "prompt-ladder"
+        },
+        {
+          "alias": "repick",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "repick"
+        },
+        {
+          "alias": "failed contact only setup: gripper remained open, no lift, bottle still upright",
+          "source_cell": "goal_swap_t9_s0",
+          "source_field": "goal_swap_t9_s0:pick_result.wine_bottle_pi0_pick_step8",
+          "source_excerpt": "failed contact-only setup: gripper remained open, no lift, bottle still upright"
+        },
+        {
+          "alias": "successful grasp and delivery: gripper gap about 0.024 m, bottle visible held",
+          "source_cell": "goal_swap_t9_s0",
+          "source_field": "goal_swap_t9_s0:pick_result.wine_bottle_pi0_pick_step9",
+          "source_excerpt": "successful grasp-and-delivery: gripper gap about 0.024 m, bottle visible held at rack, terminated true"
+        },
+        {
+          "alias": "step 8 ran pi0 pick with prompt pick up the wine bottle",
+          "source_cell": "goal_swap_t9_s0",
+          "source_field": "goal_swap_t9_s0:strategy_notes",
+          "source_excerpt": "Step 8 ran pi0_pick with prompt 'pick up the wine bottle', max_chunks=20, lift_thresh=0.05, gripper_closed_thresh=0.06 from the home/default…"
+        }
+      ]
+    },
+    {
+      "memory_id": "support-assisted-axis-reorientation",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "bottle bridges drawer mouth",
+        "in hand rotation drops object",
+        "long axis points along container depth",
+        "horizontal carry stalls",
+        "object must lie across container width",
+        "step 6 used the verbatim task prompt and produced the retained bottle",
+        "steps 8 10 lifted high, carried upright over the cavity, and descended"
+      ],
+      "alias_sources": [
+        {
+          "alias": "bottle bridges drawer mouth",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "bottle bridges drawer mouth"
+        },
+        {
+          "alias": "in hand rotation drops object",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "in-hand rotation drops object"
+        },
+        {
+          "alias": "long axis points along container depth",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "long axis points along container depth"
+        },
+        {
+          "alias": "horizontal carry stalls",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "horizontal carry stalls"
+        },
+        {
+          "alias": "object must lie across container width",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object must lie across container width"
+        },
+        {
+          "alias": "step 6 used the verbatim task prompt and produced the retained bottle",
+          "source_cell": "10_task_t3_s0",
+          "source_field": "10_task_t3_s0:strategy_notes",
+          "source_excerpt": "Step 6 used the verbatim task prompt and produced the retained bottle grasp;"
+        },
+        {
+          "alias": "steps 8 10 lifted high, carried upright over the cavity, and descended",
+          "source_cell": "10_task_t3_s0",
+          "source_field": "10_task_t3_s0:strategy_notes",
+          "source_excerpt": "Steps 8-10 lifted high, carried upright over the cavity, and descended to base support."
+        }
+      ]
+    },
+    {
+      "memory_id": "support-guided-weak-hook-translation",
+      "kind": "strategy",
+      "source_cells": [
+        "10_task_t9_s0"
+      ],
+      "retrieval_aliases": [
+        "weak hook",
+        "grip collapse",
+        "long carry slip",
+        "supported slide",
+        "wrist refinement accepted the target and rejected a distractor cavity view",
+        "recipe steps 1 3: yaw0.8/pitch0.15 prepose, concise pi0 grasp, and +1 firming"
+      ],
+      "alias_sources": [
+        {
+          "alias": "weak hook",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "weak hook"
+        },
+        {
+          "alias": "grip collapse",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "grip collapse"
+        },
+        {
+          "alias": "long carry slip",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "long carry slip"
+        },
+        {
+          "alias": "supported slide",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "supported slide"
+        },
+        {
+          "alias": "wrist refinement accepted the target and rejected a distractor cavity view",
+          "source_cell": "10_task_t9_s0",
+          "source_field": "10_task_t9_s0:strategy_notes",
+          "source_excerpt": "wrist refinement accepted the target and rejected a distractor cavity view."
+        },
+        {
+          "alias": "recipe steps 1 3: yaw0.8/pitch0.15 prepose, concise pi0 grasp, and +1 firming",
+          "source_cell": "10_task_t9_s0",
+          "source_field": "10_task_t9_s0:strategy_notes",
+          "source_excerpt": "Recipe steps 1-3: yaw0.8/pitch0.15 prepose, concise Pi0 grasp, and +1 firming."
+        }
+      ]
+    },
+    {
+      "memory_id": "verify-duplicate-semantics",
+      "kind": "perception",
+      "source_cells": [
+        "spatial_swap_t4_s0"
+      ],
+      "retrieval_aliases": [
+        "nonterminal",
+        "duplicate",
+        "wrong target",
+        "visually overlapping",
+        "pick the akita black bowl in the top layer of the wooden",
+        "real grasp of drawer bowl; cabinet top duplicate remained in place",
+        "wrist confirmed the drawer bowl before grasp",
+        "the successful seed 0 reference indicated this swap predicate tracks the drawer"
+      ],
+      "alias_sources": [
+        {
+          "alias": "nonterminal",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "nonterminal"
+        },
+        {
+          "alias": "duplicate",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "duplicate"
+        },
+        {
+          "alias": "wrong target",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "wrong-target"
+        },
+        {
+          "alias": "visually overlapping",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "visually-overlapping"
+        },
+        {
+          "alias": "pick the akita black bowl in the top layer of the wooden",
+          "source_cell": "spatial_swap_t4_s0",
+          "source_field": "spatial_swap_t4_s0:pick_result.drawer_bowl_pi0_pick_step2.prompt",
+          "source_excerpt": "Pick the akita black bowl in the top layer of the wooden cabinet and place it on the plate"
+        },
+        {
+          "alias": "real grasp of drawer bowl; cabinet top duplicate remained in place",
+          "source_cell": "spatial_swap_t4_s0",
+          "source_field": "spatial_swap_t4_s0:pick_result.drawer_bowl_pi0_pick_step2.perception_verdict",
+          "source_excerpt": "real grasp of drawer bowl; cabinet-top duplicate remained in place"
+        },
+        {
+          "alias": "wrist confirmed the drawer bowl before grasp",
+          "source_cell": "spatial_swap_t4_s0",
+          "source_field": "spatial_swap_t4_s0:localization",
+          "source_excerpt": "wrist confirmed the drawer bowl before grasp."
+        },
+        {
+          "alias": "the successful seed 0 reference indicated this swap predicate tracks the drawer",
+          "source_cell": "spatial_swap_t4_s0",
+          "source_field": "spatial_swap_t4_s0:localization",
+          "source_excerpt": "The successful seed-0 reference indicated this swap predicate tracks the drawer bowl despite the top-layer wording, so coordinates were re-d…"
+        }
+      ]
+    },
+    {
+      "memory_id": "visual-over-pick-heuristic",
+      "kind": "strategy",
+      "source_cells": [
+        "spatial_task_t3_s0"
+      ],
+      "retrieval_aliases": [
+        "pick false",
+        "visual success",
+        "heuristic false",
+        "object moved",
+        "target still on cabinet; no secure hold",
+        "correct cabinet top bowl carried to plate despite heuristic false",
+        "target remained upright and better seated on plate",
+        "agentview high resolution rgb selected the cabinet top patterned bowl by the"
+      ],
+      "alias_sources": [
+        {
+          "alias": "pick false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "pick_false"
+        },
+        {
+          "alias": "visual success",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "visual_success"
+        },
+        {
+          "alias": "heuristic false",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "heuristic_false"
+        },
+        {
+          "alias": "object moved",
+          "source_cell": null,
+          "source_field": "symptom",
+          "source_excerpt": "object_moved"
+        },
+        {
+          "alias": "target still on cabinet; no secure hold",
+          "source_cell": "spatial_task_t3_s0",
+          "source_field": "spatial_task_t3_s0:pick_result.cabinet_bowl_pi0_pick_step2.visual_result",
+          "source_excerpt": "target still on cabinet; no secure hold"
+        },
+        {
+          "alias": "correct cabinet top bowl carried to plate despite heuristic false",
+          "source_cell": "spatial_task_t3_s0",
+          "source_field": "spatial_task_t3_s0:pick_result.cabinet_bowl_pi0_pick_step4.visual_result",
+          "source_excerpt": "correct cabinet-top bowl carried to plate despite heuristic false"
+        },
+        {
+          "alias": "target remained upright and better seated on plate",
+          "source_cell": "spatial_task_t3_s0",
+          "source_field": "spatial_task_t3_s0:pick_result.near_plate_repick_step6.visual_result",
+          "source_excerpt": "target remained upright and better seated on plate"
+        },
+        {
+          "alias": "agentview high resolution rgb selected the cabinet top patterned bowl by the",
+          "source_cell": "spatial_task_t3_s0",
+          "source_field": "spatial_task_t3_s0:localization.method",
+          "source_excerpt": "Agentview high-resolution RGB selected the cabinet-top patterned bowl by the relation 'on the top of the cabinet' and rejected the duplicate…"
+        }
+      ]
+    }
+  ]
+}

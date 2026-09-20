@@ -1,0 +1,475 @@
+{
+  "arms": {
+    "D0_ORIGINAL": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.233,
+          "R@3": 0.575,
+          "R@5": 0.592,
+          "MRR": 0.418,
+          "empty_top3": 0,
+          "irrelevant@3": 0.425,
+          "retreat_in_top3": 111
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.933,
+          "R@3": 0.967,
+          "R@5": 1.0,
+          "MRR": 0.953,
+          "empty_top3": 0,
+          "irrelevant@3": 0.033,
+          "retreat_in_top3": 29
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.944,
+          "R@5": 0.972,
+          "MRR": 0.482,
+          "empty_top3": 0,
+          "irrelevant@3": 0.056,
+          "retreat_in_top3": 36
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.103,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 7
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.2,
+          "MRR": 0.119,
+          "empty_top3": 0,
+          "irrelevant@3": 0.8,
+          "retreat_in_top3": 22
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 17
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "collision": {
+        "gold_points": 120,
+        "points_with_new_nongold_top3": 0,
+        "alias_driven": 0
+      },
+      "perception17_hits": 0
+    },
+    "D1_QUERY_RICH": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.275,
+          "R@3": 0.592,
+          "R@5": 0.608,
+          "MRR": 0.458,
+          "empty_top3": 0,
+          "irrelevant@3": 0.408,
+          "retreat_in_top3": 60
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.8,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.9,
+          "empty_top3": 0,
+          "irrelevant@3": 0.0,
+          "retreat_in_top3": 30
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.25,
+          "R@3": 0.972,
+          "R@5": 1.0,
+          "MRR": 0.618,
+          "empty_top3": 0,
+          "irrelevant@3": 0.028,
+          "retreat_in_top3": 1
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.072,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 1
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.233,
+          "MRR": 0.161,
+          "empty_top3": 0,
+          "irrelevant@3": 0.8,
+          "retreat_in_top3": 28
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.019,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "collision": {
+        "gold_points": 120,
+        "points_with_new_nongold_top3": 119,
+        "alias_driven": 119
+      },
+      "perception17_hits": 0
+    },
+    "D2_CARD_ALIGNED": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.083,
+          "R@3": 0.275,
+          "R@5": 0.442,
+          "MRR": 0.268,
+          "empty_top3": 0,
+          "irrelevant@3": 0.725,
+          "retreat_in_top3": 119
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.267,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.628,
+          "empty_top3": 0,
+          "irrelevant@3": 0.0,
+          "retreat_in_top3": 30
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.102,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 36
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.152,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 7
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.067,
+          "R@3": 0.1,
+          "R@5": 0.767,
+          "MRR": 0.274,
+          "empty_top3": 0,
+          "irrelevant@3": 0.9,
+          "retreat_in_top3": 29
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.019,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 17
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "collision": {
+        "gold_points": 120,
+        "points_with_new_nongold_top3": 119,
+        "alias_driven": 119
+      },
+      "perception17_hits": 0
+    },
+    "D3_BOTH": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.125,
+          "R@3": 0.392,
+          "R@5": 0.483,
+          "MRR": 0.277,
+          "empty_top3": 0,
+          "irrelevant@3": 0.608,
+          "retreat_in_top3": 1
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.767,
+          "R@5": 0.967,
+          "MRR": 0.316,
+          "empty_top3": 0,
+          "irrelevant@3": 0.233,
+          "retreat_in_top3": 1
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.055,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.118,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.5,
+          "R@3": 0.8,
+          "R@5": 0.967,
+          "MRR": 0.683,
+          "empty_top3": 0,
+          "irrelevant@3": 0.2,
+          "retreat_in_top3": 0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.026,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 0
+      },
+      "collision": {
+        "gold_points": 120,
+        "points_with_new_nongold_top3": 120,
+        "alias_driven": 120
+      },
+      "perception17_hits": 0
+    },
+    "D_SHAM": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.05,
+          "R@3": 0.242,
+          "R@5": 0.358,
+          "MRR": 0.202,
+          "empty_top3": 0,
+          "irrelevant@3": 0.758,
+          "retreat_in_top3": 0
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.2,
+          "R@3": 0.933,
+          "R@5": 1.0,
+          "MRR": 0.524,
+          "empty_top3": 0,
+          "irrelevant@3": 0.067,
+          "retreat_in_top3": 0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.095,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.143,
+          "R@5": 1.0,
+          "MRR": 0.255,
+          "empty_top3": 0,
+          "irrelevant@3": 0.857,
+          "retreat_in_top3": 0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.2,
+          "MRR": 0.097,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.02,
+          "empty_top3": 0,
+          "irrelevant@3": 1.0,
+          "retreat_in_top3": 0
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 0
+      },
+      "collision": {
+        "gold_points": 120,
+        "points_with_new_nongold_top3": 120,
+        "alias_driven": 120
+      },
+      "perception17_hits": 0
+    }
+  },
+  "gates": {
+    "1_D2_perception_R@3_ge_8of17": {
+      "value": 0,
+      "pass": false
+    },
+    "2_nonperception_R@3_drop_le_3pp": {
+      "D0": 0.67,
+      "D2": 0.32,
+      "pass": false
+    },
+    "3_hardneg_noise_le_+5pp": {
+      "D0_any": 14,
+      "D2_any": 14,
+      "pass": true
+    },
+    "4_D2_beats_D_SHAM": {
+      "perception17": [
+        0,
+        0
+      ],
+      "MRR": [
+        0.268,
+        0.202
+      ],
+      "pass": false
+    }
+  },
+  "regression": {
+    "D0_ORIGINAL.R@1": {
+      "got": 0.233,
+      "anchor": 0.233,
+      "match": true
+    },
+    "D0_ORIGINAL.R@3": {
+      "got": 0.575,
+      "anchor": 0.575,
+      "match": true
+    },
+    "D0_ORIGINAL.R@5": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "D0_ORIGINAL.MRR": {
+      "got": 0.418,
+      "anchor": 0.418,
+      "match": true
+    },
+    "D0_ORIGINAL.irrelevant@3": {
+      "got": 0.425,
+      "anchor": 0.425,
+      "match": true
+    },
+    "D1_QUERY_RICH.R@1": {
+      "got": 0.275,
+      "anchor": 0.275,
+      "match": true
+    },
+    "D1_QUERY_RICH.R@3": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "D1_QUERY_RICH.R@5": {
+      "got": 0.608,
+      "anchor": 0.608,
+      "match": true
+    },
+    "D1_QUERY_RICH.MRR": {
+      "got": 0.458,
+      "anchor": 0.458,
+      "match": true
+    },
+    "D1_QUERY_RICH.irrelevant@3": {
+      "got": 0.408,
+      "anchor": 0.408,
+      "match": true
+    },
+    "D0_ORIGINAL.perception17_R@3": {
+      "got": 0,
+      "anchor": 0,
+      "match": true
+    },
+    "D1_QUERY_RICH.perception17_R@3": {
+      "got": 0,
+      "anchor": 0,
+      "match": true
+    },
+    "D0.hardneg_retreat": {
+      "got": 14,
+      "anchor": 14,
+      "match": true
+    },
+    "ALL_MATCH": true
+  },
+  "offline_verdict": "GATE_FAILED"
+}
