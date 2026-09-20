@@ -1,0 +1,520 @@
+{
+  "arms": {
+    "S0_ORIGINAL_RAW": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.233,
+          "R@3": 0.575,
+          "R@5": 0.592,
+          "MRR": 0.418,
+          "irrelevant@3": 0.425
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.933,
+          "R@3": 0.967,
+          "R@5": 1.0,
+          "MRR": 0.953,
+          "irrelevant@3": 0.033
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.944,
+          "R@5": 0.972,
+          "MRR": 0.482,
+          "irrelevant@3": 0.056
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.103,
+          "irrelevant@3": 1.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.2,
+          "MRR": 0.119,
+          "irrelevant@3": 0.8
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        }
+      },
+      "stats": {
+        "mean_gold_rank": 12.0,
+        "mean_margin_topneg_minus_gold": 1.483
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "perception17_hits": 0
+    },
+    "S1_ALIAS_RAW": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.083,
+          "R@3": 0.275,
+          "R@5": 0.442,
+          "MRR": 0.268,
+          "irrelevant@3": 0.725
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.267,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.628,
+          "irrelevant@3": 0.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.102,
+          "irrelevant@3": 1.0
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.152,
+          "irrelevant@3": 1.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.067,
+          "R@3": 0.1,
+          "R@5": 0.767,
+          "MRR": 0.274,
+          "irrelevant@3": 0.9
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.019,
+          "irrelevant@3": 1.0
+        }
+      },
+      "stats": {
+        "mean_gold_rank": 12.4,
+        "mean_margin_topneg_minus_gold": 2.658
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "perception17_hits": 0
+    },
+    "S2_ORIGINAL_BM25": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.233,
+          "R@3": 0.583,
+          "R@5": 0.633,
+          "MRR": 0.435,
+          "irrelevant@3": 0.417
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.933,
+          "R@3": 0.967,
+          "R@5": 1.0,
+          "MRR": 0.953,
+          "irrelevant@3": 0.033
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.972,
+          "R@5": 0.972,
+          "MRR": 0.489,
+          "irrelevant@3": 0.028
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.571,
+          "MRR": 0.16,
+          "irrelevant@3": 1.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.233,
+          "MRR": 0.163,
+          "irrelevant@3": 0.8
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        }
+      },
+      "stats": {
+        "mean_gold_rank": 10.2,
+        "mean_margin_topneg_minus_gold": 3.606
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 12
+      },
+      "perception17_hits": 0
+    },
+    "S3_ALIAS_BM25": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.125,
+          "R@3": 0.292,
+          "R@5": 0.408,
+          "MRR": 0.284,
+          "irrelevant@3": 0.708
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.5,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.75,
+          "irrelevant@3": 0.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.167,
+          "MRR": 0.115,
+          "irrelevant@3": 1.0
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.105,
+          "irrelevant@3": 1.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.167,
+          "R@5": 0.433,
+          "MRR": 0.205,
+          "irrelevant@3": 0.833
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.031,
+          "irrelevant@3": 1.0
+        }
+      },
+      "stats": {
+        "mean_gold_rank": 10.2,
+        "mean_margin_topneg_minus_gold": 6.245
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "perception17_hits": 0
+    },
+    "S4_ALIAS_TFIDF": {
+      "primary": {
+        "ALL": {
+          "n": 120,
+          "R@1": 0.042,
+          "R@3": 0.333,
+          "R@5": 0.492,
+          "MRR": 0.235,
+          "irrelevant@3": 0.667
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.133,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.528,
+          "irrelevant@3": 0.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.167,
+          "MRR": 0.082,
+          "irrelevant@3": 1.0
+        },
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.093,
+          "irrelevant@3": 1.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.033,
+          "R@3": 0.333,
+          "R@5": 0.767,
+          "MRR": 0.28,
+          "irrelevant@3": 0.667
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.021,
+          "irrelevant@3": 1.0
+        }
+      },
+      "stats": {
+        "mean_gold_rank": 14.6,
+        "mean_margin_topneg_minus_gold": 0.281
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14
+      },
+      "perception17_hits": 0
+    }
+  },
+  "token_stats": {
+    "gripper": {
+      "df_base": 13,
+      "df_alias": 39,
+      "idf_alias": 0.451,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.121,
+      "median_rare_idf": 3.722
+    },
+    "release": {
+      "df_base": 11,
+      "df_alias": 25,
+      "idf_alias": 0.888,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.239,
+      "median_rare_idf": 3.722
+    },
+    "pick": {
+      "df_base": 10,
+      "df_alias": 33,
+      "idf_alias": 0.616,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.165,
+      "median_rare_idf": 3.722
+    },
+    "bowl": {
+      "df_base": 5,
+      "df_alias": 16,
+      "idf_alias": 1.324,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.356,
+      "median_rare_idf": 3.722
+    },
+    "predicate": {
+      "df_base": 15,
+      "df_alias": 20,
+      "idf_alias": 1.107,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.297,
+      "median_rare_idf": 3.722
+    },
+    "move": {
+      "df_base": 3,
+      "df_alias": 8,
+      "idf_alias": 1.987,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.534,
+      "median_rare_idf": 3.722
+    },
+    "object": {
+      "df_base": 41,
+      "df_alias": 46,
+      "idf_alias": 0.288,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.077,
+      "median_rare_idf": 3.722
+    },
+    "false": {
+      "df_base": 7,
+      "df_alias": 25,
+      "idf_alias": 0.888,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.239,
+      "median_rare_idf": 3.722
+    },
+    "basket": {
+      "df_base": 10,
+      "df_alias": 19,
+      "idf_alias": 1.157,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.311,
+      "median_rare_idf": 3.722
+    },
+    "plate": {
+      "df_base": 1,
+      "df_alias": 16,
+      "idf_alias": 1.324,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.356,
+      "median_rare_idf": 3.722
+    },
+    "success": {
+      "df_base": 2,
+      "df_alias": 13,
+      "idf_alias": 1.524,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.41,
+      "median_rare_idf": 3.722
+    },
+    "wrist": {
+      "df_base": 9,
+      "df_alias": 28,
+      "idf_alias": 0.777,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.209,
+      "median_rare_idf": 3.722
+    },
+    "held": {
+      "df_base": 13,
+      "df_alias": 25,
+      "idf_alias": 0.888,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.239,
+      "median_rare_idf": 3.722
+    },
+    "target": {
+      "df_base": 16,
+      "df_alias": 28,
+      "idf_alias": 0.777,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.209,
+      "median_rare_idf": 3.722
+    },
+    "rim": {
+      "df_base": 9,
+      "df_alias": 25,
+      "idf_alias": 0.888,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.239,
+      "median_rare_idf": 3.722
+    },
+    "opening": {
+      "df_base": 3,
+      "df_alias": 20,
+      "idf_alias": 1.107,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.297,
+      "median_rare_idf": 3.722
+    },
+    "grasp": {
+      "df_base": 13,
+      "df_alias": 23,
+      "idf_alias": 0.97,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.261,
+      "median_rare_idf": 3.722
+    },
+    "pi0": {
+      "df_base": 15,
+      "df_alias": 28,
+      "idf_alias": 0.777,
+      "raw_weight": 1.0,
+      "idf_weight_vs_median_rare": 0.209,
+      "median_rare_idf": 3.722
+    }
+  },
+  "regression": {
+    "S0_ORIGINAL_RAW.R@1": {
+      "got": 0.233,
+      "anchor": 0.233,
+      "match": true
+    },
+    "S0_ORIGINAL_RAW.R@3": {
+      "got": 0.575,
+      "anchor": 0.575,
+      "match": true
+    },
+    "S0_ORIGINAL_RAW.R@5": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "S0_ORIGINAL_RAW.MRR": {
+      "got": 0.418,
+      "anchor": 0.418,
+      "match": true
+    },
+    "S0_ORIGINAL_RAW.irrelevant@3": {
+      "got": 0.425,
+      "anchor": 0.425,
+      "match": true
+    },
+    "S1_ALIAS_RAW.R@1": {
+      "got": 0.083,
+      "anchor": 0.083,
+      "match": true
+    },
+    "S1_ALIAS_RAW.R@3": {
+      "got": 0.275,
+      "anchor": 0.275,
+      "match": true
+    },
+    "S1_ALIAS_RAW.R@5": {
+      "got": 0.442,
+      "anchor": 0.442,
+      "match": true
+    },
+    "S1_ALIAS_RAW.MRR": {
+      "got": 0.268,
+      "anchor": 0.268,
+      "match": true
+    },
+    "S1_ALIAS_RAW.irrelevant@3": {
+      "got": 0.725,
+      "anchor": 0.725,
+      "match": true
+    },
+    "ALL_MATCH": true
+  },
+  "verdict": {
+    "S3_R@3": 0.292,
+    "S0_R@3": 0.575,
+    "recovers_S0_minus3pp": false,
+    "hardneg_safe": true,
+    "scoring_diagnosis": "SCORING FIX NOT SUFFICIENT"
+  }
+}

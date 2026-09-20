@@ -1,0 +1,427 @@
+{
+  "arms": {
+    "E0_POOR": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.103,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.944,
+          "R@5": 0.972,
+          "MRR": 0.482,
+          "irrelevant@3": 0.056
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.933,
+          "R@3": 0.967,
+          "R@5": 1.0,
+          "MRR": 0.953,
+          "irrelevant@3": 0.033
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.2,
+          "MRR": 0.119,
+          "irrelevant@3": 0.8
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.233,
+          "R@3": 0.575,
+          "R@5": 0.592,
+          "MRR": 0.418,
+          "irrelevant@3": 0.425
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14,
+        "irr_rate": 1.0
+      },
+      "perception17_hits": 0,
+      "mean_query_len": 247.6
+    },
+    "E1_CURRENT_STATE": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.072,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.019,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.25,
+          "R@3": 0.972,
+          "R@5": 1.0,
+          "MRR": 0.618,
+          "irrelevant@3": 0.028
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.8,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.9,
+          "irrelevant@3": 0.0
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.233,
+          "MRR": 0.161,
+          "irrelevant@3": 0.8
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.275,
+          "R@3": 0.592,
+          "R@5": 0.608,
+          "MRR": 0.458,
+          "irrelevant@3": 0.408
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 14,
+        "irr_rate": 1.0
+      },
+      "perception17_hits": 0,
+      "mean_query_len": 475.4
+    },
+    "E2_RAW_TRACE": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.086,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.306,
+          "R@3": 0.944,
+          "R@5": 1.0,
+          "MRR": 0.611,
+          "irrelevant@3": 0.056
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.167,
+          "R@3": 0.833,
+          "R@5": 1.0,
+          "MRR": 0.452,
+          "irrelevant@3": 0.167
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.067,
+          "R@3": 0.2,
+          "R@5": 0.2,
+          "MRR": 0.143,
+          "irrelevant@3": 0.8
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.15,
+          "R@3": 0.542,
+          "R@5": 0.6,
+          "MRR": 0.337,
+          "irrelevant@3": 0.458
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 13,
+        "irr_rate": 1.0
+      },
+      "perception17_hits": 0,
+      "mean_query_len": 491.5
+    },
+    "E3_FAILURE_ORIGIN": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.089,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.972,
+          "R@5": 0.972,
+          "MRR": 0.49,
+          "irrelevant@3": 0.028
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.033,
+          "R@3": 0.6,
+          "R@5": 1.0,
+          "MRR": 0.367,
+          "irrelevant@3": 0.4
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.233,
+          "R@3": 0.3,
+          "R@5": 0.367,
+          "MRR": 0.323,
+          "irrelevant@3": 0.7
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.067,
+          "R@3": 0.517,
+          "R@5": 0.633,
+          "MRR": 0.325,
+          "irrelevant@3": 0.483
+        }
+      },
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "retreat_in_top3": 11,
+        "irr_rate": 1.0
+      },
+      "perception17_hits": 0,
+      "mean_query_len": 378.3
+    }
+  },
+  "gates": {
+    "g1_perception": {
+      "value": "0/17",
+      "pass": false
+    },
+    "g2_E3_gt_E1": {
+      "E3": 0.517,
+      "E1": 0.592,
+      "pass": false
+    },
+    "g3_E3_gt_E2": {
+      "E3": 0.517,
+      "E2": 0.542,
+      "R@3_delta": -0.025,
+      "perc_delta": 0,
+      "pass": false
+    },
+    "g4_nonperc": {
+      "E0": 0.67,
+      "E3": 0.602,
+      "drop": 0.068,
+      "pass": false
+    },
+    "g5_hardneg": {
+      "E0_irr": 1.0,
+      "E3_irr": 1.0,
+      "pass": true
+    },
+    "g6_audit": {
+      "value": "47/52=.904 (stageE_origin_audit.md)",
+      "pass": true
+    },
+    "all_pass": false
+  },
+  "by_origin": {
+    "E0_POOR": {
+      "PERCEPTION": {
+        "n": 22,
+        "R@3": 0.0
+      },
+      "GRASP": {
+        "n": 68,
+        "R@3": 0.794
+      },
+      "PLACE": {
+        "n": 21,
+        "R@3": 0.714
+      },
+      "NONE": {
+        "n": 4,
+        "R@3": 0.0
+      },
+      "UNKNOWN": {
+        "n": 5,
+        "R@3": 0.0
+      }
+    },
+    "E1_CURRENT_STATE": {
+      "PERCEPTION": {
+        "n": 22,
+        "R@3": 0.0
+      },
+      "GRASP": {
+        "n": 68,
+        "R@3": 0.824
+      },
+      "PLACE": {
+        "n": 21,
+        "R@3": 0.714
+      },
+      "NONE": {
+        "n": 4,
+        "R@3": 0.0
+      },
+      "UNKNOWN": {
+        "n": 5,
+        "R@3": 0.0
+      }
+    },
+    "E2_RAW_TRACE": {
+      "PERCEPTION": {
+        "n": 22,
+        "R@3": 0.0
+      },
+      "GRASP": {
+        "n": 68,
+        "R@3": 0.75
+      },
+      "PLACE": {
+        "n": 21,
+        "R@3": 0.667
+      },
+      "NONE": {
+        "n": 4,
+        "R@3": 0.0
+      },
+      "UNKNOWN": {
+        "n": 5,
+        "R@3": 0.0
+      }
+    },
+    "E3_FAILURE_ORIGIN": {
+      "PERCEPTION": {
+        "n": 22,
+        "R@3": 0.0
+      },
+      "GRASP": {
+        "n": 68,
+        "R@3": 0.647
+      },
+      "PLACE": {
+        "n": 21,
+        "R@3": 0.857
+      },
+      "NONE": {
+        "n": 4,
+        "R@3": 0.0
+      },
+      "UNKNOWN": {
+        "n": 5,
+        "R@3": 0.0
+      }
+    }
+  },
+  "regression": {
+    "E0_POOR.R@1": {
+      "got": 0.233,
+      "anchor": 0.233,
+      "match": true
+    },
+    "E0_POOR.R@3": {
+      "got": 0.575,
+      "anchor": 0.575,
+      "match": true
+    },
+    "E0_POOR.R@5": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "E0_POOR.MRR": {
+      "got": 0.418,
+      "anchor": 0.418,
+      "match": true
+    },
+    "E0_POOR.irrelevant@3": {
+      "got": 0.425,
+      "anchor": 0.425,
+      "match": true
+    },
+    "E1_CURRENT_STATE.R@1": {
+      "got": 0.275,
+      "anchor": 0.275,
+      "match": true
+    },
+    "E1_CURRENT_STATE.R@3": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "E1_CURRENT_STATE.R@5": {
+      "got": 0.608,
+      "anchor": 0.608,
+      "match": true
+    },
+    "E1_CURRENT_STATE.MRR": {
+      "got": 0.458,
+      "anchor": 0.458,
+      "match": true
+    },
+    "E1_CURRENT_STATE.irrelevant@3": {
+      "got": 0.408,
+      "anchor": 0.408,
+      "match": true
+    },
+    "ALL_MATCH": true
+  },
+  "nonperception_R@3": {
+    "E0_POOR": 0.67,
+    "E1_CURRENT_STATE": 0.689,
+    "E2_RAW_TRACE": 0.631,
+    "E3_FAILURE_ORIGIN": 0.602
+  }
+}
