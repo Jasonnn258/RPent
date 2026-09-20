@@ -1,0 +1,3205 @@
+{
+  "version": "v1",
+  "generated": "2026-09-20",
+  "policy": {
+    "activation_channel": "title+applies_when+symptom",
+    "remedy_channel": "how_to_apply+why",
+    "locus_vocab": {
+      "PERCEPTION": [
+        "wrong-mask",
+        "wrong instance",
+        "wrong object",
+        "wrong can",
+        "wrong duplicate",
+        "wrong target",
+        "wrong surface",
+        "wrong side",
+        "misground",
+        "low-score-segment",
+        "sam3",
+        "text segmentation",
+        "segment prompt",
+        "brand noun",
+        "same box for different prompts",
+        "duplicate",
+        "look-alike",
+        "visually identical",
+        "disambiguation",
+        "disambiguate",
+        "back_project returns",
+        "back_project captured",
+        "back_project",
+        "stale coordinates",
+        "wrist views",
+        "segmentation outlier",
+        "cannot see",
+        "cannot tell",
+        "occluded",
+        "which compartment",
+        "which pocket",
+        "ambiguous compartment",
+        "choose +y",
+        "semantic identity",
+        "relation target",
+        "region/pixel",
+        "reads as",
+        "segment the wrong",
+        "selects the wrong"
+      ],
+      "GRASP": [
+        "missed grasp",
+        "pick miss",
+        "never closes",
+        "will not close",
+        "not fully closed",
+        "contacts without lifting",
+        "but no lift",
+        "no lift",
+        "no-lift",
+        "grabbed air",
+        "grabbing air",
+        "grabbed nothing",
+        "success false",
+        "success:false",
+        "success_flag",
+        "pick_false",
+        "false negative",
+        "grasp slips",
+        "close slips",
+        "slips off",
+        "ungrasped",
+        "contact-only",
+        "gripper stays open",
+        "gripper reopens",
+        "descent stalls",
+        "over the shoulder",
+        "partially engages",
+        "judge-by-grip",
+        "visibly moved or held",
+        "grasps stall",
+        "closure fails",
+        "grasp never"
+      ],
+      "TRANSPORT": [
+        "carry stalls",
+        "carry slip",
+        "carry-past-lift",
+        "reach wall",
+        "osc stall",
+        "eef moved sideways",
+        "eef moved far",
+        "eef jumped",
+        "moved the eef",
+        "drifts",
+        "drifted",
+        "drift",
+        "horizontal carry",
+        "long carry",
+        "swing",
+        "hangs beyond",
+        "unreachable eef"
+      ],
+      "PLACE": [
+        "release false",
+        "release_false",
+        "release-false",
+        "release not",
+        "release opens the gripper",
+        "release did not",
+        "unreleased",
+        "nonterminal",
+        "not firing",
+        "did not fire",
+        "never fires",
+        "wont fire",
+        "wont terminate",
+        "predicate",
+        "terminated",
+        "termination",
+        "perched",
+        "rim catch",
+        "rim-perched",
+        "wedged",
+        "settle",
+        "settles",
+        "settling",
+        "seat",
+        "seated",
+        "tipped",
+        "falls back",
+        "rolls out",
+        "rolls away",
+        "lands outside",
+        "lands in the wrong",
+        "dropped into the wrong",
+        "displaced",
+        "stalls high",
+        "cannot-descend",
+        "rogue place",
+        "placement misses",
+        "miss the",
+        "shoved",
+        "snagged",
+        "back into",
+        "falls off",
+        "re-hooks",
+        "extracts it",
+        "look correct but",
+        "fail despite"
+      ],
+      "PREDICATE": [
+        "predicate",
+        "terminated",
+        "termination",
+        "nonterminal",
+        "not firing",
+        "did not fire",
+        "never fires",
+        "wont fire",
+        "wont terminate",
+        "success flag"
+      ],
+      "RECOVERY": [
+        "repick",
+        "regrasp",
+        "re-approach",
+        "retry",
+        "corrective",
+        "near miss",
+        "near-miss",
+        "near_miss",
+        "after miss",
+        "spatially qualified"
+      ]
+    },
+    "prereq_vocab_keys": [
+      "PREREQ_1",
+      "PREREQ_2",
+      "PREREQ_3",
+      "PREREQ_4",
+      "PREREQ_5"
+    ],
+    "remedy_vocab": {
+      "PERCEPTION": [
+        "point prompt",
+        "point-prompt",
+        "segment",
+        "mask",
+        "agentview",
+        "inspect",
+        "observe",
+        "look",
+        "visual"
+      ],
+      "GRASP": [
+        "regrip",
+        "firm the grip",
+        "close",
+        "grip"
+      ],
+      "TRANSPORT": [
+        "yaw",
+        "pitch",
+        "rotate",
+        "recenter",
+        "offset",
+        "move",
+        "translate",
+        "retreat high"
+      ],
+      "PLACE": [
+        "release",
+        "settle",
+        "seat",
+        "contact",
+        "descend",
+        "drop",
+        "retreat",
+        "insert",
+        "perch"
+      ],
+      "RECOVERY": [
+        "repick",
+        "regrasp",
+        "retry",
+        "retreat",
+        "corrective",
+        "re-approach",
+        "back off"
+      ],
+      "PREDICATE": [
+        "wait",
+        "predicate"
+      ]
+    },
+    "ontology": "analysis/stageF_prerequisite_ontology.md (frozen)",
+    "empty_field_means": "unspecified — never forced",
+    "firewall": "reads only resources/libero/{global,task_only}"
+  },
+  "cards": [
+    {
+      "memory_id": "avoid-full-task-prompt-after-miss",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "GRASP",
+        "PLACE"
+      ],
+      "phase": [
+        "P_grasp",
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "goal_task_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "missed grasp",
+            "partially engages",
+            "pick miss"
+          ],
+          "excerpt": "Keep Pi0 recovery prompts grasp-only after a missed pick. | A Pi0 pick misses or only partially engages and th…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "rogue place",
+            "tipped"
+          ],
+          "excerpt": "Keep Pi0 recovery prompts grasp-only after a missed pick. | A Pi0 pick misses or only partially engages and th…"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-insertion-open-retreat",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "object_task_t4_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "perched",
+            "release false",
+            "seat"
+          ],
+          "excerpt": "Retreat open after seating objects inside baskets. | placing a held object into a rimmed or fabric-lined baske…"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-release-retreat-settle",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "object_swap_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "release false",
+            "settle"
+          ],
+          "excerpt": "Retreat upward with the gripper open after low basket release. | An object is released low inside a basket but…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Retreat upward with the gripper open after low basket release. | An object is released low inside a basket but…"
+        }
+      ]
+    },
+    {
+      "memory_id": "basket-two-cans-wedge-not-stack",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "10_swap_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "lands outside",
+            "never fires",
+            "predicate",
+            "rolls out"
+          ],
+          "excerpt": "For a second object into a nearly-full container, wedge it against a closed | task requires putting TWO (or mo…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "For a second object into a nearly-full container, wedge it against a closed | task requires putting TWO (or mo…"
+        }
+      ]
+    },
+    {
+      "memory_id": "box-vs-can-lid-wrist-disambiguation",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "back_project",
+            "back_project captured",
+            "back_project returns",
+            "reads as"
+          ],
+          "excerpt": "Wrist-confirm box identity when an agentview z-scan puts a target box at the | localizing a standing box that …"
+        }
+      ]
+    },
+    {
+      "memory_id": "boxes-tolerate-stacking-in-basket",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "GRASP",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_grasp",
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "source_cells": [
+        "10_swap_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "descent stalls"
+          ],
+          "excerpt": "For two-BOXES-into-basket, a second box resting on the first still fires In(); | placing a second flat/box-sha…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "stalls high"
+          ],
+          "excerpt": "For two-BOXES-into-basket, a second box resting on the first still fires In(); | placing a second flat/box-sha…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "For two-BOXES-into-basket, a second box resting on the first still fires In(); | placing a second flat/box-sha…"
+        }
+      ]
+    },
+    {
+      "memory_id": "brand-label-over-segmentation",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION"
+      ],
+      "source_cells": [
+        "object_task_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "low-score-segment"
+          ],
+          "excerpt": "Let readable RGB labels overrule low-confidence category masks. | Grocery or packaged-object tasks name a bran…"
+        }
+      ]
+    },
+    {
+      "memory_id": "caddy-back-is-near-robot-pocket",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "10_task_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "ambiguous compartment",
+            "which pocket"
+          ],
+          "excerpt": "A container's named front/back compartment is in the CONTAINER's local frame, | task says put X in the \"back\"/…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "not firing",
+            "predicate",
+            "wont fire"
+          ],
+          "excerpt": "A container's named front/back compartment is in the CONTAINER's local frame, | task says put X in the \"back\"/…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "A container's named front/back compartment is in the CONTAINER's local frame, | task says put X in the \"back\"/…"
+        }
+      ]
+    },
+    {
+      "memory_id": "can-pick-visual-confirmation",
+      "kind": "perception",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION"
+      ],
+      "source_cells": [
+        "object_swap_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "false negative",
+            "success false"
+          ],
+          "excerpt": "Trust visual grasp evidence over Pi0's pick boolean for cylindrical groceries. | A Pi0 can or bottle pick repo…"
+        }
+      ]
+    },
+    {
+      "memory_id": "closed-gripper-container-insertion",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "object_swap_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "not firing",
+            "predicate",
+            "release not",
+            "rim catch"
+          ],
+          "excerpt": "Descend into open containers before releasing. | Object is already held above a basket or open container and t…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Descend into open containers before releasing. | Object is already held above a basket or open container and t…"
+        }
+      ]
+    },
+    {
+      "memory_id": "co-vary-pitch-clears-yawed-reach-wall",
+      "kind": "primitive",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "carry stalls",
+            "osc stall",
+            "reach wall"
+          ],
+          "excerpt": "Add a small pitch while using move_pose to cross a yawed Cartesian reach wall | a yawed gripper stalls several…"
+        }
+      ]
+    },
+    {
+      "memory_id": "contact-skill-state-change",
+      "kind": "strategy",
+      "failure_origin": [],
+      "missing_prerequisites": [],
+      "failure_surface": [],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "pi0_doubled",
+        "pi0_pick",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "goal_task_t7_s0"
+      ],
+      "annotation_evidence": []
+    },
+    {
+      "memory_id": "container-slide-axis-toward-fixture-body",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "will not close"
+          ],
+          "excerpt": "Close a drawer along the axis toward the cabinet body, and treat zero-motion-under-push | closing (or opening)…"
+        }
+      ]
+    },
+    {
+      "memory_id": "drawer-top-contact-before-release",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "goal_swap_t2_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Let contact predicates fire during a controlled closed-gripper descent. | Tall or awkward object is being plac…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Let contact predicates fire during a controlled closed-gripper descent. | Tall or awkward object is being plac…"
+        }
+      ]
+    },
+    {
+      "memory_id": "flat-box-basket-interior-drop",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "source_cells": [
+        "object_swap_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "perched",
+            "release false"
+          ],
+          "excerpt": "Drop flat boxes into basket interiors before opening. | placing a long flat grocery box into a woven basket or…"
+        }
+      ]
+    },
+    {
+      "memory_id": "flat-box-rigid-bowl-seat",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4",
+        "PREREQ_5"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "goal_swap_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "perched",
+            "release false",
+            "seat"
+          ],
+          "excerpt": "Seat flat boxes below a rigid bowl rim before release. | placing a flat rectangular object into or on a rigid …"
+        },
+        {
+          "field": "activation(verify-discipline)",
+          "match": "verify/confirm + before/not-yet",
+          "excerpt": "Seat flat boxes below a rigid bowl rim before release. | placing a flat rectangular object into or on a rigid …"
+        }
+      ]
+    },
+    {
+      "memory_id": "held-contact-container-insertion",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "object_swap_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "release false"
+          ],
+          "excerpt": "Use trained contact insertion before opening a held object. | A held object is near a rimmed container but scr…"
+        }
+      ]
+    },
+    {
+      "memory_id": "held-offset-rotation-reach",
+      "kind": "strategy",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t4_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "unreachable eef"
+          ],
+          "excerpt": "Rotate a held payload to redirect an unreachable hang offset into a reachable | a correctly grasped object han…"
+        }
+      ]
+    },
+    {
+      "memory_id": "high-drop-over-cavity",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "source_cells": [
+        "object_task_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "cannot-descend",
+            "perched",
+            "release-false",
+            "rim-perched"
+          ],
+          "excerpt": "Release box-like objects high over a container cavity instead of descending | Placing a rectangular or box-lik…"
+        }
+      ]
+    },
+    {
+      "memory_id": "knob-side-front-zone",
+      "kind": "strategy",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "goal_swap_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "wrong surface"
+          ],
+          "excerpt": "Treat fixture front as the control/handle side when edge placements fail. | A task asks for an object at the f…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "look correct but",
+            "nonterminal"
+          ],
+          "excerpt": "Treat fixture front as the control/handle side when edge placements fail. | A task asks for an object at the f…"
+        }
+      ]
+    },
+    {
+      "memory_id": "leaned-contact-before-policy-push",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "goal_task_t4_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "falls back"
+          ],
+          "excerpt": "Turn unreachable held placement into a leaned contact setup before invoking | A held object cannot be released…"
+        }
+      ]
+    },
+    {
+      "memory_id": "learned-contact-after-near-placement",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "source_cells": [
+        "spatial_task_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "tipped"
+          ],
+          "excerpt": "Use learned contact to finish near placements. | A scripted release leaves the correct object visibly near or …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "near miss"
+          ],
+          "excerpt": "Use learned contact to finish near placements. | A scripted release leaves the correct object visibly near or …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Use learned contact to finish near placements. | A scripted release leaves the correct object visibly near or …"
+        }
+      ]
+    },
+    {
+      "memory_id": "libero-in-predicate-fires-while-grasped",
+      "kind": "strategy",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "look-alike"
+          ],
+          "excerpt": "Test placement targets by holding the object over them and watching libero_terminated, | an In()/On() place ta…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "not firing",
+            "predicate",
+            "terminated",
+            "tipped"
+          ],
+          "excerpt": "Test placement targets by holding the object over them and watching libero_terminated, | an In()/On() place ta…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate",
+            "terminated"
+          ],
+          "excerpt": "Test placement targets by holding the object over them and watching libero_terminated, | an In()/On() place ta…"
+        }
+      ]
+    },
+    {
+      "memory_id": "libero10-left-right-sign-verify-empirically",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "choose +y",
+            "wrong side"
+          ],
+          "excerpt": "Do not trust a fixed left/right sign for \"right/left of X\" predicates; verify | a task says put an object to t…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "termination"
+          ],
+          "excerpt": "Do not trust a fixed left/right sign for \"right/left of X\" predicates; verify | a task says put an object to t…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate",
+            "termination"
+          ],
+          "excerpt": "Do not trust a fixed left/right sign for \"right/left of X\" predicates; verify | a task says put an object to t…"
+        }
+      ]
+    },
+    {
+      "memory_id": "low-contact-seat-after-release",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "did not fire",
+            "perched",
+            "predicate",
+            "release_false"
+          ],
+          "excerpt": "Use short low contact to seat an upright object after an off-center release | An object is already upright on …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Use short low contact to seat an upright object after an off-center release | An object is already upright on …"
+        }
+      ]
+    },
+    {
+      "memory_id": "low-pose-settle-regrasp",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "did not fire",
+            "predicate",
+            "settle",
+            "terminated"
+          ],
+          "excerpt": "Use a low regrasp to settle an object that is already on the target. | An object has been released partly on t…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "regrasp"
+          ],
+          "excerpt": "Use a low regrasp to settle an object that is already on the target. | An object has been released partly on t…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate",
+            "terminated"
+          ],
+          "excerpt": "Use a low regrasp to settle an object that is already on the target. | An object has been released partly on t…"
+        }
+      ]
+    },
+    {
+      "memory_id": "moka-pot-grasp-the-handle-not-the-body",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "descent stalls",
+            "grasp slips",
+            "grasps stall",
+            "never closes"
+          ],
+          "excerpt": "Grasp a moka pot by its thin side handle, not its wide body or cap | picking a moka pot (or any wide low-poly …"
+        }
+      ]
+    },
+    {
+      "memory_id": "named-compartment-via-front-back-pair",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "disambiguate",
+            "which compartment"
+          ],
+          "excerpt": "Disambiguate a \"back/front compartment\" by finding the divided front/back PAIR, | task names a \"back\" or \"fron…"
+        }
+      ]
+    },
+    {
+      "memory_id": "near-goal-contact-regrasp",
+      "kind": "strategy",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "spatial_swap_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "duplicate"
+          ],
+          "excerpt": "Use short local regrasp contact after visible near-goal placement stalls. | A movable object is visibly on or …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "nonterminal",
+            "perched",
+            "predicate"
+          ],
+          "excerpt": "Use short local regrasp contact after visible near-goal placement stalls. | A movable object is visibly on or …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "regrasp"
+          ],
+          "excerpt": "Use short local regrasp contact after visible near-goal placement stalls. | A movable object is visibly on or …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Use short local regrasp contact after visible near-goal placement stalls. | A movable object is visibly on or …"
+        }
+      ]
+    },
+    {
+      "memory_id": "near-miss-corrective-pick",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "spatial_swap_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "release false",
+            "seat"
+          ],
+          "excerpt": "Use a short pick as corrective contact after a near-miss placement. | An object has been released partly on or…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "corrective",
+            "near miss",
+            "near-miss"
+          ],
+          "excerpt": "Use a short pick as corrective contact after a near-miss placement. | An object has been released partly on or…"
+        }
+      ]
+    },
+    {
+      "memory_id": "near-target-repick",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "source_cells": [
+        "spatial_task_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "release_false"
+          ],
+          "excerpt": "Use a short local repick when an upright object lands just short of a placement | A placed object remains upri…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "near_miss",
+            "repick"
+          ],
+          "excerpt": "Use a short local repick when an upright object lands just short of a placement | A placed object remains upri…"
+        }
+      ]
+    },
+    {
+      "memory_id": "object-frame-box-to-basket",
+      "kind": "strategy",
+      "failure_origin": [],
+      "missing_prerequisites": [],
+      "failure_surface": [],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "object_swap_t6_s0"
+      ],
+      "annotation_evidence": []
+    },
+    {
+      "memory_id": "open-retreat-settles-container",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY"
+      ],
+      "source_cells": [
+        "object_swap_t4_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "release opens the gripper",
+            "release_false",
+            "wedged"
+          ],
+          "excerpt": "Retreat open after container release when the object is visibly inside. | Container placement release opens th…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Retreat open after container release when the object is visibly inside. | Container placement release opens th…"
+        }
+      ]
+    },
+    {
+      "memory_id": "open-side-bowl-grasp",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "but no lift",
+            "contacts without lifting",
+            "gripper reopens",
+            "no lift"
+          ],
+          "excerpt": "Shift bowl grasps away from nearby fixture clutter. | A bowl target is crowded by a cabinet handle, rim, wall,…"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-grasp-tall-mug-by-handle",
+      "kind": "primitive",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "grabbed air",
+            "grabbing air",
+            "gripper stays open"
+          ],
+          "excerpt": "Grasp a tall wide-mouth mug by its handle, not from above | picking a tall mug/cup whose open top is wider tha…"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-pick-carries-past-lift-judge-by-grip",
+      "kind": "perception",
+      "failure_origin": [
+        "GRASP",
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_grasp",
+        "P_transport",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t7_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "not fully closed",
+            "success false",
+            "success:false"
+          ],
+          "excerpt": "Judge a pi0_pick by grip + wrist, not the success flag — it can grasp then | pi0_pick returns success:false (d…"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "eef jumped"
+          ],
+          "excerpt": "Judge a pi0_pick by grip + wrist, not the success flag — it can grasp then | pi0_pick returns success:false (d…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "success flag"
+          ],
+          "excerpt": "Judge a pi0_pick by grip + wrist, not the success flag — it can grasp then | pi0_pick returns success:false (d…"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-pick-may-place-at-trained-left",
+      "kind": "primitive",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PLACE"
+      ],
+      "source_cells": [
+        "10_task_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "drift",
+            "drifted",
+            "drifts",
+            "eef moved sideways"
+          ],
+          "excerpt": "pi0_pick often carries the grasped object toward its trained place pose; exploit | using pi0_pick for a grasp …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "success flag"
+          ],
+          "excerpt": "pi0_pick often carries the grasped object toward its trained place pose; exploit | using pi0_pick for a grasp …"
+        }
+      ]
+    },
+    {
+      "memory_id": "pi0-prepositioned-simple-basket",
+      "kind": "strategy",
+      "failure_origin": [],
+      "missing_prerequisites": [],
+      "failure_surface": [],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "object_swap_t7_s0"
+      ],
+      "annotation_evidence": []
+    },
+    {
+      "memory_id": "pick-before-contact-skill-keeps-wrist-clean",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t2_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "close slips",
+            "gripper stays open",
+            "never closes",
+            "slips off"
+          ],
+          "excerpt": "In multi-part tasks, do the pi0_pick grasp BEFORE any pi0_doubled contact skill, | A task needs both a grasp/p…"
+        }
+      ]
+    },
+    {
+      "memory_id": "pitched-side-grasp-overedge-release",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "goal_swap_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Release wide held objects once they overlap the container edge. | A wide bowl or cup collides before reaching …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Release wide held objects once they overlap the container edge. | A wide bowl or cup collides before reaching …"
+        }
+      ]
+    },
+    {
+      "memory_id": "place-order-never-carry-over-placed-object",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP"
+      ],
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "tipped"
+          ],
+          "excerpt": "Order multi-place tasks so nothing is carried or re-grasped over an already-placed | a task requires placing t…"
+        }
+      ]
+    },
+    {
+      "memory_id": "point-prompt-after-text-misground",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION"
+      ],
+      "source_cells": [
+        "spatial_swap_t2_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "duplicate",
+            "look-alike",
+            "selects the wrong",
+            "text segmentation"
+          ],
+          "excerpt": "Switch to point prompts when text masks ignore the intended relation. | A scene has duplicate objects or look-…"
+        }
+      ]
+    },
+    {
+      "memory_id": "post-grasp-yaw-offset",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t9_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "placement misses"
+          ],
+          "excerpt": "Rotate a held bowl after a reliable grasp to move its offset into reach | A reliable Pi0 bowl grasp carries th…"
+        }
+      ]
+    },
+    {
+      "memory_id": "predicate-fires-after-gripper-retreat",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "not firing",
+            "predicate",
+            "release did not",
+            "terminated"
+          ],
+          "excerpt": "After releasing an object into a container, retreat the gripper straight up | you released a held object into/…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate",
+            "terminated"
+          ],
+          "excerpt": "After releasing an object into a container, retreat the gripper straight up | you released a held object into/…"
+        }
+      ]
+    },
+    {
+      "memory_id": "predicate-gated-by-eef-proximity-retreat-clear",
+      "kind": "failure",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t6_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "predicate",
+            "terminated"
+          ],
+          "excerpt": "Retreat the eef fully clear of a placement before concluding the predicate | after a geometrically-correct pla…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate",
+            "terminated"
+          ],
+          "excerpt": "Retreat the eef fully clear of a placement before concluding the predicate | after a geometrically-correct pla…"
+        }
+      ]
+    },
+    {
+      "memory_id": "pregrasp-yaw-recenter",
+      "kind": "strategy",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_task_t9_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "drift"
+          ],
+          "excerpt": "Recenter after pre-grasp yaw before trusting Pi0. | A pre-grasp wrist yaw is used to change a bowl or cup rim-…"
+        }
+      ]
+    },
+    {
+      "memory_id": "probe-container-floor-by-stall-height",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_swap_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "cannot see",
+            "cannot tell",
+            "occluded"
+          ],
+          "excerpt": "Find a container's true floor by descend-until-OSC-stall and read the stall | you must place a held object on …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "seat",
+            "seated",
+            "stalls high"
+          ],
+          "excerpt": "Find a container's true floor by descend-until-OSC-stall and read the stall | you must place a held object on …"
+        }
+      ]
+    },
+    {
+      "memory_id": "relation-anchored-wrist-refine",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "duplicate",
+            "relation target",
+            "segmentation outlier",
+            "stale coordinates"
+          ],
+          "excerpt": "Anchor duplicate-object wrist refinement to a visible relation landmark. | A task chooses one of multiple iden…"
+        }
+      ]
+    },
+    {
+      "memory_id": "relation-selected-identical-object",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t7_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "duplicate",
+            "look-alike",
+            "visually identical",
+            "wrong target"
+          ],
+          "excerpt": "Select identical targets by the named spatial relation before wrist refinement | A task contains duplicate or …"
+        }
+      ]
+    },
+    {
+      "memory_id": "remeasure-loaded-offset-before-descent",
+      "kind": "strategy",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t2_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "reach wall"
+          ],
+          "excerpt": "Remeasure a held payload after every loaded servo before descending | a large asymmetric object is carried by …"
+        }
+      ]
+    },
+    {
+      "memory_id": "retreat-high-before-lateral-near-lined-basket",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t1_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "displaced",
+            "snagged"
+          ],
+          "excerpt": "After releasing into a lined basket, retreat straight up before moving laterally | placing items into a woven/…"
+        }
+      ]
+    },
+    {
+      "memory_id": "reverse-entry-corridor-clearance",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t9_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "extracts it",
+            "re-hooks"
+          ],
+          "excerpt": "Clear a released wrist by reversing the corridor that successfully entered. | A released object is cavity-side…"
+        }
+      ]
+    },
+    {
+      "memory_id": "right-front-perimeter-contact",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_pick",
+        "release",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "source_cells": [
+        "goal_task_t5_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "fail despite"
+          ],
+          "excerpt": "Test perimeter contact zones before rejecting a fixture-relative placement. | A fixture-relative goal says fro…"
+        }
+      ]
+    },
+    {
+      "memory_id": "rim-perch-contact-seat",
+      "kind": "strategy",
+      "failure_origin": [
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "object_task_t2_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "perched",
+            "predicate",
+            "release-false",
+            "rim-perched"
+          ],
+          "excerpt": "Use a capped contact skill to seat rim-perched objects into containers. | An object has been released at a rim…"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Use a capped contact skill to seat rim-perched objects into containers. | An object has been released at a rim…"
+        }
+      ]
+    },
+    {
+      "memory_id": "rotate-wrist-90deg-drifts-eef-recenter-after",
+      "kind": "primitive",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t8_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "drift",
+            "drifts"
+          ],
+          "excerpt": "A large rotate_wrist yaw drifts the eef ~0.1-0.15m; re-center before descending | you rotate_wrist by a large …"
+        }
+      ]
+    },
+    {
+      "memory_id": "sam3-brand-noun-can-collision",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1"
+      ],
+      "failure_surface": [
+        "PERCEPTION"
+      ],
+      "phase": [],
+      "action_family": [
+        "back_project",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "PERCEPTION"
+      ],
+      "source_cells": [
+        "10_task_t0_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "brand noun",
+            "disambiguate",
+            "look-alike",
+            "sam3"
+          ],
+          "excerpt": "Disambiguate look-alike cans by RGB label, never by SAM3 brand-noun prompt | two or more similar cans/cylinder…"
+        }
+      ]
+    },
+    {
+      "memory_id": "spatial-qualified-repick",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP",
+        "RECOVERY"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP"
+      ],
+      "phase": [
+        "P_grasp"
+      ],
+      "action_family": [
+        "back_project",
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "goal_swap_t9_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "contact-only",
+            "no-lift",
+            "ungrasped"
+          ],
+          "excerpt": "Re-issue a pick with a nearby landmark when generic picking makes only contact. | A generic Pi0 pick contacts …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "repick"
+          ],
+          "excerpt": "Re-issue a pick with a nearby landmark when generic picking makes only contact. | A generic Pi0 pick contacts …"
+        }
+      ]
+    },
+    {
+      "memory_id": "support-assisted-axis-reorientation",
+      "kind": "strategy",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_pitch",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "carry stalls",
+            "drift",
+            "horizontal carry"
+          ],
+          "excerpt": "Support an elongated held object on the destination floor before chaining yaw | an elongated held object must …"
+        }
+      ]
+    },
+    {
+      "memory_id": "support-guided-weak-hook-translation",
+      "kind": "strategy",
+      "failure_origin": [
+        "TRANSPORT"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "TRANSPORT"
+      ],
+      "phase": [
+        "P_transport"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "rotate_wrist",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "10_task_t9_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "carry slip",
+            "long carry"
+          ],
+          "excerpt": "Translate a weak hooked grasp with surface support before lifting over thresholds. | A narrow rim or handle ho…"
+        }
+      ]
+    },
+    {
+      "memory_id": "verify-duplicate-semantics",
+      "kind": "perception",
+      "failure_origin": [
+        "PERCEPTION",
+        "PLACE"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_1",
+        "PREREQ_4"
+      ],
+      "failure_surface": [
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_place",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_to",
+        "pi0_pick",
+        "release"
+      ],
+      "remedy_family": [
+        "PERCEPTION",
+        "PREDICATE",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_swap_t4_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "duplicate"
+          ],
+          "excerpt": "Re-check duplicate identity before tuning a non-firing placement. | A task has duplicate objects and repeated …"
+        },
+        {
+          "field": "activation",
+          "match": [
+            "nonterminal",
+            "predicate"
+          ],
+          "excerpt": "Re-check duplicate identity before tuning a non-firing placement. | A task has duplicate objects and repeated …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "predicate"
+          ],
+          "excerpt": "Re-check duplicate identity before tuning a non-firing placement. | A task has duplicate objects and repeated …"
+        }
+      ]
+    },
+    {
+      "memory_id": "visual-over-pick-heuristic",
+      "kind": "strategy",
+      "failure_origin": [
+        "GRASP"
+      ],
+      "missing_prerequisites": [
+        "PREREQ_2"
+      ],
+      "failure_surface": [
+        "GRASP",
+        "PREDICATE"
+      ],
+      "phase": [
+        "P_grasp",
+        "P_verify"
+      ],
+      "action_family": [
+        "move_pose",
+        "move_to",
+        "pi0_doubled",
+        "pi0_pick",
+        "release",
+        "segment",
+        "set_gripper"
+      ],
+      "remedy_family": [
+        "GRASP",
+        "PERCEPTION",
+        "PLACE",
+        "PREDICATE",
+        "RECOVERY",
+        "TRANSPORT"
+      ],
+      "source_cells": [
+        "spatial_task_t3_s0"
+      ],
+      "annotation_evidence": [
+        {
+          "field": "activation",
+          "match": [
+            "pick_false",
+            "success false",
+            "visibly moved or held"
+          ],
+          "excerpt": "Trust visual grasp evidence over the Pi0 pick success flag. | A pi0_pick reports success false but the object …"
+        },
+        {
+          "field": "activation(surface)",
+          "match": [
+            "success flag"
+          ],
+          "excerpt": "Trust visual grasp evidence over the Pi0 pick success flag. | A pi0_pick reports success false but the object …"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,333 @@
+{
+  "arms": {
+    "A0_LEXICAL": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.103,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.944,
+          "R@5": 0.972,
+          "MRR": 0.482,
+          "irrelevant@3": 0.056
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.933,
+          "R@3": 0.967,
+          "R@5": 1.0,
+          "MRR": 0.953,
+          "irrelevant@3": 0.033
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.2,
+          "R@5": 0.2,
+          "MRR": 0.119,
+          "irrelevant@3": 0.8
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.233,
+          "R@3": 0.575,
+          "R@5": 0.592,
+          "MRR": 0.418,
+          "irrelevant@3": 0.425
+        }
+      },
+      "perception_hits": 0,
+      "perception_n": 17,
+      "nonperception_R@3": 0.67,
+      "gold_routing_recall": 1.0,
+      "perception_routing_recall": 1.0,
+      "nomatch_rate": 0.0,
+      "mean_bucket": 61.0,
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "irr_rate": 1.0,
+        "nomatch_rate": 0.0
+      }
+    },
+    "A1_ORIGIN": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.142,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.495,
+          "irrelevant@3": 0.0
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.267,
+          "R@3": 0.3,
+          "R@5": 0.3,
+          "MRR": 0.283,
+          "irrelevant@3": 0.7
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.05,
+          "irrelevant@3": 1.0
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.067,
+          "R@3": 0.375,
+          "R@5": 0.375,
+          "MRR": 0.24,
+          "irrelevant@3": 0.625
+        }
+      },
+      "perception_hits": 0,
+      "perception_n": 17,
+      "nonperception_R@3": 0.437,
+      "gold_routing_recall": 0.725,
+      "perception_routing_recall": 1.0,
+      "nomatch_rate": 0.0,
+      "mean_bucket": 22.1,
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "irr_rate": 1.0,
+        "nomatch_rate": 0.0
+      }
+    },
+    "A2_ORIGIN_PREREQ": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.142,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 1.0,
+          "R@5": 1.0,
+          "MRR": 0.495,
+          "irrelevant@3": 0.0
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.267,
+          "R@3": 0.3,
+          "R@5": 0.3,
+          "MRR": 0.283,
+          "irrelevant@3": 0.7
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.05,
+          "irrelevant@3": 1.0
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.067,
+          "R@3": 0.375,
+          "R@5": 0.375,
+          "MRR": 0.24,
+          "irrelevant@3": 0.625
+        }
+      },
+      "perception_hits": 0,
+      "perception_n": 17,
+      "nonperception_R@3": 0.437,
+      "gold_routing_recall": 0.725,
+      "perception_routing_recall": 1.0,
+      "nomatch_rate": 0.0,
+      "mean_bucket": 22.1,
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "irr_rate": 1.0,
+        "nomatch_rate": 0.0
+      }
+    },
+    "A3_TYPED_FULL": {
+      "primary": {
+        "grasp": {
+          "n": 7,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.142,
+          "irrelevant@3": 1.0
+        },
+        "perception": {
+          "n": 17,
+          "R@1": 0.0,
+          "R@3": 0.0,
+          "R@5": 0.0,
+          "MRR": 0.0,
+          "irrelevant@3": 1.0
+        },
+        "pick_verify": {
+          "n": 36,
+          "R@1": 0.0,
+          "R@3": 0.972,
+          "R@5": 0.972,
+          "MRR": 0.481,
+          "irrelevant@3": 0.028
+        },
+        "predicate_timing": {
+          "n": 30,
+          "R@1": 0.3,
+          "R@3": 0.3,
+          "R@5": 0.3,
+          "MRR": 0.3,
+          "irrelevant@3": 0.7
+        },
+        "recovery": {
+          "n": 30,
+          "R@1": 0.0,
+          "R@3": 0.067,
+          "R@5": 0.067,
+          "MRR": 0.091,
+          "irrelevant@3": 0.933
+        },
+        "ALL": {
+          "n": 120,
+          "R@1": 0.075,
+          "R@3": 0.383,
+          "R@5": 0.383,
+          "MRR": 0.25,
+          "irrelevant@3": 0.617
+        }
+      },
+      "perception_hits": 0,
+      "perception_n": 17,
+      "nonperception_R@3": 0.447,
+      "gold_routing_recall": 0.717,
+      "perception_routing_recall": 1.0,
+      "nomatch_rate": 0.0,
+      "mean_bucket": 17.1,
+      "hardneg": {
+        "n": 14,
+        "any_top3": 14,
+        "irr_rate": 1.0,
+        "nomatch_rate": 0.0
+      }
+    }
+  },
+  "gates": {
+    "A1_ORIGIN.G1_perception": {
+      "value": "0/17",
+      "pass": false
+    },
+    "A1_ORIGIN.G2_overall": {
+      "pass": false,
+      "overall": 0.375,
+      "nonperc": 0.437
+    },
+    "A2_ORIGIN_PREREQ.G1_perception": {
+      "value": "0/17",
+      "pass": false
+    },
+    "A2_ORIGIN_PREREQ.G2_overall": {
+      "pass": false,
+      "overall": 0.375,
+      "nonperc": 0.437
+    },
+    "A3_TYPED_FULL.G1_perception": {
+      "value": "0/17",
+      "pass": false
+    },
+    "A3_TYPED_FULL.G2_overall": {
+      "pass": false,
+      "overall": 0.383,
+      "nonperc": 0.447
+    },
+    "G3_perc_routing_recall": {
+      "A2": 1.0,
+      "A3": 1.0,
+      "pass": true
+    },
+    "G4_hardneg": {
+      "A0": 1.0,
+      "A3": 1.0,
+      "pass": true
+    },
+    "best_G1G2_arm": null,
+    "verdict": "TYPED_ADDRESS_UPPER_BOUND_INSUFFICIENT_IN_BUCKET_RANK_FAIL"
+  },
+  "regression": {
+    "R@1": {
+      "got": 0.233,
+      "anchor": 0.233,
+      "match": true
+    },
+    "R@3": {
+      "got": 0.575,
+      "anchor": 0.575,
+      "match": true
+    },
+    "R@5": {
+      "got": 0.592,
+      "anchor": 0.592,
+      "match": true
+    },
+    "MRR": {
+      "got": 0.418,
+      "anchor": 0.418,
+      "match": true
+    },
+    "irrelevant@3": {
+      "got": 0.425,
+      "anchor": 0.425,
+      "match": true
+    },
+    "ALL_MATCH": true
+  }
+}
