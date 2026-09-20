@@ -1,0 +1,274 @@
+{
+  "arms": {
+    "A": {
+      "label": [
+        "memB",
+        "memB2"
+      ],
+      "n_rows": 30,
+      "infra": {},
+      "sr": {
+        "n": 30,
+        "SR_micro": 0.733,
+        "SR_macro": 0.733,
+        "SR_by_task": {
+          "3": 0.6,
+          "5": 1.0,
+          "9": 0.6
+        },
+        "turns_mean": 29.8
+      },
+      "trigger": {
+        "episodes": 30,
+        "should_moments": 57,
+        "recall_strict": 0.228,
+        "recall_agnostic": 0.368,
+        "fires": 49,
+        "fires_per_ep": 1.63,
+        "precision": 0.265,
+        "false_per_ep": 1.2,
+        "false_by_phase": {
+          "P_transport": 5,
+          "P_grasp": 27,
+          "P_place": 4
+        }
+      },
+      "retrieval": {
+        "hardneg_events": 6,
+        "hardneg_retreat_in_top3": 6,
+        "gold_events": 7,
+        "relevant@1": 0.571,
+        "relevant@3": 0.571,
+        "irrelevant@3": 0.429,
+        "retrieval_count_per_ep": 1.63,
+        "retrieval_empty_rate": 0.0
+      }
+    },
+    "B": {
+      "label": [
+        "g0",
+        "g0B"
+      ],
+      "n_rows": 2,
+      "infra": {},
+      "sr": {
+        "n": 2,
+        "SR_micro": 1.0,
+        "SR_macro": 1.0,
+        "SR_by_task": {
+          "3": 1.0
+        },
+        "turns_mean": 14.5
+      },
+      "trigger": {
+        "episodes": 2,
+        "should_moments": 4,
+        "recall_strict": 0.0,
+        "recall_agnostic": 0.25,
+        "fires": 1,
+        "fires_per_ep": 0.5,
+        "precision": 0.0,
+        "false_per_ep": 0.5,
+        "false_by_phase": {
+          "P_transport": 1
+        }
+      },
+      "retrieval": {
+        "retrieval_count_per_ep": 0.5,
+        "retrieval_empty_rate": 0.0
+      }
+    },
+    "C": {
+      "label": [
+        "memC",
+        "memO2"
+      ],
+      "n_rows": 27,
+      "infra": {
+        "t3_s2": "infra_missing",
+        "t3_s6": "infra_missing",
+        "t3_s7": "infra_missing"
+      },
+      "sr": {
+        "n": 27,
+        "SR_micro": 0.852,
+        "SR_macro": 0.852,
+        "SR_by_task": {
+          "3": 0.857,
+          "5": 1.0,
+          "9": 0.7
+        },
+        "turns_mean": 28.5
+      },
+      "trigger": {
+        "episodes": 27,
+        "should_moments": 43,
+        "recall_strict": 0.302,
+        "recall_agnostic": 0.302,
+        "fires": 13,
+        "fires_per_ep": 0.48,
+        "precision": 1.0,
+        "false_per_ep": 0.0,
+        "false_by_phase": {}
+      },
+      "retrieval": {
+        "gold_events": 9,
+        "relevant@1": 0.889,
+        "relevant@3": 0.889,
+        "irrelevant@3": 0.111,
+        "hardneg_events": 4,
+        "hardneg_retreat_in_top3": 4,
+        "retrieval_count_per_ep": 0.48,
+        "retrieval_empty_rate": 0.0
+      }
+    },
+    "D": {
+      "label": [
+        "g0",
+        "g0D"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "retrieval": {
+        "retrieval_count_per_ep": null,
+        "retrieval_empty_rate": null
+      }
+    },
+    "E": {
+      "label": [
+        "g0",
+        "g0E"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "retrieval": {
+        "retrieval_count_per_ep": null,
+        "retrieval_empty_rate": null
+      }
+    }
+  },
+  "contrasts": {
+    "A->B": {
+      "n_pairs": 2,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 1,
+      "diff_micro": 0.5,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        0.0,
+        1.0
+      ],
+      "ci95_macro_cluster": [
+        0.5,
+        0.5
+      ]
+    },
+    "B->C": {
+      "n_pairs": 2,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "diff_micro": 0.0,
+      "mcnemar_p": null,
+      "ci95_micro": [
+        0.0,
+        0.0
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.0
+      ]
+    },
+    "B->D": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null
+    },
+    "C->E": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null
+    },
+    "A->E": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null
+    },
+    "A->C": {
+      "n_pairs": 27,
+      "flips_a_only_success": 2,
+      "flips_b_only_success": 5,
+      "diff_micro": 0.111,
+      "mcnemar_p": 0.45312,
+      "ci95_micro": [
+        -0.074,
+        0.296
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.286
+      ]
+    }
+  },
+  "infra": {},
+  "gates": {
+    "gate1_mechanism_C_vs_B": {
+      "rule": "progress SR gain vs v1_per_result > 0 (diff_micro or paired flips b>c)",
+      "diff_micro": 0.0,
+      "flips_b_only(C)": 0,
+      "flips_c_only(B)": 0
+    },
+    "gate2_common_query_E_vs_D": {
+      "rule": "progress advantage not fully gone under common query (E vs D diff_micro > 0, or flips favor E)",
+      "diff_micro": null,
+      "flips_e_only": null,
+      "flips_d_only": null,
+      "note": "manifest pairs this as C->E removing the query confound within progress; E vs D is the WHEN contrast under common query"
+    },
+    "gate2b_progress_query_cost_C_vs_E": {
+      "diff_micro": null,
+      "note": "common query's cost inside the progress family"
+    },
+    "gate3_q3_regression": "see scripts/test_stageG0_audit.py (must be green at verdict time)",
+    "gate4_mstuck": "see scripts/test_stageG0_audit.py §D"
+  }
+}
