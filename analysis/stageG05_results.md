@@ -7,31 +7,34 @@ pre-registered in stageG05_preregistration.md BEFORE the run._
 
 | arm | n | SR | fires/ep | inj/ep | tok/ep | rec@3 | ph@3 |stalled@3 | turns_after | wall |
 |---|---|---|---|---|---|---|---|---|---|---|
-| P0 g05P0 | 0 | None | None | None | None | None | None | None | None | None |
-| P1 g05P1 | 0 | None | None | None | None | None | None | None | None | None |
-| P2 g05P2 | 0 | None | None | None | None | None | None | None | None | None |
-| P3 g05P3 | 0 | None | None | None | None | None | None | None | None | None |
+| P0 g05P0 | 30 | 0.867 | 1.97 | 0.0 | 0.0 | None | None | None | None | 2426.4 |
+| P1 g05P1 | 30 | 0.833 | 1.7 | 1.7 | 34.2 | 0.706 | 0.471 | 0.29 | 5.3 | 2381.5 |
+| P2 g05P2 | 30 | 0.9 | 2.0 | 2.0 | 112.0 | 0.733 | 0.367 | 0.2 | 5.1 | 2345.2 |
+| P3 g05P3 | 30 | 0.833 | 2.27 | 2.27 | 737.3 | 0.735 | 0.485 | 0.31 | 5.3 | 2251.1 |
 | P4 g0D | 30 | 0.9 | 2.2 | 2.2 | 764.7 | 0.818 | 0.348 | 0.21 | 6.4 | 2403.1 |
 
-SR by task: {"P0": null, "P1": null, "P2": null, "P3": null, "P4": {"3": 0.9, "5": 1.0, "9": 0.8}}
+SR by task: {"P0": {"3": 0.7, "5": 1.0, "9": 0.9}, "P1": {"3": 0.7, "5": 1.0, "9": 0.8}, "P2": {"3": 0.9, "5": 1.0, "9": 0.8}, "P3": {"3": 0.7, "5": 0.9, "9": 0.9}, "P4": {"3": 0.9, "5": 1.0, "9": 0.8}}
 
 ## TABLE 2 — six pre-registered contrasts
 
 | contrast | n | diff | wins | losses | ties | McNemar p | CI95 |
 |---|---|---|---|---|---|---|---|
-| P1 - P0 | 0 | None | 0 | 0 | 0 | None | None |
-| P2 - P0 | 0 | None | 0 | 0 | 0 | None | None |
-| P3 - P0 | 0 | None | 0 | 0 | 0 | None | None |
-| P4 - P3 | 0 | None | 0 | 0 | 0 | None | None |
-| P4 - P1 | 0 | None | 0 | 0 | 0 | None | None |
+| P1 - P0 | 30 | -0.033 | 3 | 4 | 23 | 1.0 | [-0.2, 0.133] |
+| P2 - P0 | 30 | 0.033 | 3 | 2 | 25 | 1.0 | [-0.1, 0.167] |
+| P3 - P0 | 30 | -0.033 | 3 | 4 | 23 | 1.0 | [-0.2, 0.133] |
+| P4 - P3 | 30 | 0.067 | 4 | 2 | 24 | 0.6875 | [-0.1, 0.233] |
+| P4 - P1 | 30 | 0.067 | 3 | 1 | 26 | 0.625 | [-0.067, 0.2] |
 
 ## Interaction
 
 {
   "(P4-P3)-(P1-P0)": {
-    "n_cells": 0,
-    "interaction_diff": null,
-    "ci95": null
+    "n_cells": 30,
+    "interaction_diff": 0.1,
+    "ci95": [
+      -0.1,
+      0.3
+    ]
   }
 }
 
@@ -39,31 +42,31 @@ SR by task: {"P0": null, "P1": null, "P2": null, "P3": null, "P4": {"3": 0.9, "5
 
 {
   "P1": {
-    "diff_vs_P0": null,
-    "net_wins_vs_P0": 0,
-    "nonneg_tasks_of3": 0,
+    "diff_vs_P0": -0.033,
+    "net_wins_vs_P0": -1,
+    "nonneg_tasks_of3": 2,
     "CLEAR_POSITIVE": false
   },
   "P2": {
-    "diff_vs_P0": null,
-    "net_wins_vs_P0": 0,
-    "nonneg_tasks_of3": 0,
+    "diff_vs_P0": 0.033,
+    "net_wins_vs_P0": 1,
+    "nonneg_tasks_of3": 2,
     "CLEAR_POSITIVE": false
   },
   "P3": {
-    "diff_vs_P0": null,
-    "net_wins_vs_P0": 0,
-    "nonneg_tasks_of3": 0,
+    "diff_vs_P0": -0.033,
+    "net_wins_vs_P0": -1,
+    "nonneg_tasks_of3": 2,
     "CLEAR_POSITIVE": false
   },
   "P4": {
-    "diff_vs_P0": null,
-    "net_wins_vs_P0": 0,
-    "nonneg_tasks_of3": 0,
+    "diff_vs_P0": 0.033,
+    "net_wins_vs_P0": 1,
+    "nonneg_tasks_of3": 2,
     "CLEAR_POSITIVE": false
   }
 }
 
-retrieval quality (P3/P4 only): {"P3": {"retrieval_count_per_ep": null, "retrieval_empty_rate": null}, "P4": {"gold_events": 5, "relevant@1": 0.4, "relevant@3": 0.4, "irrelevant@3": 0.6, "hardneg_events": 3, "hardneg_retreat_in_top3": 3, "retrieval_count_per_ep": 2.2, "retrieval_empty_rate": 0.0}}
+retrieval quality (P3/P4 only): {"P3": {"gold_events": 5, "relevant@1": 0.6, "relevant@3": 0.6, "irrelevant@3": 0.4, "hardneg_events": 5, "hardneg_retreat_in_top3": 5, "retrieval_count_per_ep": 2.27, "retrieval_empty_rate": 0.0}, "P4": {"gold_events": 5, "relevant@1": 0.4, "relevant@3": 0.4, "irrelevant@3": 0.6, "hardneg_events": 3, "hardneg_retreat_in_top3": 3, "retrieval_count_per_ep": 2.2, "retrieval_empty_rate": 0.0}}
 
 infra (excluded, counted openly): {"P0": 0, "P1": 0, "P2": 0, "P3": 0, "P4": 0}

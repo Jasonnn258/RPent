@@ -1,97 +1,130 @@
 {
   "contrasts": {
     "P1->P0": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "net_wins_b_minus_a": 0,
-      "ties": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null,
-      "nonneg_tasks": null
+      "n_pairs": 30,
+      "flips_a_only_success": 4,
+      "flips_b_only_success": 3,
+      "net_wins_b_minus_a": -1,
+      "ties": 23,
+      "diff_micro": -0.033,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.2,
+        0.133
+      ],
+      "ci95_macro_cluster": [
+        -0.1,
+        0.0
+      ],
+      "nonneg_tasks": 2
     },
     "P2->P0": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "net_wins_b_minus_a": 0,
-      "ties": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null,
-      "nonneg_tasks": null
+      "n_pairs": 30,
+      "flips_a_only_success": 2,
+      "flips_b_only_success": 3,
+      "net_wins_b_minus_a": 1,
+      "ties": 25,
+      "diff_micro": 0.033,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.1,
+        0.167
+      ],
+      "ci95_macro_cluster": [
+        -0.1,
+        0.2
+      ],
+      "nonneg_tasks": 2
     },
     "P3->P0": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "net_wins_b_minus_a": 0,
-      "ties": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null,
-      "nonneg_tasks": null
+      "n_pairs": 30,
+      "flips_a_only_success": 4,
+      "flips_b_only_success": 3,
+      "net_wins_b_minus_a": -1,
+      "ties": 23,
+      "diff_micro": -0.033,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.2,
+        0.133
+      ],
+      "ci95_macro_cluster": [
+        -0.1,
+        0.0
+      ],
+      "nonneg_tasks": 2
     },
     "P4->P3": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "net_wins_b_minus_a": 0,
-      "ties": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null,
-      "nonneg_tasks": null
+      "n_pairs": 30,
+      "flips_a_only_success": 2,
+      "flips_b_only_success": 4,
+      "net_wins_b_minus_a": 2,
+      "ties": 24,
+      "diff_micro": 0.067,
+      "mcnemar_p": 0.6875,
+      "ci95_micro": [
+        -0.1,
+        0.233
+      ],
+      "ci95_macro_cluster": [
+        -0.1,
+        0.2
+      ],
+      "nonneg_tasks": 2
     },
     "P4->P1": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "net_wins_b_minus_a": 0,
-      "ties": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null,
-      "nonneg_tasks": null
+      "n_pairs": 30,
+      "flips_a_only_success": 1,
+      "flips_b_only_success": 3,
+      "net_wins_b_minus_a": 2,
+      "ties": 26,
+      "diff_micro": 0.067,
+      "mcnemar_p": 0.625,
+      "ci95_micro": [
+        -0.067,
+        0.2
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.2
+      ],
+      "nonneg_tasks": 3
     }
   },
   "interaction": {
     "(P4-P3)-(P1-P0)": {
-      "n_cells": 0,
-      "interaction_diff": null,
-      "ci95": null
+      "n_cells": 30,
+      "interaction_diff": 0.1,
+      "ci95": [
+        -0.1,
+        0.3
+      ]
     }
   },
   "infra": {},
   "factor_labels": {
     "P1": {
-      "diff_vs_P0": null,
-      "net_wins_vs_P0": 0,
-      "nonneg_tasks_of3": 0,
+      "diff_vs_P0": -0.033,
+      "net_wins_vs_P0": -1,
+      "nonneg_tasks_of3": 2,
       "CLEAR_POSITIVE": false
     },
     "P2": {
-      "diff_vs_P0": null,
-      "net_wins_vs_P0": 0,
-      "nonneg_tasks_of3": 0,
+      "diff_vs_P0": 0.033,
+      "net_wins_vs_P0": 1,
+      "nonneg_tasks_of3": 2,
       "CLEAR_POSITIVE": false
     },
     "P3": {
-      "diff_vs_P0": null,
-      "net_wins_vs_P0": 0,
-      "nonneg_tasks_of3": 0,
+      "diff_vs_P0": -0.033,
+      "net_wins_vs_P0": -1,
+      "nonneg_tasks_of3": 2,
       "CLEAR_POSITIVE": false
     },
     "P4": {
-      "diff_vs_P0": null,
-      "net_wins_vs_P0": 0,
-      "nonneg_tasks_of3": 0,
+      "diff_vs_P0": 0.033,
+      "net_wins_vs_P0": 1,
+      "nonneg_tasks_of3": 2,
       "CLEAR_POSITIVE": false
     }
   },
@@ -101,26 +134,39 @@
         "g05",
         "g05P0"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.867,
+        "SR_macro": 0.867,
+        "SR_by_task": {
+          "3": 0.7,
+          "5": 1.0,
+          "9": 0.9
+        },
+        "turns_mean": 27.1
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
-        "false_by_phase": {}
+        "episodes": 30,
+        "should_moments": 45,
+        "recall_strict": 0.178,
+        "recall_agnostic": 0.422,
+        "fires": 59,
+        "fires_per_ep": 1.97,
+        "precision": 0.136,
+        "false_per_ep": 1.7,
+        "false_by_phase": {
+          "P_grasp": 38,
+          "P_transport": 4,
+          "P_place": 6,
+          "P_verify": 3
+        }
       },
       "recovery": {
-        "episodes": 0,
+        "episodes": 30,
         "interventions": 0,
-        "int_per_ep": null,
+        "int_per_ep": 0.0,
         "recovery@3": null,
         "ep_with_recovery@3": 0.0,
         "phase_change@3": null,
@@ -128,12 +174,12 @@
         "turns_after_mean": null
       },
       "tokens": {
-        "fires": 0,
-        "fires_per_ep": null,
-        "injections_per_ep": null,
-        "injected_tokens_per_ep": null,
+        "fires": 59,
+        "fires_per_ep": 1.97,
+        "injections_per_ep": 0.0,
+        "injected_tokens_per_ep": 0.0,
         "mean_block_tokens": null,
-        "wall_mean_s": null
+        "wall_mean_s": 2426.4
       }
     },
     "P1": {
@@ -141,39 +187,52 @@
         "g05",
         "g05P1"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.833,
+        "SR_macro": 0.833,
+        "SR_by_task": {
+          "3": 0.7,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 27.0
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
-        "false_by_phase": {}
+        "episodes": 30,
+        "should_moments": 41,
+        "recall_strict": 0.195,
+        "recall_agnostic": 0.39,
+        "fires": 51,
+        "fires_per_ep": 1.7,
+        "precision": 0.137,
+        "false_per_ep": 1.467,
+        "false_by_phase": {
+          "P_transport": 4,
+          "P_grasp": 35,
+          "P_place": 3,
+          "P_verify": 2
+        }
       },
       "recovery": {
-        "episodes": 0,
-        "interventions": 0,
-        "int_per_ep": null,
-        "recovery@3": null,
-        "ep_with_recovery@3": 0.0,
-        "phase_change@3": null,
-        "stalled_prims@3_mean": null,
-        "turns_after_mean": null
+        "episodes": 30,
+        "interventions": 51,
+        "int_per_ep": 1.7,
+        "recovery@3": 0.706,
+        "ep_with_recovery@3": 0.947,
+        "phase_change@3": 0.471,
+        "stalled_prims@3_mean": 0.29,
+        "turns_after_mean": 5.3
       },
       "tokens": {
-        "fires": 0,
-        "fires_per_ep": null,
-        "injections_per_ep": null,
-        "injected_tokens_per_ep": null,
-        "mean_block_tokens": null,
-        "wall_mean_s": null
+        "fires": 51,
+        "fires_per_ep": 1.7,
+        "injections_per_ep": 1.7,
+        "injected_tokens_per_ep": 34.2,
+        "mean_block_tokens": 20.1,
+        "wall_mean_s": 2381.5
       }
     },
     "P2": {
@@ -181,39 +240,52 @@
         "g05",
         "g05P2"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.9,
+        "SR_macro": 0.9,
+        "SR_by_task": {
+          "3": 0.9,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 27.0
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
-        "false_by_phase": {}
+        "episodes": 30,
+        "should_moments": 45,
+        "recall_strict": 0.156,
+        "recall_agnostic": 0.356,
+        "fires": 60,
+        "fires_per_ep": 2.0,
+        "precision": 0.117,
+        "false_per_ep": 1.767,
+        "false_by_phase": {
+          "P_transport": 3,
+          "P_grasp": 45,
+          "P_place": 4,
+          "P_verify": 1
+        }
       },
       "recovery": {
-        "episodes": 0,
-        "interventions": 0,
-        "int_per_ep": null,
-        "recovery@3": null,
-        "ep_with_recovery@3": 0.0,
-        "phase_change@3": null,
-        "stalled_prims@3_mean": null,
-        "turns_after_mean": null
+        "episodes": 30,
+        "interventions": 60,
+        "int_per_ep": 2.0,
+        "recovery@3": 0.733,
+        "ep_with_recovery@3": 0.81,
+        "phase_change@3": 0.367,
+        "stalled_prims@3_mean": 0.2,
+        "turns_after_mean": 5.1
       },
       "tokens": {
-        "fires": 0,
-        "fires_per_ep": null,
-        "injections_per_ep": null,
-        "injected_tokens_per_ep": null,
-        "mean_block_tokens": null,
-        "wall_mean_s": null
+        "fires": 60,
+        "fires_per_ep": 2.0,
+        "injections_per_ep": 2.0,
+        "injected_tokens_per_ep": 112.0,
+        "mean_block_tokens": 56.0,
+        "wall_mean_s": 2345.2
       }
     },
     "P3": {
@@ -221,39 +293,51 @@
         "g05",
         "g05P3"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.833,
+        "SR_macro": 0.833,
+        "SR_by_task": {
+          "3": 0.7,
+          "5": 0.9,
+          "9": 0.9
+        },
+        "turns_mean": 28.2
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
-        "false_by_phase": {}
+        "episodes": 30,
+        "should_moments": 53,
+        "recall_strict": 0.208,
+        "recall_agnostic": 0.528,
+        "fires": 68,
+        "fires_per_ep": 2.27,
+        "precision": 0.147,
+        "false_per_ep": 1.933,
+        "false_by_phase": {
+          "P_transport": 8,
+          "P_place": 10,
+          "P_grasp": 40
+        }
       },
       "recovery": {
-        "episodes": 0,
-        "interventions": 0,
-        "int_per_ep": null,
-        "recovery@3": null,
-        "ep_with_recovery@3": 0.0,
-        "phase_change@3": null,
-        "stalled_prims@3_mean": null,
-        "turns_after_mean": null
+        "episodes": 30,
+        "interventions": 68,
+        "int_per_ep": 2.27,
+        "recovery@3": 0.735,
+        "ep_with_recovery@3": 0.958,
+        "phase_change@3": 0.485,
+        "stalled_prims@3_mean": 0.31,
+        "turns_after_mean": 5.3
       },
       "tokens": {
-        "fires": 0,
-        "fires_per_ep": null,
-        "injections_per_ep": null,
-        "injected_tokens_per_ep": null,
-        "mean_block_tokens": null,
-        "wall_mean_s": null
+        "fires": 68,
+        "fires_per_ep": 2.27,
+        "injections_per_ep": 2.27,
+        "injected_tokens_per_ep": 737.3,
+        "mean_block_tokens": 325.3,
+        "wall_mean_s": 2251.1
       }
     },
     "P4": {
