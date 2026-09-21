@@ -1,18 +1,17 @@
-"""Decision-point long-term memory recall (Stage B1 arms B2/B3).
+"""决策点长期记忆召回(Stage B1 的 B2/B3 臂)。
 
-Gate: ``RPENT_MEMORY_TRIGGER=1``. Rank method: ``RPENT_MEMORY_RANK`` in
-{"Q0_FIXED", "Q3"} — both are FROZEN ports of the Stage A offline benchmark
-(``scripts/memory_stagea_benchmark.py``); weights and rules must not be
-tuned against online results (experiment discipline).
+门控: ``RPENT_MEMORY_TRIGGER=1``。排序方法: ``RPENT_MEMORY_RANK``,取值
+{"Q0_FIXED", "Q3"} — 两者都是 Stage A 离线 benchmark
+(``scripts/memory_stagea_benchmark.py``)的冻结移植;权重与规则不得针对
+线上结果调参(实验纪律)。
 
-The component watches primitive/perception tool results, evaluates a frozen
-generic trigger at each turn boundary, and on fire retrieves the top-3 cards
-which the planner receives as a SOFT context block (no enforcement — the
-adoption question is exactly what Stage B measures). Every retrieval event
-is logged to ``memory_events.jsonl`` in the episode output dir.
+该组件监听 primitive/perception 工具结果,在每个 turn boundary 评估冻结的
+通用触发器;触发后检索 top-3 卡片,以软性上下文块的形式交给 planner
+(不强制执行 —— 是否采纳正是 Stage B 要测量的问题)。每个检索事件都写入
+episode 输出目录的 ``memory_events.jsonl``。
 
-Trigger rules are task-id-free signals only (spec §3): they answer "should
-long-term memory be consulted NOW", never "which memory".
+触发规则只用无 task-id 的信号(spec §3):它们回答的是"现在该不该查
+长期记忆",从不回答"查哪条记忆"。
 
 
 长期记忆动态召回模块。
@@ -58,8 +57,8 @@ logger = logging.getLogger(__name__)
 
 REPO = Path(__file__).resolve().parent.parent.parent
 
-# ------------------------------------------------------------------ frozen
-# Tokenizer + phase map + scoring are verbatim ports of Stage A (frozen).
+# ------------------------------------------------------------------ 冻结区
+# 分词器 + 相位映射 + 打分逻辑都是 Stage A 的逐字移植(冻结)。
 STOP = set("""a an the and or of to in on at for with by from into onto is are was
 were be been being it its this that these those not no does do did over under
 near after before while during than then so as if but per via up down out off
@@ -84,27 +83,23 @@ PRIMITIVES = ("pi0_pick", "pi0_doubled", "move_to", "move_pose", "release",
               "set_gripper", "rotate_wrist", "rotate_pitch")
 PERCEPTION = ("segment", "back_project", "detect")
 
-# Frozen cooldown policy: no trigger within 2 boundaries of the previous one,
-# at most 6 retrievals per episode, none before the first primitive action,
-# none on memory-file tools.
-
-#一次 Memory Retrieval 之后
-#至少隔 2 个 turn boundary
-#并且整个 episode
-#最多查 6 次 Memory
+# 冻结的冷却策略:
+# 一次 Memory Retrieval 之后,至少隔 2 个 turn boundary 才能再触发;
+# 整个 episode 最多查 6 次 Memory;
+# 第一个 primitive 动作之前不触发;memory 文件类工具上不触发。
 
 COOLDOWN_BOUNDARIES = 2
 MAX_TRIGGERS_PER_EPISODE = 6
 
-# G0.5 §18 — experiment-only injection modes (channel 3, planner-visible
-# context). "full" is the historical behavior and the default; the others
-# are pre-registered in analysis/stageG05_preregistration.md (texts below
-# are FROZEN verbatim there — do not re-word).
+# G0.5 §18 — 仅实验用的注入模式(第 3 通道,planner 可见的上下文)。
+# "full" 是历史行为,也是默认值;其余四个模式已在
+# analysis/stageG05_preregistration.md 中预注册(下面的文本在那里逐字
+# 冻结 — 不得改写措辞)。
 INJECTION_MODES = ("full", "memory_only", "reason_only", "generic_refresh",
                    "none")
 _NO_RETRIEVAL_MODES = ("reason_only", "generic_refresh", "none")
 
-# F3 — P2 generic_refresh block (task-independent; no reason, no cards).
+# F3 — P2 generic_refresh 注入块(与任务无关;不含 reason、不含卡片)。
 GENERIC_REFRESH_BLOCK = (
     "[DECISION-POINT REORIENTATION]\n"
     "Re-evaluate the task goal, the latest observable execution result, "
@@ -116,8 +111,8 @@ GENERIC_REFRESH_BLOCK = (
     "the current state."
 )
 
-# F4 header — P3 memory_only replaces _block()'s header (title + framing)
-# with this neutral two-liner; card rendering is identical to _block().
+# F4 头部 — P3 memory_only 用这个中性的两行文本替换 _block() 的头部
+# (标题 + 框架说明);卡片渲染与 _block() 完全一致。
 MEMORY_CONTEXT_HEADER = (
     "[DECISION-POINT MEMORY CONTEXT]\n"
     "These past experiences may or may not be relevant. Judge them "
@@ -126,13 +121,13 @@ MEMORY_CONTEXT_HEADER = (
 
 
 def _reason_only_block(reason: str) -> str:
-    """F2 — P1 block: the trigger's reason plus one re-evaluate line."""
+    """F2 — P1 注入块:触发 reason + 一行重新评估的提示。"""
     return ("[DECISION-POINT CHECK]\n"
             f"trigger reason: {reason}\n"
             "Re-evaluate the next action using the latest observable "
             "state.")
 
-# Q3 structured-rerank weights — FROZEN from Stage A (do not tune online).
+# Q3 结构化重排权重 — 从 Stage A 冻结而来(禁止线上调参)。
 W_SEMANTIC = 2.0 #语义
 W_APPLIES = 0.6 #适用性
 W_SYMPTOM = 0.4 #问题匹配度
@@ -192,7 +187,7 @@ def card_phases(card: dict) -> set[str]:
 
 
 class _Embedder: #语义向量
-    """Lazy local bge-small-en-v1.5 (CPU) — same encoder as Stage A."""
+    """惰性加载本地 bge-small-en-v1.5(CPU)— 与 Stage A 用同一编码器。"""
 
     def __init__(self) -> None:
         self._net = None
@@ -236,17 +231,16 @@ class _Embedder: #语义向量
 
 
 class DecisionMemory:
-    """Frozen trigger + soft retrieval + event logging for one episode.
+    """单个 episode 的冻结触发器 + 软性检索 + 事件记录。
 
-    mode="v1" (default, RPENT_MEMORY_TRIGGER=1): the frozen Stage B1
-    boundary trigger — DO NOT TOUCH (published behavior).
+    mode="v1"(默认,RPENT_MEMORY_TRIGGER=1):冻结的 Stage B1 boundary
+    触发器 — 不得改动(已发表的行为)。
 
-    mode="progress" (RPENT_MEMORY_TRIGGER=progress, Stage C3 arm O2): the
-    Stage C2 frozen progress-aware rules (R1-R5), evaluated per tool result
-    (queued and flushed at the next boundary).  Rules mirror
-    scripts/memory_stagec2_benchmark.py exactly — including no
-    first-primitive gate (the C2 offline replay had none) and the frozen
-    thresholds MOVE_EPS=0.005 / MOVE_ARRIVED=0.03 / LIFT_OK=0.05.
+    mode="progress"(RPENT_MEMORY_TRIGGER=progress,Stage C3 的 O2 臂):
+    Stage C2 冻结的进度感知规则(R1-R5),逐工具结果评估(命中后排队,
+    在下一个 boundary 冲刷)。规则与 scripts/memory_stagec2_benchmark.py
+    精确镜像 — 包括没有 first-primitive 门(C2 离线重放就没有)以及冻结
+    阈值 MOVE_EPS=0.005 / MOVE_ARRIVED=0.03 / LIFT_OK=0.05。
     """
 
     MOVE_EPS = 0.005
@@ -260,9 +254,9 @@ class DecisionMemory:
         self.cards = load_cards()
         self.index = load_index()
         self.ids = sorted(self.cards)
-        # Stage G scale-test banks (stageG_subset_manifest.md §3): append
-        # REAL library pages as extra retrieval entries. Additive only —
-        # the 61 global cards and MEMORY.md index are never modified.
+        # Stage G 规模压力测试库(stageG_subset_manifest.md §3):把真实
+        # 库页面追加为额外检索条目。纯增量 — 61 张全局卡与 MEMORY.md
+        # 索引从不被修改。
         extra_bank = os.environ.get("RPENT_MEMORY_EXTRA_BANK", "")
         if extra_bank:
             self._load_extra_bank(extra_bank)
@@ -274,12 +268,12 @@ class DecisionMemory:
         self.phases = {c: card_phases(self.cards[c]) for c in self.ids}
         self._emb_card: dict[str, list[float]] | None = None
         self.events: list[dict] = []
-        # per-episode signal state
+        # 每个 episode 的信号状态
         self.task_language = ""
         self.boundaries_since_trigger = COOLDOWN_BOUNDARIES
         self.triggers_fired = 0
         self.saw_primitive = False
-        self.release_open = False  # release executed, predicate unconfirmed
+        self.release_open = False  # 已执行 release,谓词尚未确认
         self.last_primitive = ""
         self.recent_primitives: list[str] = []
         self.phase_steps = 0
@@ -287,19 +281,19 @@ class DecisionMemory:
         self.picks_failed = 0
         self.turn = 0
         self._last_result: dict | None = None
-        self._fresh_result = False  # a result arrived since last boundary
+        self._fresh_result = False  # 上个 boundary 以来有新结果到达
         self._last_scores: list[float] = []
         self._embedder = _Embedder()
-        # progress-mode state (Stage C2 frozen rules)
-        self._queued_fire: str | None = None   # reason of the pending fire
+        # progress 模式状态(Stage C2 冻结规则)
+        self._queued_fire: str | None = None   # 待冲刷触发的 reason
         self._queued_result: dict | None = None
-        self._queued_phase = ""  # tracker phase at queue time (G0-C)
-        self._last_eef: list[float] | None = None  # last seen final_eef_pos
+        self._queued_phase = ""  # 排队时刻的 tracker 相位(G0-C)
+        self._last_eef: list[float] | None = None  # 最近一次见到的 final_eef_pos
         self._consec_pick_fails = 0
         self._prev_prim_failed = False
-        # Stage G baseline trigger params (frozen once on the DEV suite in
-        # analysis/stageG_trigger_baseline_config.md; never tuned on final
-        # suites). Only read when mode is a baseline mode.
+        # Stage G 基线触发器参数(在 DEV suite 上一次性冻结于
+        # analysis/stageG_trigger_baseline_config.md;从不在最终 suite 上
+        # 调参)。仅在 mode 为基线模式时读取。
         self.periodic_n = int(os.environ.get("RPENT_MEMORY_PERIODIC_N", "6"))
         self.mstuck_k = int(os.environ.get("RPENT_MSTUCK_K", "3"))
         self.mstuck_move_m = float(os.environ.get("RPENT_MSTUCK_MOVE_M",
@@ -307,19 +301,17 @@ class DecisionMemory:
         self.mstuck_prog_m = float(os.environ.get("RPENT_MSTUCK_PROG_M",
                                                   "0.01"))
         self._boundary_count = 0
-        # G0-D: window entries are (eef[:3], final_dist_m | None, target_key)
-        # — final_dist_m progress is only comparable within ONE commanded
-        # target (3-decimal key). Phase the window opened under is tracked
-        # separately; a phase transition resets the window.
+        # G0-D:窗口条目为 (eef[:3], final_dist_m | None, target_key)
+        # — final_dist_m 的进度只在同一个被指令目标内可比(3 位小数键)。
+        # 窗口开启时所处的相位单独记录;相位切换会重置窗口。
         self._mstuck_win: list[tuple[list[float], float | None,
                                      tuple]] = []
         self._mstuck_phase = ""
-        # G0-A/B: query mode. "native" = historical behavior (query =
-        # observation + trigger reason). "common" = WHEN/WHAT decoupled for
-        # the causal audit: the query carries ONLY phase / trigger-result
-        # action / trigger-result fields / task_language — the trigger
-        # reason is logged but never enters retrieval scoring (lexical
-        # query text AND the Q3 structured reason term).
+        # G0-A/B:query 模式。"native" = 历史行为(query = 观测 + 触发
+        # reason)。"common" = 为因果审计解耦 WHEN/WHAT:query 只携带
+        # 相位 / 触发结果的动作 / 触发结果的字段 / task_language —
+        # 触发 reason 只写入日志,从不进入检索打分(词面 query 文本和
+        # Q3 结构化 reason 项都不含它)。
         self.query_mode = os.environ.get("RPENT_MEMORY_QUERY_MODE",
                                          "native")
         if self.query_mode not in ("native", "common"):
@@ -327,10 +319,9 @@ class DecisionMemory:
                 f"RPENT_MEMORY_QUERY_MODE={self.query_mode!r} must be "
                 "'native' or 'common' — fail fast rather than silently "
                 "contaminating an arm")
-        # G0.5 §18: injection mode (channel-3 knob, experiment-only).
-        # "full" = historical behavior, byte-identical for every existing
-        # mode; the other four are the G0.5 arms and are legal ONLY with
-        # the v1_per_result trigger they were pre-registered with.
+        # G0.5 §18:注入模式(第 3 通道旋钮,仅实验用)。"full" = 历史行为,
+        # 对所有既有模式逐字节一致;其余四个是 G0.5 的臂,只在与它们被
+        # 预注册时配套的 v1_per_result 触发器下合法。
         self.injection_mode = os.environ.get("RPENT_MEMORY_INJECTION_MODE",
                                              "full")
         if self.injection_mode not in INJECTION_MODES:
@@ -344,9 +335,8 @@ class DecisionMemory:
                 "RPENT_MEMORY_TRIGGER=v1_per_result only (got "
                 f"{self.mode!r}) — fail fast rather than running an "
                 "undeclared arm configuration")
-        # G0.5 §18 explicit aliases — cross-validated against the knobs
-        # they duplicate so a stale/conflicting env can never silently
-        # redefine an arm.
+        # G0.5 §18 显式别名旋钮 — 与它们所重复的旋钮交叉校验,确保过期
+        # 或互相矛盾的 env 永远无法静默重定义一个臂。
         _qr = os.environ.get("RPENT_MEMORY_QUERY_REASON")
         if _qr is not None:
             _want = "native" if _qr == "1" else "common"
@@ -362,7 +352,7 @@ class DecisionMemory:
                 "neutral header; it cannot be combined with "
                 f"injection_mode={self.injection_mode!r}")
 
-    # ------------------------------------------------------------- observe
+    # ------------------------------------------------------------- 观测
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
         try:
             data = json.loads(content) if content.strip().startswith("{") else {}
@@ -379,8 +369,8 @@ class DecisionMemory:
             if name == "pi0_pick" and data.get("success") is False:
                 self.picks_failed += 1
             if name == "release":
-                # predicate signal lives in the result; if the episode did
-                # not terminate on the release, keep watching (T3).
+                # 谓词信号就在结果里;若 episode 没有在 release 上终止,
+                # 继续保持监视(T3)。
                 self.release_open = not data.get("libero_terminated", False)
         self._last_result = {"name": name, "data": data, "is_error": is_error,
                              "text": content[:400]}
@@ -392,13 +382,13 @@ class DecisionMemory:
         elif self.mode == "motion_stuck":
             self._mstuck_observe(name, data)
 
-    # -------------------------------------- progress mode (Stage C2 frozen)
+    # -------------------------------------- progress 模式(Stage C2 冻结)
     def _progress_observe(self, name: str, data: dict, is_error: bool) -> None:
-        """Evaluate the frozen C2 rules R1-R5 on THIS result (per-result
-        evaluation — the fix for the v1 boundary-overwrite signal loss)."""
+        """在当前这条结果上评估冻结的 C2 规则 R1-R5(逐结果评估 —
+        这是修复 v1 boundary 覆盖导致信号丢失的手段)。"""
         fd = data.get("final_dist_m")
         is_move = name in ("move_to", "move_pose")
-        # pre-eef for R2 = last known eef before this result updates it
+        # R2 用的 pre-eef = 本结果更新 _last_eef 之前最后一次已知的 eef
         pre_eef = self._last_eef
         if isinstance(data.get("final_eef_pos"), list):
             self._last_eef = data["final_eef_pos"]
@@ -418,8 +408,8 @@ class DecisionMemory:
                           f"no eef progress toward target")
         elif name == "pi0_pick":
             lift = (data.get("diagnostics") or {}).get("post_min_ascent_m")
-            # counter semantics mirror the frozen offline replay exactly:
-            # increment on success=False, reset on anything else
+            # 计数器语义与冻结的离线重放精确一致:
+            # success=False 时递增,其余情况清零
             if data.get("success") is False:
                 self._consec_pick_fails += 1
             else:
@@ -444,24 +434,23 @@ class DecisionMemory:
         if reason and self._queued_fire is None:
             self._queued_fire = reason
             self._queued_result = dict(self._last_result)
-        # mirror the offline prev_prim_failed definition
+        # 镜像离线版的 prev_prim_failed 定义
         if name in PRIMITIVES:
             self._prev_prim_failed = data.get("success") is False or (
                 is_move and isinstance(fd, (int, float))
                 and fd > self.MOVE_ARRIVED)
 
     def _v1pr_observe(self, name: str, data: dict, is_error: bool) -> None:
-        """G0-A experimental mode "v1_per_result": the frozen v1 trigger
-        RULES (T1-T7, untouched) evaluated at EACH tool result's arrival,
-        queued on hit, flushed at the next boundary.
+        """G0-A 实验模式 "v1_per_result":冻结的 v1 触发规则(T1-T7,
+        未改动)在每条工具结果到达时评估,命中即排队,下一个 boundary
+        冲刷。
 
-        Isolates signal preservation: v1_original loses a hit whenever a
-        later result arrives before the boundary (last-result-at-boundary
-        overwrite); this mode keeps it. Queue/cooldown semantics are the
-        PROGRESS flush semantics (drop-on-cooldown, drop at cap) so that
-        v1_per_result -> progress differs by rule content only. The v1
-        saw_primitive gate is applied at EVAL time (skipped until any
-        primitive has run), mirroring where v1 applies it."""
+        用于隔离信号保全问题:v1_original 在 boundary 之前又到达新结果时
+        会丢失命中(boundary 只看最后一条结果);本模式逐结果保留
+        队列/冷却语义 = 冻结的 PROGRESS 冲刷语义(冷却即丢弃、到上限即
+        丢弃),因此 v1_per_result -> progress 只差规则内容本身。v1 的
+        saw_primitive 门在评估(EVAL)时施加(任何 primitive 运行过之前
+        跳过),与 v1 的施加位置保持一致。"""
         if not self.saw_primitive:
             return
         reason = self._v1_rules_for(name, data, is_error)
@@ -470,7 +459,7 @@ class DecisionMemory:
             self._queued_result = dict(self._last_result)
             self._queued_phase = self.last_phase
 
-    # ------------------------------------------------------------- trigger
+    # ------------------------------------------------------------- 触发
     def _trigger_reason(self) -> str | None:
         r = self._last_result
         if not r:
@@ -479,17 +468,16 @@ class DecisionMemory:
 
     def _v1_rules_for(self, name: str, data: dict,
                       is_error: bool) -> str | None:
-        """The frozen v1 trigger rules T1-T7, evaluated for ONE result.
+        """冻结的 v1 触发规则 T1-T7,针对单条结果评估。
 
-        G0-A: body is VERBATIM the historical _trigger_reason logic — same
-        rules, same accumulated state reads (recent_primitives,
-        release_open, picks_failed, phase_steps, tracker). The only change
-        is that the result under judgment is an explicit argument, so
-        v1_per_result can evaluate each result at arrival time.
+        G0-A:函数体逐字保留历史 _trigger_reason 逻辑 — 同样的规则、
+        同样的累计状态读取(recent_primitives、release_open、
+        picks_failed、phase_steps、tracker)。唯一的变化是被评判的
+        结果是显式参数,使 v1_per_result 能在每条结果到达时评估。
         """
         if name not in PRIMITIVES + PERCEPTION:
             return None
-        # T1 primitive failure
+        # T1 primitive 失败
         if name == "pi0_pick" and data.get("success") is False:
             return "primitive_failure: pi0_pick reports no grasp"
         if name == "pi0_doubled" and data.get("success") is False:
@@ -501,53 +489,53 @@ class DecisionMemory:
                     f"({data['final_dist_m']:.3f} m residual)")
         if is_error:
             return f"primitive_failure: {name} returned error"
-        # T2 pick ambiguous: reported success but near-zero lift
+        # T2 pick 模糊:报告成功但抬升近零
         if name == "pi0_pick" and data.get("success") is True:
             diag = data.get("diagnostics") or {}
             lift = diag.get("post_min_ascent_m")
             if isinstance(lift, (int, float)) and 0.0 <= lift < 0.05:
                 return "pick_ambiguous: pick reports success but barely lifted"
-        # T3 predicate stalled after release
+        # T3 release 之后谓词停滞
         if name in PRIMITIVES and self.release_open \
                 and not data.get("libero_terminated", False) \
                 and name != "release":
             return ("predicate_stalled: actions continue after release but "
                     "the task predicate has not fired")
-        # T4 repeated action without progress
+        # T4 重复动作且无进展
         if len(self.recent_primitives) >= 3 \
                 and len(set(self.recent_primitives[-3:])) == 1:
             return f"repeated_no_progress: {name} x3 in a row"
         if self.picks_failed >= 2:
             return "repeated_no_progress: repeated failed picks"
-        # T5 perception insufficient
+        # T5 感知不足
         if name in PERCEPTION:
             if data.get("found") is False:
                 return "perception_insufficient: segmentation found no mask"
             if data.get("world_error"):
                 return f"perception_insufficient: {data['world_error']}"
-        # T6 recovery rule pending (SM1 signal)
+        # T6 恢复规则待定(SM1 信号)
         try:
             if self.tracker is not None and self.tracker.recovery_pending():
                 return "recovery_pending: failure-recovery rule precondition met"
-        except Exception:  # noqa: BLE001 - trigger must never break the run
+        except Exception:  # noqa: BLE001 - 触发器绝不能弄崩整个 run
             pass
-        # T7 phase stalled: expected transition did not occur
+        # T7 相位停滞:预期的切换没有发生
         if self.phase_steps >= 8:
             return "phase_stalled: no phase transition across 8+ actions"
         return None
 
-    # ------------------------------------------------------------ boundary
+    # ------------------------------------------------------------ 边界
     def turn_boundary(self, turn: int) -> tuple[str, dict] | None:
-        """Evaluate the frozen trigger; return (block, event) on fire."""
+        """评估冻结的触发器;触发则返回 (block, event)。"""
         self.turn = turn
         self.boundaries_since_trigger += 1
         self._boundary_count += 1
         if self.tracker is not None:
             ph = ""
             try:
-                # PhaseTracker.current_phase is a METHOD (no @property) —
-                # call it; a bare attribute fetch grabs the bound method,
-                # which then poisons the event JSON and the Q3 query text.
+                # PhaseTracker.current_phase 是方法(没有 @property)—
+                # 必须调用;裸属性取到的是绑定方法,会污染 event JSON
+                # 和 Q3 的 query 文本。
                 ph = self.tracker.current_phase()
             except Exception:  # noqa: BLE001
                 ph = ""
@@ -560,21 +548,21 @@ class DecisionMemory:
             return self._periodic_boundary(turn)
         if self.mode == "motion_stuck":
             if self._mstuck_win and self.last_phase != self._mstuck_phase:
-                self._mstuck_win = []  # G0-D: phase transition resets window
+                self._mstuck_win = []  # G0-D:相位切换重置窗口
             return self._mstuck_boundary(turn)
         if not self.saw_primitive or self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
         if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
             return None
         if not self._fresh_result:
-            return None  # nothing new since the last boundary
+            return None  # 上个 boundary 以来没有新结果
         reason = self._trigger_reason()
         self._fresh_result = False
         if not reason:
             return None
         self.boundaries_since_trigger = 0
         self.triggers_fired += 1
-        # one-shot resets so a signal does not re-fire forever
+        # 一次性重置,避免同一信号永远重复触发
         self.picks_failed = 0
         self.phase_steps = 0
         self.release_open = False
@@ -583,7 +571,7 @@ class DecisionMemory:
         top, cand = self._retrieve(reason)
         latency_ms = (time.time() - t0) * 1000
         event = {
-            "episode": "",  # filled at finalize from the output dir
+            "episode": "",  # finalize 时从输出目录回填
             "task": os.environ.get("RPENT_TASK", ""),
             "turn": turn,
             "phase": self.last_phase,
@@ -604,14 +592,14 @@ class DecisionMemory:
             "top3_memories": [],
             "retrieval_latency_ms": round(latency_ms, 2),
             "task_language": self.task_language,
-            "planner_next_action": None,   # post-hoc, filled by analysis
-            "planner_followed_top1": None,  # post-hoc
-            "planner_followed_any_top3": None,  # post-hoc
-            "verification_result": None,    # post-hoc
-            "episode_result": None,        # post-hoc
+            "planner_next_action": None,   # 事后字段,由分析回填
+            "planner_followed_top1": None,  # 事后字段
+            "planner_followed_any_top3": None,  # 事后字段
+            "verification_result": None,    # 事后字段
+            "episode_result": None,        # 事后字段
         }
-        # G0-E applies to the frozen v1 path too: every attempt is logged;
-        # EMPTY writes the event but injects nothing. Policy unchanged.
+        # G0-E 同样适用于冻结的 v1 路径:每次尝试都有日志;EMPTY 只写
+        # 事件、不注入。策略不变。
         if not top:
             self.events.append(event)
             logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
@@ -630,12 +618,11 @@ class DecisionMemory:
         return block, event
 
     def _flush_boundary(self, turn: int) -> tuple[str, dict] | None:
-        """Flush a queued per-result fire. Shared by mode="progress"
-        (Stage C2 frozen rules; no first-primitive gate — the offline
-        replay had none) and mode="v1_per_result" (G0-A; the gate applies
-        at eval time instead). Cooldown blocks DROP the fire rather than
-        deferring it — the frozen progress semantics, adopted by
-        v1_per_result so the two differ by rule content only."""
+        """冲刷一条排队的逐结果触发。由 mode="progress"(Stage C2 冻结
+        规则;没有 first-primitive 门 — 离线重放就没有)和
+        mode="v1_per_result"(G0-A;门改在评估时施加)共享。冷却中的触发
+        直接丢弃而不是推迟 — 这是冻结的 progress 语义,v1_per_result
+        沿用之,使两者只差规则内容。"""
         if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             self._queued_fire = None
             return None
@@ -651,14 +638,14 @@ class DecisionMemory:
         self._queued_phase = ""
         self.boundaries_since_trigger = 0
         self.triggers_fired += 1
-        # G0.5: P0/P1/P2 skip retrieval entirely (§6 — no memory retrieval
-        # outside P3/P4); the fire itself is fully instrumented above.
+        # G0.5:P0/P1/P2 完全跳过检索(§6 — P3/P4 之外不做记忆检索);
+        # 触发本身在上面已完整记录。
         if self.injection_mode in _NO_RETRIEVAL_MODES:
             return self._fire_without_retrieval(turn, reason, qr, phase)
         t0 = time.time()
         obs = self._obs_summary_for(qr)
-        # G0-B: common query = WHEN/WHAT decoupled — the reason never
-        # enters the query (lexical text) or the structured reason term.
+        # G0-B:common query = WHEN/WHAT 解耦 — reason 永不进入 query
+        # (词面文本)也不进入结构化 reason 项。
         reason_toks = toks(reason) if self.query_mode == "native" else set()
         q = " | ".join([obs, reason]) if self.query_mode == "native" \
             else obs
@@ -695,15 +682,15 @@ class DecisionMemory:
             "verification_result": None,
             "episode_result": None,
         }
-        # G0-E: EVERY trigger attempt is logged. An EMPTY retrieval writes
-        # the event (retrieval_empty=True) but injects nothing.
+        # G0-E:每次触发尝试都有日志。检索为 EMPTY 时仍写事件
+        # (retrieval_empty=True),但不注入任何内容。
         if not top:
             self.events.append(event)
             logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
                         "(logged, no injection)", turn, reason)
             return None
-        # G0.5: P3 renders the neutral F4 header; P4/full stays on the
-        # frozen _block() (byte-identical to every historical arm).
+        # G0.5:P3 渲染中性 F4 头部;P4/full 走冻结的 _block()(与所有
+        # 历史臂逐字节一致)。
         block = (self._memory_only_block(top)
                  if self.injection_mode == "memory_only"
                  else self._block(reason, top))
@@ -718,35 +705,33 @@ class DecisionMemory:
                     top[:3])
         return block, event
 
-    # ------------------------------- Stage G baseline triggers (T2/T3)
-    # Baselines ONLY (stageG_trigger_baseline_config.md). The decision rule
-    # is the ONLY difference from the frozen modes: retrieval, injection
-    # path, cooldown and per-episode cap are identical. The frozen v1/progress
-    # code paths above are untouched.
+    # ------------------------------- Stage G 基线触发器(T2/T3)
+    # 仅作基线(stageG_trigger_baseline_config.md)。与冻结模式的唯一
+    # 差别是判定规则本身:检索、注入路径、冷却与每 episode 上限全部
+    # 一致。上面冻结的 v1/progress 代码路径未被动过。
     def _mstuck_observe(self, name: str, data: dict) -> None:
-        """T3_MOTION_STUCK: generic spatial-stuck detector (G0-D hardened).
-        Uses ONLY EEF displacement between consecutive move results and
-        final_dist_m improvement — the latter comparable ONLY between two
-        results commanded to the SAME target (target_xyz key, 3 decimals).
-        No primitive-specific PICK/PLACE/PERCEPTION logic. Window resets
-        on: a non-move primitive interleaved, a commanded-target change, a
-        missing target (no progress anchor), or a phase transition (checked
-        at the boundary). Evaluated only when a move result arrives."""
+        """T3_MOTION_STUCK:通用空间停滞检测器(G0-D 加固版)。只使用
+        相邻 move 结果之间的 EEF 位移和 final_dist_m 的改善 — 后者只在
+        被指令到同一目标(target_xyz 键,3 位小数)的两次结果之间可比。
+        不含任何 primitive 专属的 PICK/PLACE/PERCEPTION 逻辑。窗口在
+        以下情况重置:夹入非 move 的 primitive、被指令目标变化、目标
+        缺失(失去进度锚点)、或相位切换(boundary 处检查)。仅在 move
+        结果到达时评估。"""
         if name in PRIMITIVES and name not in ("move_to", "move_pose"):
-            self._mstuck_win = []   # pick/release/... between moves: reset
+            self._mstuck_win = []   # move 之间出现 pick/release 等:重置
             return
         if name not in ("move_to", "move_pose"):
-            return                  # perception/memory results: no reset
+            return                  # perception/memory 结果:不重置
         eef = data.get("final_eef_pos")
         tgt = data.get("target_xyz")
         if not isinstance(eef, list) or len(eef) < 3:
             return
         if not isinstance(tgt, list) or len(tgt) < 3:
-            self._mstuck_win = []   # no target -> no progress anchor
+            self._mstuck_win = []   # 无目标 -> 无进度锚点
             return
         tkey = tuple(round(v, 3) for v in tgt[:3])
         if self._mstuck_win and self._mstuck_win[-1][2] != tkey:
-            self._mstuck_win = []   # commanded target changed
+            self._mstuck_win = []   # 被指令目标变了
         fd = data.get("final_dist_m")
         self._mstuck_win.append(
             (eef[:3], fd if isinstance(fd, (int, float)) else None, tkey))
@@ -760,13 +745,12 @@ class DecisionMemory:
             disp = sum((a - b) ** 2 for a, b in zip(p0, p1)) ** 0.5
             if disp >= self.mstuck_move_m:
                 return
-            # window entries share tkey by construction; progress is
-            # same-target by design. Unknown dist (None) -> cannot verify
-            # progress, displacement evidence still stands (kept from the
-            # frozen DEV calibration semantics).
+            # 窗口条目构造上共享 tkey;进度按同目标设计。dist 未知
+            # (None) -> 无法验证进度,但位移证据仍然成立(保留冻结
+            # DEV 校准时的语义)。
             if d0 is not None and d1 is not None \
                     and d0 - d1 >= self.mstuck_prog_m:
-                return  # real progress toward the commanded target
+                return  # 朝被指令目标有真实进展
         if self._queued_fire is None:
             self._queued_fire = (f"motion_stuck: k={self.mstuck_k} "
                                  f"disp<{self.mstuck_move_m:.3f}m "
@@ -774,11 +758,11 @@ class DecisionMemory:
                                  f"same-target")
             self._queued_result = dict(self._last_result)
             self._queued_phase = self.last_phase
-            self._mstuck_win = []  # window resets once a fire is queued
+            self._mstuck_win = []  # 一旦排队触发,窗口重置
 
     def _periodic_boundary(self, turn: int) -> tuple[str, dict] | None:
-        """T2_PERIODIC: fire every N-th turn boundary (a timer, blind to
-        state). Ticks before the first primitive result are skipped."""
+        """T2_PERIODIC:每第 N 个 turn boundary 触发一次(纯计时器,
+        对状态视而不见)。第一个 primitive 结果之前的 tick 跳过。"""
         if not self.saw_primitive or self._boundary_count % self.periodic_n:
             return None
         reason = (f"periodic_tick: boundary={self._boundary_count} "
@@ -789,8 +773,8 @@ class DecisionMemory:
                                    "periodic")
 
     def _mstuck_boundary(self, turn: int) -> tuple[str, dict] | None:
-        """Flush a queued T3 fire at the boundary (drop-on-cooldown, like
-        the frozen progress semantics)."""
+        """在 boundary 冲刷排队的 T3 触发(冷却即丢弃,同冻结的
+        progress 语义)。"""
         if not self._queued_fire:
             return None
         reason = self._queued_fire
@@ -802,9 +786,8 @@ class DecisionMemory:
 
     def _baseline_fire(self, turn: int, reason: str, qr: dict,
                        mode_label: str) -> tuple[str, dict] | None:
-        """Shared fire path for the Stage G baselines — same cooldown/cap/
-        retrieval/logging semantics as the frozen modes (incl. G0-B query
-        mode and G0-E attempt logging)."""
+        """Stage G 基线共用的触发路径 — 冷却/上限/检索/日志语义与
+        冻结模式一致(含 G0-B query 模式与 G0-E 尝试日志)。"""
         if self.triggers_fired >= MAX_TRIGGERS_PER_EPISODE:
             return None
         if self.boundaries_since_trigger < COOLDOWN_BOUNDARIES:
@@ -867,13 +850,11 @@ class DecisionMemory:
         return block, event
 
     def _load_extra_bank(self, spec: str) -> None:
-        """Append real library pages (G4 distractor banks) as retrieval
-        entries. G0-F: IDs are NAMESPACED as extra::<dir>::<stem> so pages
-        from different bank directories can never collide (the global 61
-        card ids are untouched). Page frontmatter supplies task_language
-        (used as title); the body supplies the lexical index line and the
-        Q3 body text. No card content is edited; global cards keep their
-        exact index lines."""
+        """把真实库页面(G4 干扰库)追加为检索条目。G0-F:id 带命名空间
+        extra::<dir>::<stem>,不同库目录的页面永不冲突(全局 61 张卡的
+        id 不受影响)。页面 frontmatter 提供 task_language(作 title 用);
+        正文提供词面索引行和 Q3 的 body 文本。不编辑任何卡片内容;全局
+        卡保留其精确的索引行。"""
         n = 0
         for d in spec.split(":"):
             base = Path(d)
@@ -897,8 +878,8 @@ class DecisionMemory:
                 m = re.search(r"^task_language:\s*(.+)$", fm, re.M)
                 if m:
                     card["title"] = m.group(1).strip()[:120]
-                # same "how_to" key (and the same 400-char cap) as the
-                # global cards, so _block() renders both uniformly.
+                # 与全局卡相同的 "how_to" 键(和同样的 400 字符截断),
+                # 使 _block() 对两者统一渲染。
                 card["how_to"] = re.sub(r"\s+", " ", body).strip()[:400]
                 self.cards[cid] = card
                 self.index[cid] = (card["title"] + " " +
@@ -917,7 +898,7 @@ class DecisionMemory:
                         "entries (namespaced extra::<dir>::<stem>)", n,
                         len(self.ids))
 
-    # ------------------------------------------------------------ retrieval
+    # ------------------------------------------------------------ 检索
     def _obs_summary(self) -> str:
         r = self._last_result
         keys = ("success", "libero_terminated", "final_dist_m", "found",
@@ -927,8 +908,8 @@ class DecisionMemory:
                 f"result fields={fields}; task: {self.task_language[:110]}")
 
     def _obs_summary_for(self, r: dict) -> str:
-        """Poor-format obs summary for a specific (queued) result — progress
-        mode fires on the result that broke, not the last one seen."""
+        """针对某条(排队的)结果的 poor-format 观测摘要 — progress
+        模式在出问题的那条结果上触发,而不是最后看到的那条。"""
         data = r.get("data") or {}
         keys = ("success", "libero_terminated", "final_dist_m", "found",
                 "world_error", "min_gripper_opening")
@@ -937,9 +918,9 @@ class DecisionMemory:
                 f"result fields={fields}; task: {self.task_language[:110]}")
 
     def _retrieve(self, reason: str) -> tuple[list[str], list[str]]:
-        """v1 boundary retrieval. The v1 boundary fires on the LAST result,
-        so the structured Q3 terms (obs text / action / phase) are that
-        result's values — consistent with the G0-C explicit-state fix."""
+        """v1 boundary 检索。v1 boundary 在最后一条结果上触发,所以
+        结构化 Q3 项(obs 文本 / 动作 / 相位)取的就是那条结果的值 —
+        与 G0-C 的显式状态修复一致。"""
         obs = self._obs_summary()
         reason_toks = toks(reason) if self.query_mode == "native" else set()
         q = " | ".join([obs, reason]) if self.query_mode == "native" \
@@ -951,9 +932,8 @@ class DecisionMemory:
 
     def _q0_fixed(self, q: str) -> tuple[list[str], list[str]]:
         qt = toks(q) | toks(self.task_language)
-        # G0-F: namespaced extra ids score by their STEM tokens only (the
-        # extra::<dir>:: prefix contributes nothing); global cards, which
-        # carry no "::", are scored exactly as before.
+        # G0-F:带命名空间的 extra id 只按其 STEM 词计分(extra::<dir>::
+        # 前缀不贡献词);不带 "::" 的全局卡打分方式与从前完全一致。
         scored = sorted(
             ((len(qt & (toks(self.index.get(c, self.cards[c]["title"]))
                         | toks(c.split("::")[-1].replace("-", " ")))), c)
@@ -965,13 +945,12 @@ class DecisionMemory:
 
     def _q3(self, q: str, reason_toks: set[str], obs_text: str,
             action: str, phase: str) -> tuple[list[str], list[str]]:
-        """Q3 structured rerank — FROZEN weights / pool size / encoder /
-        phase map (Stage A port, unchanged).
+        """Q3 结构化重排 — 冻结的权重 / 池大小 / 编码器 / 相位映射
+        (Stage A 移植,未改动)。
 
-        G0-C: every structured term (observation tokens, action, phase)
-        comes in EXPLICITLY from the result the trigger fired on, so a
-        queued fire can no longer be rescored against a LATER result's
-        state. Weights and the semantic pool are untouched."""
+        G0-C:每个结构化项(观测词、动作、相位)都显式来自触发所落在
+        的那条结果,排队的触发不会再被后续结果的状态重新打分。权重与
+        语义池未动。"""
         if self._emb_card is None:
             vecs = self._embedder.embed([self.body[c] for c in self.ids])
             self._emb_card = dict(zip(self.ids, vecs))
@@ -997,7 +976,7 @@ class DecisionMemory:
         self._last_scores = [float(s) for s, _ in rescored[:5]]
         return [c for _, c in rescored[:3]], cand
 
-    # ---------------------------------------------------------------- block
+    # ---------------------------------------------------------------- 注入块
     def _block(self, reason: str, top: list[str]) -> str:
         lines = [
             "[DECISION-POINT MEMORY RECALL] "
@@ -1017,11 +996,11 @@ class DecisionMemory:
         return "\n".join(lines)
 
     def _memory_only_block(self, top: list[str]) -> str:
-        """F4 — P3 block: neutral header, SAME card rendering as _block().
+        """F4 — P3 注入块:中性头部,卡片渲染与 _block() 相同。
 
-        Kept a deliberate sibling of _block() (not a refactor of the frozen
-        function); test_stageG05_injection.py asserts the card lines are
-        identical for the same top-3."""
+        刻意作为 _block() 的兄弟函数保留(而不是重构那个冻结函数);
+        test_stageG05_injection.py 断言两者对同一 top-3 的卡片行完全
+        一致。"""
         lines = [MEMORY_CONTEXT_HEADER]
         for i, c in enumerate(top[:3], 1):
             card = self.cards[c]
@@ -1035,16 +1014,16 @@ class DecisionMemory:
 
     def _fire_without_retrieval(self, turn: int, reason: str, qr: dict,
                                 phase: str) -> tuple[str, dict] | None:
-        """G0.5 P0/P1/P2: the trigger fired (fully logged, same cooldown/
-        cap semantics) but NO memory retrieval runs. P0 injects nothing at
-        all; P1/P2 inject their frozen text. Events carry
-        retrieval_status=NOT_RUN — recorded, never counted as EMPTY."""
+        """G0.5 P0/P1/P2:触发器已触发(完整记录日志,冷却/上限语义
+        相同),但不做任何记忆检索。P0 什么都不注入;P1/P2 注入各自
+        的冻结文本。事件带 retrieval_status=NOT_RUN — 只作记录,绝不
+        计为 EMPTY。"""
         block = {
             "reason_only": _reason_only_block(reason),
             "generic_refresh": GENERIC_REFRESH_BLOCK,
         }.get(self.injection_mode)
         event = {
-            "episode": "",  # filled at finalize from the output dir
+            "episode": "",  # finalize 时从输出目录回填
             "task": os.environ.get("RPENT_TASK", ""),
             "turn": turn,
             "phase": phase,
@@ -1081,7 +1060,7 @@ class DecisionMemory:
                     ", injected" if block is not None else ", no injection")
         return (block, event) if block is not None else None
 
-    # ------------------------------------------------------------- finalize
+    # ------------------------------------------------------------- 收尾
     def finalize(self, *, success: bool | None) -> None:
         try:
             from rpent.utils.logging import get_output_dir
@@ -1094,10 +1073,10 @@ class DecisionMemory:
         try:
             with open(out / "memory_events.jsonl", "w") as f:
                 for e in self.events:
-                    # default=str: instrumentation must never lose events to
-                    # an unexpected field type again (2026-09-17 smoke incident)
+                    # default=str:插桩绝不能再因意外的字段类型丢事件
+                    # (2026-09-17 smoke 事故)
                     f.write(json.dumps(e, ensure_ascii=False,
                                        default=str) + "\n")
             logger.info("[memrecall] wrote %d events", len(self.events))
-        except Exception as e:  # noqa: BLE001 - never fail the run
+        except Exception as e:  # noqa: BLE001 - 绝不让 run 失败
             logger.warning("[memrecall] failed to write events: %s", e)
