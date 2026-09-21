@@ -110,3 +110,7 @@ Human review of the claim rewrite above (approve / edit / reject).
 G1-G4 grids, arms, and analyzers stay exactly as committed (2c67cbd,
 c6bed6b, 3f5adff, 9f048af, 0f836ca) — G2's T2/T3 baselines now carry
 additional explanatory weight.
+
+**RESOLVED 2026-09-21 02:3x: rewrite APPROVED as written (human review in
+session). G1-G4 unblocked sequentially at 8 workers (429-avoidance
+concurrency cap, per the G0 incident); grids/arms/analyzers unchanged.**
