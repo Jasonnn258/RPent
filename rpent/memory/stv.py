@@ -1,45 +1,42 @@
-"""B2 — Evidence-Sufficient State-Transition Verification (arm B2).
+"""B2 —— 证据充分的状态转移验证(B2 臂)。
 
-B1 (:mod:`rpent.memory.ovpm`) judges an action by binary outcome checks on
-the tool result's own fields — most notoriously ``pi0_pick``'s tight-grip
-signal, which fires on an empty gripper that simply closed on nothing.
-B2 replaces the *binary outcome* question ("did the reported metric pass?")
-with a *state-transition* question: given the pre-state, the action, and
-the post-state, did the world change the way this action type is supposed
-to change it?
+B1(:mod:`rpent.memory.ovpm`)用工具结果自身字段上的二元 outcome 检查
+来评判动作 —— 最典型的坑是 ``pi0_pick`` 的紧握信号,空手爪只是
+合拢在无物上时它也会触发。B2 把*二元 outcome* 问题("上报的指标
+过了吗?")换成*状态转移*问题:给定前置状态、动作和
+后置状态,世界是否按这类动作理应造成的方式发生了变化?
 
-Templates are action-level and general (GRASP / PLACE / TRANSPORT /
-CONTACT / ROTATE). No task-scoped rules, no phase scoping, no new tools.
-Evidence comes only from what the planner already sees: tool-result fields
-(proprioception, the official termination flag), SAM3 ``segment`` /
-``back_project`` world positions, and ``view_driver_state``. No benchmark
-ground truth, no privileged object coordinates.
+模板是动作级且通用的(GRASP / PLACE / TRANSPORT /
+CONTACT / ROTATE)。没有 task 范围规则、没有 phase 限定、没有新工具。
+证据只来自 planner 已经看到的东西:工具结果字段
+(本体感知、官方终止标志)、SAM3 ``segment`` /
+``back_project`` 的世界坐标,以及 ``view_driver_state``。没有 benchmark
+真值、没有特权物体坐标。
 
-GRASP confirmation always requires object-level state evidence (the object
-left its support / rides with the gripper): calibrated on 160 recorded
-arm-B picks, gripper-opening distributions of true and false holds fully
-overlap, so proprioception alone can disprove a grasp (gripper stayed
-open) but never confirm one.
+GRASP 确认永远要求物体级状态证据(物体
+离开了支撑物/随手爪移动):基于 160 次录制的
+arm-B 抓取做标定,真握与假握的手爪开合分布完全
+重叠,因此仅凭本体感知可以证伪一次抓取(手爪一直
+张开)却永远无法证实它。
 
-Verdicts are three-way and drive an explicit next decision:
+裁决是三向的并驱动一个显式的下一步决策:
 
-  CONFIRMED_SUCCESS -> COMMIT    proceed; further verification is redundant
-  CONFIRMED_FAILURE -> RECOVER   switch strategy; do not repeat unchanged
-  UNCERTAIN         -> OBSERVE   one targeted observation; if that does not
-                                 resolve it, REASON (bounded, never loops)
+  CONFIRMED_SUCCESS -> COMMIT    继续;进一步验证是冗余的
+  CONFIRMED_FAILURE -> RECOVER   换策略;不要原样重试
+  UNCERTAIN         -> OBSERVE   一次定向观察;若仍不能
+                                 定论则 REASON(有界,绝不循环)
 
-Every judgment is appended to ``<output_dir>/b2_events.jsonl`` with the
-pre-state summary, expected vs observed change, evidence lists, verdict,
-decision, and the rule template that produced it.
+每条判定都连同前置状态摘要、期望与观测到的变化、证据列表、裁决、
+决策以及产生它的规则模板,一起追加到 ``<output_dir>/b2_events.jsonl``。
 
-Injected lines must never contain the substrings "fail"/"error"/"could
-not"/"no object": the PhaseTracker pick heuristic greps result text for
-those words. ``CONFIRMED_FAILURE`` therefore lives only in the JSONL and
-metrics; injected lines say "objective NOT established".
+注入行绝不能包含子串 "fail"/"error"/"could
+not"/"no object":PhaseTracker 的 pick 启发式会在结果文本里 grep
+这些词。因此 ``CONFIRMED_FAILURE`` 只存在于 JSONL 和
+指标里;注入行说 "objective NOT established"。
 
-Gate: ``RPENT_OVPM2=1`` (requires ``RPENT_STRUCTURED_MEMORY=1`` — the SM1
-tracker supplies phase context for the logs and latency accounting,
-nothing more).
+门控:``RPENT_OVPM2=1``(需要 ``RPENT_STRUCTURED_MEMORY=1`` —— SM1
+tracker 为日志和延迟记账提供 phase 上下文,
+仅此而已)。
 """
 
 from __future__ import annotations
@@ -61,12 +58,12 @@ from rpent.memory.schema import PHASE_ORDER
 
 logger = logging.getLogger(__name__)
 
-#: Action tool -> rule template. General by construction: keyed on action
-#: semantics, never on task identity.
+#: 动作工具 -> 规则模板。构造上即通用:按动作
+#: 语义作键,绝不按 task 身份。
 TEMPLATES: dict[str, str] = {
     "pi0_pick": "GRASP",
     "release": "PLACE",
-    "set_gripper": "PLACE",  # only judged when opening (gripper <= 0)
+    "set_gripper": "PLACE",  # 仅在张开时评判(gripper <= 0)
     "move_to": "TRANSPORT",
     "move_pose": "TRANSPORT",
     "pi0_doubled": "CONTACT",
@@ -92,20 +89,20 @@ EXPECTED_CHANGE: dict[str, str] = {
     "ROTATE": "wrist reached the commanded orientation",
 }
 
-# --------------------------------------------------------------- thresholds
-# Quantities shared with B1 reuse its constants; the rest are B2's own.
+# --------------------------------------------------------------- 阈值
+# 与 B1 共享的量复用其常量;其余是 B2 自己的。
 
-NEVER_CLOSED_TOL = 0.06  # min_gripper_opening above this = never closed
-FULLY_CLOSED_EPS = 0.004  # below this the fingers pinned shut on nothing
-LIFT_MIN = 0.05  # pi0_pick's own lift threshold
-OBJ_MOVE_TOL = 0.04  # displacement that counts as "left its support"
-OBJ_STAY_TOL = 0.03  # within this of the pre-pick spot = left behind
-HOLD_RADIUS = 0.15  # object within this of the eef = consistent with held
-NEAR_EEF = 0.08  # tighter post-release ambiguity band
-PLACE_TOL = 0.10  # object within this of the last transport target
-PLACE_FAR = 0.20  # beyond this from target (and from eef) = misplaced
-MAX_OBSERVE_ROUNDS = 2  # directed observations per pending verification
-STALL_STEPS = 4  # tool results without action before REASON escalation
+NEVER_CLOSED_TOL = 0.06  # min_gripper_opening 高于此 = 从未闭合
+FULLY_CLOSED_EPS = 0.004  # 低于此值说明手指空夹合死
+LIFT_MIN = 0.05  # pi0_pick 自带的抬升阈值
+OBJ_MOVE_TOL = 0.04  # 计为"离开支撑物"的位移量
+OBJ_STAY_TOL = 0.03  # 距抓前位置在此值内 = 被留在原地
+HOLD_RADIUS = 0.15  # 物体距 eef 在此值内 = 与被握一致
+NEAR_EEF = 0.08  # 更紧的 release 后歧义带
+PLACE_TOL = 0.10  # 物体距上一个 transport 目标在此值内
+PLACE_FAR = 0.20  # 距目标(且距 eef)超过此值 = 放错位置
+MAX_OBSERVE_ROUNDS = 2  # 每个未决验证的定向观察次数
+STALL_STEPS = 4  # 升级到 REASON 前无动作的工具结果数
 
 _MAX_EVENT_LOG = 400
 
@@ -125,13 +122,13 @@ def _xyz(v: Any) -> tuple[float, float, float] | None:
     return None
 
 
-# --------------------------------------------------------------- label words
-# Smoke-run finding (2026-09-15): the planner segments the SAME object under
-# different wordings ("the black patterned bowl" pre-pick, "the black
-# patterned bowl held in the gripper" post-pick) and picks via natural
-# language ("grasp the upper right black bowl by the rim"). Exact-string
-# label equality therefore misses the evidence; match on shared content
-# words instead. Fallback labels ("segment@12") carry no semantics.
+# --------------------------------------------------------------- 标签词
+# 冒烟运行发现(2026-09-15):planner 会用不同措辞分割同一个
+# 对象(抓取前 "the black patterned bowl",抓取后
+# "the black patterned bowl held in the gripper"),并通过自然
+# 语言抓取("grasp the upper right black bowl by the rim")。精确字符串
+# 标签相等因此会漏掉证据;改按共享的实词
+# 匹配。回退标签("segment@12")不带语义。
 
 _LABEL_STOP = frozenset({
     "the", "a", "an", "of", "on", "in", "at", "to", "by", "with", "and",
@@ -148,13 +145,13 @@ def _label_tokens(text: str) -> set[str]:
 
 
 def _match_label(query: str, records: dict[str, dict[str, Any]]) -> str | None:
-    """Cached label sharing >=2 content tokens with *query* (max shared,
-    then most recently observed). None when nothing clears the bar."""
+    """与 *query* 共享 >=2 个实词的缓存标签(共享最多者、
+    其次取最近观察)。无一达标时返回 None。"""
     q = _label_tokens(query)
     if not q:
         return None
     best: str | None = None
-    best_key = (1, -1)  # (shared tokens, recency) — 1 = below the bar
+    best_key = (1, -1)  # (共享 token 数, 新近度)— 1 = 未达标
     for lbl, rec in records.items():
         if "@" in lbl:
             continue
@@ -165,19 +162,19 @@ def _match_label(query: str, records: dict[str, dict[str, Any]]) -> str | None:
 
 
 def _labels_related(a: str | None, b: str | None) -> bool:
-    """True when two labels plausibly name the same object (or either is a
-    semantic-free fallback), for gating which observations may consume a
-    pending verification round."""
+    """两个标签可能指同一对象(或任一是无语义
+    回退标签)时为 True,用于门控哪些观察可以消耗
+    一个未决验证轮次。"""
     if not a or not b or "@" in a or "@" in b:
         return True
     return a == b or len(_label_tokens(a) & _label_tokens(b)) >= 2
 
 
 def _is_grip_maintenance(name: str, kwargs: dict[str, Any]) -> bool:
-    """Closing actuation (``set_gripper`` gripper>0) is grip maintenance, not
-    a state-transition step: it must not overtake an open verification (the
-    smoke run showed the planner firming the grip BEFORE running the
-    directed observation — the evidence arrives one action later)."""
+    """闭合驱动(``set_gripper`` gripper>0)是握持维护,不是
+    状态转移步骤:它不得超越未决验证(冒烟
+    运行显示 planner 会在执行定向观察之前先加固握持 ——
+    证据晚一个动作到达)。"""
     if name != "set_gripper":
         return False
     try:
@@ -187,32 +184,32 @@ def _is_grip_maintenance(name: str, kwargs: dict[str, Any]) -> bool:
 
 
 class TransitionVerifier:
-    """Feed tool results in; get three-way verdict lines and metrics out.
+    """喂入工具结果;产出三向裁决行和指标。
 
-    Mirrors :class:`rpent.memory.ovpm.OutcomeValidator` so the planner-loop
-    wiring is symmetric: ``observe_result`` returns the line (if any) that
-    the caller appends to the tool result text — zero extra turns. The
-    verdict text itself avoids the PhaseTracker's forbidden substrings.
+    镜像 :class:`rpent.memory.ovpm.OutcomeValidator`,使 planner 循环
+    接线对称:``observe_result`` 返回由调用方追加到
+    工具结果文本的行(若有)—— 零额外 turn。裁决文本本身避开
+    PhaseTracker 的禁用子串。
     """
 
     def __init__(self, *, tracker: Any = None, task: str = "") -> None:
-        self._tracker = tracker  # phase context for logs/latency only
+        self._tracker = tracker  # 仅为日志/延迟提供 phase 上下文
         self._task = task
         self._step = 0
         self._tool_n: dict[str, int] = {}
-        # world-fact cache — mutated only inside observe_result, so a
-        # snapshot taken when an action's result arrives IS the pre-state.
-        self._obj: dict[str, dict[str, Any]] = {}  # label -> {xyz, step}
+        # 世界事实缓存 —— 只在 observe_result 内部改动,因此
+        # 动作结果到达那一刻拍的快照就是前置状态。
+        self._obj: dict[str, dict[str, Any]] = {}  # 标签 -> {xyz, step}
         self._eef: tuple[float, float, float] | None = None
         self._eef_step = -1
         self._grip: float | None = None
         self._grip_step = -1
-        self._held: str | None = None  # label hypothesized held
-        self._target: tuple[float, float, float] | None = None  # last transport
+        self._held: str | None = None  # 假设被握住的标签
+        self._target: tuple[float, float, float] | None = None  # 上一个 transport 目标
         self._target_step = -1
         self._pending: dict[str, Any] | None = None
         self._last_action_step = -1
-        # counters
+        # 计数器
         self.n_success = 0
         self.n_failure = 0
         self.n_uncertain = 0
@@ -228,24 +225,24 @@ class TransitionVerifier:
             "overtaken": 0,
             "unresolved": 0,
         }
-        # latency events (same semantics as B1: commit = confirmed success ->
-        # advance; recovery = confirmed failure -> different action tool)
+        # 延迟事件(语义同 B1:commit = 确认成功 ->
+        # 推进;recovery = 确认失败 -> 换动作工具)
         self._open_commit: list[dict[str, Any]] = []
         self._open_recovery: list[dict[str, Any]] = []
         self.commit_events: list[dict[str, Any]] = []
         self.recovery_events: list[dict[str, Any]] = []
         self.events: list[dict[str, Any]] = []
 
-    # ------------------------------------------------------------- helpers
+    # ------------------------------------------------------------- 辅助
 
     def _phase(self) -> str:
         try:
             return self._tracker.current_phase()
-        except Exception:  # noqa: BLE001 - tracker is optional
+        except Exception:  # noqa: BLE001 - tracker 可选
             return ""
 
     def _pre_state_summary(self) -> dict[str, Any]:
-        """Compact snapshot of everything known *before* the current event."""
+        """当前事件*之前*已知全部信息的紧凑快照。"""
         return {
             "held": self._held,
             "eef": list(self._eef or ()),
@@ -259,10 +256,10 @@ class TransitionVerifier:
         }
 
     def _last_label(self, real_only: bool = False) -> str | None:
-        """Most recently observed object label (planners localize the grasp
-        target immediately before picking it — action-level, not task-level).
-        ``real_only`` skips point-observation fallback labels ("segment@12")
-        that carry no reusable semantics."""
+        """最近观察到的对象标签(planner 在抓取前一刻定位
+        抓取目标 —— 动作级而非 task 级)。
+        ``real_only`` 跳过不带可复用语义的点观察
+        回退标签("segment@12")。"""
         items = list(self._obj.items())
         if real_only:
             items = [(l, v) for l, v in items if "@" not in l]
@@ -273,12 +270,12 @@ class TransitionVerifier:
 
     @staticmethod
     def _segment_directive(label: str | None) -> str:
-        """Actionable observation directive; never quotes a fallback label."""
+        """可执行的观察指令;绝不引用回退标签。"""
         if label and "@" not in label:
             return f"segment(prompt='{label}', camera='agentview')"
         return "segment the object in question (text prompt or point)"
 
-    # ------------------------------------------------------------ events IO
+    # ------------------------------------------------------------ 事件 IO
 
     def _emit(self, ev: dict[str, Any]) -> None:
         ev.setdefault("episode", _episode_id())
@@ -296,7 +293,7 @@ class TransitionVerifier:
             if out is not None:
                 with open(out / "b2_events.jsonl", "a", encoding="utf-8") as f:
                     f.write(json.dumps(ev, ensure_ascii=False, default=str) + "\n")
-        except Exception as e:  # noqa: BLE001 - logging must never break a run
+        except Exception as e:  # noqa: BLE001 - 日志绝不能搞挂运行
             logger.warning("[b2] event log write failed: %s", e)
 
     def _base_event(
@@ -315,7 +312,7 @@ class TransitionVerifier:
             "pending_of": None,
         }
 
-    # -------------------------------------------------------- verdict lines
+    # -------------------------------------------------------- 裁决行
 
     def _commit_line(self, tool: str, why: str, what_next: str) -> str:
         n = self._tool_n.get(tool, 0)
@@ -348,7 +345,7 @@ class TransitionVerifier:
             "without acting burns the budget."
         )
 
-    # --------------------------------------------------------- main entry
+    # --------------------------------------------------------- 主入口
 
     def observe_result(
         self,
@@ -359,13 +356,13 @@ class TransitionVerifier:
         is_error: bool = False,
         phase: str | None = None,
     ) -> str | None:
-        """Observe one tool result; return the verdict line or None."""
+        """观察一个工具结果;返回裁决行或 None。"""
         self._step += 1
         self._tool_n[name] = self._tool_n.get(name, 0) + 1
         ph = phase if phase is not None else self._phase()
         try:
             payload = json.loads(result_text)
-        except Exception:  # noqa: BLE001 - unparseable
+        except Exception:  # noqa: BLE001 - 无法解析
             payload = None
         if not isinstance(payload, dict):
             payload = None
@@ -377,15 +374,15 @@ class TransitionVerifier:
 
         template = TEMPLATES.get(name)
         if template is None:
-            # finish + neutral tools: no verdict of their own, but finish
-            # closes open latency events (same accounting as B1).
+            # finish + 中性工具:自身无裁决,但 finish
+            # 会关闭打开中的延迟事件(记账口径同 B1)。
             self._close_events(name, ph)
             return None
 
-        # A new action while a verification is pending: the planner moved on
-        # without producing the requested evidence — record and clear. Grip
-        # maintenance (closing set_gripper) is transparent: it answers no
-        # question but also does not advance the plan past one.
+        # 验证未决期间出现新动作:planner 未产出所求证据就
+        # 继续走了 —— 记录并清除。握持
+        # 维护(闭合 set_gripper)是透明的:它不回答
+        # 任何问题,但也不会把计划推过这一步。
         if self._pending is not None and not _is_grip_maintenance(name, kwargs):
             self._resolve_pending_overtaken(ph, by=name)
 
@@ -402,7 +399,7 @@ class TransitionVerifier:
         kwargs: dict[str, Any],
         payload: dict[str, Any] | None,
     ) -> None:
-        """Fold an action result's proprioception into the world cache."""
+        """把动作结果的本体感知并入世界缓存。"""
         if not isinstance(payload, dict):
             return
         f = _fields_from_payload(payload)
@@ -419,7 +416,7 @@ class TransitionVerifier:
             except (TypeError, ValueError):
                 pass
 
-    # ---------------------------------------------------------- perception
+    # ---------------------------------------------------------- 感知
 
     def _observe_perception(
         self,
@@ -450,14 +447,14 @@ class TransitionVerifier:
                     self.n_redundant_obs += 1
                 self._obj[label] = {"xyz": xyz, "step": self._step}
             elif self._pending and self._pending.get("wants") == "object_position":
-                # The directed observation ran but produced no position —
-                # a stall round only when it targeted the pending's object.
+                # 定向观察执行了但没给出位置 —— 仅当它
+                # 针对未决项的对象时才算一轮停滞。
                 if _labels_related(self._pending.get("label"), label):
                     return self._resolve_pending(
                         ph, obs_xyz=None, obs_label=label
                     )
             return self._maybe_resolve(ph)
-        # view_driver_state: fresh proprioception for the cache
+        # view_driver_state:为缓存补充新鲜本体感知
         st = payload.get("state") or {}
         eef = _xyz(st.get("robot0_eef_pos"))
         if eef is not None:
@@ -478,10 +475,10 @@ class TransitionVerifier:
         if self._pending.get("wants") == "object_position":
             label, rec = self._pending_target_record()
             if rec is not None:
-                self._pending["label"] = label  # adopt on first sighting
+                self._pending["label"] = label  # 首次目击即采纳
                 return self._resolve_pending(ph, obs_xyz=rec["xyz"], obs_label=label)
             return None
-        # wants == driver_state (set_gripper actuator check)
+        # wants == driver_state(set_gripper 执行器检查)
         if self._grip is not None and self._grip_step > self._pending["open_step"]:
             return self._resolve_pending(ph, obs_xyz=None, obs_label=None)
         return None
@@ -489,13 +486,13 @@ class TransitionVerifier:
     def _pending_target_record(
         self,
     ) -> tuple[str | None, dict[str, Any] | None]:
-        """Fresh (post-action) sighting of the object an open verification
-        asks about; ``(None, None)`` when nothing usable has arrived.
+        """未决验证所询问对象的(动作后)新目击;无可用
+        信息到达时为 ``(None, None)``。
 
-        A semantically labeled pending resolves on its own label under any
-        wording (token match); an *unrelated* observation does not answer it.
-        A pending with no semantic label accepts the freshest sighting — the
-        directive told the planner which object to look at.
+        带语义标签的未决项在任何措辞下都按自己的标签落定
+        (token 匹配);*无关*观察不能回答它。
+        无语义标签的未决项接受最新的目击 —— 指令
+        已告诉 planner 该看哪个对象。
         """
         p = self._pending
         if p is None:
@@ -516,7 +513,7 @@ class TransitionVerifier:
             return lbl, fresh[lbl]
         return None, None
 
-    # ------------------------------------------------------------ actions
+    # ------------------------------------------------------------ 动作
 
     def _judge_action(
         self,
@@ -531,16 +528,16 @@ class TransitionVerifier:
         ev = self._base_event(name, template, pre)
         f = _fields_from_payload(payload or {})
 
-        # set_gripper only counts as a PLACE attempt when opening
+        # set_gripper 只在张开时才算一次 PLACE 尝试
         if payload is None and not is_error:
-            return None  # unparseable result — no state-transition question
+            return None  # 结果无法解析 —— 不存在状态转移问题
         if name == "set_gripper":
             try:
                 g = float(kwargs.get("gripper", -1.0))
             except (TypeError, ValueError):
                 g = -1.0
             if g > 0:
-                return None  # closing actuation: no state-transition question
+                return None  # 闭合驱动:无状态转移问题
 
         if template == "GRASP":
             return self._judge_grasp(name, kwargs, ev, f, ph, is_error)
@@ -600,7 +597,7 @@ class TransitionVerifier:
                 name, "the task condition is met", "call finish now."
             )
         if mg is None and succ is None:
-            return None  # nothing machine-checkable — no judgment
+            return None  # 无可机检内容 —— 不做判定
 
         if mg is not None:
             n_checks += 1
@@ -640,17 +637,17 @@ class TransitionVerifier:
                 "unchanged retry is discouraged",
             )
 
-        # GRASP confirmation ALWAYS requires object-level state evidence.
-        # Calibration (2026-09-15, 160 armB picks, dev t0/t7/t9 + heldout
-        # t1/t4/t8): min_gripper_opening distributions of true and false
-        # holds fully overlap (false positives with success=true span
-        # 0.001-0.019; successful episodes' picks reach 0.0010) — no
-        # proprioceptive band separates them. Proprioception only grades
-        # the hypothesis and can disprove (stayed open).
-        # Object identity for the directed observation: the pick prompt's
-        # content words against cached perception labels (planners describe
-        # the same object differently across wordings), else the most recent
-        # real label. Never a point-observation fallback label.
+        # GRASP 确认永远要求物体级状态证据。
+        # 标定(2026-09-15,160 次 armB 抓取,dev t0/t7/t9 + heldout
+        # t1/t4/t8):真握与假握的 min_gripper_opening 分布完全
+        # 重叠(success=true 的假阳性跨度
+        # 0.001-0.019;成功 episode 的抓取低至 0.0010)——
+        # 没有任何本体感知区间能分开它们。本体感知只能给
+        # 假设打分并能证伪(保持张开)。
+        # 定向观察的对象身份:pick prompt 的
+        # 实词对照缓存感知标签(planner 对同一
+        # 对象的措辞各不相同),否则用最近的
+        # 真实标签。绝不用点观察回退标签。
         label = (
             _match_label(str(kwargs.get("prompt") or ""), self._obj)
             or self._last_label(real_only=True)
@@ -752,12 +749,12 @@ class TransitionVerifier:
                 "re-attempt with set_gripper(gripper=-1.0); escalate the "
                 "placement method if it repeats",
             )
-        # Released at the actuator level; the object-level question (at rest
-        # at the intended location, clear of the gripper) needs observation.
+        # 执行器层面已释放;物体级问题(静止在
+        # 目标位置、离开手爪)需要观察。
         label = self._held or self._last_label(real_only=True)
         wants = "object_position"
         if name == "set_gripper" and pg is None:
-            wants = "driver_state"  # actuator confirmation first
+            wants = "driver_state"  # 先做执行器确认
         directive = self._segment_directive(label)
         directive += (
             " — confirm it now rests at the intended location and is clear "
@@ -945,7 +942,7 @@ class TransitionVerifier:
             )
             self._register_success(ev, ph)
             self._emit(ev)
-            return None  # quiet: rotation success needs no behavior change
+            return None  # 静默:旋转成功无需行为改变
         ev.update(
             verdict="UNCERTAIN",
             next_decision="PROCEED",
@@ -957,7 +954,7 @@ class TransitionVerifier:
         self._emit(ev)
         return None
 
-    # ------------------------------------------------------------ pending
+    # ------------------------------------------------------------ 未决项
 
     def _open_pending(
         self,
@@ -996,7 +993,7 @@ class TransitionVerifier:
             pending_of=p["tool"],
             rounds=p["rounds"],
         )
-        self.n_uncertain += 0  # already counted when opened
+        self.n_uncertain += 0  # 打开时已计数
         self._emit(ev)
         self._pending = None
 
@@ -1011,14 +1008,14 @@ class TransitionVerifier:
         if p is None:
             return None
         p["rounds"] += 1
-        self.n_observe_obeyed += 1  # a directed observation actually arrived
+        self.n_observe_obeyed += 1  # 定向观察确实到达了
         rounds = p["rounds"]
         ev = self._base_event(p["tool"], p["template"], self._pre_state_summary())
         ev["pending_of"] = p["tool"]
         ev["rounds"] = rounds
         ev["verification_source"] = "directed_observation"
 
-        # --- set_gripper actuator check (driver_state round) ---
+        # --- set_gripper 执行器检查(driver_state 轮)---
         if p["wants"] == "driver_state":
             if self._grip is not None and self._grip > GRIP_OPEN:
                 label = p.get("label")
@@ -1047,11 +1044,11 @@ class TransitionVerifier:
                 self._register_success(ev, ph)
                 self._emit(ev)
                 self._pending = None
-                return None  # quiet: actuator-level confirmation
-            # actuator not confirmed either — fall through to object rounds
+                return None  # 静默:执行器级确认
+            # 执行器也未确认 —— 落入物体轮
             p["wants"] = "object_position"
 
-        # --- object_position rounds (GRASP / PLACE) ---
+        # --- object_position 轮(GRASP / PLACE)---
         if obs_xyz is None:
             ev["missing_evidence"].append(
                 "observation produced no usable object position"
@@ -1076,7 +1073,7 @@ class TransitionVerifier:
             if d_pre is not None and d_pre <= OBJ_STAY_TOL and (
                 d_e is None or d_e > NEAR_EEF
             ):
-                ev["b1_style_would_match"] = None  # set by the opener event
+                ev["b1_style_would_match"] = None  # 由开启者事件设置
                 return self._pending_failure(
                     ev, ph,
                     why=f"object stayed at its original support position "
@@ -1160,8 +1157,8 @@ class TransitionVerifier:
             evidence_for_failure=[why],
             confidence=0.9,
         )
-        # The B1-style check may have matched on the original action —
-        # that pairing is exactly the false-positive class B2 exists to catch.
+        # B1 式检查可能在原动作上匹配过 ——
+        # 那种配对正是 B2 为之而生的假阳性类。
         opener = next(
             (e for e in reversed(self.events)
              if e.get("action") == p.get("tool")
@@ -1223,7 +1220,7 @@ class TransitionVerifier:
         self._pending = None
         return self._reason_line(tool, rounds)
 
-    # ------------------------------------------------------------ latency
+    # ------------------------------------------------------------ 延迟
 
     def _register_success(self, ev: dict[str, Any], ph: str) -> None:
         self.n_success += 1
@@ -1284,17 +1281,17 @@ class TransitionVerifier:
             still.append(e)
         self._open_commit = still
 
-    # ------------------------------------------------------------ boundary
+    # ------------------------------------------------------------ 边界
 
     def turn_boundary_hint(self) -> str | None:
-        """Escalate a stalled verification: pending for many tool results
-        with no action executed and no directed observation arriving."""
+        """升级停滞的验证:未决项历经多个工具结果
+        却无动作执行、也无定向观察到达。"""
         p = self._pending
         if not p or p.get("stalled_hinted"):
             return None
-        # no action executed since the pending opened (the opening action
-        # itself has _last_action_step == open_step) and no observation is
-        # arriving -> escalate once.
+        # 未决项打开后没有动作执行(开启动作本身满足
+        # _last_action_step == open_step)且没有观察
+        # 到来 -> 升级一次。
         stalled = (
             self._last_action_step <= p["open_step"]
             and self._step - p["open_step"] >= STALL_STEPS
@@ -1307,10 +1304,10 @@ class TransitionVerifier:
         self._pending = None
         return self._reason_line(p["tool"], p["rounds"])
 
-    # ------------------------------------------------------------ snapshot
+    # ------------------------------------------------------------ 快照
 
     def snapshot(self, *, success: bool) -> dict[str, Any]:
-        """Per-episode B2 metrics (merged into structured_metrics.json)."""
+        """单 episode 的 B2 指标(并入 structured_metrics.json)。"""
         if self._pending is not None:
             self.uncertain_resolutions["unresolved"] += 1
             self._pending = None
@@ -1360,7 +1357,7 @@ class TransitionVerifier:
         }
 
 
-# ------------------------------------------------------------------ output
+# ------------------------------------------------------------------ 输出
 
 def _output_dir() -> Path | None:
     try:
@@ -1368,7 +1365,7 @@ def _output_dir() -> Path | None:
 
         out = get_output_dir()
         return Path(out) if out else None
-    except Exception:  # noqa: BLE001 - optional
+    except Exception:  # noqa: BLE001 - 可选
         return None
 
 

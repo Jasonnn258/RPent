@@ -1,37 +1,36 @@
-"""B3 — Active Verification + Verdict Compliance.
+"""B3 —— 主动验证 + 裁决合规。
 
-B2 (``rpent.memory.stv``) answered *can the verifier judge correctly?* — yes:
-verdicts matched physical reality, no loops, commit latency halved. B3 leaves
-the frozen verifier untouched and attacks the two bottlenecks B2 exposed:
+B2(``rpent.memory.stv``)回答了*验证器能否正确裁决?* —— 能:
+裁决与物理现实相符、无循环、commit 延迟减半。B3 不动冻结的
+验证器,专攻 B2 暴露的两个瓶颈:
 
-1. **Verdict compliance** (~39-49% obey rate). The planner reads a verdict and
-   proceeds with the plan anyway. B3-A adds an explicit verdict protocol:
-   SUCCESS -> commit; NOT-established -> recover (changed approach);
-   UNCERTAIN -> acquire the requested evidence before any task action;
-   REASON -> one deliberate step. Every verdict's *actual* next action is
-   classified obeyed/violated (behavioral, not textual assent) and logged to
-   ``b3_compliance_events.jsonl``; violations get an injected reminder line.
+1. **裁决合规**(服从率约 39-49%)。planner 读了裁决却仍按原计划
+   继续。B3-A 加入显式裁决协议:
+   SUCCESS -> commit;NOT-established -> 恢复(换做法);
+   UNCERTAIN -> 在任何任务动作之前先取得所求证据;
+   REASON -> 一步审慎动作。每条裁决之后*实际*的下一个动作
+   被分类为服从/违规(看行为而非口头同意)并记录到
+   ``b3_compliance_events.jsonl``;违规会得到一行注入的提醒。
 
-2. **Evidence timing**. Most UNCERTAINs land where failure is undecidable
-   (object still at its spot, gripper still next to it — the failure
-   signature needs the gripper to have left). B3-B adds
-   *retreat-and-reobserve*: on an UNCERTAIN evidence directive the verifier
-   appends a deterministic probe instruction — ``move_to`` one fixed
-   retreat vector clear of the object, then re-segment — and runs the SAME
-   frozen resolution logic on the post-retreat state. The probe move is
-   transparent to the pending machinery (it is verification, not a task
-   action) and is counted separately (``b3_probe_events.jsonl``).
+2. **证据时机**。多数 UNCERTAIN 落在失败不可判定的位置
+   (物体还在原位、手爪还在旁边 —— 失败签名需要手爪已经
+   离开)。B3-B 加入*后撤-再观察*:对 UNCERTAIN 证据指令,验证器
+   追加一条确定性探针指令 —— ``move_to`` 到一个固定的
+   远离物体的后撤向量,然后重新 segment —— 并对后撤后的
+   状态运行同一套冻结判定逻辑。探针移动对未决项
+   机制透明(它是验证、不是任务动作)并单独计数
+   (``b3_probe_events.jsonl``)。
 
-B3-C = both. Gates: ``RPENT_B3_COMPLY=1`` / ``RPENT_B3_PROBE=1``
-(both require ``RPENT_OVPM2=1``). Compliance *logging* is always on for the
-subclass (the 2x2 needs obedience rates on every arm); with both gates off
-no injected text changes, so planner-visible behavior is byte-identical to
-frozen B2 — enforced by tests.
+B3-C = 两者兼用。门控:``RPENT_B3_COMPLY=1`` / ``RPENT_B3_PROBE=1``
+(两者都需要 ``RPENT_OVPM2=1``)。子类的合规*记录*永远开启
+(2x2 需要每个臂的服从率);两个门都关掉时注入文本
+不变,因此 planner 可见行为与冻结 B2 逐字节一致 ——
+由测试保证。
 
-Injected-line hygiene is inherited from B2: never the substrings
-"fail"/"error"/"could not"/"no object" (the PhaseTracker greps for those).
-The failure verdict class is therefore referred to in injected text only as
-"NOT_ESTABLISHED" / "objective NOT established".
+注入行的卫生要求继承自 B2:绝不出现子串
+"fail"/"error"/"could not"/"no object"(PhaseTracker 会 grep 这些词)。
+因此失败裁决类在注入文本中只写作
+"NOT_ESTABLISHED" / "objective NOT established"。
 """
 
 from __future__ import annotations
@@ -50,23 +49,23 @@ from rpent.memory.stv import (
 
 logger = logging.getLogger(__name__)
 
-# ------------------------------------------------------------- B3 constants
-PROBE_RETREAT_DY = 0.12  # retreat vector: back off the table center ...
-PROBE_RETREAT_DZ = 0.10  # ... and up. |v| ~ 0.156 m > HOLD_RADIUS (0.15):
-PROBE_Z_MAX = 1.15       # a held object follows, a left one stays put.
-PROBE_TARGET_TOL = 0.02  # a move_to within this of the issued target = probe
-MAX_PROBES_PER_PENDING = 1  # one probe per open verification, then the frozen
-MAX_PROBES_PER_EPISODE = 4  # OBSERVE->REASON path — probes can never loop
+# ------------------------------------------------------------- B3 常量
+PROBE_RETREAT_DY = 0.12  # 后撤向量:从桌面中心退开 ...
+PROBE_RETREAT_DZ = 0.10  # ...并抬高。|v| ~ 0.156 m > HOLD_RADIUS(0.15):
+PROBE_Z_MAX = 1.15       # 被握住的对象会跟随,被留在原地的对象不动。
+PROBE_TARGET_TOL = 0.02  # move_to 距下发目标在该值内 = 探针
+MAX_PROBES_PER_PENDING = 1  # 每个未决验证一次探针,之后走冻结的
+MAX_PROBES_PER_EPISODE = 4  # OBSERVE->REASON 路径 —— 探针永不循环
 PERCEPTION_TOOLS = frozenset(
     {"segment", "back_project", "view_driver_state", "view_camera_meta"})
 
-# Verdict classes, classified from the frozen line formats (stable strings).
+# 裁决类别,从冻结的行格式归类(字符串稳定)。
 _CLS_SUCCESS = "state change CONFIRMED"
 _CLS_FAILURE = "NOT established"
 _CLS_UNCERTAIN = "Observe once"
 _CLS_REASON = "Reason explicitly"
 
-# Class tokens safe for injected text (hygiene: no "fail" substring).
+# 可安全用于注入文本的类别 token(卫生:不含 "fail" 子串)。
 _CLS_DISPLAY = {"SUCCESS": "CONFIRMED", "FAILURE": "NOT_ESTABLISHED",
                 "UNCERTAIN": "UNCERTAIN", "REASON": "REASON"}
 
@@ -100,7 +99,7 @@ _VIOLATION_TEMPLATE = (
 
 
 def _classify_line(line: str | None) -> str | None:
-    """Verdict class of a frozen B2 verdict line (its formats are stable)."""
+    """冻结 B2 裁决行的裁决类别(其格式稳定)。"""
     if not line:
         return None
     if _CLS_REASON in line:
@@ -117,7 +116,7 @@ def _classify_line(line: str | None) -> str | None:
 def _args_relevantly_different(
     name: str, a: dict[str, Any], b: dict[str, Any]
 ) -> bool:
-    """Did a same-tool retry change the approach (target/prompt/pose)?"""
+    """同工具重试是否改变了做法(target/prompt/pose)?"""
     keys = {
         "pi0_pick": ("prompt", "xyz"),
         "move_to": ("xyz", "target"),
@@ -128,9 +127,9 @@ def _args_relevantly_different(
         "rotate_pitch": ("target_pitch",),
     }.get(name, None)
     if keys is None:
-        return True  # unknown tool: any retry counts as changed
+        return True  # 未知工具:任何重试都算有变化
     if not keys:
-        return False  # release(): nothing to change — same call = unchanged
+        return False  # release():无可改变 —— 同样调用 = 未变化
     for k in keys:
         if a.get(k) != b.get(k):
             return True
@@ -138,9 +137,9 @@ def _args_relevantly_different(
 
 
 class ActiveVerifier(TransitionVerifier):
-    """Frozen B2 + (optional) verdict-compliance enforcement and/or
-    retreat-and-reobserve probing. Zero edits to judgment rules: every
-    verdict still comes from the frozen code, verbatim."""
+    """冻结 B2 +(可选的)裁决合规强制和/或
+    后撤-再观察探针。判定规则零改动:每条
+    裁决仍逐字出自冻结代码。"""
 
     def __init__(
         self,
@@ -153,7 +152,7 @@ class ActiveVerifier(TransitionVerifier):
         super().__init__(tracker=tracker, task=task)
         self.comply = comply
         self.probe = probe
-        # compliance state
+        # 合规状态
         self._awaiting: dict[str, Any] | None = None
         self._protocol_sent = False
         self._violation_line: str | None = None
@@ -161,10 +160,10 @@ class ActiveVerifier(TransitionVerifier):
                                          "UNCERTAIN": 0, "REASON": 0}
         self.obeyed: dict[str, int] = dict(self.verdicts)
         self.violated: dict[str, int] = dict(self.verdicts)
-        # probe state
+        # 探针状态
         self._probe_issued: dict[str, Any] | None = None
-        self._probe_armed: dict[str, Any] | None = None  # move executed,
-        # waiting for the re-observation to resolve the pending
+        self._probe_armed: dict[str, Any] | None = None  # 移动已执行,
+        # 等待再观察来解决未决项
         self.probe_directives = 0
         self.probe_executed = 0
         self.probe_ignored = 0
@@ -175,10 +174,10 @@ class ActiveVerifier(TransitionVerifier):
         self._armed_s0 = 0
         self._armed_f0 = 0
 
-    # ------------------------------------------------------------ plumbing
+    # ------------------------------------------------------------ 管道
 
     def _emit3(self, kind: str, ev: dict[str, Any]) -> None:
-        """Append a B3 event to its own JSONL (best-effort, never fatal)."""
+        """把 B3 事件追加到它自己的 JSONL(尽力而为,绝不致命)。"""
         ev.setdefault("kind", kind)
         ev.setdefault("task", self._task)
         ev.setdefault("turn", self._step)
@@ -199,7 +198,7 @@ class ActiveVerifier(TransitionVerifier):
         except Exception as e:  # noqa: BLE001
             logger.warning("[b3] event write failed: %s", e)
 
-    # ---------------------------------------------------------- compliance
+    # ---------------------------------------------------------- 合规
 
     def _await_on(self, cls: str, tool: str, kwargs: dict[str, Any]) -> None:
         self.verdicts[cls] = self.verdicts.get(cls, 0) + 1
@@ -213,8 +212,8 @@ class ActiveVerifier(TransitionVerifier):
     def _classify_incoming(
         self, name: str, kwargs: dict[str, Any], ph: str
     ) -> None:
-        """Behavioral compliance: does THIS tool call honor the verdict that
-        is still awaiting a response? Emits one compliance event."""
+        """行为合规:本次工具调用是否遵守了仍在等待
+        响应的裁决?发出一条合规事件。"""
         a = self._awaiting
         self._awaiting = None
         if a is None:
@@ -223,20 +222,20 @@ class ActiveVerifier(TransitionVerifier):
         if name == "finish":
             obeyed = cls in ("SUCCESS", "FAILURE", "REASON")
         elif cls == "SUCCESS":
-            obeyed = True  # commit: anything proceeds
+            obeyed = True  # commit:接下来做什么都算服从
         elif cls == "FAILURE":
             if name != tool:
-                obeyed = True  # switched action = recovery
+                obeyed = True  # 换了动作 = 恢复
             else:
                 obeyed = _args_relevantly_different(name, kwargs,
                                                     a.get("kwargs") or {})
         elif cls == "UNCERTAIN":
             if name in PERCEPTION_TOOLS or self._probe_hit(name, kwargs):
-                obeyed = True  # evidence acquisition (incl. the probe)
+                obeyed = True  # 证据获取(含探针)
             else:
                 obeyed = False
         else:  # REASON
-            obeyed = True  # one deliberate step is whatever comes next
+            obeyed = True  # 接下来的任何动作都算一步审慎动作
         ev = {
             "verdict": cls,
             "verdict_tool": tool,
@@ -257,10 +256,10 @@ class ActiveVerifier(TransitionVerifier):
                     tool=tool, cls=_CLS_DISPLAY[cls],
                     protocol=_PROTOCOL_FOR[cls], next_tool=name)
 
-    # -------------------------------------------------------------- probe
+    # -------------------------------------------------------------- 探针
 
     def _probe_hit(self, name: str, kwargs: dict[str, Any]) -> bool:
-        """Is this action the issued verification probe (exact retreat)?"""
+        """这个动作是不是下发的验证探针(精确后撤)?"""
         if not self._probe_issued or name not in ("move_to", "move_pose"):
             return False
         t = _xyz(kwargs.get("xyz") or kwargs.get("target"))
@@ -270,9 +269,9 @@ class ActiveVerifier(TransitionVerifier):
         return d is not None and d <= PROBE_TARGET_TOL
 
     def _maybe_issue_probe(self, line: str | None) -> str | None:
-        """Append the retreat-and-reobserve instruction to an UNCERTAIN
-        evidence directive (B3-B). One probe per pending, capped per
-        episode; deterministic target from the freshest eef."""
+        """在 UNCERTAIN 证据指令后追加后撤-再观察说明
+        (B3-B)。每个未决项一次探针,每 episode 封顶;
+        目标由最新的 eef 确定性算出。"""
         if not line or not self.probe:
             return line
         if _classify_line(line) != "UNCERTAIN" or self._pending is None:
@@ -282,7 +281,7 @@ class ActiveVerifier(TransitionVerifier):
         if self._pending.get("probes_used", 0) >= MAX_PROBES_PER_PENDING:
             return line
         if self._probe_issued is not None:
-            return line  # one live directive at a time
+            return line  # 同一时刻只有一条活跃指令
         if self.probe_executed >= MAX_PROBES_PER_EPISODE:
             return line
         eef = self._eef
@@ -316,9 +315,8 @@ class ActiveVerifier(TransitionVerifier):
         return line + probe_block
 
     def _close_probe(self, result: str | None) -> None:
-        """Record the outcome transition of an executed probe once its
-        pending verification resolves (or the pending closes without
-        resolving)."""
+        """当已执行探针对应的未决验证落定(或未决项未落定
+        即关闭)时,记录其结果转移。"""
         if self._probe_armed is None:
             return
         p = self._probe_armed
@@ -335,7 +333,7 @@ class ActiveVerifier(TransitionVerifier):
                               "target": p.get("target"),
                               "latency_steps": lat})
 
-    # ------------------------------------------------------- main entry
+    # ------------------------------------------------------- 主入口
 
     def observe_result(
         self,
@@ -353,9 +351,9 @@ class ActiveVerifier(TransitionVerifier):
         is_action = name in ACTION_TOOLS
         pending_tool_at_entry = (self._pending or {}).get("tool")
 
-        # 1) behavioral compliance for the incoming tool vs the awaiting
-        #    verdict. Grip maintenance (closing set_gripper) is transparent
-        #    in B2 and answers no protocol question — skip it.
+        # 1) 到来的工具相对等待中裁决的行为合规。
+        #    握持维护(闭合 set_gripper)在 B2 中透明且不回答
+        #    任何协议问题 —— 跳过。
         if self._awaiting is not None and \
                 not _is_grip_maintenance(name, kwargs) and \
                 (is_action or name in PERCEPTION_TOOLS or name == "finish"):
@@ -363,7 +361,7 @@ class ActiveVerifier(TransitionVerifier):
         violation = self._violation_line
         self._violation_line = None
 
-        # 2) the issued probe move is transparent to the frozen machinery
+        # 2) 已下发的探针移动对冻结机制透明
         if self._probe_hit(name, kwargs):
             self._step += 1
             self._tool_n[name] = self._tool_n.get(name, 0) + 1
@@ -379,39 +377,39 @@ class ActiveVerifier(TransitionVerifier):
                                   "target": list(self._probe_armed["target"]),
                                   "issued_step": self._probe_issued["step"]})
             self._probe_issued = None
-            return None  # no verdict, no overtake, no TRANSPORT judgment
+            return None  # 无裁决、不超越、无 TRANSPORT 判定
 
-        # 3) any other action while a probe directive is live: ignored
+        # 3) 探针指令仍活跃期间的任何其他动作:记为忽略
         if self._probe_issued is not None and is_action:
             self.probe_ignored += 1
             self._emit3("probe", {"event": "ignored", "by": name})
             self._probe_issued = None
 
-        # 4) frozen B2 path (unchanged judgment; emits its own events)
+        # 4) 冻结 B2 路径(判定不变;自发自己的事件)
         line = super().observe_result(
             name, kwargs, result_text, is_error=is_error, phase=phase)
 
-        # 5) probe result instrumentation: if the pending that a probe was
-        #    armed for resolves now, classify the transition
+        # 5) 探针结果记录:若探针所对应的未决项
+        #    现在落定,归类该转移
         if self._probe_armed is not None:
             res = self.uncertain_resolutions
             if res.get("resolved_success", 0) > self._armed_s0:
                 self._close_probe("to_success")
             elif res.get("resolved_failure", 0) > self._armed_f0:
                 self._close_probe("to_failure")
-            elif self._pending is None:  # overtaken / REASON / closed
+            elif self._pending is None:  # 被超越 / REASON / 已关闭
                 self._close_probe("still_uncertain")
         self._armed_s0 = self.uncertain_resolutions.get("resolved_success", 0)
         self._armed_f0 = self.uncertain_resolutions.get("resolved_failure", 0)
 
-        # 6) directive abandoned (pending closed without the probe running)
+        # 6) 指令被放弃(未决项关闭而探针未执行)
         if self._probe_issued is not None and self._pending is None:
             self.probe_abandoned += 1
             self._emit3("probe", {"event": "abandoned"})
             self._probe_issued = None
 
-        # 7) post-processing: probe directive / awaiting / violation /
-        #    one-time protocol preamble
+        # 7) 后处理:探针指令 / 等待中 / 违规提醒 /
+        #    一次性协议前言
         line = self._maybe_issue_probe(line)
         cls = _classify_line(line)
         if cls:
@@ -424,7 +422,7 @@ class ActiveVerifier(TransitionVerifier):
             line = f"{_PROTOCOL_PREAMBLE}\n\n{line}"
         return line
 
-    # ------------------------------------------------------------ snapshot
+    # ------------------------------------------------------------ 快照
 
     def snapshot(self, *, success: bool) -> dict[str, Any]:
         if self._probe_armed is not None:

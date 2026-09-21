@@ -1,21 +1,21 @@
-"""Outcome-Validated Procedural Memory (OVP-M) — arm B of the 2026-09 study.
+"""结果验证式程序记忆(OVP-M)—— 2026-09 研究的 B 臂。
 
-The v1 rule schema already carries ``expected_result`` / ``success_check``,
-but they were only ever evaluated offline at snapshot time. This module
-turns them into a runtime contract: every action-tool result is checked
-against the expected outcome for the current phase, producing a
-MATCHED / MISMATCHED / UNCERTAIN verdict that is appended to the tool
-result the planner already reads (zero extra turns, zero extra requests).
+v1 规则 schema 本就携带 ``expected_result`` / ``success_check``,
+但它们此前只在 snapshot 时离线求值。本模块把
+它们变成运行时契约:每个动作工具的结果都会对照
+当前 phase 的预期结果检查,产出一条
+MATCHED / MISMATCHED / UNCERTAIN 裁决并追加到 planner
+已经在读的工具结果里(零额外 turn、零额外请求)。
 
-Ground truth comes only from the tool result itself — proprioception
-(``min_gripper_opening``, ``final_dist_m``), executed-skill self-report
-(``success``) and the official termination flag (``libero_terminated``).
-No benchmark GT, no new primitives, no VLA/SAM3 changes.
+真值只来自工具结果本身 —— 本体感知
+(``min_gripper_opening``、``final_dist_m``)、已执行技能的自报
+(``success``)和官方终止标志(``libero_terminated``)。
+没有 benchmark GT、没有新原语、不动 VLA/SAM3。
 
-Injected lines must never contain the substrings "fail" or "error": the
-PhaseTracker's pick heuristic greps the result text for those words.
+注入行绝不能包含子串 "fail" 或 "error":
+PhaseTracker 的 pick 启发式会在结果文本里 grep 这些词。
 
-Gate: ``RPENT_OVPM=1`` (requires ``RPENT_STRUCTURED_MEMORY=1``).
+门控:``RPENT_OVPM=1``(需要 ``RPENT_STRUCTURED_MEMORY=1``)。
 """
 
 from __future__ import annotations
@@ -32,24 +32,24 @@ from rpent.memory.structured import ACTION_TOOLS
 
 logger = logging.getLogger(__name__)
 
-#: Verify kinds understood by :meth:`OutcomeValidator._evaluate`.
+#: :meth:`OutcomeValidator._evaluate` 能理解的 verify 种类。
 VERIFY_KINDS = frozenset(
     {
-        "pick_holding",  # pi0_pick: success=true OR min_gripper_opening < GRIP_TIGHT
-        "released",  # release: peak_gripper_opening > GRIP_OPEN
-        "moved_to_target",  # move_to: final_dist_m <= MOVE_TOL
-        "task_terminated",  # libero_terminated === True (mismatch when False)
-        "task_terminated_opt",  # same, but False stays UNCERTAIN (silent)
-        "no_exception",  # any tool: executed without raising
+        "pick_holding",  # pi0_pick:success=true 或 min_gripper_opening < GRIP_TIGHT
+        "released",  # release:peak_gripper_opening > GRIP_OPEN
+        "moved_to_target",  # move_to:final_dist_m <= MOVE_TOL
+        "task_terminated",  # libero_terminated === True(为 False 时判 mismatch)
+        "task_terminated_opt",  # 同上,但 False 保持 UNCERTAIN(静默)
+        "no_exception",  # 任意工具:执行且未抛异常
     }
 )
 
-#: Outcome thresholds — same sources as analysis/pairing_analysis.py.
-GRIP_TIGHT = 0.03  # holding := min_gripper_opening below this
-GRIP_OPEN = 0.05  # released := peak_gripper_opening above this
-MOVE_TOL = 0.03  # arrived := final_dist_m below this (servo tol is 0.012)
+#: 结果阈值 —— 来源同 analysis/pairing_analysis.py。
+GRIP_TIGHT = 0.03  # 握住 := min_gripper_opening 低于此值
+GRIP_OPEN = 0.05  # 已释放 := peak_gripper_opening 高于此值
+MOVE_TOL = 0.03  # 已到达 := final_dist_m 低于此值(servo 容差 0.012)
 
-#: Tools whose results carry a machine-checkable outcome.
+#: 结果带可机器校验 outcome 的工具。
 CONTRACT_TOOLS = frozenset(
     {"pi0_pick", "release", "move_to", "pi0_doubled", "set_gripper",
      "view_driver_state"}
@@ -60,18 +60,18 @@ _MAX_VERDICT_LOG = 200
 
 @dataclasses.dataclass(frozen=True)
 class OutcomeContract:
-    """One ``action → expected outcome → verify → commit/recover`` contract."""
+    """一条 ``action → expected outcome → verify → commit/recover`` 契约。"""
 
     id: str
     tool: str
-    phases: tuple[str, ...]  # phases the contract applies in ("ANY" = all)
+    phases: tuple[str, ...]  # 契约适用的 phases("ANY" = 全部)
     action: str
     expected_outcome: str
-    verify: dict[str, Any]  # {"kind": ...} (+ optional per-kind params)
+    verify: dict[str, Any]  # {"kind": ...}(+ 可选的按 kind 参数)
     on_match: str
     on_mismatch: str
-    next_phase: str = ""  # commit target ("P_place"/"finish"/"" = none)
-    scope: str = "GLOBAL"  # GLOBAL | task<N> — same semantics as Rule.scope
+    next_phase: str = ""  # commit 目标("P_place"/"finish"/"" = 无)
+    scope: str = "GLOBAL"  # GLOBAL | task<N> —— 语义同 Rule.scope
     source: str = ""
 
     def applies_to_phase(self, phase: str) -> bool:
@@ -87,15 +87,15 @@ class OutcomeContract:
         return target in norm or norm in target
 
     def scope_priority(self) -> int:
-        """Task-scoped contracts win over GLOBAL ones for the same tool."""
+        """同一工具下,task 范围契约优先于 GLOBAL 契约。"""
         return 0 if self.scope == "GLOBAL" else 1
 
 
 def parse_contracts(raw: dict[str, Any]) -> list[OutcomeContract]:
-    """Validate the ``outcome_contracts`` section of a rules document.
+    """校验规则文档的 ``outcome_contracts`` 段。
 
-    Fail-fast like :func:`rpent.memory.schema.validate`: a bad contract
-    surfaces at load time, not mid-episode.
+    与 :func:`rpent.memory.schema.validate` 一样 fail-fast:坏契约
+    在加载期暴露,而不是 episode 中途。
     """
     out: list[OutcomeContract] = []
     for i, c in enumerate(raw.get("outcome_contracts", [])):
@@ -142,7 +142,7 @@ def parse_contracts(raw: dict[str, Any]) -> list[OutcomeContract]:
 
 
 def load_contracts(path: str | os.PathLike) -> list[OutcomeContract]:
-    """Load contracts from a rules document; missing file => [] with warning."""
+    """从规则文档加载契约;文件缺失 => [] 并告警。"""
     p = Path(path)
     if not p.exists():
         logger.warning("[ovpm] contracts file not found: %s — validator is a no-op", p)
@@ -151,15 +151,15 @@ def load_contracts(path: str | os.PathLike) -> list[OutcomeContract]:
     return parse_contracts(raw)
 
 
-# ---------------------------------------------------------------- outcome IO
+# ---------------------------------------------------------------- 结果 IO
 
 
 def _fields_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    """Extract outcome fields from a tool-result JSON payload.
+    """从工具结果 JSON payload 提取 outcome 字段。
 
-    Handles both shapes in the wild: direct tool results carry the fields at
-    the top level; ``view_driver_state`` echoes the last command's result
-    under ``log.result``.
+    兼顾实际出现的两种形态:直接工具结果把字段放在
+    顶层;``view_driver_state`` 在 ``log.result`` 下回显
+    上一条命令的结果。
     """
     out: dict[str, Any] = {}
     log = payload.get("log") or {}
@@ -167,7 +167,7 @@ def _fields_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
     def grab(key: str) -> Any:
         v = payload.get(key)
-        if v is None:  # key absent OR explicitly null -> try the nested echo
+        if v is None:  # 键缺失或显式为 null -> 尝试嵌套回显
             v = nested.get(key)
         return v
 
@@ -189,7 +189,7 @@ def _fields_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def _describe_actual(kind: str, f: dict[str, Any]) -> str:
-    """Compact ``actual=...`` fragment for the verdict line."""
+    """裁决行用的紧凑 ``actual=...`` 片段。"""
     bits = []
     if "success" in f:
         bits.append(f"success={str(f['success']).lower()}")
@@ -206,7 +206,7 @@ def _describe_actual(kind: str, f: dict[str, Any]) -> str:
 
 
 def _evaluate(kind: str, f: dict[str, Any]) -> bool | None:
-    """True/False verdict, or None when the fields needed are absent."""
+    """True/False 裁决;所需字段缺失时为 None。"""
     if kind == "pick_holding":
         if f.get("success") is True:
             return True
@@ -241,21 +241,21 @@ def _evaluate(kind: str, f: dict[str, Any]) -> bool | None:
             return None if kind == "task_terminated_opt" else False
         return None
     if kind == "no_exception":
-        return True  # reached only when the tool did not raise
+        return True  # 仅当工具没有抛异常才会走到这里
     return None
 
 
-# ------------------------------------------------------------------ validator
+# ------------------------------------------------------------------ 校验器
 
 
 class OutcomeValidator:
-    """Feed tool results in; get verdict lines and latency metrics out.
+    """喂入工具结果;产出裁决行和延迟指标。
 
-    Pure logic — no I/O, no prompt side effects. The planner loop calls
-    :meth:`observe_result` with exactly the text the model will see; the
-    returned line (if any) is appended to that text. ``step`` below is the
-    validator's own count of observed tool results — the decision-step unit
-    for both latency metrics.
+    纯逻辑 —— 无 I/O、无 prompt 副作用。planner 循环用
+    模型将看到的原文本调用 :meth:`observe_result`;
+    返回的行(若有)被追加到该文本。下面的 ``step`` 是
+    校验器自己对已观察工具结果的计数 —— 两个延迟
+    指标共用的决策步单位。
     """
 
     def __init__(
@@ -266,15 +266,15 @@ class OutcomeValidator:
         task: str = "",
     ) -> None:
         self._contracts = contracts
-        self._tracker = tracker  # queried for current_phase() only
+        self._tracker = tracker  # 仅用于查询 current_phase()
         self._task = task
         self._step = 0
         self._tool_n: dict[str, int] = {}
         self._consec_mismatch: dict[str, int] = {}
-        self._hinted: set[tuple[str, str]] = set()  # (phase, contract id)
+        self._hinted: set[tuple[str, str]] = set()  # (phase, 契约 id)
         self._hinted_phase = ""
-        # open / closed latency events (commit = matched→advance, recovery =
-        # mismatch→strategy switch)
+        # 打开/关闭中的延迟事件(commit = matched→推进,recovery =
+        # mismatch→换策略)
         self._open_commit: list[dict[str, Any]] = []
         self._open_recovery: list[dict[str, Any]] = []
         self.commit_events: list[dict[str, Any]] = []
@@ -287,7 +287,7 @@ class OutcomeValidator:
         self.repeated_same_strategy_after_mismatch = 0
         self._last_is_error = False
 
-    # ------------------------------------------------------------ selection
+    # ------------------------------------------------------------ 选择
 
     def _contract_for(self, name: str, phase: str) -> OutcomeContract | None:
         best: OutcomeContract | None = None
@@ -303,10 +303,10 @@ class OutcomeValidator:
     def _phase(self) -> str:
         try:
             return self._tracker.current_phase()
-        except Exception:  # noqa: BLE001 - tracker is optional
+        except Exception:  # noqa: BLE001 - tracker 可选
             return ""
 
-    # ------------------------------------------------------------ observing
+    # ------------------------------------------------------------ 观察
 
     def observe_result(
         self,
@@ -317,10 +317,10 @@ class OutcomeValidator:
         is_error: bool = False,
         phase: str | None = None,
     ) -> str | None:
-        """Observe one tool result; return the verdict line or None.
+        """观察一个工具结果;返回裁决行或 None。
 
-        The line is appended to ``result_text`` by the caller — the model
-        reads it inside the same tool result, at zero turn cost.
+        该行由调用方追加到 ``result_text`` —— 模型在同一个
+        工具结果里读到它,零 turn 成本。
         """
         self._step += 1
         self._tool_n[name] = self._tool_n.get(name, 0) + 1
@@ -337,7 +337,7 @@ class OutcomeValidator:
             else:
                 try:
                     payload = json.loads(result_text)
-                except Exception:  # noqa: BLE001 - unparseable => uncertain
+                except Exception:  # noqa: BLE001 - 无法解析 => uncertain
                     payload = None
                 if not isinstance(payload, dict):
                     matched = None
@@ -346,11 +346,11 @@ class OutcomeValidator:
                     matched = _evaluate(contract.verify.get("kind", ""), f)
                     actual = _describe_actual(contract.verify.get("kind", ""), f)
 
-        # Close pending latency events against this new observation.
+        # 以这条新观察关闭未决的延迟事件。
         self._close_events(name, ph, matched)
 
         if name == "finish":
-            return None  # finish closes events; no verdict of its own
+            return None  # finish 关闭事件;自身无裁决
         if contract is None:
             return None
         if matched is None:
@@ -370,20 +370,20 @@ class OutcomeValidator:
         self._log(name, ph, "MISMATCH", actual, contract)
         return self._mismatched_line(name, n, k, ph, contract, actual)
 
-    # ------------------------------------------------------------- verdicts
+    # ------------------------------------------------------------- 裁决
 
     def _matched_line(
         self, name: str, n: int, phase: str, c: OutcomeContract, actual: str
     ) -> str | None:
         if not c.next_phase:
-            return None  # advisory contract: counted, not injected
+            return None  # 建议性契约:计数但不注入
         if phase != self._hinted_phase:
             self._hinted.clear()
             self._hinted_phase = phase
         key = (phase, c.id)
         already = key in self._hinted
         if c.next_phase != "finish" and already:
-            return None  # one commit hint per contract per phase
+            return None  # 每契约每 phase 只提示一次 commit
         self._hinted.add(key)
         self._open_commit.append(
             {
@@ -405,7 +405,7 @@ class OutcomeValidator:
     def _mismatched_line(
         self, name: str, n: int, k: int, phase: str, c: OutcomeContract, actual: str
     ) -> str:
-        # A mismatch invalidates the pending commit opened by the same tool.
+        # 一次 mismatch 使同一工具打开的未决 commit 失效。
         self._open_commit = [e for e in self._open_commit if e["tool"] != name]
         self._open_recovery.append(
             {
@@ -427,7 +427,7 @@ class OutcomeValidator:
             f"actual: {actual}. {c.on_mismatch}{suffix}"
         )
 
-    # ------------------------------------------------------------- latency
+    # ------------------------------------------------------------- 延迟
 
     def _close_events(
         self, name: str, phase: str, matched: bool | None
@@ -439,16 +439,16 @@ class OutcomeValidator:
                 e["closed_by"] = "finish"
                 self.recovery_events.append(e)
                 continue
-            # Only a *different action* counts as a strategy switch —
-            # re-observing (perception) after a mismatch is diagnosis, not
-            # recovery, and must not close the event.
+            # 只有*不同的动作*才算换策略 ——
+            # mismatch 后重新观察(感知)是诊断而非
+            # 恢复,不得关闭该事件。
             if name in ACTION_TOOLS and name != e["tool"]:
                 e["latency_steps"] = self._step - e["step"]
                 e["closed_by"] = "switch"
                 self.mismatch_escalations += 1
                 self.recovery_events.append(e)
                 continue
-            # same action tool again: resolved or repeated
+            # 再次同一动作工具:已解决或重复
             if matched is True:
                 e["latency_steps"] = self._step - e["step"]
                 e["closed_by"] = "same_tool_resolved"
@@ -470,7 +470,7 @@ class OutcomeValidator:
             cur = PHASE_ORDER.get(phase, -1)
             tgt = PHASE_ORDER.get(e.get("next_phase", ""), 99)
             if e.get("next_phase") == "finish":
-                still_open.append(e)  # only finish closes it
+                still_open.append(e)  # 只有 finish 能关闭它
                 continue
             if cur > PHASE_ORDER.get(e.get("phase", ""), -1) and cur >= tgt:
                 e["latency_steps"] = self._step - e["step"]
@@ -481,11 +481,11 @@ class OutcomeValidator:
         self._open_commit = still_open
 
     def turn_boundary_hint(self) -> str | None:
-        """One-line reminder when a commit verdict has not been acted on.
+        """commit 裁决未被照办时的一行提醒。
 
-        Reuses the SM1 injection throttle: emitted at most once per open
-        commit event, only after ≥2 further tool results without the phase
-        advancing.
+        复用 SM1 注入节流:每个打开的 commit 事件至多发
+        一次,且仅在 phase 未推进又过了 ≥2 个工具结果之后
+        才发。
         """
         for e in self._open_commit:
             if e.get("next_phase") == "finish" or e.get("hinted_twice"):
@@ -501,14 +501,13 @@ class OutcomeValidator:
         return None
 
     def commit_mode_ctx(self) -> dict[str, Any] | None:
-        """Arm C (RPENT_REASON_MODE): COMMIT-MODE eligibility for one turn.
+        """C 臂(RPENT_REASON_MODE):单轮 COMMIT-MODE 资格判定。
 
-        Eligible exactly when a verified-MATCHED commit is still open (the
-        next step is known), nothing anomalous is pending (no open recovery
-        events, last action result not an error), and this open event has
-        not already consumed a commit turn. If the model still does not
-        advance, later boundaries fall back to REASON MODE with the full
-        agent — self-correcting by construction.
+        恰好在如下情形才合格:已验证 MATCHED 的 commit 仍打开(下一
+        步已知)、无异常未决(无打开的 recovery 事件、上一动作结果
+        非报错)、且该打开事件尚未消耗过 commit 轮。若模型仍不
+        推进,后续边界会回退到带完整 agent 的 REASON
+        MODE —— 构造上自纠。
         """
         if self._open_recovery or self._last_is_error:
             return None
@@ -520,7 +519,7 @@ class OutcomeValidator:
                     "step": e["step"]}
         return None
 
-    # --------------------------------------------------------------- output
+    # --------------------------------------------------------------- 输出
 
     def _log(
         self, name: str, phase: str, verdict: str, actual: str, c: OutcomeContract
@@ -539,7 +538,7 @@ class OutcomeValidator:
             )
 
     def snapshot(self, *, success: bool) -> dict[str, Any]:
-        """Per-episode OVP-M metrics (merged into structured_metrics.json)."""
+        """单 episode 的 OVP-M 指标(并入 structured_metrics.json)。"""
         for e in self._open_commit:
             e["closed_by"] = "unclosed"
             e["latency_steps"] = None

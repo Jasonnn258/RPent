@@ -1,7 +1,6 @@
-"""Structured Global Memory v1 — executable phase-scoped rules.
+"""结构化全局记忆 v1 —— 可执行的按 phase 限定范围的规则。
 
-Converts free-text Global Memory into precondition-gated rules the planner
-reads via per-turn phase context injection. Pure logic lives here; integration
-with the planner is gated behind ``RPENT_STRUCTURED_MEMORY=1`` in
-``rpent.planner.api_loop``.
+把自由文本 Global Memory 转换成前置条件门控的规则,planner
+通过逐轮 phase 上下文注入来读取。纯逻辑都在这里;与 planner 的
+集成由 ``rpent.planner.api_loop`` 里的 ``RPENT_STRUCTURED_MEMORY=1`` 门控。
 """

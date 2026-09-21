@@ -1,20 +1,20 @@
-"""Structured Global Memory v1 — executable rule engine.
+"""结构化全局记忆 v1 —— 可执行规则引擎。
 
-The engine converts free-text Global Memory into phase-scoped,
-precondition-gated rules that the planner consumes via per-turn phase context
-injection. It is pure and side-effect-free apart from logging:
+本引擎把自由文本 Global Memory 转换成按 phase 限定、
+前置条件门控的规则,planner 通过逐轮 phase 上下文
+注入来消费它们。除日志外它是纯的、无副作用的:
 
-- counters advance from the tool stream (``on_tool_call`` / ``on_tool_result``);
-- ``current_block()`` returns the compact text to enqueue (or ``None`` to keep
-  the run quiet — the only thing that costs a turn is an actual injection);
-- ``snapshot()`` emits the offline metrics consumed by the paired analysis.
+- 计数器随工具流推进(``on_tool_call`` / ``on_tool_result``);
+- ``current_block()`` 返回要入队的紧凑文本(或 ``None`` 保持
+  静默 —— 唯一消耗 turn 的是真实注入);
+- ``snapshot()`` 产出配对分析消费的离线指标。
 
-The phase model is deterministic and derives purely from cumulative tool
-counts (no ``set_phase`` tool, so the tool list stays identical to baseline):
+phase 模型是确定性的,纯由累计工具计数推导
+(没有 ``set_phase`` 工具,因此工具列表与 baseline 完全一致):
 
-    P_init -> P_look (first perception) -> P_transport (first move_to/move_pose)
-    -> P_grasp (first pi0_pick) -> P_place (first release/pi0_doubled)
-    -> P_verify (second release/pi0_doubled)
+    P_init -> P_look(首次感知)-> P_transport(首次 move_to/move_pose)
+    -> P_grasp(首次 pi0_pick)-> P_place(首次 release/pi0_doubled)
+    -> P_verify(第二次 release/pi0_doubled)
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from rpent.utils.logging import get_logger
 
 logger = get_logger("structured_memory")
 
-#: Tools that advance the perception streak. A streak resets only on an ACTION.
+#: 推进感知连击的工具。连击只在 ACTION 上重置。
 PERCEPTION_TOOLS = frozenset(
     {
         "view_driver_state",
@@ -41,8 +41,8 @@ PERCEPTION_TOOLS = frozenset(
     }
 )
 
-#: Tools that count as "acting" (break perception streaks, count toward
-#: ``action_calls`` and the F2/F3 repositioning loops).
+#: 计为"动作"的工具(打断感知连击、计入 ``action_calls``
+#: 和 F2/F3 重新定位循环)。
 ACTION_TOOLS = frozenset(
     {
         "move_to",
@@ -56,10 +56,10 @@ ACTION_TOOLS = frozenset(
     }
 )
 
-#: Tools that neither perceive nor act.
+#: 既不感知也不动作的工具。
 NEUTRAL_TOOLS = frozenset({"read_text_file", "write_text_file", "list_dir", "finish"})
 
-#: One-line semantic hint per phase — part of the injected context.
+#: 每个 phase 的一行语义提示 —— 注入上下文的一部分。
 PHASE_HINT = {
     "P_init": "task not started — first act: perceive the scene once.",
     "P_look": "perceiving / localizing — resolve a target xyz, then act. Never loop perception.",
@@ -69,7 +69,7 @@ PHASE_HINT = {
     "P_verify": "confirm final placement, then call finish — do not re-open perception.",
 }
 
-#: predicate key -> current counter value used for ``*_ge`` and ``max_turns_left_le``.
+#: 谓词键 -> 用于 ``*_ge`` 和 ``max_turns_left_le`` 的当前计数值。
 def _counter_for(tracker: "PhaseTracker", key: str) -> int | None:
     if key == "consecutive_perception_ge":
         return tracker._consecutive_perception
@@ -95,7 +95,7 @@ def _counter_for(tracker: "PhaseTracker", key: str) -> int | None:
 
 
 class PhaseTracker:
-    """Deterministic per-episode phase + rule engine fed by the tool stream."""
+    """由工具流驱动的确定性单 episode phase + 规则引擎。"""
 
     def __init__(
         self,
@@ -108,11 +108,11 @@ class PhaseTracker:
         self._task = task
         self._max_turns = max_turns
         self._memory_dir = memory_dir
-        # Rules are filtered to the current task scope once at construction.
+        # 规则在构造时按当前 task 范围一次性过滤。
         self._rules = [r for r in rules if r.applies_to_task(task)]
         self._rules_by_id = {r.id: r for r in self._rules}
 
-        # cumulative per-tool counters (zero-initialised for every tool name)
+        # 按工具的累计计数器(每个工具名都零初始化)
         self._counts: dict[str, int] = {name: 0 for name in PERCEPTION_TOOLS}
         self._counts.update({name: 0 for name in ACTION_TOOLS})
         self._counts.update({name: 0 for name in NEUTRAL_TOOLS})
@@ -126,14 +126,14 @@ class PhaseTracker:
         self._moves_since_pick = 0
         self._finish_called = False
 
-        # phase state
+        # phase 状态
         self._phase = "P_init"
         self._prev_phase = "P_init"
         self._phase_sequence: list[str] = ["P_init"]
         self._phase_entries: dict[str, int] = {"P_init": 1}
 
-        # rule / injection bookkeeping
-        self._fired: list[str] = []  # rule ids fired, deduped, in fire order
+        # 规则/注入记账
+        self._fired: list[str] = []  # 已触发的规则 id,去重,按触发顺序
         self._fired_detail: dict[str, dict[str, Any]] = {}
         self._actions_since_fire: dict[str, int] = {}
         self._injections = 0
@@ -141,11 +141,11 @@ class PhaseTracker:
         self._last_injected_phase: str | None = None
         self._mem_reads: list[str] = []
 
-    # ------------------------------------------------------------------ feed
+    # ------------------------------------------------------------------ 喂入
     def on_tool_call(self, name: str, args: dict[str, Any] | None = None) -> None:
         args = args or {}
-        # read_text_file is counted separately (memory-scoped only, see below) so
-        # the R8 over-reading guard triggers only on real memory reads.
+        # read_text_file 单独计数(仅 memory 范围,见下),这样
+        # R8 过度读取守卫只在真实记忆读取时触发。
         if name in self._counts and name != "read_text_file":
             self._counts[name] += 1
         if name in PERCEPTION_TOOLS:
@@ -179,11 +179,11 @@ class PhaseTracker:
             self._last_pick_success = not any(
                 tok in low for tok in ("fail", "error", "could not", "no object")
             )
-            # a fresh grasp restarts the move-distance counter
+            # 新的一次抓取会重置移动距离计数器
             self._moves_since_pick = 0
         elif name == "release":
-            # The grasp is consumed by the release — clear it so a second fast
-            # release() cannot fire (that would skip double-stage placement).
+            # 这次 release 消耗掉了抓取 —— 清掉它,第二次快速
+            # release() 便不能触发(那会跳过双段放置)。
             self._last_pick_success = None
 
     # ----------------------------------------------------------------- phase
@@ -216,12 +216,12 @@ class PhaseTracker:
 
     # ------------------------------------------------------------ fast/slow API
     def recovery_pending(self) -> str | None:
-        """First current-phase rule whose precondition is met but not yet fired.
+        """第一条前置条件已满足但尚未触发的当前 phase 规则。
 
-        Pure: no side effects (does not fire rules, does not touch
-        ``_turns_used``, does not log). The dual-route decider must NOT call
-        ``current_block`` for a pending check — that fires rules and records
-        ``_turns_used``.
+        纯查询:无副作用(不触发规则、不碰
+        ``_turns_used``、不记日志)。dual-route 决策器做 pending 检查时
+        绝不能调用 ``current_block`` —— 那会触发规则并记录
+        ``_turns_used``。
         """
         for rule in self._rules:
             if rule.id in self._fired:
@@ -248,7 +248,7 @@ class PhaseTracker:
     def finish_called(self) -> bool:
         return self._finish_called
 
-    # ------------------------------------------------------------- predicates
+    # ------------------------------------------------------------- 谓词
     def _value_for(self, key: str) -> Any:
         if key == "phase":
             return self._phase
@@ -292,14 +292,14 @@ class PhaseTracker:
                 if cur is None or not (cur >= value):
                     return False
             else:
-                return False  # unknown key -> fail safe, never fires
+                return False  # 未知键 -> 保险起见判负,永不触发
         return True
 
     def _imminent_rule(self) -> Rule | None:
-        """First current-phase rule within 1 of its ``*_ge`` threshold (advisory).
+        """第一条距自身 ``*_ge`` 阈值只差 1 的当前 phase 规则(建议性)。
 
-        Only numeric ``*_ge`` / ``max_turns_left_le`` keys can be "imminent";
-        string/boolean keys are excluded.
+        只有数值型 ``*_ge`` / ``max_turns_left_le`` 键可能"临近";
+        字符串/布尔键被排除。
         """
         for rule in self._rules:
             if rule.id in self._fired or not rule.applies_to_phase(self._phase):
@@ -315,13 +315,13 @@ class PhaseTracker:
                         return rule
         return None
 
-    # ----------------------------------------------------------------- blocks
+    # ----------------------------------------------------------------- 注入块
     def current_block(self, turns: int) -> str | None:
-        """Return the compact injected block, or None to keep the run quiet.
+        """返回紧凑的注入块,或 None 保持静默。
 
-        Inject only when the phase changed or a new rule fired since the last
-        injection — this is what keeps turn inflation bounded (each injection
-        costs one model request).
+        仅当自上次注入以来 phase 变化或有新规则触发时才注入 ——
+        这正是控制 turn 膨胀的手段(每次注入
+        消耗一次模型请求)。
         """
         self._turns_used = turns
 
@@ -379,11 +379,11 @@ class PhaseTracker:
         self._injections += 1
         self._last_injected_phase = self._phase
 
-    # ---------------------------------------------------------------- metrics
+    # ---------------------------------------------------------------- 指标
     def snapshot(self, *, success: bool | None = None) -> dict[str, Any]:
         c = self._counts
-        # Evaluate every fired rule's success_check against the final counters
-        # (does the recovery actually get the planner out of the loop?).
+        # 用最终计数器对每条已触发规则的 success_check 求值
+        #(恢复是否真的让 planner 走出了循环?)。
         recovery_success: dict[str, bool] = {}
         for rule_id in self._fired:
             rule = self._rules_by_id.get(rule_id)
@@ -422,7 +422,7 @@ class PhaseTracker:
             "success": success,
         }
 
-    # ------------------------------------------------------------------ misc
+    # ------------------------------------------------------------------ 杂项
     def _is_memory_read(self, path: str) -> bool:
         low = path.lower()
         if "memory" in low or "rules" in low:
@@ -432,15 +432,15 @@ class PhaseTracker:
         return False
 
 
-# ---------------------------------------------------------------- loaders
+# ---------------------------------------------------------------- 加载器
 def load_rules(path: str | os.PathLike) -> list[Rule]:
-    """Load and validate the rules document at *path*."""
+    """加载并校验位于 *path* 的规则文档。"""
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
     return parse_rules(raw)
 
 
 def detect_task(output_dir: str | os.PathLike | None = None) -> str:
-    """Task id from RPENT_TASK env, else from the run dir name ``_t<N>_s<M>``."""
+    """task id 取自 RPENT_TASK 环境变量,否则取自运行目录名 ``_t<N>_s<M>``。"""
     env = os.environ.get("RPENT_TASK", "").strip()
     if env:
         return env
@@ -452,7 +452,7 @@ def detect_task(output_dir: str | os.PathLike | None = None) -> str:
 
 
 def detect_seed(output_dir: str | os.PathLike | None = None) -> str:
-    """Seed from RPENT_SEED env, else from the run dir name ``_s<M>``."""
+    """seed 取自 RPENT_SEED 环境变量,否则取自运行目录名 ``_s<M>``。"""
     env = os.environ.get("RPENT_SEED", "").strip()
     if env:
         return env

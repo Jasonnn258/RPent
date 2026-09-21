@@ -1,12 +1,12 @@
-"""Structured Global Memory v1 — rule schema and validation.
+"""结构化全局记忆 v1 —— 规则 schema 与校验。
 
-Each rule is the executable form of one Global Memory entry, carrying the full
-nine-field contract from the v1 spec: ``phase``, ``trigger``, ``precondition``,
-``expected_result``, ``success_check``, ``failure_pattern``, ``recovery``,
-``next_phase``, ``scope``.
+每条规则是一个 Global Memory 条目的可执行形式,携带 v1 规范完整的
+九字段契约:``phase``、``trigger``、``precondition``、
+``expected_result``、``success_check``、``failure_pattern``、``recovery``、
+``next_phase``、``scope``。
 
-Validation fails fast: a typo in a rules JSON (unknown field, bad phase, bad
-predicate key) surfaces at load time, not mid-episode.
+校验 fail-fast:规则 JSON 里的笔误(未知字段、坏 phase、坏
+谓词键)在加载期暴露,而不是 episode 中途。
 """
 
 from __future__ import annotations
@@ -14,20 +14,20 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
-#: Deterministic phase model — derived purely from tool-call counts.
+#: 确定性 phase 模型 —— 纯由工具调用计数推导。
 PHASES = ("P_init", "P_look", "P_transport", "P_grasp", "P_place", "P_verify")
 PHASE_ORDER = {p: i for i, p in enumerate(PHASES)}
 
-#: Predicate keys accepted inside ``precondition`` / ``success_check`` dicts.
-#: Every key in a predicate is AND'd; all keys are evaluated against the
-#: tracker's windowed/cumulative counters.
+#: ``precondition`` / ``success_check`` 字典里接受的谓词键。
+#: 谓词里的每个键之间取 AND;所有键都对照 tracker 的窗口/累计
+#: 计数器求值。
 PREDICATE_KEYS = frozenset(
     {
-        # current phase matching
-        "phase",            # equals (str)  | "ANY" matches anything
-        "phase_ne",         # not equals (str)
-        "phase_in",         # in a list of phases
-        # counter thresholds (all AND'd)
+        # 当前 phase 匹配
+        "phase",            # 相等(str)  | "ANY" 匹配任意
+        "phase_ne",         # 不相等(str)
+        "phase_in",         # 属于 phase 列表
+        # 计数阈值(全部 AND)
         "consecutive_perception_ge",
         "action_calls_ge",
         "actions_after_fire_ge",
@@ -39,16 +39,16 @@ PREDICATE_KEYS = frozenset(
         "read_text_file_calls_ge",
         "turns_used_ge",
         "max_turns_left_le",
-        # exact cumulative per-tool count
+        # 精确的按工具累计计数
         "tool_count",       # {tool_name: int}
-        # misc
-        "result_contains",  # last tool result contains substring
-        "failure_marker",   # str marker (only "max_turns" supported)
+        # 杂项
+        "result_contains",  # 上一个工具结果包含子串
+        "failure_marker",   # str 标记(仅支持 "max_turns")
         "finish_called",    # bool
     }
 )
 
-#: The nine mandated fields + ``source`` (evidence citation).
+#: 九个规定字段 + ``source``(证据引用)。
 REQUIRED_FIELDS = (
     "id",
     "phase",
@@ -65,10 +65,10 @@ REQUIRED_FIELDS = (
 
 @dataclasses.dataclass(frozen=True)
 class Rule:
-    """One structured memory rule."""
+    """一条结构化记忆规则。"""
 
     id: str
-    phase: str  # P_init..P_verify, or ANY
+    phase: str  # P_init..P_verify 或 ANY
     trigger: str
     precondition: dict[str, Any]
     expected_result: str
@@ -93,7 +93,7 @@ class Rule:
 
 
 def validate(rule: dict[str, Any], *, index: int | None = None) -> Rule:
-    """Validate one raw rule dict; return a frozen :class:`Rule`."""
+    """校验一条原始规则 dict;返回冻结的 :class:`Rule`。"""
     loc = f"rule#{index}" if index is not None else "rule"
     missing = [f for f in REQUIRED_FIELDS if f not in rule]
     if missing:
@@ -143,7 +143,7 @@ def validate(rule: dict[str, Any], *, index: int | None = None) -> Rule:
 
 
 def parse_phase_file(item: dict[str, Any]) -> list[Rule]:
-    """Parse one phase-file dict ``{"phase": ..., "rules": [...]}``."""
+    """解析一个 phase 文件 dict ``{"phase": ..., "rules": [...]}``。"""
     if not isinstance(item, dict) or "rules" not in item:
         raise ValueError("each phase file must be a dict with a 'rules' list")
     return [
@@ -152,7 +152,7 @@ def parse_phase_file(item: dict[str, Any]) -> list[Rule]:
 
 
 def parse_rules(data: Any) -> list[Rule]:
-    """Parse the full rules document (list of phase files)."""
+    """解析完整规则文档(phase 文件列表)。"""
     if isinstance(data, dict) and "phases" in data:
         data = data["phases"]
     if not isinstance(data, list):
