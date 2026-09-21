@@ -49,32 +49,43 @@
         "g0",
         "g0B"
       ],
-      "n_rows": 2,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 2,
-        "SR_micro": 1.0,
-        "SR_macro": 1.0,
+        "n": 30,
+        "SR_micro": 0.767,
+        "SR_macro": 0.767,
         "SR_by_task": {
-          "3": 1.0
+          "3": 0.7,
+          "5": 1.0,
+          "9": 0.6
         },
-        "turns_mean": 14.5
+        "turns_mean": 26.3
       },
       "trigger": {
-        "episodes": 2,
-        "should_moments": 4,
-        "recall_strict": 0.0,
-        "recall_agnostic": 0.25,
-        "fires": 1,
-        "fires_per_ep": 0.5,
-        "precision": 0.0,
-        "false_per_ep": 0.5,
+        "episodes": 30,
+        "should_moments": 49,
+        "recall_strict": 0.122,
+        "recall_agnostic": 0.429,
+        "fires": 47,
+        "fires_per_ep": 1.57,
+        "precision": 0.128,
+        "false_per_ep": 1.367,
         "false_by_phase": {
-          "P_transport": 1
+          "P_transport": 5,
+          "P_grasp": 26,
+          "P_place": 8,
+          "P_verify": 2
         }
       },
       "retrieval": {
-        "retrieval_count_per_ep": 0.5,
+        "gold_events": 3,
+        "relevant@1": 0.667,
+        "relevant@3": 0.667,
+        "irrelevant@3": 0.333,
+        "hardneg_events": 3,
+        "hardneg_retreat_in_top3": 3,
+        "retrieval_count_per_ep": 1.57,
         "retrieval_empty_rate": 0.0
       }
     },
@@ -127,25 +138,43 @@
         "g0",
         "g0D"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.9,
+        "SR_macro": 0.9,
+        "SR_by_task": {
+          "3": 0.9,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 28.0
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
-        "false_by_phase": {}
+        "episodes": 30,
+        "should_moments": 38,
+        "recall_strict": 0.211,
+        "recall_agnostic": 0.526,
+        "fires": 66,
+        "fires_per_ep": 2.2,
+        "precision": 0.121,
+        "false_per_ep": 1.933,
+        "false_by_phase": {
+          "P_transport": 7,
+          "P_grasp": 46,
+          "P_place": 5
+        }
       },
       "retrieval": {
-        "retrieval_count_per_ep": null,
-        "retrieval_empty_rate": null
+        "gold_events": 5,
+        "relevant@1": 0.4,
+        "relevant@3": 0.4,
+        "irrelevant@3": 0.6,
+        "hardneg_events": 3,
+        "hardneg_retreat_in_top3": 3,
+        "retrieval_count_per_ep": 2.2,
+        "retrieval_empty_rate": 0.0
       }
     },
     "E": {
@@ -153,85 +182,117 @@
         "g0",
         "g0E"
       ],
-      "n_rows": 0,
+      "n_rows": 30,
       "infra": {},
       "sr": {
-        "n": 0
+        "n": 30,
+        "SR_micro": 0.8,
+        "SR_macro": 0.8,
+        "SR_by_task": {
+          "3": 0.6,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 28.4
       },
       "trigger": {
-        "episodes": 0,
-        "should_moments": 0,
-        "recall_strict": null,
-        "recall_agnostic": null,
-        "fires": 0,
-        "fires_per_ep": null,
-        "precision": null,
-        "false_per_ep": null,
+        "episodes": 30,
+        "should_moments": 59,
+        "recall_strict": 0.153,
+        "recall_agnostic": 0.153,
+        "fires": 9,
+        "fires_per_ep": 0.3,
+        "precision": 1.0,
+        "false_per_ep": 0.0,
         "false_by_phase": {}
       },
       "retrieval": {
-        "retrieval_count_per_ep": null,
-        "retrieval_empty_rate": null
+        "hardneg_events": 3,
+        "hardneg_retreat_in_top3": 3,
+        "gold_events": 6,
+        "relevant@1": 0.833,
+        "relevant@3": 0.833,
+        "irrelevant@3": 0.167,
+        "retrieval_count_per_ep": 0.3,
+        "retrieval_empty_rate": 0.0
       }
     }
   },
   "contrasts": {
     "A->B": {
-      "n_pairs": 2,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 1,
-      "diff_micro": 0.5,
+      "n_pairs": 30,
+      "flips_a_only_success": 5,
+      "flips_b_only_success": 6,
+      "diff_micro": 0.033,
       "mcnemar_p": 1.0,
       "ci95_micro": [
-        0.0,
-        1.0
+        -0.167,
+        0.267
       ],
       "ci95_macro_cluster": [
-        0.5,
-        0.5
+        0.0,
+        0.1
       ]
     },
     "B->C": {
-      "n_pairs": 2,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "diff_micro": 0.0,
-      "mcnemar_p": null,
+      "n_pairs": 27,
+      "flips_a_only_success": 3,
+      "flips_b_only_success": 4,
+      "diff_micro": 0.037,
+      "mcnemar_p": 1.0,
       "ci95_micro": [
-        0.0,
-        0.0
+        -0.148,
+        0.222
       ],
       "ci95_macro_cluster": [
         0.0,
-        0.0
+        0.1
       ]
     },
     "B->D": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null
+      "n_pairs": 30,
+      "flips_a_only_success": 2,
+      "flips_b_only_success": 6,
+      "diff_micro": 0.133,
+      "mcnemar_p": 0.28906,
+      "ci95_micro": [
+        -0.033,
+        0.3
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.2
+      ]
     },
     "C->E": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null
+      "n_pairs": 27,
+      "flips_a_only_success": 5,
+      "flips_b_only_success": 4,
+      "diff_micro": -0.037,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.259,
+        0.185
+      ],
+      "ci95_macro_cluster": [
+        -0.286,
+        0.1
+      ]
     },
     "A->E": {
-      "n_pairs": 0,
-      "flips_a_only_success": 0,
-      "flips_b_only_success": 0,
-      "diff_micro": null,
-      "mcnemar_p": null,
-      "ci95_micro": null,
-      "ci95_macro_cluster": null
+      "n_pairs": 30,
+      "flips_a_only_success": 1,
+      "flips_b_only_success": 3,
+      "diff_micro": 0.067,
+      "mcnemar_p": 0.625,
+      "ci95_micro": [
+        -0.067,
+        0.2
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.2
+      ]
     },
     "A->C": {
       "n_pairs": 27,
@@ -247,25 +308,55 @@
         0.0,
         0.286
       ]
+    },
+    "D->E": {
+      "n_pairs": 30,
+      "flips_a_only_success": 6,
+      "flips_b_only_success": 3,
+      "diff_micro": -0.1,
+      "mcnemar_p": 0.50781,
+      "ci95_micro": [
+        -0.3,
+        0.1
+      ],
+      "ci95_macro_cluster": [
+        -0.3,
+        0.0
+      ]
+    },
+    "A->D": {
+      "n_pairs": 30,
+      "flips_a_only_success": 2,
+      "flips_b_only_success": 7,
+      "diff_micro": 0.167,
+      "mcnemar_p": 0.17969,
+      "ci95_micro": [
+        0.0,
+        0.367
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.3
+      ]
     }
   },
   "infra": {},
   "gates": {
     "gate1_mechanism_C_vs_B": {
       "rule": "progress SR gain vs v1_per_result > 0 (diff_micro or paired flips b>c)",
-      "diff_micro": 0.0,
-      "flips_b_only(C)": 0,
-      "flips_c_only(B)": 0
+      "diff_micro": 0.037,
+      "flips_b_only(C)": 4,
+      "flips_c_only(B)": 3
     },
     "gate2_common_query_E_vs_D": {
       "rule": "progress advantage not fully gone under common query (E vs D diff_micro > 0, or flips favor E)",
-      "diff_micro": null,
-      "flips_e_only": null,
-      "flips_d_only": null,
+      "diff_micro": -0.1,
+      "flips_e_only": 3,
+      "flips_d_only": 6,
       "note": "manifest pairs this as C->E removing the query confound within progress; E vs D is the WHEN contrast under common query"
     },
     "gate2b_progress_query_cost_C_vs_E": {
-      "diff_micro": null,
+      "diff_micro": -0.037,
       "note": "common query's cost inside the progress family"
     },
     "gate3_q3_regression": "see scripts/test_stageG0_audit.py (must be green at verdict time)",

@@ -53,7 +53,7 @@ G0_ARMS = {
 PROGRESS_FAMILY = {"C", "E"}
 
 CONTRASTS = [("A", "B"), ("B", "C"), ("B", "D"), ("C", "E"), ("A", "E"),
-             ("A", "C")]
+             ("A", "C"), ("D", "E"), ("A", "D")]
 
 
 def log(msg):
