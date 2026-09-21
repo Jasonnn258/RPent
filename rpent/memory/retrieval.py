@@ -13,6 +13,36 @@ is logged to ``memory_events.jsonl`` in the episode output dir.
 
 Trigger rules are task-id-free signals only (spec §3): they answer "should
 long-term memory be consulted NOW", never "which memory".
+
+
+长期记忆动态召回模块。
+
+它解决两个问题：
+
+1. WHEN：
+   当前这个时刻，要不要查长期记忆？
+
+2. WHAT：
+   如果要查，从 Memory Bank 里取哪 3 张卡？
+
+注意：
+这里的 Memory 只是作为提示信息交给 Planner，
+不会强制 Planner 执行 Memory 中的策略。
+
+实验变量：
+
+RPENT_MEMORY_TRIGGER
+    决定使用哪种“什么时候查”的策略。
+
+RPENT_MEMORY_RANK
+    决定使用哪种“查哪张卡”的检索器。
+
+这两个维度被刻意分开，
+方便实验判断：
+性能变化到底来自 Trigger，还是来自 Retrieval Ranking。
+
+
+
 """
 from __future__ import annotations
 
@@ -57,15 +87,57 @@ PERCEPTION = ("segment", "back_project", "detect")
 # Frozen cooldown policy: no trigger within 2 boundaries of the previous one,
 # at most 6 retrievals per episode, none before the first primitive action,
 # none on memory-file tools.
+
+#一次 Memory Retrieval 之后
+#至少隔 2 个 turn boundary
+#并且整个 episode
+#最多查 6 次 Memory
+
 COOLDOWN_BOUNDARIES = 2
 MAX_TRIGGERS_PER_EPISODE = 6
 
+# G0.5 §18 — experiment-only injection modes (channel 3, planner-visible
+# context). "full" is the historical behavior and the default; the others
+# are pre-registered in analysis/stageG05_preregistration.md (texts below
+# are FROZEN verbatim there — do not re-word).
+INJECTION_MODES = ("full", "memory_only", "reason_only", "generic_refresh",
+                   "none")
+_NO_RETRIEVAL_MODES = ("reason_only", "generic_refresh", "none")
+
+# F3 — P2 generic_refresh block (task-independent; no reason, no cards).
+GENERIC_REFRESH_BLOCK = (
+    "[DECISION-POINT REORIENTATION]\n"
+    "Re-evaluate the task goal, the latest observable execution result, "
+    "and the current scene before choosing the next action.\n"
+    "Do not assume the previous action succeeded.\n"
+    "Base the next primitive on the latest observable evidence rather "
+    "than blindly continuing the previous plan.\n"
+    "Do not apply any specific recovery strategy unless supported by "
+    "the current state."
+)
+
+# F4 header — P3 memory_only replaces _block()'s header (title + framing)
+# with this neutral two-liner; card rendering is identical to _block().
+MEMORY_CONTEXT_HEADER = (
+    "[DECISION-POINT MEMORY CONTEXT]\n"
+    "These past experiences may or may not be relevant. Judge them "
+    "against the current observable state."
+)
+
+
+def _reason_only_block(reason: str) -> str:
+    """F2 — P1 block: the trigger's reason plus one re-evaluate line."""
+    return ("[DECISION-POINT CHECK]\n"
+            f"trigger reason: {reason}\n"
+            "Re-evaluate the next action using the latest observable "
+            "state.")
+
 # Q3 structured-rerank weights — FROZEN from Stage A (do not tune online).
-W_SEMANTIC = 2.0
-W_APPLIES = 0.6
-W_SYMPTOM = 0.4
-W_ACTION = 0.5
-W_PHASE = 0.4
+W_SEMANTIC = 2.0 #语义
+W_APPLIES = 0.6 #适用性
+W_SYMPTOM = 0.4 #问题匹配度
+W_ACTION = 0.5 #行动匹配度
+W_PHASE = 0.4 #阶段匹配度
 
 
 def toks(s: str) -> set[str]:
@@ -99,7 +171,7 @@ def load_cards() -> dict[str, dict]:
     return cards
 
 
-def load_index() -> dict[str, str]:
+def load_index() -> dict[str, str]: #初级索引：title + 简要描述
     out: dict[str, str] = {}
     try:
         for ln in (REPO / "resources" / "libero" / "MEMORY.md").read_text(
@@ -119,7 +191,7 @@ def card_phases(card: dict) -> set[str]:
             if any(k in text for k in kws)}
 
 
-class _Embedder:
+class _Embedder: #语义向量
     """Lazy local bge-small-en-v1.5 (CPU) — same encoder as Stage A."""
 
     def __init__(self) -> None:
@@ -255,6 +327,40 @@ class DecisionMemory:
                 f"RPENT_MEMORY_QUERY_MODE={self.query_mode!r} must be "
                 "'native' or 'common' — fail fast rather than silently "
                 "contaminating an arm")
+        # G0.5 §18: injection mode (channel-3 knob, experiment-only).
+        # "full" = historical behavior, byte-identical for every existing
+        # mode; the other four are the G0.5 arms and are legal ONLY with
+        # the v1_per_result trigger they were pre-registered with.
+        self.injection_mode = os.environ.get("RPENT_MEMORY_INJECTION_MODE",
+                                             "full")
+        if self.injection_mode not in INJECTION_MODES:
+            raise ValueError(
+                f"RPENT_MEMORY_INJECTION_MODE={self.injection_mode!r} must "
+                f"be one of {sorted(INJECTION_MODES)}")
+        if (self.injection_mode != "full"
+                and self.mode != "v1_per_result"):
+            raise ValueError(
+                "G0.5 injection modes are pre-registered for "
+                "RPENT_MEMORY_TRIGGER=v1_per_result only (got "
+                f"{self.mode!r}) — fail fast rather than running an "
+                "undeclared arm configuration")
+        # G0.5 §18 explicit aliases — cross-validated against the knobs
+        # they duplicate so a stale/conflicting env can never silently
+        # redefine an arm.
+        _qr = os.environ.get("RPENT_MEMORY_QUERY_REASON")
+        if _qr is not None:
+            _want = "native" if _qr == "1" else "common"
+            if _want != self.query_mode:
+                raise ValueError(
+                    "RPENT_MEMORY_QUERY_REASON="
+                    f"{_qr!r} contradicts QUERY_MODE={self.query_mode!r}")
+        _br = os.environ.get("RPENT_MEMORY_BLOCK_REASON", "1")
+        _br_want = _br == "0"
+        if _br_want != (self.injection_mode == "memory_only"):
+            raise ValueError(
+                "RPENT_MEMORY_BLOCK_REASON=0 marks the P3 memory_only "
+                "neutral header; it cannot be combined with "
+                f"injection_mode={self.injection_mode!r}")
 
     # ------------------------------------------------------------- observe
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
@@ -545,6 +651,10 @@ class DecisionMemory:
         self._queued_phase = ""
         self.boundaries_since_trigger = 0
         self.triggers_fired += 1
+        # G0.5: P0/P1/P2 skip retrieval entirely (§6 — no memory retrieval
+        # outside P3/P4); the fire itself is fully instrumented above.
+        if self.injection_mode in _NO_RETRIEVAL_MODES:
+            return self._fire_without_retrieval(turn, reason, qr, phase)
         t0 = time.time()
         obs = self._obs_summary_for(qr)
         # G0-B: common query = WHEN/WHAT decoupled — the reason never
@@ -567,6 +677,7 @@ class DecisionMemory:
             "trigger_reason": reason,
             "trigger_mode": self.mode,
             "query_mode": self.query_mode,
+            "injection_mode": self.injection_mode,
             "retrieval_method": self.rank,
             "candidate_memory_ids": cand,
             "retrieval_status": "MATCH" if top else "EMPTY",
@@ -591,7 +702,11 @@ class DecisionMemory:
             logger.info("[memrecall] turn=%s trigger=%s retrieval=EMPTY "
                         "(logged, no injection)", turn, reason)
             return None
-        block = self._block(reason, top)
+        # G0.5: P3 renders the neutral F4 header; P4/full stays on the
+        # frozen _block() (byte-identical to every historical arm).
+        block = (self._memory_only_block(top)
+                 if self.injection_mode == "memory_only"
+                 else self._block(reason, top))
         event["scores"] = [round(s, 4) for s in self._last_scores]
         event["ranked_memory_ids"] = top
         event["top1_memory"] = top[0]
@@ -900,6 +1015,71 @@ class DecisionMemory:
                 f"   Falsify (do not use if true): {card['falsify'][:160]}"
             )
         return "\n".join(lines)
+
+    def _memory_only_block(self, top: list[str]) -> str:
+        """F4 — P3 block: neutral header, SAME card rendering as _block().
+
+        Kept a deliberate sibling of _block() (not a refactor of the frozen
+        function); test_stageG05_injection.py asserts the card lines are
+        identical for the same top-3."""
+        lines = [MEMORY_CONTEXT_HEADER]
+        for i, c in enumerate(top[:3], 1):
+            card = self.cards[c]
+            lines.append(
+                f"{i}. [{card['id']}] {card['title']}\n"
+                f"   applies_when: {card['applies_when'][:220]}\n"
+                f"   How to apply: {card['how_to'][:280]}\n"
+                f"   Falsify (do not use if true): {card['falsify'][:160]}"
+            )
+        return "\n".join(lines)
+
+    def _fire_without_retrieval(self, turn: int, reason: str, qr: dict,
+                                phase: str) -> tuple[str, dict] | None:
+        """G0.5 P0/P1/P2: the trigger fired (fully logged, same cooldown/
+        cap semantics) but NO memory retrieval runs. P0 injects nothing at
+        all; P1/P2 inject their frozen text. Events carry
+        retrieval_status=NOT_RUN — recorded, never counted as EMPTY."""
+        block = {
+            "reason_only": _reason_only_block(reason),
+            "generic_refresh": GENERIC_REFRESH_BLOCK,
+        }.get(self.injection_mode)
+        event = {
+            "episode": "",  # filled at finalize from the output dir
+            "task": os.environ.get("RPENT_TASK", ""),
+            "turn": turn,
+            "phase": phase,
+            "last_action": qr.get("name", ""),
+            "symptom": reason,
+            "observation_summary": "",
+            "trigger_reason": reason,
+            "trigger_mode": self.mode,
+            "query_mode": self.query_mode,
+            "injection_mode": self.injection_mode,
+            "retrieval_method": self.rank,
+            "candidate_memory_ids": [],
+            "retrieval_status": "NOT_RUN",
+            "retrieval_empty": None,
+            "trigger_fired": True,
+            "scores": [],
+            "ranked_memory_ids": [],
+            "top1_memory": "",
+            "top3_memories": [],
+            "retrieval_latency_ms": 0.0,
+            "task_language": self.task_language,
+            "planner_next_action": None,
+            "planner_followed_top1": None,
+            "planner_followed_any_top3": None,
+            "verification_result": None,
+            "episode_result": None,
+        }
+        if block is not None:
+            event["retrieval_tokens"] = len(block.split())
+        self.events.append(event)
+        logger.info("[memrecall] turn=%s trigger=%s injection=%s "
+                    "retrieval=NOT_RUN (logged%s)", turn, reason,
+                    self.injection_mode,
+                    ", injected" if block is not None else ", no injection")
+        return (block, event) if block is not None else None
 
     # ------------------------------------------------------------- finalize
     def finalize(self, *, success: bool | None) -> None:

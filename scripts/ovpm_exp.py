@@ -154,6 +154,38 @@ COND_ENV = {
             "RPENT_MEMORY_TRIGGER": "progress",
             "RPENT_MEMORY_QUERY_MODE": "common",
             "RPENT_MEMORY_RANK": "Q0_FIXED"},
+    # G0.5 causal-attribution arms (analysis/stageG05_preregistration.md):
+    # identical to g0D (trigger/query/rank/bank) except the post-trigger
+    # planner context — P4 IS g0D (rows reused, never re-run).
+    "g05P0": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "v1_per_result",
+              "RPENT_MEMORY_QUERY_MODE": "common",
+              "RPENT_MEMORY_RANK": "Q0_FIXED",
+              "RPENT_MEMORY_QUERY_REASON": "0",
+              "RPENT_MEMORY_INJECTION_MODE": "none"},
+    "g05P1": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "v1_per_result",
+              "RPENT_MEMORY_QUERY_MODE": "common",
+              "RPENT_MEMORY_RANK": "Q0_FIXED",
+              "RPENT_MEMORY_QUERY_REASON": "0",
+              "RPENT_MEMORY_INJECTION_MODE": "reason_only"},
+    "g05P2": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "v1_per_result",
+              "RPENT_MEMORY_QUERY_MODE": "common",
+              "RPENT_MEMORY_RANK": "Q0_FIXED",
+              "RPENT_MEMORY_QUERY_REASON": "0",
+              "RPENT_MEMORY_INJECTION_MODE": "generic_refresh"},
+    "g05P3": {"RPENT_STRUCTURED_MEMORY": "1",
+              "RPENT_MEMORY_ACCESS_FIX": "1",
+              "RPENT_MEMORY_TRIGGER": "v1_per_result",
+              "RPENT_MEMORY_QUERY_MODE": "common",
+              "RPENT_MEMORY_RANK": "Q0_FIXED",
+              "RPENT_MEMORY_QUERY_REASON": "0",
+              "RPENT_MEMORY_BLOCK_REASON": "0",
+              "RPENT_MEMORY_INJECTION_MODE": "memory_only"},
     # G3 arm D: progress trigger + Q3 (two orthogonal frozen envs; no new
     # method — stageG_subset_manifest.md §2).
     "memO3": {"RPENT_STRUCTURED_MEMORY": "1",
@@ -571,6 +603,13 @@ def build_episodes(args, done):
         conds = conds or ["g0B", "g0D", "g0E"]
         tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
+    elif args.stage == "g05":
+        # Stage G0.5 attribution (DEV suite only): P0-P3 fresh; P4 = g0D
+        # rows REUSED (field-by-field match, stageG05_preregistration.md
+        # §0-1) — never re-run.
+        conds = conds or ["g05P0", "g05P1", "g05P2", "g05P3"]
+        tasks = tasks or MEMB_TASKS
+        repeats = repeats or [1]
     elif args.stage in ("g1", "g2", "g3", "g4"):
         # Stage G: multi-suite grids on the frozen final-test suites
         # (stageG_subset_manifest.md). --suites/--tasks override for the
@@ -710,7 +749,7 @@ def main():
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
                              "stage1", "memB", "memC", "smoke",
-                             "g0", "g1", "g2", "g3", "g4"])
+                             "g0", "g05", "g1", "g2", "g3", "g4"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")

@@ -57,10 +57,13 @@ timeout / system prompt identical. ONLY the post-trigger planner context
 
 ### Frozen texts (verbatim, byte-frozen after this commit)
 
-**F2 — P1 block** (per fire; `{reason}` = the trigger's reason string):
+**F2 — P1 block** (per fire; `{reason}` = the trigger's reason string.
+CORRECTED 2026-09-21 pre-implementation: earlier draft of this file
+carried an extra "(turn N)" line not present in the user's spec — removed
+to match the user-verbatim text; no run had started):
 
 ```
-[DECISION-POINT CHECK] (turn {turn})
+[DECISION-POINT CHECK]
 trigger reason: {reason}
 Re-evaluate the next action using the latest observable state.
 ```
