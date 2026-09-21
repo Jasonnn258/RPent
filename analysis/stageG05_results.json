@@ -1,0 +1,312 @@
+{
+  "contrasts": {
+    "P1->P0": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "net_wins_b_minus_a": 0,
+      "ties": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null,
+      "nonneg_tasks": null
+    },
+    "P2->P0": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "net_wins_b_minus_a": 0,
+      "ties": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null,
+      "nonneg_tasks": null
+    },
+    "P3->P0": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "net_wins_b_minus_a": 0,
+      "ties": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null,
+      "nonneg_tasks": null
+    },
+    "P4->P3": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "net_wins_b_minus_a": 0,
+      "ties": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null,
+      "nonneg_tasks": null
+    },
+    "P4->P1": {
+      "n_pairs": 0,
+      "flips_a_only_success": 0,
+      "flips_b_only_success": 0,
+      "net_wins_b_minus_a": 0,
+      "ties": 0,
+      "diff_micro": null,
+      "mcnemar_p": null,
+      "ci95_micro": null,
+      "ci95_macro_cluster": null,
+      "nonneg_tasks": null
+    }
+  },
+  "interaction": {
+    "(P4-P3)-(P1-P0)": {
+      "n_cells": 0,
+      "interaction_diff": null,
+      "ci95": null
+    }
+  },
+  "infra": {},
+  "factor_labels": {
+    "P1": {
+      "diff_vs_P0": null,
+      "net_wins_vs_P0": 0,
+      "nonneg_tasks_of3": 0,
+      "CLEAR_POSITIVE": false
+    },
+    "P2": {
+      "diff_vs_P0": null,
+      "net_wins_vs_P0": 0,
+      "nonneg_tasks_of3": 0,
+      "CLEAR_POSITIVE": false
+    },
+    "P3": {
+      "diff_vs_P0": null,
+      "net_wins_vs_P0": 0,
+      "nonneg_tasks_of3": 0,
+      "CLEAR_POSITIVE": false
+    },
+    "P4": {
+      "diff_vs_P0": null,
+      "net_wins_vs_P0": 0,
+      "nonneg_tasks_of3": 0,
+      "CLEAR_POSITIVE": false
+    }
+  },
+  "arms": {
+    "P0": {
+      "label": [
+        "g05",
+        "g05P0"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "recovery": {
+        "episodes": 0,
+        "interventions": 0,
+        "int_per_ep": null,
+        "recovery@3": null,
+        "ep_with_recovery@3": 0.0,
+        "phase_change@3": null,
+        "stalled_prims@3_mean": null,
+        "turns_after_mean": null
+      },
+      "tokens": {
+        "fires": 0,
+        "fires_per_ep": null,
+        "injections_per_ep": null,
+        "injected_tokens_per_ep": null,
+        "mean_block_tokens": null,
+        "wall_mean_s": null
+      }
+    },
+    "P1": {
+      "label": [
+        "g05",
+        "g05P1"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "recovery": {
+        "episodes": 0,
+        "interventions": 0,
+        "int_per_ep": null,
+        "recovery@3": null,
+        "ep_with_recovery@3": 0.0,
+        "phase_change@3": null,
+        "stalled_prims@3_mean": null,
+        "turns_after_mean": null
+      },
+      "tokens": {
+        "fires": 0,
+        "fires_per_ep": null,
+        "injections_per_ep": null,
+        "injected_tokens_per_ep": null,
+        "mean_block_tokens": null,
+        "wall_mean_s": null
+      }
+    },
+    "P2": {
+      "label": [
+        "g05",
+        "g05P2"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "recovery": {
+        "episodes": 0,
+        "interventions": 0,
+        "int_per_ep": null,
+        "recovery@3": null,
+        "ep_with_recovery@3": 0.0,
+        "phase_change@3": null,
+        "stalled_prims@3_mean": null,
+        "turns_after_mean": null
+      },
+      "tokens": {
+        "fires": 0,
+        "fires_per_ep": null,
+        "injections_per_ep": null,
+        "injected_tokens_per_ep": null,
+        "mean_block_tokens": null,
+        "wall_mean_s": null
+      }
+    },
+    "P3": {
+      "label": [
+        "g05",
+        "g05P3"
+      ],
+      "n_rows": 0,
+      "infra": {},
+      "sr": {
+        "n": 0
+      },
+      "trigger": {
+        "episodes": 0,
+        "should_moments": 0,
+        "recall_strict": null,
+        "recall_agnostic": null,
+        "fires": 0,
+        "fires_per_ep": null,
+        "precision": null,
+        "false_per_ep": null,
+        "false_by_phase": {}
+      },
+      "recovery": {
+        "episodes": 0,
+        "interventions": 0,
+        "int_per_ep": null,
+        "recovery@3": null,
+        "ep_with_recovery@3": 0.0,
+        "phase_change@3": null,
+        "stalled_prims@3_mean": null,
+        "turns_after_mean": null
+      },
+      "tokens": {
+        "fires": 0,
+        "fires_per_ep": null,
+        "injections_per_ep": null,
+        "injected_tokens_per_ep": null,
+        "mean_block_tokens": null,
+        "wall_mean_s": null
+      }
+    },
+    "P4": {
+      "label": [
+        "g0",
+        "g0D"
+      ],
+      "n_rows": 30,
+      "infra": {},
+      "sr": {
+        "n": 30,
+        "SR_micro": 0.9,
+        "SR_macro": 0.9,
+        "SR_by_task": {
+          "3": 0.9,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 28.0
+      },
+      "trigger": {
+        "episodes": 30,
+        "should_moments": 38,
+        "recall_strict": 0.211,
+        "recall_agnostic": 0.526,
+        "fires": 66,
+        "fires_per_ep": 2.2,
+        "precision": 0.121,
+        "false_per_ep": 1.933,
+        "false_by_phase": {
+          "P_transport": 7,
+          "P_grasp": 46,
+          "P_place": 5
+        }
+      },
+      "recovery": {
+        "episodes": 30,
+        "interventions": 66,
+        "int_per_ep": 2.2,
+        "recovery@3": 0.818,
+        "ep_with_recovery@3": 0.88,
+        "phase_change@3": 0.348,
+        "stalled_prims@3_mean": 0.21,
+        "turns_after_mean": 6.4
+      },
+      "tokens": {
+        "fires": 66,
+        "fires_per_ep": 2.2,
+        "injections_per_ep": 2.2,
+        "injected_tokens_per_ep": 764.7,
+        "mean_block_tokens": 347.6,
+        "wall_mean_s": 2403.1
+      }
+    }
+  }
+}
