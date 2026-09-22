@@ -47,8 +47,14 @@ env 语义(`robots/libero/env_server.py:make_env`):
 
 | 臂 | 调度命令 | 落行位置 |
 |---|---|---|
-| P0/P2 | `--stage g05 --seeds 20 --conds g05P0,g05P2` | stage=g05(done-keys 自动跳过 s1-s10) |
-| P4 | `--stage g0 --seeds 20 --conds g0D` | stage=g0(同上) |
+| P0/P2 | `--tier glm-5.3-flash --stage g05 --seeds 20 --conds g05P0,g05P2` | stage=g05(done-keys 自动跳过 s1-s10) |
+| P4 | `--tier glm-5.3-flash --stage g0 --seeds 20 --conds g0D` | stage=g0(同上) |
+
+> **tier 必须显式 `glm-5.3-flash`**(= G0/G0.5 全部现有行的 tier/model:
+> `anthropic:glm-5.3-flash`)。默认值 `glm-5.3` 是**另一个模型**,且
+> tier 参与 done-keys 匹配 —— 2026-09-22 02:13 首次启动漏了该参数,
+> 调度器按 120 格全量排队(重跑 s1-s10 + 换模型),7 分钟内发现并击杀,
+> 零行落盘、零目录残留,CSV 三 cond 仍 90 行。此为启动事故记录,非协议变更。
 
 P4 沿用 g0D 原 cond 原环境运行 —— "Full" 不被重新定义(§5)。
 分析器按 (stage,cond) 映射统一读 60 cells。
