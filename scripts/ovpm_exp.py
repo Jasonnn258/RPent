@@ -71,6 +71,9 @@ PLANNER_MAX_TOKENS = 24576
 # pydantic-ai raises this when a model burns the whole output cap before
 # emitting any content; it is an infra defect, never the policy's fault.
 _TOKEN_LIMIT_FATAL = "token limit ({}) exceeded before any response was generated"
+# GLM 429 code 1310:7 天用量配额耗尽(服务端整段拒绝,直到重置时刻)。
+# 与 token-limit 同理:是基础设施故障,绝不能记成 policy_fail。
+_QUOTA_LIMIT_FATAL = "已达到 7 天使用上限"
 INFRA_PAUSE_S = 600
 RUNTIME_S = 4500
 WORKERS_PER_GPU = int(os.environ.get("OVPM_WORKERS_PER_GPU", "2"))
@@ -388,7 +391,8 @@ def run_episode(ep, gpu):
         try:
             with open(rl, errors="replace") as f:
                 if _TOKEN_LIMIT_FATAL.format(PLANNER_MAX_TOKENS) in f.read() or \
-                        _TOKEN_LIMIT_FATAL.format("8192") in f.read():
+                        _TOKEN_LIMIT_FATAL.format("8192") in f.read() or \
+                        _QUOTA_LIMIT_FATAL in f.read():
                     result = "infra_crash"
         except OSError:
             pass
