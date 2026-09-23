@@ -94,6 +94,20 @@ G0.5/G0.6 之外的历史阶段 raw logs;完整历史 rpent-logs archive。
 | 分析层索引(35 项) | `analysis/data_handoff_analysis_index.md` |
 | 一致性报告 | `analysis/data_handoff_mismatch_report.md` |
 | 构建脚本(可幂等重建) | `scripts/build_g05g06_bundle.py` |
+| **异地备份(ModelScope)** | `https://modelscope.cn/datasets/Jasonnn258/rpent_g05_g06_trajectory_bundle`(私有) |
+
+### ModelScope 备份记录(2026-09-23)
+
+- 私有数据集已创建(openapi 元数据核对:private=true,owner=Jasonnn258),
+  上传 3 个文件:`g05_g06_trajectory_bundle.tar.zst`(commit 70670050)、
+  `README.md`(e41928d2)、`data_handoff_report.md`(9c3b0b27);
+- 校验状态:README 内容已通过 openapi readme 字段逐字核对;tar.zst 的
+  SHA256 回读校验被令牌权限挡住(细粒度令牌只含"写",读端点 403),
+  服务端 commit ID 在,待补读权限后补一轮 roundtrip 或网页人工核对
+  (页面上 tar.zst 应为 3.2M,sha256 见第 13 问);
+- 令牌存 `~/.modelscope/token`(600),SDK 上传走
+  `HubApi(token=...)` 构造器直传(绕过会调 /users/me 的 login;
+  该端点对只读/只写令牌都会 403,不代表令牌坏)。
 
 ## 完整性与安全
 
