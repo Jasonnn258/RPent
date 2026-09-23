@@ -1,0 +1,305 @@
+{
+  "contrasts": {
+    "P2->P0": {
+      "n_pairs": 60,
+      "flips_a_only_success": 5,
+      "flips_b_only_success": 5,
+      "net_wins_b_minus_a": 0,
+      "ties": 50,
+      "diff_micro": 0.0,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.1,
+        0.1
+      ],
+      "ci95_macro_cluster": [
+        -0.05,
+        0.05
+      ],
+      "nonneg_tasks": 2,
+      "by_task_diff": {
+        "t3": 0.05,
+        "t5": 0.0,
+        "t9": -0.05
+      }
+    },
+    "P4->P0": {
+      "n_pairs": 60,
+      "flips_a_only_success": 5,
+      "flips_b_only_success": 6,
+      "net_wins_b_minus_a": 1,
+      "ties": 49,
+      "diff_micro": 0.017,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.083,
+        0.133
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.05
+      ],
+      "nonneg_tasks": 3,
+      "by_task_diff": {
+        "t3": 0.05,
+        "t5": 0.0,
+        "t9": 0.0
+      }
+    },
+    "P4->P2": {
+      "n_pairs": 60,
+      "flips_a_only_success": 5,
+      "flips_b_only_success": 6,
+      "net_wins_b_minus_a": 1,
+      "ties": 49,
+      "diff_micro": 0.017,
+      "mcnemar_p": 1.0,
+      "ci95_micro": [
+        -0.1,
+        0.117
+      ],
+      "ci95_macro_cluster": [
+        0.0,
+        0.05
+      ],
+      "nonneg_tasks": 3,
+      "by_task_diff": {
+        "t3": 0.0,
+        "t5": 0.0,
+        "t9": 0.05
+      }
+    }
+  },
+  "infra": {},
+  "case": "D",
+  "case_reasons": {
+    "diffs": {
+      "P2->P0": 0.0,
+      "P4->P0": 0.017,
+      "P4->P2": 0.017
+    },
+    "nonneg_tasks": {
+      "P2->P0": 2,
+      "P4->P0": 3,
+      "P4->P2": 3
+    },
+    "A": false,
+    "B": false,
+    "C": false,
+    "D": true,
+    "E": false,
+    "F": true
+  },
+  "recovery_special_check": {
+    "q1_p4_rec3_higher": true,
+    "q2_rec3_by_task": {
+      "P4": {
+        "t3": 0.769,
+        "t5": 0.833,
+        "t9": 0.941
+      },
+      "P2": {
+        "t3": 0.545,
+        "t5": 0.75,
+        "t9": 0.95
+      }
+    },
+    "q3_sr_given_recovery": {
+      "P4": 0.878,
+      "P2": 0.865
+    },
+    "q4_recovered_but_failed": {
+      "P4": {
+        "t3": 2,
+        "t9": 3
+      },
+      "P2": {
+        "t3": 1,
+        "t9": 4
+      }
+    }
+  },
+  "cost_reduction": {
+    "applicable": true,
+    "token_reduction": 0.824,
+    "wall_reduction": -0.107,
+    "P2_tok_per_ep": 123.2,
+    "P4_tok_per_ep": 701.1,
+    "P2_wall_mean_s": 2357.7,
+    "P4_wall_mean_s": 2130.3
+  },
+  "retrieval_quality_P4": {
+    "gold_events": 14,
+    "relevant@1": 0.714,
+    "relevant@3": 0.714,
+    "irrelevant@3": 0.286,
+    "hardneg_events": 3,
+    "hardneg_retreat_in_top3": 3,
+    "retrieval_count_per_ep": 2.02,
+    "retrieval_empty_rate": 0.0
+  },
+  "arms": {
+    "P0": {
+      "label": [
+        "g05",
+        "g05P0"
+      ],
+      "n_rows": 60,
+      "infra": {},
+      "sr": {
+        "n": 60,
+        "SR_micro": 0.883,
+        "SR_macro": 0.883,
+        "SR_by_task": {
+          "3": 0.8,
+          "5": 1.0,
+          "9": 0.85
+        },
+        "turns_mean": 27.8
+      },
+      "trigger": {
+        "episodes": 60,
+        "should_moments": 99,
+        "recall_strict": 0.182,
+        "recall_agnostic": 0.354,
+        "fires": 113,
+        "fires_per_ep": 1.88,
+        "precision": 0.168,
+        "false_per_ep": 1.567,
+        "false_by_phase": {
+          "P_grasp": 73,
+          "P_transport": 8,
+          "P_place": 10,
+          "P_verify": 3
+        }
+      },
+      "recovery": {
+        "episodes": 60,
+        "interventions": 0,
+        "int_per_ep": 0.0,
+        "recovery@3": null,
+        "ep_with_recovery@3": 0.0,
+        "prim_to_recovery_mean": null,
+        "phase_change@3": null,
+        "stalled_prims@3_mean": null,
+        "turns_after_mean": null
+      },
+      "tokens": {
+        "fires": 113,
+        "fires_per_ep": 1.88,
+        "injections_per_ep": 0.0,
+        "injected_tokens_per_ep": 0.0,
+        "mean_block_tokens": null,
+        "wall_mean_s": 2421.3
+      }
+    },
+    "P2": {
+      "label": [
+        "g05",
+        "g05P2"
+      ],
+      "n_rows": 60,
+      "infra": {},
+      "sr": {
+        "n": 60,
+        "SR_micro": 0.883,
+        "SR_macro": 0.883,
+        "SR_by_task": {
+          "3": 0.85,
+          "5": 1.0,
+          "9": 0.8
+        },
+        "turns_mean": 27.6
+      },
+      "trigger": {
+        "episodes": 60,
+        "should_moments": 93,
+        "recall_strict": 0.194,
+        "recall_agnostic": 0.387,
+        "fires": 132,
+        "fires_per_ep": 2.2,
+        "precision": 0.136,
+        "false_per_ep": 1.9,
+        "false_by_phase": {
+          "P_transport": 9,
+          "P_grasp": 94,
+          "P_place": 8,
+          "P_verify": 3
+        }
+      },
+      "recovery": {
+        "episodes": 60,
+        "interventions": 132,
+        "int_per_ep": 2.2,
+        "recovery@3": 0.72,
+        "ep_with_recovery@3": 0.787,
+        "prim_to_recovery_mean": 1.15,
+        "phase_change@3": 0.432,
+        "stalled_prims@3_mean": 0.3,
+        "turns_after_mean": 6.0
+      },
+      "tokens": {
+        "fires": 132,
+        "fires_per_ep": 2.2,
+        "injections_per_ep": 2.2,
+        "injected_tokens_per_ep": 123.2,
+        "mean_block_tokens": 56.0,
+        "wall_mean_s": 2357.7
+      }
+    },
+    "P4": {
+      "label": [
+        "g0",
+        "g0D"
+      ],
+      "n_rows": 60,
+      "infra": {},
+      "sr": {
+        "n": 60,
+        "SR_micro": 0.9,
+        "SR_macro": 0.9,
+        "SR_by_task": {
+          "3": 0.85,
+          "5": 1.0,
+          "9": 0.85
+        },
+        "turns_mean": 27.0
+      },
+      "trigger": {
+        "episodes": 60,
+        "should_moments": 88,
+        "recall_strict": 0.193,
+        "recall_agnostic": 0.477,
+        "fires": 121,
+        "fires_per_ep": 2.02,
+        "precision": 0.14,
+        "false_per_ep": 1.733,
+        "false_by_phase": {
+          "P_transport": 12,
+          "P_grasp": 77,
+          "P_place": 14,
+          "P_verify": 1
+        }
+      },
+      "recovery": {
+        "episodes": 60,
+        "interventions": 121,
+        "int_per_ep": 2.02,
+        "recovery@3": 0.777,
+        "ep_with_recovery@3": 0.854,
+        "prim_to_recovery_mean": 1.21,
+        "phase_change@3": 0.38,
+        "stalled_prims@3_mean": 0.27,
+        "turns_after_mean": 6.4
+      },
+      "tokens": {
+        "fires": 121,
+        "fires_per_ep": 2.02,
+        "injections_per_ep": 2.02,
+        "injected_tokens_per_ep": 701.1,
+        "mean_block_tokens": 347.7,
+        "wall_mean_s": 2130.3
+      }
+    }
+  }
+}
