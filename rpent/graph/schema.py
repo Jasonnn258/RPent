@@ -31,6 +31,8 @@ OBSERVABLE_FACT_KEYS = frozenset({
     "final_dist_m",            # move 残差
     "found",                   # 感知可用性
     "world_error",
+    "descent_done",            # pi0_pick 下降段物证(result.diagnostics)
+    "eef_z",                   # 末端 z(states.robot0_eef_pos[2],本体感知)
     # 解释器/SM1 风格计数器(runtime 可算)
     "target_localized",        # 最近一次定位是否给出坐标
     "consec_move_stall",       # 连续停滞 move 数(residual >= MOVE_TOL)

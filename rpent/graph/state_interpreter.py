@@ -28,6 +28,8 @@ _DEFAULTS: dict[str, Any] = {
     "final_dist_m": None,
     "found": None,
     "world_error": None,
+    "descent_done": None,
+    "eef_z": None,
     "target_localized": None,
     "consec_move_stall": 0,
     "consec_pick_fails": 0,

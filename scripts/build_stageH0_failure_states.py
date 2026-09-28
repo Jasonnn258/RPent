@@ -23,7 +23,9 @@
                     其后 4 step 内 libero_terminated 仍为 False。
 
 decision point 取失败证据首次成立的那一步;pre-state = 该步的
-observable facts(last action、result 字段、tracker 类计数)。
+observable facts(last action、result 字段、tracker 类计数)。证据步自身
+libero_terminated=True 的(post-terminal)不构成决策点 —— episode 已结束,
+与三家族判据里的 `not term` 同口径排除。
 future outcome(episode 终局、后续 step 是否恢复)= analysis_only=true,
 任何 runtime/router prompt 不得读取(runtime_view 字段单独给出)。
 
@@ -135,7 +137,10 @@ def extract_points(steps: list[dict]) -> list[dict]:
         term = step.get("libero_terminated")
         hits: list[tuple[str, str]] = []  # (family, evidence_id)
 
-        if cmd == "pi0_pick":
+        # post-terminal 排除:证据步自身 libero_terminated=True 则 episode
+        # 已结束(analysis_only 终局也多为 success),不存在恢复决策点。
+        # 与 pi0_doubled/release 分支的 `not term` 同一口径。
+        if cmd == "pi0_pick" and not term:
             lift = res.get("peak_lift_m")
             if res.get("success") is True and isinstance(lift, (int, float)) \
                     and lift < LIFT_OK:
@@ -204,9 +209,14 @@ def main():
         outcome_success = bool(steps and steps[-1].get("libero_terminated"))
         run_id = Path(d).name
         for p in pts:
+            # runtime_view 的 pre-state = 原语结果字段 + SM1 风格计数器
+            # (真实 runtime 在 turn boundary 两者都可见 —— 触发器 T1-T7
+            # 消费的正是这些计数器;此前的 view 漏了计数器,属抽取 bug)。
+            full_obs = {**p["obs"],
+                        **episode_counters(steps, p["step"])}
             runtime_view = {
                 "task_goal": f"libero_spatial t{t} (pick-and-place)",
-                "observable_pre_state": p["obs"],
+                "observable_pre_state": full_obs,
                 "recent_window": p["window"],
             }
             rec = {
@@ -216,9 +226,7 @@ def main():
                 "primitive_step": p["step"],
                 "failure_family": p["family"],
                 "evidence_id": p["evidence_id"],
-                "observable_pre_state": {**p["obs"],
-                                         **episode_counters(steps,
-                                                            p["step"])},
+                "observable_pre_state": full_obs,
                 "latest_action": p["obs"].get("action"),
                 "latest_result": {k: v for k, v in p["obs"].items()
                                   if k != "action"},
@@ -294,6 +302,10 @@ _2026-09-28 生成 by scripts/build_stageH0_failure_states.py(确定性抽取,
   目标本 集排除并计数(本轮:{infra_excluded})。
 - 正常 waypoint repetition 处理:MOVE_STALL 判据要求 residual >=
   MOVE_TOL(0.03,冻结值)且窗口内不下降 —— 到位后的重复 move 不算。
+- post-terminal 排除:证据步自身 libero_terminated=True 的不算决策点
+  (episode 已结束;这 29 步全部为 reported_success_no_lift 型,且终局
+  多为 success —— 低抬升签名下的谓词触发,不是可恢复失败)。三家族
+  判据统一 `not term` 口径。
 
 ## 三类失败判据(冻结)
 

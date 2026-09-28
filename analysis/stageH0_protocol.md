@@ -12,6 +12,10 @@ _2026-09-28 生成 by scripts/build_stageH0_failure_states.py(确定性抽取,
   目标本 集排除并计数(本轮:0)。
 - 正常 waypoint repetition 处理:MOVE_STALL 判据要求 residual >=
   MOVE_TOL(0.03,冻结值)且窗口内不下降 —— 到位后的重复 move 不算。
+- post-terminal 排除:证据步自身 libero_terminated=True 的不算决策点
+  (episode 已结束;这 29 步全部为 reported_success_no_lift 型,且终局
+  多为 success —— 低抬升签名下的谓词触发,不是可恢复失败)。三家族
+  判据统一 `not term` 口径。
 
 ## 三类失败判据(冻结)
 
@@ -44,22 +48,22 @@ _2026-09-28 生成 by scripts/build_stageH0_failure_states.py(确定性抽取,
 {
   "episodes_scanned": 180,
   "episodes_infra_excluded": 0,
-  "episodes_with_failure_points": 90,
-  "episodes_contributing_points": 90,
-  "decision_points_total": 177,
+  "episodes_with_failure_points": 86,
+  "episodes_contributing_points": 86,
+  "decision_points_total": 148,
   "points_by_family": {
-    "FALSE_GRASP": 142,
+    "FALSE_GRASP": 113,
     "MOVE_CONTACT_STALL": 17,
     "RELEASE_PREDICATE_STALL": 18
   },
   "episodes_by_family": {
-    "FALSE_GRASP": 78,
+    "FALSE_GRASP": 71,
     "MOVE_CONTACT_STALL": 16,
     "RELEASE_PREDICATE_STALL": 17
   },
   "points_by_family_split": {
-    "FALSE_GRASP/discovery": 51,
-    "FALSE_GRASP/validation": 91,
+    "FALSE_GRASP/discovery": 41,
+    "FALSE_GRASP/validation": 72,
     "MOVE_CONTACT_STALL/discovery": 9,
     "MOVE_CONTACT_STALL/validation": 8,
     "RELEASE_PREDICATE_STALL/discovery": 9,
