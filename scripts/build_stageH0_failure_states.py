@@ -93,6 +93,37 @@ def obs_facts(step: dict) -> dict:
     return {k: v for k, v in facts.items() if v is not None}
 
 
+def episode_counters(steps: list[dict], i: int) -> dict:
+    """截至第 i 步的 runtime 可算计数器(SM1 tracker 风格,零未来信息)。
+    与 state_interpreter 的合法输入词汇一致。"""
+    consec_stall = 0
+    for j in range(i, -1, -1):
+        sj = steps[j]
+        if (sj.get("command") or {}).get("action") not in ("move_to",
+                                                           "move_pose"):
+            break
+        d = (sj.get("result") or {}).get("final_dist_m")
+        if isinstance(d, (int, float)) and d >= 0.03:
+            consec_stall += 1
+        else:
+            break
+    release_open = False
+    since_rel = None
+    prior_pick = None
+    for j in range(i, -1, -1):
+        sj = steps[j]
+        cmd = (sj.get("command") or {}).get("action")
+        res = sj.get("result") or {}
+        if cmd == "release" and since_rel is None:
+            since_rel = i - j
+            release_open = (res.get("final_gripper_opening") or 0) > 0.05
+        if cmd == "pi0_pick" and prior_pick is None and j < i:
+            prior_pick = res.get("success")
+    return {"consec_move_stall": consec_stall, "release_open": release_open,
+            "actions_since_release": since_rel,
+            "prior_pick_success": prior_pick}
+
+
 def extract_points(steps: list[dict]) -> list[dict]:
     """一个 episode 内的全部失败 decision points(每步可多家族命中,
     但同家族连续步只保留首个 —— 后续步是同一停滞的延续)。"""
@@ -185,7 +216,9 @@ def main():
                 "primitive_step": p["step"],
                 "failure_family": p["family"],
                 "evidence_id": p["evidence_id"],
-                "observable_pre_state": p["obs"],
+                "observable_pre_state": {**p["obs"],
+                                         **episode_counters(steps,
+                                                            p["step"])},
                 "latest_action": p["obs"].get("action"),
                 "latest_result": {k: v for k, v in p["obs"].items()
                                   if k != "action"},
