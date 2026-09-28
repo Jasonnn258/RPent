@@ -516,8 +516,10 @@ def main():
         A(f"\n**零合法出边 fire {len(empty_legal)} 次(审计 coverage 应为 0,"
           f"须核查)**:{empty_legal[:10]}")
     if banned_hits:
-        A(f"\n**注入块违禁词命中 {len(banned_hits)}(冒烟检查项,应为 0)"
-          f"**:{banned_hits[:10]}")
+        A(f"\n**注入块违禁词命中 {len(banned_hits)}**:口径(prereg §3(c)"
+          f" 2026-09-28 澄清)——新内容臂(P2/GRAPH)应为 0;CARD 命中为"
+          f"冻结 61 卡正文继承(2 张卡 falsify/how_to 含 'fail',G0.5 同款"
+          f"注入),如实报告、不改卡:{banned_hits[:10]}")
     if infra_missing:
         A(f"\n### infra 缺失格(未计入,调度器重试后应清零)\n")
         for a, t, sd, r_ in infra_missing:
