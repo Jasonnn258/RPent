@@ -109,8 +109,15 @@ micro_reposition→{move_to,move_pose,rotate_wrist};
 repick_replace→{pi0_pick,move_to,release};
 observe→{detect,segment,view_driver_state};
 planner_judgment/finish→全原语集。
-判定 = 注入块文本与该映射原语集的词面交为空。图作为**评分器**评三臂
-(冻结,非_actor)。
+判定 = 注入块文本与匹配词表的词面交为空;匹配词表 = 上述映射原语集
+**∪ 合法边 action_family 名本身**。〔修订 2026-09-28,先于任何 H1 在线
+结果分析:graph v0 的渲染词汇是 action_family(如 grasp_offset)+现象
+描述,不含原语名(pi0_pick 等);原字面口径会把语义上完全相位适配的
+GRAPH 块全判 wrong——度量对象应是"建议是否指向该状态的合法行动",
+不是建议用哪种词表书写。action_family 名加入匹配词表后,CARD/P2 的
+判定不变(卡片/泛型文本不含 action_family 复合词)。guard_violation
+不受影响(它评判 planner 的下一条**实际动作原语**,本就是原语词汇)。〕
+图作为**评分器**评三臂(冻结,非_actor)。
 
 **guard_violation_rate(仅 H1-GRAPH,安全门)**:fire 后 planner 的下一条
 **动作**原语(pi0_pick/pi0_doubled/move_to/move_pose/release/set_gripper/
