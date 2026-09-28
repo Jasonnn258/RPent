@@ -1,0 +1,376 @@
+# Stage H — Frozen Local State-Transition Graph v0(2026-09-28 冻结)
+#
+# 语义:node = 抽象可观测物理/执行状态;edge = 可执行的恢复/继续策略。
+# 全部 guard/verifier 只用 runtime-observable 事实(白名单见
+# rpent/graph/schema.py OBSERVABLE_FACT_KEYS),零 benchmark GT、零未来字段。
+#
+# 覆盖:H0 三类失败家族 + 必要正常流(11 nodes / 26 edges)。
+# status 初始 frozen/candidate;utility 初始 unknown;本阶段禁止在线修改。
+#
+# 渲染禁忌(PhaseTracker pick 启发式 grep 禁词,镜像 B2 纪律):
+# guard/expected/verifier 等渲染文本不得含 fail/error/could not/no object
+# 子串 —— 用 "not established / stalled / unstable" 等中性表述。
+
+meta:
+  version: v0
+  frozen_date: "2026-09-28"
+  suite: libero_spatial_task
+  notes: >
+    H1 用图:只读。节点判定由 deterministic state interpreter 完成;
+    edge 选择 H1 交给 GLM planner(渲染 legal edges),H2 交给 local router。
+
+nodes:
+  PRE_GRASP:
+    desc: "尚未尝试抓取;定位/逼近阶段"
+    terminal: false
+  GRASP_CHECK:
+    desc: "抓取已上报成功,抬升证据待核"
+    terminal: false
+  GRASP_CONFIRMED:
+    desc: "抓取有物证(peak_lift 达标)"
+    terminal: false
+  FALSE_GRASP:
+    desc: "抓取未建立:自报未成或抬升缺失"
+    terminal: false
+  MOVE_PROGRESS:
+    desc: "move 在推进或已到位"
+    terminal: false
+  MOVE_STALL:
+    desc: "move 连续停滞(残差 >= 容差且不降)"
+    terminal: false
+  CONTACT_STALL:
+    desc: "接触技能(pi0_doubled)未达成"
+    terminal: false
+  PLACE_CHECK:
+    desc: "持物到位,进入放置/释放准备"
+    terminal: false
+  RELEASE_PREDICATE_STALL:
+    desc: "已开爪但任务谓词未触发"
+    terminal: false
+  UNCERTAIN:
+    desc: "可观测事实不足,需定向观察"
+    terminal: false
+  DONE:
+    desc: "任务谓词已触发(libero_terminated)"
+    terminal: true
+
+edges:
+  # ---------------- PRE_GRASP ----------------
+  - id: PG-1
+    source_state: PRE_GRASP
+    action_family: perceive
+    guard: {target_localized: false}
+    expected_transition: "segment/back_project 返回可用目标位置(found=True)"
+    target_state: PRE_GRASP
+    verifier: {found: true}
+    falsify: "segment 再次空结果 -> 改用 hi-res 区域回投影"
+    fallback: PG-2
+    evidence: "memB 卡:hi-res agentview 区域回投影定位"
+    status: frozen
+    utility: unknown
+  - id: PG-2
+    source_state: PRE_GRASP
+    action_family: perceive_hires
+    guard: {target_localized: false}
+    expected_transition: "hi-res 回投影给出目标坐标"
+    target_state: PRE_GRASP
+    verifier: {target_localized: true}
+    falsify: "仍无可用坐标 -> UNCERTAIN 观察路径"
+    fallback: UN-1
+    evidence: "memB 卡:hi-res 回投影"
+    status: frozen
+    utility: unknown
+  - id: PG-3
+    source_state: PRE_GRASP
+    action_family: grasp
+    guard: {target_localized: true}
+    expected_transition: "pi0_pick 上报成功且 peak_lift >= 5mm"
+    target_state: GRASP_CHECK
+    verifier: {peak_lift_m: {gte: 0.005}}
+    falsify: "自报未成或抬升缺失 -> FALSE_GRASP 路径"
+    fallback: FG-1
+    evidence: "suite 通用抓取链"
+    status: frozen
+    utility: unknown
+
+  # ---------------- FALSE_GRASP ----------------
+  - id: FG-1
+    source_state: FALSE_GRASP
+    action_family: perceive_hires
+    guard: {}
+    expected_transition: "hi-res 回投影更新目标/抓点坐标"
+    target_state: PRE_GRASP
+    verifier: {target_localized: true}
+    falsify: "坐标不变 -> 换抓点偏移"
+    fallback: FG-3
+    evidence: "memB 卡:拒绝同名干扰物后重定位"
+    status: frozen
+    utility: unknown
+  - id: FG-2
+    source_state: FALSE_GRASP
+    action_family: grasp_retry
+    guard: {target_localized: true, consec_pick_fails: {lt: 3}}
+    expected_transition: "重抓后 peak_lift >= 5mm"
+    target_state: GRASP_CHECK
+    verifier: {peak_lift_m: {gte: 0.005}}
+    falsify: "再次抬升缺失 -> 必须换策略,不原样重试"
+    fallback: FG-3
+    evidence: "160 次录制臂抓取标定(B2):抬升是唯一物证"
+    status: frozen
+    utility: unknown
+  - id: FG-3
+    source_state: FALSE_GRASP
+    action_family: grasp_offset
+    guard: {}
+    expected_transition: "偏移抓点(±1-2cm / 换 yaw)后 peak_lift >= 5mm"
+    target_state: GRASP_CHECK
+    verifier: {peak_lift_m: {gte: 0.005}}
+    falsify: "连续 3 次抓取未建立 -> 观察物体状态"
+    fallback: UN-1
+    evidence: "memB 卡:offset-compensated 抓取"
+    status: frozen
+    utility: unknown
+
+  # ---------------- GRASP_CHECK / GRASP_CONFIRMED ----------------
+  - id: GC-1
+    source_state: GRASP_CHECK
+    action_family: verify_hold
+    guard: {}
+    expected_transition: "持物偏移测量(wrist 回投影)确认物体在爪"
+    target_state: GRASP_CONFIRMED
+    verifier: {peak_lift_m: {gte: 0.005}}
+    falsify: "抬升证据缺失 -> 按 FALSE_GRASP 处理"
+    fallback: FG-2
+    evidence: "measured held offset 卡"
+    status: frozen
+    utility: unknown
+  - id: GC-2
+    source_state: GRASP_CONFIRMED
+    action_family: transport
+    guard: {}
+    expected_transition: "move_to 残差下降,抵达放置区上方"
+    target_state: MOVE_PROGRESS
+    verifier: {final_dist_m: {lt: 0.03}}
+    falsify: "残差连续不降 -> MOVE_STALL 路径"
+    fallback: MS-1
+    evidence: "suite 通用搬运链"
+    status: frozen
+    utility: unknown
+
+  # ---------------- MOVE_STALL ----------------
+  - id: MS-1
+    source_state: MOVE_STALL
+    action_family: perceive
+    guard: {}
+    expected_transition: "回投影当前目标区域,刷新目标坐标"
+    target_state: MOVE_STALL
+    verifier: {found: true}
+    falsify: "目标不变且仍停滞 -> 分段逼近"
+    fallback: MS-2
+    evidence: "memB 卡:re-center over target"
+    status: frozen
+    utility: unknown
+  - id: MS-2
+    source_state: MOVE_STALL
+    action_family: move_waypoint
+    guard: {}
+    expected_transition: "分段逼近:先到中间点,残差应下降 > 5mm"
+    target_state: MOVE_PROGRESS
+    verifier: {final_dist_m: {delta_lt: -0.005}}
+    falsify: "残差未降 -> 退后再进"
+    fallback: MS-3
+    evidence: "winning_sequence 卡:两段路点搬运"
+    status: frozen
+    utility: unknown
+  - id: MS-3
+    source_state: MOVE_STALL
+    action_family: retreat_reapproach
+    guard: {}
+    expected_transition: "抬升 z 退开,换平面路径再进"
+    target_state: MOVE_PROGRESS
+    verifier: {final_dist_m: {delta_lt: -0.005}}
+    falsify: "仍停滞 -> 定向观察当前场景"
+    fallback: UN-1
+    evidence: "memB 卡:retreat clear 后 re-approach"
+    status: frozen
+    utility: unknown
+
+  # ---------------- CONTACT_STALL ----------------
+  - id: CS-1
+    source_state: CONTACT_STALL
+    action_family: perceive
+    guard: {}
+    expected_transition: "hi-res 回投影确认接触目标实际位置"
+    target_state: CONTACT_STALL
+    verifier: {target_localized: true}
+    falsify: "目标位置无误 -> 调爪距重试"
+    fallback: CS-2
+    evidence: "memB 卡:wrist 回投影核位"
+    status: frozen
+    utility: unknown
+  - id: CS-2
+    source_state: CONTACT_STALL
+    action_family: grip_adjust_retry
+    guard: {}
+    expected_transition: "调开爪距/下压深度后 pi0_doubled 终止任务"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "仍未终止 -> 换低爪距 settling 接触"
+    fallback: CS-3
+    evidence: "memB 卡:low open-gripper settling contact"
+    status: frozen
+    utility: unknown
+  - id: CS-3
+    source_state: CONTACT_STALL
+    action_family: contact_settling
+    guard: {}
+    expected_transition: "低位 settling 接触触发谓词"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "仍不终止 -> 定向观察后由 planner 决策"
+    fallback: UN-1
+    evidence: "memB 卡:settling contact at plate"
+    status: frozen
+    utility: unknown
+
+  # ---------------- PLACE_CHECK ----------------
+  - id: PC-1
+    source_state: PLACE_CHECK
+    action_family: place
+    guard: {prior_pick_success: true}
+    expected_transition: "下降到放置面并 release,谓词触发"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "开爪后谓词未触发 -> RELEASE_PREDICATE_STALL 路径"
+    fallback: RS-1
+    evidence: "suite 通用放置链"
+    status: frozen
+    utility: unknown
+  - id: PC-2
+    source_state: PLACE_CHECK
+    action_family: perceive_hires
+    guard: {prior_pick_success: null}
+    expected_transition: "回投影放置面,确认下落高度"
+    target_state: PLACE_CHECK
+    verifier: {target_localized: true}
+    falsify: "放置面不明 -> 定向观察"
+    fallback: UN-1
+    evidence: "hi-res region 回投影"
+    status: frozen
+    utility: unknown
+
+  # ---------------- RELEASE_PREDICATE_STALL ----------------
+  - id: RS-1
+    source_state: RELEASE_PREDICATE_STALL
+    action_family: micro_reposition
+    guard: {actions_since_release: {lte: 6}}
+    expected_transition: "微移(小 y 偏移/沉降)后谓词在数步内触发"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "谓词仍未触发 -> 重抓重放"
+    fallback: RS-2
+    evidence: "memB 卡:small positive y offset at plate"
+    status: frozen
+    utility: unknown
+  - id: RS-2
+    source_state: RELEASE_PREDICATE_STALL
+    action_family: repick_replace
+    guard: {}
+    expected_transition: "重抓物体并深放(release 前降至更近放置面),谓词触发"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "重放仍不触发 -> 短程 repick 或本地 settling"
+    fallback: RS-3
+    evidence: "memB 卡:short local repick after upright-on-plate"
+    status: frozen
+    utility: unknown
+  - id: RS-3
+    source_state: RELEASE_PREDICATE_STALL
+    action_family: contact_settling
+    guard: {}
+    expected_transition: "低开爪 settling 接触触发谓词"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: "全部路径用尽 -> planner 自主决策(DEFER 语义)"
+    fallback: UN-1
+    evidence: "memB 卡:low open-gripper settling"
+    status: frozen
+    utility: unknown
+
+  # ---------------- MOVE_PROGRESS ----------------
+  - id: MP-1
+    source_state: MOVE_PROGRESS
+    action_family: transport
+    guard: {prior_pick_success: true}
+    expected_transition: "继续搬运至放置区上方(residual < 容差)"
+    target_state: PLACE_CHECK
+    verifier: {final_dist_m: {lt: 0.03}}
+    falsify: "残差回升且不降 -> MOVE_STALL 路径"
+    fallback: MS-2
+    evidence: "suite 通用搬运链"
+    status: frozen
+    utility: unknown
+  - id: MP-2
+    source_state: MOVE_PROGRESS
+    action_family: approach
+    guard: {prior_pick_success: false}
+    expected_transition: "逼近目标后发起抓取"
+    target_state: GRASP_CHECK
+    verifier: {peak_lift_m: {gte: 0.005}}
+    falsify: "抓取未建立 -> FALSE_GRASP 路径"
+    fallback: FG-1
+    evidence: "suite 通用抓取链"
+    status: frozen
+    utility: unknown
+  - id: MP-3
+    source_state: MOVE_PROGRESS
+    action_family: perceive
+    guard: {prior_pick_success: null}
+    expected_transition: "移动后刷新观测,回到解释器"
+    target_state: UNCERTAIN
+    verifier: {found: true}
+    falsify: "观测不可用 -> 保持 UNCERTAIN"
+    fallback: UN-1
+    evidence: "感知-行动循环"
+    status: frozen
+    utility: unknown
+
+  # ---------------- UNCERTAIN ----------------
+  - id: UN-1
+    source_state: UNCERTAIN
+    action_family: observe
+    guard: {}
+    expected_transition: "定向观察(hi-res / driver state)后事实足以判定"
+    target_state: UNCERTAIN
+    verifier: {found: true}
+    falsify: "仍不定 -> 交给 planner 自主决策"
+    fallback: UN-2
+    evidence: "B2 OBSERVE 决策先例"
+    status: frozen
+    utility: unknown
+  - id: UN-2
+    source_state: UNCERTAIN
+    action_family: planner_judgment
+    guard: {}
+    expected_transition: "planner 依据当前证据自选下一步(无图边强制)"
+    target_state: UNCERTAIN
+    verifier: {}
+    falsify: "观察发现新证据 -> 回解释器"
+    fallback: ""
+    evidence: "B2 有界 REASON 先例"
+    status: frozen
+    utility: unknown
+
+  # ---------------- DONE ----------------
+  - id: DN-1
+    source_state: DONE
+    action_family: finish
+    guard: {libero_terminated: true}
+    expected_transition: "finish(status=success)"
+    target_state: DONE
+    verifier: {libero_terminated: true}
+    falsify: ""
+    fallback: ""
+    evidence: "任务谓词已触发"
+    status: frozen
+    utility: unknown
