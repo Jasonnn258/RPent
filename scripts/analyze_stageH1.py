@@ -390,8 +390,8 @@ def main():
     m2 = None if gv is None or gv[1] == 0 else gv[0] / gv[1] <= 0.02
     max_vr = max((v for v in (vr["h1C"], vr["h1P2"]) if v is not None),
                  default=None)
-    max_sr = max(sr["h1C"], sr["h1P2"]) if sr["h1C"] is not None \
-        or sr["h1P2"] is not None else None
+    max_sr = max((v for v in (sr["h1C"], sr["h1P2"]) if v is not None),
+                 default=None)
     gate_a = (vr["h1G"] is not None and max_vr is not None
               and vr["h1G"] >= max_vr + 0.10
               and sr["h1G"] is not None and sr["h1G"] >= max_sr - 0.03)
@@ -480,8 +480,10 @@ def main():
       f"{pct(0.5 * wp['h1C']) if wp['h1C'] is not None else 'n/a(CARD 分母 0)'} | "
       f"{'PASS' if m1 else ('FAIL' if m1 is False else 'N/A')} |")
     if gv:
-        A(f"| M2 guard_violation | GRAPH ≤ 2% | {gv[0] / gv[1]:.1%} "
-          f"({gv[0]}/{gv[1]}) | {'PASS' if m2 else 'FAIL'} |")
+        gv_txt = (f"{gv[0] / gv[1]:.1%} ({gv[0]}/{gv[1]})"
+                  if gv[1] else "0/0")
+        A(f"| M2 guard_violation | GRAPH ≤ 2% | {gv_txt} | "
+          f"{'PASS' if m2 else ('FAIL' if m2 is False else 'N/A')} |")
     A(f"| 行为门 A | VR_G ≥ max(VR_ctrl)+10pp 且 SR_G ≥ max(SR_ctrl)−3pp | "
       f"VR {pct(vr['h1G'])} vs {pct(max_vr)}+10pp;SR "
       f"{pct(sr['h1G'])} vs {pct(max_sr)}−3pp | "
