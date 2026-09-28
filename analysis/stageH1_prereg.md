@@ -37,9 +37,13 @@ RPENT_MEMORY_QUERY_REASON=0`。
   prior_pick_success;由 recall 内部维护的原语结果历史重算)构造白名单事实,
   过冻结 interpreter(rpent/graph/state_interpreter.interpret)得 active node。
 - 触发条件:node ∈ {FALSE_GRASP, MOVE_STALL, CONTACT_STALL,
-  RELEASE_PREDICATE_STALL}(四失败节点)且 ≠ 上一次已触发节点
-  (同节点连续停滞只触发一次 = 基准"同家族紧邻步只保留首个"的运行时镜像;
-  节点切换到另一失败家族可再次触发)。
+  RELEASE_PREDICATE_STALL}(四失败节点)且同**基准家族**非邻接 ——
+  按家族键记 last_fam_step,`last >= i-1` 即延续(与基准抽取器
+  "同家族紧邻步只保留首个"逐语句同构,含 skip-不更新的 quirk;step 序
+  只计 actuation 原语,感知步不进序 —— states.json 词汇)。离开失败
+  家族后复发可再次触发。〔修订 2026-09-28,先于任何运行:把
+  "≠ 上次触发节点"精确为家族键邻接抑制,与基准抽取器逐语句一致,
+  使 §3(b) 重放校验可逐点对齐。〕
 - 冲刷/冷却/上限:走冻结的 per-result 冲刷路径(_flush_boundary 语义:
   冷却中丢弃、MAX_TRIGGERS_PER_EPISODE=6 到顶丢弃),与 v1_per_result/
   progress 完全同一实现。

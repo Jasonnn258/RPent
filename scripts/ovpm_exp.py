@@ -237,6 +237,34 @@ COND_ENV = {
                 "RPENT_MEMORY_RANK": "Q0_FIXED",
                 "RPENT_MEMORY_EXTRA_BANK":
                     "analysis/stageG_banks/{suite}/bank_max"},
+    # ---- Stage H1 (2026-09-28) ------------------------------------------
+    # 三臂共享 graph 触发器(interpreter 失败节点),唯一差异 = 注入内容
+    # (stageH1_prereg.md §2):P2 = F3 泛型重定向(= g05P2 内容);
+    # CARD = F4 中性头 + 冻结 Top-3 卡(= g05P3 内容);GRAPH = 冻结图
+    # active node 合法出边(渲染在 rpent/graph)。检索/排序/query 全
+    # 部与 g05 系同配置(common + Q0_FIXED,reason 永不进 query)。
+    "h1P2": {"RPENT_STRUCTURED_MEMORY": "1",
+             "RPENT_MEMORY_ACCESS_FIX": "1",
+             "RPENT_MEMORY_TRIGGER": "graph",
+             "RPENT_MEMORY_QUERY_MODE": "common",
+             "RPENT_MEMORY_RANK": "Q0_FIXED",
+             "RPENT_MEMORY_QUERY_REASON": "0",
+             "RPENT_MEMORY_INJECTION_MODE": "generic_refresh"},
+    "h1C": {"RPENT_STRUCTURED_MEMORY": "1",
+            "RPENT_MEMORY_ACCESS_FIX": "1",
+            "RPENT_MEMORY_TRIGGER": "graph",
+            "RPENT_MEMORY_QUERY_MODE": "common",
+            "RPENT_MEMORY_RANK": "Q0_FIXED",
+            "RPENT_MEMORY_QUERY_REASON": "0",
+            "RPENT_MEMORY_INJECTION_MODE": "memory_only",
+            "RPENT_MEMORY_BLOCK_REASON": "0"},
+    "h1G": {"RPENT_STRUCTURED_MEMORY": "1",
+            "RPENT_MEMORY_ACCESS_FIX": "1",
+            "RPENT_MEMORY_TRIGGER": "graph",
+            "RPENT_MEMORY_QUERY_MODE": "common",
+            "RPENT_MEMORY_RANK": "Q0_FIXED",
+            "RPENT_MEMORY_QUERY_REASON": "0",
+            "RPENT_MEMORY_INJECTION_MODE": "graph_block"},
 }
 
 DEV_TASKS = [0, 7, 9]
@@ -252,6 +280,16 @@ B2_NEW_TASKS = [2, 3, 5]
 # reproduce online; no new features added to probe it).
 MEMB_TASKS = [3, 5, 9]
 P0_SUITE = "libero_spatial_task"
+
+# Stage H1 matched cells(stageH1_prereg.md §4:REL 前 10 → CONTACT 至 10 →
+# 仅 FG 补足 30,按 (task,seed) 升序;锁定于 prereg,不得增删)。
+H1_CELLS = [
+    (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8),
+    (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15),
+    (3, 16), (3, 18), (5, 1), (5, 13), (5, 18),
+    (9, 2), (9, 3), (9, 5), (9, 6), (9, 8), (9, 10), (9, 12), (9, 13),
+    (9, 15), (9, 17),
+]
 
 # ---- Stage G grids (stageG_suite_audit.md / stageG_subset_manifest.md) ----
 # Final-test suites: same _task perturbation axis as the DEV suite, the
@@ -614,6 +652,30 @@ def build_episodes(args, done):
         conds = conds or ["g05P0", "g05P1", "g05P2", "g05P3"]
         tasks = tasks or MEMB_TASKS
         repeats = repeats or [1]
+    elif args.stage == "h1":
+        # Stage H1 (stageH1_prereg.md): 30 locked matched cells × 3 arms.
+        # Cell list is explicit — --tasks/--seeds are ignored here on
+        # purpose (no silent grid drift). OVPM_H1_CELLS 仅用于 DEV 冒烟
+        # (格式 "task:seed,...",冒烟格必须取 30 格之外,如 3:19)。
+        conds = conds or ["h1P2", "h1C", "h1G"]
+        repeats = repeats or [1]
+        cells = H1_CELLS
+        ov = os.environ.get("OVPM_H1_CELLS")
+        if ov:
+            cells = [tuple(int(x) for x in c.split(":")) for c in
+                     ov.split(",")]
+            print(f"[h1] OVPM_H1_CELLS smoke override: {cells} "
+                  f"(30-cell frozen list bypassed)")
+        eps = []
+        for cond in conds:
+            for (t, sd) in cells:
+                for r in repeats:
+                    k = (args.stage, args.tier, P0_SUITE, t, sd, cond, r)
+                    if k not in done:
+                        eps.append(dict(stage=args.stage, tier=args.tier,
+                                        suite=P0_SUITE, task=t, seed=sd,
+                                        cond=cond, repeat=r))
+        return eps
     elif args.stage in ("g1", "g2", "g3", "g4"):
         # Stage G: multi-suite grids on the frozen final-test suites
         # (stageG_subset_manifest.md). --suites/--tasks override for the
@@ -753,7 +815,7 @@ def main():
     ap.add_argument("--stage", required=True,
                     choices=["sanity", "dev", "devC", "heldout", "dev2",
                              "stage1", "memB", "memC", "smoke",
-                             "g0", "g05", "g1", "g2", "g3", "g4"])
+                             "g0", "g05", "g1", "g2", "g3", "g4", "h1"])
     ap.add_argument("--tier", default="glm-5.3", choices=sorted(TIERS))
     ap.add_argument("--conds", help="comma list overriding stage defaults")
     ap.add_argument("--tasks", help="comma list, e.g. 0,7,9")

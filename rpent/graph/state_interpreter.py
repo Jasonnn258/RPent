@@ -32,6 +32,7 @@ _DEFAULTS: dict[str, Any] = {
     "eef_z": None,
     "target_localized": None,
     "consec_move_stall": 0,
+    "move_win_first_dist": None,  # 3-move 停滞窗口的首残差(趋势判据)
     "consec_pick_fails": 0,
     "release_open": False,
     "actions_since_release": None,
@@ -61,7 +62,9 @@ def interpret(facts: dict[str, Any] | None, last_action: str = "") -> str:
     # 1) 感知不可用 -> UNCERTAIN(显式输出)
     if f["found"] is False or f["world_error"]:
         return "UNCERTAIN"
-    # 2) 失败家族(按最近 primitive)
+    # 2) 失败家族(按最近 primitive;判据与基准抽取器逐语句同构 ——
+    #    MOVE_STALL = 3-move 窗口全未到位且残差不下降,consec>=2 的
+    #    单纯远距 move 是 MOVE_PROGRESS)
     if action == "pi0_pick":
         if f["success"] is False:
             return "FALSE_GRASP"
@@ -78,13 +81,16 @@ def interpret(facts: dict[str, Any] | None, last_action: str = "") -> str:
     if action in ("move_to", "move_pose"):
         d = f["final_dist_m"]
         if isinstance(d, (int, float)):
-            if f["consec_move_stall"] >= 2 and d >= MOVE_TOL:
-                return "MOVE_STALL"
-            return "MOVE_PROGRESS"  # 到位或首停滞(转运中)
+            wf = f["move_win_first_dist"]
+            if f["consec_move_stall"] >= 3 and isinstance(wf, (int, float)) \
+                    and d >= wf - 1e-4:
+                return "MOVE_STALL"  # 3 连 move 未到位且残差不降(基准窗口)
+            return "MOVE_PROGRESS"  # 到位 / 在途 / 残差在降 = 有进展
     # 3) 放置准备:持物(上次抓取有物证)且未开爪
     if f["prior_pick_success"] is True and f["release_open"] is not True:
         return "PLACE_CHECK"
     # 4) 开爪后任意后续动作仍无谓词 -> 释放停滞延续
+    # (状态标签语义;H1 触发器只在 release 证据步触发 —— 见 pipeline)
     if f["release_open"] is True and isinstance(
             f["actions_since_release"], int):
         return "RELEASE_PREDICATE_STALL"

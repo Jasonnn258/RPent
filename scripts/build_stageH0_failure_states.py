@@ -97,8 +97,9 @@ def obs_facts(step: dict) -> dict:
 
 def episode_counters(steps: list[dict], i: int) -> dict:
     """截至第 i 步的 runtime 可算计数器(SM1 tracker 风格,零未来信息)。
-    与 state_interpreter 的合法输入词汇一致。"""
-    consec_stall = 0
+    与 state_interpreter / rpent.graph.pipeline.counters_from_history 的
+    合法输入词汇逐键一致(含 move_win_first_dist 趋势判据)。"""
+    run_dists = []  # 从 i 向前的连续停滞 move 残差(逆序)
     for j in range(i, -1, -1):
         sj = steps[j]
         if (sj.get("command") or {}).get("action") not in ("move_to",
@@ -106,9 +107,11 @@ def episode_counters(steps: list[dict], i: int) -> dict:
             break
         d = (sj.get("result") or {}).get("final_dist_m")
         if isinstance(d, (int, float)) and d >= 0.03:
-            consec_stall += 1
+            run_dists.append(d)
         else:
             break
+    consec_stall = len(run_dists)
+    move_win_first = run_dists[2] if consec_stall >= 3 else None
     release_open = False
     since_rel = None
     prior_pick = None
@@ -121,7 +124,9 @@ def episode_counters(steps: list[dict], i: int) -> dict:
             release_open = (res.get("final_gripper_opening") or 0) > 0.05
         if cmd == "pi0_pick" and prior_pick is None and j < i:
             prior_pick = res.get("success")
-    return {"consec_move_stall": consec_stall, "release_open": release_open,
+    return {"consec_move_stall": consec_stall,
+            "move_win_first_dist": move_win_first,
+            "release_open": release_open,
             "actions_since_release": since_rel,
             "prior_pick_success": prior_pick}
 

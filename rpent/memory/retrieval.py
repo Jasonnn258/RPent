@@ -96,8 +96,11 @@ MAX_TRIGGERS_PER_EPISODE = 6
 # analysis/stageG05_preregistration.md 中预注册(下面的文本在那里逐字
 # 冻结 — 不得改写措辞)。
 INJECTION_MODES = ("full", "memory_only", "reason_only", "generic_refresh",
-                   "none")
-_NO_RETRIEVAL_MODES = ("reason_only", "generic_refresh", "none")
+                   "none", "graph_block")
+# graph_block(Stage H1):不做记忆检索,注入冻结图的 active node 合法出边
+# (rpent/graph/pipeline.render_guidance)—— 与 P0/P1/P2 同走无检索路径。
+_NO_RETRIEVAL_MODES = ("reason_only", "generic_refresh", "none",
+                       "graph_block")
 
 # F3 — P2 generic_refresh 注入块(与任务无关;不含 reason、不含卡片)。
 GENERIC_REFRESH_BLOCK = (
@@ -320,8 +323,9 @@ class DecisionMemory:
                 "'native' or 'common' — fail fast rather than silently "
                 "contaminating an arm")
         # G0.5 §18:注入模式(第 3 通道旋钮,仅实验用)。"full" = 历史行为,
-        # 对所有既有模式逐字节一致;其余四个是 G0.5 的臂,只在与它们被
-        # 预注册时配套的 v1_per_result 触发器下合法。
+        # 对所有既有模式逐字节一致;G0.5 四臂只配 v1_per_result 触发器,
+        # H1 三臂(generic_refresh/memory_only/graph_block)只配 graph
+        # 触发器(stageH1_prereg.md §2)。
         self.injection_mode = os.environ.get("RPENT_MEMORY_INJECTION_MODE",
                                              "full")
         if self.injection_mode not in INJECTION_MODES:
@@ -329,12 +333,19 @@ class DecisionMemory:
                 f"RPENT_MEMORY_INJECTION_MODE={self.injection_mode!r} must "
                 f"be one of {sorted(INJECTION_MODES)}")
         if (self.injection_mode != "full"
-                and self.mode != "v1_per_result"):
+                and self.mode not in ("v1_per_result", "graph")):
             raise ValueError(
                 "G0.5 injection modes are pre-registered for "
                 "RPENT_MEMORY_TRIGGER=v1_per_result only (got "
                 f"{self.mode!r}) — fail fast rather than running an "
                 "undeclared arm configuration")
+        # H1:graph_block 的渲染依赖 graph 触发器状态(_gtrig)—— 其它
+        # 触发模式下会在 fire 时 AttributeError,必须在加载期拒绝。
+        if self.injection_mode == "graph_block" and self.mode != "graph":
+            raise ValueError(
+                "RPENT_MEMORY_INJECTION_MODE=graph_block is pre-registered "
+                "for RPENT_MEMORY_TRIGGER=graph only (stageH1_prereg.md "
+                f"§2), got trigger={self.mode!r}")
         # G0.5 §18 显式别名旋钮 — 与它们所重复的旋钮交叉校验,确保过期
         # 或互相矛盾的 env 永远无法静默重定义一个臂。
         _qr = os.environ.get("RPENT_MEMORY_QUERY_REASON")
@@ -351,6 +362,20 @@ class DecisionMemory:
                 "RPENT_MEMORY_BLOCK_REASON=0 marks the P3 memory_only "
                 "neutral header; it cannot be combined with "
                 f"injection_mode={self.injection_mode!r}")
+        # Stage H1(2026-09-28):graph 触发器状态 —— 逐结果维护白名单
+        # 事实历史,interpreter 判失败节点即排队(与基准抽取器同语义;
+        # 运行时/离线一致性由 scripts/replay_stageH1_trigger.py 校验)。
+        # 放在全部 env 校验之后:非法臂配置先 fail-fast,再谈加载冻结图。
+        self._gtrig = None
+        if mode == "graph":
+            if self.injection_mode not in ("generic_refresh", "memory_only",
+                                           "graph_block"):
+                raise ValueError(
+                    "graph trigger is pre-registered only with the three "
+                    "H1 injection modes (stageH1_prereg.md §2), got "
+                    f"{self.injection_mode!r}")
+            from rpent.graph.pipeline import GraphTrigger
+            self._gtrig = GraphTrigger()
 
     # ------------------------------------------------------------- 观测
     def on_tool_result(self, name: str, content: str, is_error: bool) -> None:
@@ -381,6 +406,24 @@ class DecisionMemory:
             self._v1pr_observe(name, data, is_error)
         elif self.mode == "motion_stuck":
             self._mstuck_observe(name, data)
+        elif self.mode == "graph":
+            self._graph_observe(name, data)
+
+    def _graph_observe(self, name: str, data: dict) -> None:
+        """Stage H1 模式 "graph":冻结 interpreter 逐结果评估,失败节点
+        即排队(镜像 _v1pr 的排队语义:首排队保留,冲刷/冷却/上限走
+        _flush_boundary 冻结路径)。判定规则在 rpent/graph/pipeline —
+        本方法只做排队,检索/注入/日志路径与其它模式逐字节一致。"""
+        if not self.saw_primitive or self._gtrig is None:
+            return
+        hit = self._gtrig.observe(name, data,
+                                  is_primitive=name in PRIMITIVES)
+        if hit is not None and self._queued_fire is None:
+            node, facts = hit
+            self._gtrig.pending = {"node": node, "facts": facts}
+            self._queued_fire = f"graph:state={node}"
+            self._queued_result = dict(self._last_result)
+            self._queued_phase = self.last_phase
 
     # -------------------------------------- progress 模式(Stage C2 冻结)
     def _progress_observe(self, name: str, data: dict, is_error: bool) -> None:
@@ -542,7 +585,7 @@ class DecisionMemory:
             if ph and ph != self.last_phase:
                 self.last_phase = ph
                 self.phase_steps = 0
-        if self.mode in ("progress", "v1_per_result"):
+        if self.mode in ("progress", "v1_per_result", "graph"):
             return self._flush_boundary(turn)
         if self.mode == "periodic":
             return self._periodic_boundary(turn)
@@ -1014,14 +1057,19 @@ class DecisionMemory:
 
     def _fire_without_retrieval(self, turn: int, reason: str, qr: dict,
                                 phase: str) -> tuple[str, dict] | None:
-        """G0.5 P0/P1/P2:触发器已触发(完整记录日志,冷却/上限语义
-        相同),但不做任何记忆检索。P0 什么都不注入;P1/P2 注入各自
-        的冻结文本。事件带 retrieval_status=NOT_RUN — 只作记录,绝不
-        计为 EMPTY。"""
-        block = {
-            "reason_only": _reason_only_block(reason),
-            "generic_refresh": GENERIC_REFRESH_BLOCK,
-        }.get(self.injection_mode)
+        """G0.5 P0/P1/P2 + H1-GRAPH:触发器已触发(完整记录日志,
+        冷却/上限语义相同),但不做任何记忆检索。P0 什么都不注入;
+        P1/P2 注入各自的冻结文本;graph_block 注入冻结图的 active node
+        合法出边(Stage H1,渲染在 rpent/graph — 本层零图知识)。
+        事件带 retrieval_status=NOT_RUN — 只作记录,绝不计为 EMPTY。"""
+        graph_edges: list[str] = []
+        if self.injection_mode == "graph_block":
+            block, graph_edges = self._gtrig.render_guidance()
+        else:
+            block = {
+                "reason_only": _reason_only_block(reason),
+                "generic_refresh": GENERIC_REFRESH_BLOCK,
+            }.get(self.injection_mode)
         event = {
             "episode": "",  # finalize 时从输出目录回填
             "task": os.environ.get("RPENT_TASK", ""),
@@ -1053,6 +1101,10 @@ class DecisionMemory:
         }
         if block is not None:
             event["retrieval_tokens"] = len(block.split())
+        if self.injection_mode == "graph_block":
+            # H1 机制指标依赖的字段:active node + 合法边(冻结图产物)
+            event["graph_node"] = self._gtrig.pending["node"]
+            event["graph_legal_edges"] = graph_edges
         self.events.append(event)
         logger.info("[memrecall] turn=%s trigger=%s injection=%s "
                     "retrieval=NOT_RUN (logged%s)", turn, reason,

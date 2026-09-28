@@ -184,6 +184,11 @@ def main():
         "   success)—— episode 已结束,不存在恢复决策点;按与",
         "   pi0_doubled/release 分支同一 `not term` 口径从基准剔除。",
         "   基准 177 → 148 点(FALSE_GRASP 142→113)。",
+        "4. **interpreter MOVE_STALL 规则收紧**(H1 §3(b) 重放校验钓出):",
+        "   原 consec>=2 且无趋势判据,会在残差**在降**(有进展)的 2-move",
+        "   远距上早触发。收紧为基准抽取器逐语句同构的 3-move 窗口全",
+        "   未到位且残差不降(新增计数器 move_win_first_dist)。收紧后",
+        "   本表门槛重跑仍全 PASS(148 点不变、localization 仍 100%)。",
         "",
         "修复后全门槛通过;graph v0(节点/边/guard)零改动。",
     ]

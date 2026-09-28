@@ -36,6 +36,7 @@ OBSERVABLE_FACT_KEYS = frozenset({
     # 解释器/SM1 风格计数器(runtime 可算)
     "target_localized",        # 最近一次定位是否给出坐标
     "consec_move_stall",       # 连续停滞 move 数(residual >= MOVE_TOL)
+    "move_win_first_dist",     # 3-move 停滞窗口首残差(趋势判据,基准同构)
     "consec_pick_fails",       # 连续未成抓取数
     "release_open",            # 已开爪
     "actions_since_release",   # 开爪后步数
