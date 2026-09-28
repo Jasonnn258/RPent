@@ -200,10 +200,61 @@ def t8_env_guards():
         check("graph_block + v1_per_result 拒绝", True)
 
 
+def envelope(name, result, term=False):
+    """构造与真实 transcript 同形的 state envelope(真实 result 嵌在
+    log.result;顶层只有步级字段)— H1 冒烟第二轮钓出的形状。"""
+    return {"agent_elapsed_s": 1.0, "episode_truncated": False,
+            "libero_terminated": term,
+            "log": {"command": {"action": name}, "elapsed_s": 2.0,
+                    "result": {**result, "libero_terminated": term}},
+            "state": {}, "step": 1}
+
+
+def t9_envelope():
+    print("9 运行时 envelope 解包(runtime ≡ replay)")
+    # 失败 pick:envelope 形状
+    dm = fresh()
+    dm.on_tool_result("pi0_pick", json.dumps(envelope(
+        "pi0_pick", {"success": False, "peak_lift_m": 0.0,
+                     "min_gripper_opening": 0.05})), False)
+    out = dm.turn_boundary(1)
+    check("envelope 失败 pick 触发 FG",
+          out is not None and out[1]["graph_node"] == "FALSE_GRASP")
+    # 平铺形状(重放/基准喂法)同样触发
+    dm = fresh()
+    dm.on_tool_result("pi0_pick", json.dumps(
+        {"success": False, "peak_lift_m": 0.0, "libero_terminated": False}),
+        False)
+    out = dm.turn_boundary(1)
+    check("平铺失败 pick 同样触发(等价)", out is not None
+          and out[1]["graph_node"] == "FALSE_GRASP")
+    # 3-move 停滞:final_dist_m 在 log.result
+    dm = fresh()
+    out = None
+    for i, dd in enumerate([0.10, 0.11, 0.12]):
+        dm.on_tool_result("move_to", json.dumps(envelope(
+            "move_to", {"final_dist_m": dd})), False)
+        out = dm.turn_boundary(i + 1)
+    check("envelope 3-move 不降触发 MS", out is not None
+          and out[1]["graph_node"] == "MOVE_STALL")
+    # release 开爪未触发谓词:final_gripper_opening 在 log.result,
+    # term 以 envelope 顶层为准
+    dm = fresh()
+    dm.on_tool_result("release", json.dumps(envelope(
+        "release", {"final_gripper_opening": 0.08}, term=False)), False)
+    out = dm.turn_boundary(1)
+    check("envelope release 开爪触发 REL", out is not None
+          and out[1]["graph_node"] == "RELEASE_PREDICATE_STALL")
+    dm = fresh()
+    dm.on_tool_result("release", json.dumps(envelope(
+        "release", {"final_gripper_opening": 0.08}, term=True)), False)
+    check("envelope release 已终止不触发", dm.turn_boundary(1) is None)
+
+
 if __name__ == "__main__":
     for t in (t1_fg_adjacency, t2_move_window, t3_rel_evidence_only,
               t4_graph_block_content, t5_p2_arm, t6_card_arm, t7_cooldown,
-              t8_env_guards):
+              t8_env_guards, t9_envelope):
         t()
     print(f"\n{PASS} passed, {FAIL} failed")
     sys.exit(1 if FAIL else 0)

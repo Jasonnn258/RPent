@@ -413,9 +413,22 @@ class DecisionMemory:
         """Stage H1 模式 "graph":冻结 interpreter 逐结果评估,失败节点
         即排队(镜像 _v1pr 的排队语义:首排队保留,冲刷/冷却/上限走
         _flush_boundary 冻结路径)。判定规则在 rpent/graph/pipeline —
-        本方法只做排队,检索/注入/日志路径与其它模式逐字节一致。"""
+        本方法只做排队,检索/注入/日志路径与其它模式逐字节一致。
+
+        运行时 envelope 解包(2026-09-28,H1 冒烟第二轮钓出):actuation
+        原语的工具结果 content 是 state envelope —— 顶层只有步级字段
+        (libero_terminated/task_language/…),真实原语结果嵌在
+        ``log.result``。基准/重放喂的是平铺 result,这里解包使
+        runtime ≡ replay(stageH1_replay_validation.md 的对齐前提)。
+        只解包 graph 模式:v1/progress 等冻结模式的**历史运行时行为**
+        一直是 envelope 字盲(T1/T2 等字段规则从未在线触发,只有
+        T3/T4/T7 纯计数规则),逐字节保留,不悄悄改变已发布行为。"""
         if not self.saw_primitive or self._gtrig is None:
             return
+        log = data.get("log")
+        if isinstance(log, dict) and isinstance(log.get("result"), dict):
+            data = {**log["result"],
+                    "libero_terminated": data.get("libero_terminated")}
         hit = self._gtrig.observe(name, data,
                                   is_primitive=name in PRIMITIVES)
         if hit is not None and self._queued_fire is None:
