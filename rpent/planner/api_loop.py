@@ -1056,10 +1056,13 @@ def _new_memory_recall(tracker: Any) -> Any:
     rules, per-result evaluation — causal audit only, never a method
     change). Query mode (native|common) comes from
     RPENT_MEMORY_QUERY_MODE (G0-B) and is validated inside DecisionMemory.
+    Stage H1 adds "graph" (frozen interpreter failure nodes; the three H1
+    arms share it — injection content is the only arm difference,
+    stageH1_prereg.md §2-3).
     """
     mode = os.environ.get("RPENT_MEMORY_TRIGGER", "")
     if mode not in ("1", "progress", "v1_per_result", "periodic",
-                    "motion_stuck") or tracker is None:
+                    "motion_stuck", "graph") or tracker is None:
         return None
     from rpent.memory.retrieval import DecisionMemory
 
