@@ -1,0 +1,33 @@
+{
+  "tag": "qwen9b_think_diag",
+  "model": "Qwen3.5-9B",
+  "n_samples": 30,
+  "bench_sha8": "9b153e22",
+  "legal_choice_rate": 20.0,
+  "clear_state_accuracy": 12.5,
+  "clear_n": 8,
+  "family_accuracy": {
+    "FG": {
+      "n": 8,
+      "acc": 12.5
+    },
+    "MCS": {
+      "n": 0,
+      "acc": null
+    },
+    "RPS": {
+      "n": 0,
+      "acc": null
+    }
+  },
+  "defer_rate": 0.0,
+  "defer_on_ambiguous_rate": 0.0,
+  "illegal_output_rate": 80.0,
+  "api_error_rate": 0.0,
+  "latency_p50_s": 28.6008,
+  "latency_p95_s": 28.623,
+  "mean_completion_tokens": 3926.1,
+  "wall_s": 822.7,
+  "throughput_qps": 0.0365,
+  "gpu_mem_peak_mb": 71583
+}

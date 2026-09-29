@@ -1,0 +1,33 @@
+{
+  "tag": "qwen4b",
+  "model": "Qwen3.5-4B",
+  "n_samples": 252,
+  "bench_sha8": "9b153e22",
+  "legal_choice_rate": 100.0,
+  "clear_state_accuracy": 1.61,
+  "clear_n": 62,
+  "family_accuracy": {
+    "FG": {
+      "n": 44,
+      "acc": 0.0
+    },
+    "MCS": {
+      "n": 6,
+      "acc": 16.67
+    },
+    "RPS": {
+      "n": 12,
+      "acc": 0.0
+    }
+  },
+  "defer_rate": 0.0,
+  "defer_on_ambiguous_rate": 0.0,
+  "illegal_output_rate": 0.0,
+  "api_error_rate": 0.0,
+  "latency_p50_s": 0.0508,
+  "latency_p95_s": 0.0591,
+  "mean_completion_tokens": 7.0,
+  "wall_s": 14.3,
+  "throughput_qps": 17.5708,
+  "gpu_mem_peak_mb": 72273
+}
