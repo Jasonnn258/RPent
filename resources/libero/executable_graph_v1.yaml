@@ -1,0 +1,344 @@
+# Stage J — Executable Recovery Graph v1(2026-09-29 冻结)
+#
+# 语义:复用 Stage H graph_v0 的 node/state 语义(state interpreter 不变);
+# edge 从"建议文本"升级为"可执行恢复选项":parameterizer + executor(现有
+# 原语链,零 LLM)+ 机器可判 verifier。
+#
+# 冻结纪律:
+#   - guard 只用 runtime observable 事实(白名单 = state interpreter facts)
+#   - executor 只允许已注册原语(tools.py);纯自然语言动作不入图
+#   - 同状态多条边合法时按 priority(整数,小者优先)确定性选择;
+#     priority 由 J1 之前的冻结证据定(见 stageJ_graph_spec.md §3),
+#     非感知边 > 感知边为平分破解规则
+#   - 本阶段零 LLM 边选择、零自动增删边
+#   - 渲染违禁词红线:任何会进入 planner 对话的文本不得含违禁子串
+#     (Stage J 无 planner 参与循环,图的文本不渲染注入;字段名
+#     failure_family / failure_state 为 Stage J schema 强制命名,
+#     consec_pick_fails 为 v0 冻结事实键,均属标识符豁免)
+#
+# 与 J1 的关系:每 snapshot 只执行选中边的 executor 链一次(单变量
+# counterfactual);fallback / max_attempts 字段为未来在线 runtime 预留,
+# J1 不触发。
+
+meta:
+  version: v1
+  frozen_date: "2026-09-29"
+  base_graph: analysis/graph_v0.yaml   # node 语义与 guard/verifier 词汇同源
+  families: [FALSE_GRASP, MOVE_CONTACT_STALL, RELEASE_PREDICATE_STALL]
+  selection: deterministic_priority     # 无 LLM;guard 过滤 + priority 取最小
+  llm_edge_selection: false
+  notes: >
+    MOVE_STALL 与 CONTACT_STALL 同属 MOVE_CONTACT_STALL 家族(verifier
+    共用);两节点各保留自己的边以维持 v0 状态语义。
+
+# ---------------------------------------------------------------------------
+# runtime 绑定(parameterizer 可引用的全部量;均为 runtime 可观测,
+# 取值时机 = snapshot 时刻,J1 双支同值)
+#
+#   TASK_LANG          env.get_task_language() 任务语言
+#   LAST_PICK_PROMPT   prefix 中最后一条带 prompt 的抓取/接触原语
+#                      (pi0_pick / pi0_doubled)的 prompt 全文;
+#                      prefix 无此类原语时回退 TASK_LANG
+#   EEF                当前 EEF 位置(obs robot0_eef_pos)
+#   OBJ_XYZ            感知步骤(segment→back_project)的输出;
+#                      感知无果时该边链中止并记 NO_EFFECT
+#   OFFSET_SUFFIX      冻结常量(见 FG-3);" — grasp at a slightly
+#                      offset point, about two centimeters to the side
+#                      of the previous attempt"
+# ---------------------------------------------------------------------------
+
+edges:
+  # ================= FALSE_GRASP(家族 FG)=================
+  - id: FG-3
+    source_state: FALSE_GRASP
+    failure_family: FALSE_GRASP
+    guard: {}
+    option_id: fg3_offset_regrasp
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: "LAST_PICK_PROMPT + OFFSET_SUFFIX"}
+    executor:
+      - tool: pi0_pick
+        args: {prompt: "${prompt}", max_chunks: 14, lift_thresh: 0.05,
+               gripper_closed_thresh: 0.06}
+    expected_transition: "抬升 >= 5mm 且物体离支撑面跟随 EEF"
+    verifier: {family: FALSE_GRASP}      # 判据公式见 spec §5(家族级)
+    success_state: GRASP_CHECK
+    failure_state: FALSE_GRASP
+    fallback: FG-1
+    priority: 1
+    max_attempts: 1
+    historical_evidence: {h1_menu: 80, h1_family_hit: 19, h1_unique: 19}
+    status: active
+
+  - id: FG-2
+    source_state: FALSE_GRASP
+    failure_family: FALSE_GRASP
+    guard: {target_localized: true, consec_pick_fails: {lt: 3}}
+    option_id: fg2_plain_regrasp
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: LAST_PICK_PROMPT}
+    executor:
+      - tool: pi0_pick
+        args: {prompt: "${prompt}", max_chunks: 14, lift_thresh: 0.05,
+               gripper_closed_thresh: 0.06}
+    expected_transition: "同抓点重试后抬升 >= 5mm"
+    verifier: {family: FALSE_GRASP}
+    success_state: GRASP_CHECK
+    failure_state: FALSE_GRASP
+    fallback: FG-3
+    priority: 2
+    max_attempts: 1
+    historical_evidence: {h1_menu: 0, h1_family_hit: 0, h1_unique: 0,
+                          note: "guard 在 H1 全程未通过(FG 菜单 80 次均为 FG-1/FG-3)"}
+    status: active
+
+  - id: FG-1
+    source_state: FALSE_GRASP
+    failure_family: FALSE_GRASP
+    guard: {}
+    option_id: fg1_perceive_hires
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: TASK_LANG}
+    executor:
+      - tool: segment
+        args: {prompt: "${prompt}", camera: agentview, min_score: 0.2}
+      - tool: back_project
+        args: {resolution: high, row_range: "${mask_rows}", col_range: "${mask_cols}"}
+    expected_transition: "hi-res 回投影给出可用目标坐标"
+    verifier: {family: FALSE_GRASP, extra: {found: true}}
+    success_state: PRE_GRASP
+    failure_state: FALSE_GRASP
+    fallback: UN-1
+    priority: 3
+    max_attempts: 1
+    historical_evidence: {h1_menu: 80, h1_family_hit: 0, h1_unique: 0}
+    status: active
+
+  # ================= MOVE_STALL(家族 MCS)=================
+  - id: MS-2
+    source_state: MOVE_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: ms2_waypoint_approach
+    parameterizer:
+      source: runtime_observable
+      bindings: {obj: OBJ_XYZ, eef: EEF,
+                 waypoint: "[obj.x, obj.y, max(eef.z, obj.z + 0.06)]"}
+    executor:
+      - tool: segment
+        args: {prompt: "${TASK_LANG}", camera: agentview, min_score: 0.2}
+      - tool: back_project
+        args: {resolution: high, row_range: "${mask_rows}", col_range: "${mask_cols}"}
+      - tool: move_to
+        args: {xyz: "${waypoint}", max_steps: 60}
+    expected_transition: "先到中途点,对目标残差下降 > 5mm"
+    verifier: {family: MOVE_CONTACT_STALL}
+    success_state: MOVE_PROGRESS
+    failure_state: MOVE_STALL
+    fallback: MS-3
+    priority: 1
+    max_attempts: 1
+    historical_evidence: {h1_menu: 0, h1_family_hit: 0, h1_unique: 0,
+                          note: "MOVE_STALL 在 H1 无 fire,无家族证据"}
+    status: active
+
+  - id: MS-3
+    source_state: MOVE_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: ms3_retreat_reapproach
+    parameterizer:
+      source: runtime_observable
+      bindings: {eef: EEF, retreat: "[eef.x, eef.y, eef.z + 0.06]",
+                 obj: OBJ_XYZ, approach: "[obj.x, obj.y, obj.z + 0.06]"}
+    executor:
+      - tool: move_to
+        args: {xyz: "${retreat}", max_steps: 40}
+      - tool: segment
+        args: {prompt: "${TASK_LANG}", camera: agentview, min_score: 0.2}
+      - tool: back_project
+        args: {resolution: high, row_range: "${mask_rows}", col_range: "${mask_cols}"}
+      - tool: move_to
+        args: {xyz: "${approach}", max_steps: 60}
+    expected_transition: "抬升退开换路径后,残差下降 > 5mm"
+    verifier: {family: MOVE_CONTACT_STALL}
+    success_state: MOVE_PROGRESS
+    failure_state: MOVE_STALL
+    fallback: UN-1
+    priority: 2
+    max_attempts: 1
+    historical_evidence: {h1_menu: 0, h1_family_hit: 0, h1_unique: 0}
+    status: active
+
+  - id: MS-1
+    source_state: MOVE_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: ms1_perceive
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: TASK_LANG}
+    executor:
+      - tool: segment
+        args: {prompt: "${prompt}", camera: agentview, min_score: 0.2}
+      - tool: back_project
+        args: {resolution: high, row_range: "${mask_rows}", col_range: "${mask_cols}"}
+    expected_transition: "回投影刷新目标坐标"
+    verifier: {family: MOVE_CONTACT_STALL, extra: {found: true}}
+    success_state: MOVE_STALL
+    failure_state: MOVE_STALL
+    fallback: MS-2
+    priority: 3
+    max_attempts: 1
+    historical_evidence: {h1_menu: 0, h1_family_hit: 0, h1_unique: 0}
+    status: active
+
+  # ============ CONTACT_STALL(家族 MCS)============
+  - id: CS-2
+    source_state: CONTACT_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: cs2_grip_adjust_retry
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: "LAST_PICK_PROMPT(无则 TASK_LANG)"}
+    executor:
+      - tool: set_gripper
+        args: {gripper: -1.0, steps: 5}
+      - tool: pi0_doubled
+        args: {prompt: "${prompt}", max_chunks: 20}
+    expected_transition: "调开爪距后接触技能触发任务谓词"
+    verifier: {family: MOVE_CONTACT_STALL}
+    success_state: DONE
+    failure_state: CONTACT_STALL
+    fallback: CS-3
+    priority: 1
+    max_attempts: 1
+    historical_evidence: {h1_menu: 6, h1_family_hit: 2, h1_unique: 2}
+    status: active
+
+  - id: CS-3
+    source_state: CONTACT_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: cs3_contact_settling
+    parameterizer:
+      source: runtime_observable
+      bindings: {eef: EEF, settle: "[eef.x, eef.y, eef.z - 0.02]",
+                 prompt: "LAST_PICK_PROMPT(无则 TASK_LANG)"}
+    executor:
+      - tool: move_to
+        args: {xyz: "${settle}", max_steps: 30}
+      - tool: pi0_doubled
+        args: {prompt: "${prompt}", max_chunks: 20}
+    expected_transition: "低位 settling 接触触发谓词"
+    verifier: {family: MOVE_CONTACT_STALL}
+    success_state: DONE
+    failure_state: CONTACT_STALL
+    fallback: UN-1
+    priority: 2
+    max_attempts: 1
+    historical_evidence: {h1_menu: 6, h1_family_hit: 0, h1_unique: 0,
+                          note: "contact_settling 家族证据 2 次来自 RS 菜单(RS-3)"}
+    status: active
+
+  - id: CS-1
+    source_state: CONTACT_STALL
+    failure_family: MOVE_CONTACT_STALL
+    guard: {}
+    option_id: cs1_perceive
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: TASK_LANG}
+    executor:
+      - tool: segment
+        args: {prompt: "${prompt}", camera: agentview, min_score: 0.2}
+      - tool: back_project
+        args: {resolution: high, row_range: "${mask_rows}", col_range: "${mask_cols}"}
+    expected_transition: "hi-res 回投影确认接触目标实际位置"
+    verifier: {family: MOVE_CONTACT_STALL, extra: {found: true}}
+    success_state: CONTACT_STALL
+    failure_state: CONTACT_STALL
+    fallback: CS-2
+    priority: 3
+    max_attempts: 1
+    historical_evidence: {h1_menu: 6, h1_family_hit: 0, h1_unique: 0}
+    status: active
+
+  # ============ RELEASE_PREDICATE_STALL(家族 RPS)============
+  - id: RS-2
+    source_state: RELEASE_PREDICATE_STALL
+    failure_family: RELEASE_PREDICATE_STALL
+    guard: {}
+    option_id: rs2_repick_replace
+    parameterizer:
+      source: runtime_observable
+      bindings: {prompt: LAST_PICK_PROMPT, eef: EEF,
+                 deeper: "[eef.x, eef.y, eef.z - 0.03]"}
+    executor:
+      - tool: pi0_pick
+        args: {prompt: "${prompt}", max_chunks: 14, lift_thresh: 0.05,
+               gripper_closed_thresh: 0.06}
+      - tool: move_to
+        args: {xyz: "${deeper}", max_steps: 40}
+      - tool: release
+        args: {max_steps: 20}
+    expected_transition: "重抓后更深放置,任务谓词触发"
+    verifier: {family: RELEASE_PREDICATE_STALL}
+    success_state: DONE
+    failure_state: RELEASE_PREDICATE_STALL
+    fallback: RS-3
+    priority: 1
+    max_attempts: 1
+    historical_evidence: {h1_menu: 18, h1_family_hit: 6, h1_unique: 6}
+    status: active
+
+  - id: RS-3
+    source_state: RELEASE_PREDICATE_STALL
+    failure_family: RELEASE_PREDICATE_STALL
+    guard: {}
+    option_id: rs3_contact_settling
+    parameterizer:
+      source: runtime_observable
+      bindings: {eef: EEF, settle: "[eef.x, eef.y, eef.z - 0.02]"}
+    executor:
+      - tool: set_gripper
+        args: {gripper: -0.3, steps: 5}
+      - tool: move_to
+        args: {xyz: "${settle}", max_steps: 30}
+    expected_transition: "低开爪沉降接触触发谓词"
+    verifier: {family: RELEASE_PREDICATE_STALL}
+    success_state: DONE
+    failure_state: RELEASE_PREDICATE_STALL
+    fallback: UN-1
+    priority: 2
+    max_attempts: 1
+    historical_evidence: {h1_menu: 18, h1_family_hit: 2, h1_unique: 2}
+    status: active
+
+  - id: RS-1
+    source_state: RELEASE_PREDICATE_STALL
+    failure_family: RELEASE_PREDICATE_STALL
+    guard: {actions_since_release: {lte: 6}}
+    option_id: rs1_micro_reposition
+    parameterizer:
+      source: runtime_observable
+      bindings: {eef: EEF, nudge: "[eef.x, eef.y + 0.02, eef.z]",
+                 home: "${eef}"}
+    executor:
+      - tool: move_to
+        args: {xyz: "${nudge}", max_steps: 30}
+      - tool: move_to
+        args: {xyz: "${home}", max_steps: 30}
+    expected_transition: "微移回位后谓词在数步内触发"
+    verifier: {family: RELEASE_PREDICATE_STALL}
+    success_state: DONE
+    failure_state: RELEASE_PREDICATE_STALL
+    fallback: RS-2
+    priority: 3
+    max_attempts: 1
+    historical_evidence: {h1_menu: 18, h1_family_hit: 0, h1_unique: 0}
+    status: active
