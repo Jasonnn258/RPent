@@ -1,6 +1,6 @@
 # Stage H transition dataset(§7,只建不训)
 
-_生成 by scripts/build_stageH_transition_dataset.py;记录数 252(h0 148 + h1 104);sha256 = 28d569fa68271a823f209f5b3f4f602a1c3bed45eaeb8adad032f1530069353b_
+_生成 by scripts/build_stageH_transition_dataset.py;记录数 252(h0 148 + h1 104);sha256 = 44cd2e8786e11139474c9da4dcd16225b950f749ba26909087deee31b936b461_
 
 - h0 记录:历史 148 点 + H2 冻结标签(join stageH2_router_items;无干预注入,arm/injected_block/next_prim = null);
 - h1 记录:H1 fire 级(重放触发 + 事件交叉核对同分析器;infra 缺失 0 集、事件不一致剔除 13 集);

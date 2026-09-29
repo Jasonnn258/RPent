@@ -80,16 +80,19 @@ def obs_of_step(step: dict) -> dict:
 
 
 def h0_records():
-    """148 历史点 → transition 记录(标签 = H2 冻结 correct_set/DEFER)。"""
-    items = {}
-    if H2_ITEMS.exists():
-        items = {json.loads(l)["evidence_id"]: json.loads(l)
-                 for l in open(H2_ITEMS)}
+    """148 历史点 → transition 记录(标签 = H2 冻结 correct_set/DEFER)。
+
+    join 键 = **行号**(H2 items 的 idx 与本文件行序一一对应,同源于
+    对 148 点的同一 enumerate);evidence_id 是症状风格描述、跨点重复,
+    不能当键(2026-09-29 修复:dict join 曾塌缩 18 条 EDGE 标签)。"""
+    pts = [json.loads(l) for l in open(H0_STATES)]
+    items = ([json.loads(l) for l in open(H2_ITEMS)]
+             if H2_ITEMS.exists() else [])
+    assert len(items) in (0, len(pts)), "H2 items 与 H0 点数不一致"
     out = []
-    for ln in open(H0_STATES):
-        pt = json.loads(ln)
+    for i, pt in enumerate(pts):
         eid = pt["evidence_id"]
-        it = items.get(eid, {})
+        it = items[i] if items else {}
         rv = pt["runtime_view"]
         out.append({
             "src": "h0", "split": pt.get("split") or split_of(
