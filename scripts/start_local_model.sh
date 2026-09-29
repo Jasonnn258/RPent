@@ -10,6 +10,8 @@
 #   LOCAL_MODEL_MAX_CONTEXT=32768  服务端截断(原生 262144;Stage I 短上下文纪律)
 #   LOCAL_MODEL_DTYPE=bfloat16
 #   LOCAL_MODEL_UTIL=0.90          GPU 显存利用率
+#   LOCAL_MODEL_THINK=0            1=保留原生 thinking 模板(诊断用;
+#                                  默认 0 = 服务端固化 nothink)
 #
 # 特性:
 #   - chat template 服务端固化 enable_thinking=False(Qwen3.5 为 thinking
@@ -41,11 +43,19 @@ trap 'rmdir "$LOCK" 2>/dev/null || true' EXIT
 
 # thinking 服务端固化:把 add_generation_prompt 分支的条件改为恒真
 # (原: enable_thinking is defined and enable_thinking is false → 空 think 块)
+# LOCAL_MODEL_THINK=1 时跳过,用原生模板(诊断 think-on 归因用)
 TPL="$MODEL_DIR/chat_template_nothink.jinja"
 if [ ! -f "$TPL" ]; then
   sed 's/enable_thinking is defined and enable_thinking is false/true/' \
     "$MODEL_DIR/chat_template.jinja" > "$TPL"
   echo "wrote nothink template: $TPL"
+fi
+THINK_ARGS=()
+if [ "${LOCAL_MODEL_THINK:-0}" = "1" ]; then
+  THINK_ARGS=()
+  echo "LOCAL_MODEL_THINK=1 — 使用原生 thinking 模板(诊断模式)"
+else
+  THINK_ARGS=(--chat-template "$TPL")
 fi
 
 LOG=/workspace/yjx/workspace/RPent/.gap_run/local_model_p${PORT}.log
@@ -59,7 +69,7 @@ CUDA_VISIBLE_DEVICES=$GPU setsid /workspace/yjx/envs/sglm/bin/vllm serve \
   --dtype "$DTYPE" --max-model-len "$MAXLEN" \
   --tensor-parallel-size "$TP" \
   --gpu-memory-utilization "$UTIL" \
-  --chat-template "$TPL" \
+  "${THINK_ARGS[@]}" \
   --served-model-name "$NAME" \
   >> "$LOG" 2>&1 < /dev/null &
 VLLM_PID=$!

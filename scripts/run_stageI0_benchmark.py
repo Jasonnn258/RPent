@@ -43,9 +43,18 @@ BENCH = REPO / "analysis/stageI0_router_benchmark.jsonl"
 JSON_RE = re.compile(r"\{[^{}]*\}")
 LETTER_RE = re.compile(r"[A-Z]")
 
+# 三失败家族长名 → 预注册短码(prereg §2: CLEAR FG 44 / MCS 6 / RPS 12)
+FAMILY_CODE = {"FALSE_GRASP": "FG", "MOVE_CONTACT_STALL": "MCS",
+               "RELEASE_PREDICATE_STALL": "RPS"}
 
-def parse_choice(text: str):
-    """prereg §4 冻结解析:首个 JSON 块 choice → 首个 A-Z → None。"""
+
+def parse_choice(text: str, think: bool = False):
+    """prereg §4 冻结解析:首个 JSON 块 choice → 首个 A-Z → None。
+
+    think=True(诊断模式,不进资格门):截掉 </think> 前的推理段再解析,
+    防止 think 内容里的字母/JSON 污染 choice。"""
+    if think and "</think>" in (text or ""):
+        text = text.split("</think>")[-1]
     m = JSON_RE.search(text or "")
     if m:
         try:
@@ -80,6 +89,11 @@ def main() -> int:
     ap.add_argument("--port", type=int, default=8100)
     ap.add_argument("--tag", required=True, help="qwen4b / qwen9b")
     ap.add_argument("--gpu", type=int, default=7, help="显存采样用")
+    ap.add_argument("--max-tokens", type=int, default=32,
+                    help="冻结口径 32;--think 诊断时建议 512")
+    ap.add_argument("--think", action="store_true",
+                    help="诊断模式:服务端 thinking 开启时,截 </think> 后解析;"
+                         "结果只作归因,不进资格门")
     args = ap.parse_args()
 
     samples = [json.loads(l) for l in open(BENCH)]
@@ -103,26 +117,28 @@ def main() -> int:
                 r = client.chat.completions.create(
                     model=model,
                     messages=[{"role": "user", "content": ri["prompt"]}],
-                    temperature=0.0, max_tokens=32)
+                    temperature=0.0, max_tokens=args.max_tokens)
                 text = r.choices[0].message.content or ""
                 usage = r.usage
                 err = None
             except Exception as e:  # noqa: BLE001
                 text, usage, err = "", None, repr(e)[:200]
             dt = time.time() - t0
-            letter, how = parse_choice(text)
+            letter, how = parse_choice(text, think=args.think)
             n_edges = len(ri["legal_edges"])
             legal_letters = {chr(65 + k) for k in range(n_edges)}
             legal_letters.add(ri["defer_letter"])
             is_defer = letter == ri["defer_letter"]
             rec = {
                 "sample_id": s["sample_id"], "cls": s["cls"],
-                "family": s["failure_family"],
+                "family": FAMILY_CODE.get(s["failure_family"],
+                                          s["failure_family"]),
                 "n_options": n_edges + 1,
                 "reference_letter": s["reference_letter"],
                 "letter": letter, "parse_how": how,
                 "legal": letter in legal_letters if letter else False,
-                "is_defer": is_def, "raw64": (text or "")[:64],
+                "is_defer": is_defer, "raw64": (text or "")[:64],
+                "tail64": (text or "")[-64:],
                 "latency_s": round(dt, 4),
                 "prompt_tokens": getattr(usage, "prompt_tokens", None),
                 "completion_tokens": getattr(usage, "completion_tokens", None),
