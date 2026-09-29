@@ -1,0 +1,108 @@
+{
+ "version": "k0-calibration-v1",
+ "frozen_date": "2026-09-29",
+ "rule": "discovery split(机制上排除于最终 TEST);每集取 step_idx 最小 fire;episode 按 (task,seed,arm,dir) 排序,每族取前 2 集;共 6 快照 / 16 (snapshot,edge) 组合",
+ "purpose": "K0 分布标定(K_ROLLOUT 冻结);禁止进入 K1/K2 TRAIN/VAL/TEST",
+ "snapshots": [
+  {
+   "snapshot_id": "t3s2h1CT2",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260928-18:44:49_glm-5.3-flash_h1C_libero_spatial_task_t3_s2_r1",
+   "task": 3,
+   "seed": 2,
+   "arm": "h1C",
+   "T": 2,
+   "family": "FALSE_GRASP",
+   "node": "FALSE_GRASP",
+   "legal_edges": [
+    "FG-1",
+    "FG-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  },
+  {
+   "snapshot_id": "t3s2h1P2T3",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260929-00:46:40_glm-5.3-flash_h1P2_libero_spatial_task_t3_s2_r1",
+   "task": 3,
+   "seed": 2,
+   "arm": "h1P2",
+   "T": 3,
+   "family": "FALSE_GRASP",
+   "node": "FALSE_GRASP",
+   "legal_edges": [
+    "FG-1",
+    "FG-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  },
+  {
+   "snapshot_id": "t3s5h1P2T12",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260928-15:55:27_glm-5.3-flash_h1P2_libero_spatial_task_t3_s5_r1",
+   "task": 3,
+   "seed": 5,
+   "arm": "h1P2",
+   "T": 12,
+   "family": "RELEASE_PREDICATE_STALL",
+   "node": "RELEASE_PREDICATE_STALL",
+   "legal_edges": [
+    "RS-1",
+    "RS-2",
+    "RS-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  },
+  {
+   "snapshot_id": "t3s7h1P2T12",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260929-01:17:18_glm-5.3-flash_h1P2_libero_spatial_task_t3_s7_r1",
+   "task": 3,
+   "seed": 7,
+   "arm": "h1P2",
+   "T": 12,
+   "family": "RELEASE_PREDICATE_STALL",
+   "node": "RELEASE_PREDICATE_STALL",
+   "legal_edges": [
+    "RS-1",
+    "RS-2",
+    "RS-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  },
+  {
+   "snapshot_id": "t9s5h1P2T12",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260929-01:39:49_glm-5.3-flash_h1P2_libero_spatial_task_t9_s5_r1",
+   "task": 9,
+   "seed": 5,
+   "arm": "h1P2",
+   "T": 12,
+   "family": "MOVE_CONTACT_STALL",
+   "node": "CONTACT_STALL",
+   "legal_edges": [
+    "CS-1",
+    "CS-2",
+    "CS-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  },
+  {
+   "snapshot_id": "t9s8h1CT12",
+   "episode_dir": "/workspace/yjx/workspace/RPent/logs/ovpm_exp/20260928-21:11:41_glm-5.3-flash_h1C_libero_spatial_task_t9_s8_r1",
+   "task": 9,
+   "seed": 8,
+   "arm": "h1C",
+   "T": 12,
+   "family": "MOVE_CONTACT_STALL",
+   "node": "CONTACT_STALL",
+   "legal_edges": [
+    "CS-1",
+    "CS-2",
+    "CS-3"
+   ],
+   "split": "discovery",
+   "prefix_replay_ok": true
+  }
+ ]
+}
