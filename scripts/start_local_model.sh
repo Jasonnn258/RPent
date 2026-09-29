@@ -15,7 +15,8 @@
 #   - chat template 服务端固化 enable_thinking=False(Qwen3.5 为 thinking
 #     模型;不关则 16/32 token 内无答案,Stage H H2 冒烟已证)——客户端零 patch
 #   - .runlocks 锁防重复启动;日志落 repo .gap_run/(持久卷)
-#   - 健康等待最长 20 分钟(权重加载 19G 需数分钟)
+#   - 健康等待最长 20 分钟(权重加载 19G 需数分钟);curl 一律
+#     --noproxy(本机 http_proxy 会劫持 127.0.0.1 → 503)
 # 停止: bash scripts/stop_local_model.sh [port]
 set -euo pipefail
 
@@ -49,7 +50,10 @@ fi
 
 LOG=/workspace/yjx/workspace/RPent/.gap_run/local_model_p${PORT}.log
 echo "starting vLLM: $NAME gpu=$GPU tp=$TP port=$PORT maxlen=$MAXLEN log=$LOG"
-CUDA_VISIBLE_DEVICES=$GPU nohup /workspace/yjx/envs/sglm/bin/vllm serve \
+# setsid:脱离本脚本进程组 —— 外层 shell/任务被杀时不连坐
+# (非交互 shell 后台作业不换进程组,setsid 直接 exec,$! 即 vllm pid;
+#  兜底 pgrep 校验,防 setsid fork 的边缘情形)
+CUDA_VISIBLE_DEVICES=$GPU setsid /workspace/yjx/envs/sglm/bin/vllm serve \
   "$MODEL_DIR" \
   --host 127.0.0.1 --port "$PORT" \
   --dtype "$DTYPE" --max-model-len "$MAXLEN" \
@@ -57,8 +61,10 @@ CUDA_VISIBLE_DEVICES=$GPU nohup /workspace/yjx/envs/sglm/bin/vllm serve \
   --gpu-memory-utilization "$UTIL" \
   --chat-template "$TPL" \
   --served-model-name "$NAME" \
-  >> "$LOG" 2>&1 &
+  >> "$LOG" 2>&1 < /dev/null &
 VLLM_PID=$!
+sleep 3
+kill -0 "$VLLM_PID" 2>/dev/null || VLLM_PID=$(pgrep -f "vllm serve.*--port $PORT" | head -1)
 echo "$VLLM_PID" > "$LOCK/pid"
 
 echo "waiting for health (pid $VLLM_PID, up to 20min)…"
@@ -69,7 +75,7 @@ for i in $(seq 1 120); do
     tail -20 "$LOG"
     exit 1
   fi
-  if curl -sf "http://127.0.0.1:${PORT}/health" > /dev/null 2>&1; then
+  if curl -sf --noproxy '*' "http://127.0.0.1:${PORT}/health" > /dev/null 2>&1; then
     echo "HEALTH OK after ~$((i * 10))s: http://127.0.0.1:${PORT}/v1 (model=$NAME)"
     echo "smoke: python scripts/smoke_local_model.py --port $PORT"
     trap - EXIT

@@ -20,11 +20,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
 
-from openai import OpenAI
+# 本机 http_proxy 会劫持 127.0.0.1 请求(openai→httpx 读 proxy env);
+# 本地服务必须直连,先改 env 再 import OpenAI
+for _v in ("NO_PROXY", "no_proxy"):
+    _cur = os.environ.get(_v, "")
+    if "127.0.0.1" not in _cur:
+        os.environ[_v] = (_cur + "," if _cur else "") + "127.0.0.1,localhost"
+
+from openai import OpenAI  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 BENCH = REPO / "analysis/stageI0_router_benchmark.jsonl"
