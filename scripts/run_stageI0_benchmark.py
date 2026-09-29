@@ -94,9 +94,18 @@ def main() -> int:
     ap.add_argument("--think", action="store_true",
                     help="诊断模式:服务端 thinking 开启时,截 </think> 后解析;"
                          "结果只作归因,不进资格门")
+    ap.add_argument("--cls-filter", default="all",
+                    choices=["all", "CLEAR", "AMBIGUOUS"],
+                    help="诊断子集:只跑某类样本")
+    ap.add_argument("--max-n", type=int, default=0,
+                    help="诊断子集上限(0=不限);子集按文件原序确定性截取")
     args = ap.parse_args()
 
     samples = [json.loads(l) for l in open(BENCH)]
+    if args.cls_filter != "all":
+        samples = [s for s in samples if s["cls"] == args.cls_filter]
+    if args.max_n:
+        samples = samples[:args.max_n]
     bench_sha = hashlib.sha256(open(BENCH, "rb").read()).hexdigest()[:8]
     assert bench_sha == "9b153e22", f"基准被改动: sha {bench_sha}"
 
