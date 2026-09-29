@@ -243,6 +243,56 @@ class LiberoEnvFacade(RpcFacade):
     def raw_obs(self) -> dict:
         return _to_numpy_tree(self._env.current_raw_obs[self._env_idx])
 
+    # ---- Stage J0/J1:sim 状态快照、恢复与测量通道 ------------------------
+    # 全部为纯新增的只读/状态搬运方法,不触碰 task dynamics(不动 reward、
+    # termination 逻辑与控制频率)。链条:rlinf LiberoEnv →
+    # ReconfigureSubprocEnv → workers[0] 子进程(env_wrapper 层实现
+    # get_sim_state / set_init_state / check_success)。
+
+    def _worker(self):
+        """单 env worker 的父进程侧句柄(子进程内是 libero ControlEnv)。"""
+        return self._env.env.workers[0]
+
+    def save_state(self) -> np.ndarray:
+        """MuJoCo flatten 状态快照(qpos/qvel/act/time,含全部物体位姿)。"""
+        return np.asarray(self._worker().get_sim_state())
+
+    def restore_state(self, flat) -> dict:
+        """恢复 :meth:`save_state` 的快照并重生成观测。
+
+        worker 侧走 env_wrapper ``set_init_state`` = regenerate_obs_from_state
+        (set_state_from_flattened + sim.forward + check_success +
+        post_process + update_observables)。恢复语义是"回退到集中态",
+        因此同时解除本 facade 的终止闩(auto_reset=False,不会触发重置)。
+        """
+        obs = self._worker().set_init_state(np.asarray(flat))
+        self._done = False
+        return self._strip_obs(_to_numpy_tree(obs))
+
+    def check_success(self) -> bool:
+        """当前 sim 状态下的 LIBERO 任务谓词(零步进只读探测)。"""
+        return bool(self._worker().check_success())
+
+    def sim_measurement(self) -> dict:
+        """sim 级测量通道(科学仪器,只用于离线结局分类,绝不进入任何
+        planner/router 可见文本)。返回 robosuite 低维状态观测(含
+        ``object-state`` 物体位姿向量;图像键被丢弃以减小 RPC 载荷)+
+        任务关注对象名列表。"""
+        w = self._worker()
+        obs = w.env_call("_get_observations", target="robosuite")
+        keep = {}
+        for k, v in _to_numpy_tree(obs).items():
+            try:
+                ndim = np.asarray(v).ndim
+            except Exception:
+                continue
+            if ndim <= 1:  # 只保留低维状态向量(EEF/夹爪/object-state)
+                keep[k] = v
+        return {
+            "obs": keep,
+            "obj_of_interest": w.get_env_attr("obj_of_interest"),
+        }
+
     def get_env_meta(self) -> dict:
         """Return the meta info this server was launched with. """
         return dict(self._meta)

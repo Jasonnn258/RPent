@@ -96,6 +96,36 @@ class LiberoEnvClient:
     def raw_obs(self) -> dict:
         return self._client.call("env.raw_obs", timeout_s=_TIMEOUT_S["default"])
 
+    # ---- Stage J0/J1:sim 快照 / 恢复 / 测量(服务端纯新增方法)----
+
+    def save_state(self):
+        """MuJoCo flatten 状态快照(qpos/qvel/act/time,含物体位姿)。"""
+        return self._client.call("env.save_state", timeout_s=_TIMEOUT_S["default"])
+
+    def restore_state(self, flat) -> dict:
+        """恢复快照并重生成观测;恢复是集中态回退,同步清客户端终止闩,
+        使后续 step 断言可通过。"""
+        ret = self._client.call(
+            "env.restore_state", args=(np.asarray(flat),),
+            timeout_s=_TIMEOUT_S["env.reset"],
+        )
+        self.episode_terminated = False
+        self.episode_truncated = False
+        return ret
+
+    def check_success(self) -> bool:
+        """当前 sim 状态下的任务谓词(零步进只读探测)。"""
+        return self._client.call(
+            "env.check_success", timeout_s=_TIMEOUT_S["default"]
+        )
+
+    def sim_measurement(self) -> dict:
+        """sim 级测量通道(离线结局分类用,不进 planner 可见文本):
+        低维状态观测(含 object-state)+ 任务关注对象名。"""
+        return self._client.call(
+            "env.sim_measurement", timeout_s=_TIMEOUT_S["default"]
+        )
+
     def render_camera(
         self,
         camera_name: str = "agentview",
