@@ -74,6 +74,21 @@ def _result_subset(result: dict) -> dict:
     return {k: v for k, v in result.items() if k in RESULT_FIELDS}
 
 
+def _jsonable(o):
+    """numpy → python 递归转换(json 序列化兜底,防止单条记录丢整个 run)。"""
+    import numpy as np
+
+    if isinstance(o, np.ndarray):
+        return o.tolist()
+    if isinstance(o, np.generic):
+        return o.item()
+    if isinstance(o, dict):
+        return {k: _jsonable(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_jsonable(v) for v in o]
+    return o
+
+
 def _load_source_steps(episode_dir: str) -> list[dict]:
     steps = json.load(open(Path(episode_dir) / "states.json"))
     return sorted(steps, key=lambda s: s.get("step_idx", 0))
@@ -185,8 +200,8 @@ def run_fork(fork: dict, gpu: int, shared_kwargs: dict, log_root: Path,
             **base_ch,
             "check_success": bool(env.check_success()),
             "obj_of_interest": base_meas.get("obj_of_interest"),
-            "obs_full": base_ch["meas_keys"] if not keep_full_meas else {
-                k: v for k, v in base_meas["obs"].items()},
+            "obs_full": base_ch["meas_keys"] if not keep_full_meas else _jsonable(
+                base_meas["obs"]),
         }
 
         def _exec(tag_i: str, action: str, kwargs: dict) -> None:
@@ -278,7 +293,7 @@ def main() -> int:
     from rpent.utils.logging import init_output_dir
     from rpent.utils.resources import ensure_resources
 
-    ensure_resources()
+    ensure_resources("libero")
     shared_root = log_root / "_shared_runtime"
     shared_root.mkdir(parents=True, exist_ok=True)
     init_output_dir(shared_root)
@@ -306,7 +321,15 @@ def main() -> int:
                 rec = run_fork(fork, args.gpu, shared_kwargs, log_root,
                                keep_full_meas=(n_ok + n_abort) == 0)
                 rec["wall_s"] = round(time.time() - t0, 1)
-                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                try:
+                    line = json.dumps(rec, ensure_ascii=False, default=str)
+                except Exception as exc:  # 序列化失败也不能丢 run
+                    line = json.dumps({
+                        "fork_id": rec.get("fork_id"),
+                        "infra_abort": {"reason": f"serialize: {exc}"},
+                        "salvaged_keys": sorted(rec.keys()),
+                    }, ensure_ascii=False)
+                f.write(line + "\n")
                 f.flush()
                 if rec["infra_abort"]:
                     n_abort += 1

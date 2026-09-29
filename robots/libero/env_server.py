@@ -262,12 +262,18 @@ class LiberoEnvFacade(RpcFacade):
 
         worker 侧走 env_wrapper ``set_init_state`` = regenerate_obs_from_state
         (set_state_from_flattened + sim.forward + check_success +
-        post_process + update_observables)。恢复语义是"回退到集中态",
-        因此同时解除本 facade 的终止闩(auto_reset=False,不会触发重置)。
+        post_process + update_observables),返回单 env 的 raw obs;这里镜像
+        :meth:`rlinf...LiberoEnv.reset` 的做法:同步 ``current_raw_obs``
+        缓存后过 ``_wrap_obs``,让调用方拿到与 step/reset 同构的观测
+        (main_images/wrist_images/states/task_descriptions)。恢复语义是
+        "回退到集中态",因此同时解除本 facade 的终止闩(auto_reset=False,
+        不会触发重置)。
         """
-        obs = self._worker().set_init_state(np.asarray(flat))
+        obs_raw = self._worker().set_init_state(np.asarray(flat))
+        self._env.current_raw_obs[self._env_idx] = obs_raw
+        wrapped = self._env._wrap_obs(self._env.current_raw_obs)
         self._done = False
-        return self._strip_obs(_to_numpy_tree(obs))
+        return self._strip_obs(_to_numpy_tree(wrapped))
 
     def check_success(self) -> bool:
         """当前 sim 状态下的 LIBERO 任务谓词(零步进只读探测)。"""

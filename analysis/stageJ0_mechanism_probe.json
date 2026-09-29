@@ -1,0 +1,26 @@
+{
+ "ts": "2026-09-29T09:59:07",
+ "task": 3,
+ "seed": 1,
+ "gpu": 0,
+ "prompt": "pick up the black bowl on the stove",
+ "T2_obs": {
+  "states_maxdiff": 0.0,
+  "main_images_maxdiff": 0.0,
+  "wrist_images_maxdiff": 0.0
+ },
+ "T3_render": {
+  "agentview_maxdiff": 0.0
+ },
+ "T1_predict_same_obs": {
+  "act1_vs_act0_maxdiff": 0.23470422625541687,
+  "act2_vs_act0_maxdiff": 0.13096769154071808
+ },
+ "T1_shape": [
+  5,
+  7
+ ],
+ "T2_predict_obsA_vs_obsB": {
+  "actA0_vs_actB_maxdiff": 0.3292318731546402
+ }
+}
