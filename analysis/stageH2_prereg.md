@@ -1,5 +1,10 @@
 # Stage H2 预注册 — 本地 edge router(离线门 + 在线 pilot)
 
+> **〔VOID 2026-09-29〕H1 判定 REPRESENTATION NOT SUPPORTED
+> (analysis/stageH1_results.md)→ 按本文 §8 自动作废。未执行任何 H2
+> 模型调用。本文与 items.jsonl 仅作归档;重启须重新预注册。
+> 判定与收口见 analysis/STAGE_H_FINAL_REPORT.md。**
+
 _2026-09-28 起草。**状态:DRAFT — 生效条件 = H1 判定 REPRESENTATION SUPPORTED
 (stageH1_prereg.md §7);H1 NOT SUPPORTED / PARTIALLY → 本文作废,Stage H 就地
 STOP(§8 冻结规则不触发 H3)。** 起草时点声明:H1 90 集正在运行

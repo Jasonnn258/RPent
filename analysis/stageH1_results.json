@@ -1,0 +1,146 @@
+{
+ "stats": {
+  "h1P2": {
+   "n": 30,
+   "sr": [
+    25,
+    30
+   ],
+   "n_fires": 38,
+   "fired_eps": 20,
+   "vr": [
+    15,
+    20
+   ],
+   "wp": [
+    38,
+    38
+   ],
+   "pip3": [
+    15,
+    38
+   ],
+   "fam": {
+    "FALSE_GRASP": [
+     11,
+     15
+    ],
+    "MOVE_CONTACT_STALL": [
+     2,
+     3
+    ],
+    "RELEASE_PREDICATE_STALL": [
+     5,
+     9
+    ]
+   }
+  },
+  "h1C": {
+   "n": 30,
+   "sr": [
+    20,
+    30
+   ],
+   "n_fires": 34,
+   "fired_eps": 17,
+   "vr": [
+    7,
+    17
+   ],
+   "wp": [
+    0,
+    34
+   ],
+   "pip3": [
+    7,
+    34
+   ],
+   "fam": {
+    "FALSE_GRASP": [
+     7,
+     13
+    ],
+    "MOVE_CONTACT_STALL": [
+     0,
+     3
+    ],
+    "RELEASE_PREDICATE_STALL": [
+     0,
+     5
+    ]
+   }
+  },
+  "h1G": {
+   "n": 30,
+   "sr": [
+    23,
+    30
+   ],
+   "n_fires": 32,
+   "fired_eps": 18,
+   "vr": [
+    13,
+    18
+   ],
+   "wp": [
+    0,
+    32
+   ],
+   "pip3": [
+    12,
+    32
+   ],
+   "gv": [
+    27,
+    30
+   ],
+   "fam": {
+    "FALSE_GRASP": [
+     11,
+     16
+    ],
+    "MOVE_CONTACT_STALL": [
+     0,
+     0
+    ],
+    "RELEASE_PREDICATE_STALL": [
+     3,
+     4
+    ]
+   }
+  }
+ },
+ "gates": {
+  "M1": true,
+  "M2": false,
+  "A": false,
+  "B": false,
+  "family_n": 1,
+  "family": {
+   "FALSE_GRASP": {
+    "pass": true,
+    "ctrl": "h1P2",
+    "sum_diff": 0,
+    "n_cells": 30
+   },
+   "MOVE_CONTACT_STALL": {
+    "pass": false,
+    "ctrl": "h1P2",
+    "sum_diff": -2,
+    "n_cells": 30
+   },
+   "RELEASE_PREDICATE_STALL": {
+    "pass": false,
+    "ctrl": "h1P2",
+    "sum_diff": -2,
+    "n_cells": 30
+   }
+  }
+ },
+ "verdict": "REPRESENTATION NOT SUPPORTED",
+ "inconclusive_vr": true,
+ "n_eps": 90,
+ "n_infra_missing": 0,
+ "n_mismatch": 13,
+ "n_banned": 34
+}
