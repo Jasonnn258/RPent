@@ -105,8 +105,53 @@ def ranking_metrics(te, pred_v, pred_h):
             "n_snapshots_ranked": n_snap}
 
 
+def roc_auc(y_true, scores):
+    """Mann-Whitney 秩法 AUROC(平均秩处理并列,无 sklearn 依赖)。"""
+    y_true = np.asarray(y_true, dtype=int)
+    scores = np.asarray(scores, dtype=float)
+    order = np.argsort(scores, kind="mergesort")
+    ranks = np.empty(len(scores), dtype=float)
+    i = 0
+    while i < len(scores):  # 并列取平均秩
+        j = i
+        while j + 1 < len(scores) and scores[order[j + 1]] == scores[order[i]]:
+            j += 1
+        avg = (i + j) / 2 + 1  # 1-based 平均秩
+        for t in range(i, j + 1):
+            ranks[order[t]] = avg
+        i = j + 1
+    n_pos = int(y_true.sum())
+    n_neg = len(y_true) - n_pos
+    if n_pos == 0 or n_neg == 0:
+        return float("nan")
+    return float((ranks[y_true == 1].sum() - n_pos * (n_pos + 1) / 2)
+                 / (n_pos * n_neg))
+
+
+def average_precision(y_true, scores):
+    """阈值步进 AP(与 sklearn average_precision_score 同义,含并列处理)。"""
+    y_true = np.asarray(y_true, dtype=int)
+    scores = np.asarray(scores, dtype=float)
+    n_pos = int(y_true.sum())
+    if n_pos == 0:
+        return float("nan")
+    order = np.argsort(-scores, kind="mergesort")
+    ap, tp = 0.0, 0
+    i = 0
+    while i < len(scores):  # 同分组内合并为一个阈值
+        j = i
+        while j + 1 < len(scores) and scores[order[j + 1]] == scores[order[i]]:
+            j += 1
+        tp += int(y_true[order[i:j + 1]].sum())
+        prec = tp / (j + 1)
+        recall_prev = (tp - int(y_true[order[i:j + 1]].sum())) / n_pos
+        recall = tp / n_pos
+        ap += (recall - recall_prev) * prec
+        i = j + 1
+    return float(ap)
+
+
 def arm_metrics(arm, samples, edges, device):
-    from sklearn.metrics import average_precision_score, roc_auc_score
     te, pv, ph, ustd = load_arm(arm, samples, edges, device)
     yv = np.array([x["y"] == 0 for x in te], dtype=int)
     yh = np.array([x["y"] == 2 for x in te], dtype=int)
@@ -114,13 +159,13 @@ def arm_metrics(arm, samples, edges, device):
                     for p, yi in zip(pv, yv)])
     m = {
         "arm": arm, "n_test": len(te),
-        "verified_auroc": roc_auc_score(yv, pv),
-        "verified_auprc": average_precision_score(yv, pv),
+        "verified_auroc": roc_auc(yv, pv),
+        "verified_auprc": average_precision(yv, pv),
         "verified_brier": float(np.mean((pv - yv) ** 2)),
         "verified_nll": float(nll),
         "verified_ece": float(ece(pv, yv)),
-        "harm_auroc": roc_auc_score(yh, ph) if yh.any() else float("nan"),
-        "harm_auprc": average_precision_score(yh, ph) if yh.any() else float("nan"),
+        "harm_auroc": roc_auc(yh, ph) if yh.any() else float("nan"),
+        "harm_auprc": average_precision(yh, ph) if yh.any() else float("nan"),
         "ens_std_mean": float(ustd.mean()),
     }
     m.update(ranking_metrics(te, pv, ph))

@@ -127,7 +127,10 @@ class Arm(nn.Module):
         self.mdn = MDNHead(h, 3)
 
     def encode(self, batch, edge_idx):
-        h0 = self.state_proj(batch["s"]) + self.z_proj(batch["z"])
+        # B0 = STATE_ONLY:不看 z(此前误加 z_proj 致 B0≡B1,已修)
+        h0 = self.state_proj(batch["s"])
+        if self.arm != "B0":
+            h0 = h0 + self.z_proj(batch["z"])
         if self.arm == "B0":
             return h0, None
         if self.arm in ("B1", "B3"):
