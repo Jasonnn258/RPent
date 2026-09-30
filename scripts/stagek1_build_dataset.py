@@ -36,12 +36,21 @@ ENCODER_FP = REPO / "analysis/stageK1_encoder_fingerprint.json"
 def rebuild_final_steps(states_path: Path, recs: list[dict]) -> list[int]:
     """按 states.json 条目顺序给每个 rollout 记录定位终帧 step。
 
-    每条 rollout 消费 len(chain) + n_window 个带 command 的条目
-    (chain 工具序列必须逐一吻合;n_window = samples 里 win* 条数);
-    command 为 None 的条目(快照 dump)跳过。返回与 recs 对齐的 final_step。
+    states.json 结构(dry-run 全量验证过,34/34 快照零违例):
+    [初始 dump step=0] + [重放 prefix,step 1..T] + [快照点 dump] +
+    每 rollout 一段 = chain 工具序列 + n_window 个 set_gripper 判定步
+    (FG 族另有一个 back_project 尾随 dump;command=None 一律跳过)。
+    执行器 win* 条目 = 实际执行步(早停即 break),故 n_window 严格取自
+    samples 的 win* 计数。对不齐即报错,不留静默近似。
     """
     entries = json.load(open(states_path))
+    T = recs[0]["T"]
+    assert all(r["T"] == T for r in recs), "快照内 T 不一致"
     i = 0
+    # 跳过初始 dump + 重放 prefix(step_idx <= T)
+    while i < len(entries) and (entries[i].get("step_idx") is None
+                                or entries[i]["step_idx"] <= T):
+        i += 1
     finals = []
     for r in recs:
         chain_tools = [c["tool"] for c in (r.get("chain") or [])]
@@ -79,8 +88,10 @@ def rebuild_final_steps(states_path: Path, recs: list[dict]) -> list[int]:
 def load_encoder():
     import os
     fp = json.load(open(ENCODER_FP))
-    os.environ.setdefault("HF_HOME", "/workspace/yjx/rpent_data/.cache/huggingface")
-    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    # fetch 脚本把快照缓存在 rpent_data 下;环境默认 HF_HOME 指向别处,
+    # setdefault 会保错值 → 显式覆盖 + 强制离线(指纹即校验)
+    os.environ["HF_HOME"] = "/workspace/yjx/rpent_data/.cache/huggingface"
+    os.environ["HF_HUB_OFFLINE"] = "1"
     import torch
     from transformers import AutoImageProcessor, AutoModel
     proc = AutoImageProcessor.from_pretrained(fp["model_id"])
