@@ -58,7 +58,17 @@ P(VERIFIED_RECOVERY), P(NO_EFFECT), P(HARM) | snapshot, edge
   结局 NO_EFFECT(§2 冻结语义);其余原语 error/异常 → ERROR;
 - `move_to` 未显式给 `gripper` → 默认 -1.0(开爪)——冻结行为照跑,
   不为语义好看改参数(边是 7e7528e 冻结件);
-- 每原语经 `toolkit._step`(states.json 照常落盘,result 从尾记录读回)。
+- 每原语经 `toolkit._step`(states.json 照常落盘,result 从尾记录读回);
+- **感知步读快照帧**:含 segment 的链,执行前先把 restore 后的快照
+  obs dump 成下一步的 image/world artifact(segment 的 `_latest_step`
+  才能读到精确快照帧;冒烟发现 k>1 的 rollout 否则会读到上一 rollout
+  判定窗的 dump —— 修复先于全量运行,冒烟 2 轮实测同图同分)。
+- **hi-res artifact 滑动保留(非 bug)**:`dump_state` 每次落盘后会把
+  `step < step_idx−4` 的 1024 分辨率 RGB/world artifact unlink
+  (`tools.py` GC 段),即 hi-res 只保留最近 5 步;低清 256 帧/深度
+  全保留。segment 在帧存活期间读取,K0 物理不受影响;§3 数据集若要
+  hi-res 快照帧,必须在快照 dump 后立即拷出(链推进 >4 步即被 GC),
+  否则用低清帧。
 
 ## 4. 结局分类(§5 公式的实现口径)
 
