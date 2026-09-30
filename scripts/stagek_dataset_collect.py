@@ -42,12 +42,14 @@ from stagek_graph_executor import (  # noqa: E402
 
 MAX_RETRY = 3
 
-# 快照帧捕获清单:hi-res(GC 风险 → 拷出)+ 低清(全保留 → 登记路径)
+# 快照帧捕获清单:hi-res(GC 风险 → 拷出)+ 低清(全保留 → 登记路径)。
+# 模板必须是带子目录的完整相对路径(ARTIFACT_LAYOUT 的 value 形式;
+# 冒烟2发现纯文件名模板让拷出在 run 目录根部找文件、静默全 missing)。
 _CAPTURE = [
-    ("image", "agentview", "high", "images_cam_hi_{step:02d}.png", True),
-    ("world", "agentview", "high", "world_hi_{step:02d}.npy", True),
-    ("image", "wrist", "high", "images_wrist_hi_{step:02d}.png", True),
-    ("world", "wrist", "high", "world_wrist_hi_{step:02d}.npy", True),
+    ("image", "agentview", "high", "images_cam_hi/image_cam_hi_{step:02d}.png", True),
+    ("world", "agentview", "high", "world_hi/world_hi_{step:02d}.npy", True),
+    ("image", "wrist", "high", "images_wrist_hi/image_wrist_hi_{step:02d}.png", True),
+    ("world", "wrist", "high", "world_wrist_hi/world_wrist_hi_{step:02d}.npy", True),
     ("policy_image", "agentview", "low", "images/image_{step:02d}.png", False),
     ("image", "agentview", "low", "images_cam/image_cam_{step:02d}.png", False),
     ("image", "wrist", "low", "images_wrist/image_wrist_{step:02d}.png", False),
@@ -93,6 +95,9 @@ def capture_snapshot_rgb(toolkit, prims, outdir: Path, snapshot_id: str) -> dict
         rel = tmpl.format(step=step)
         src = outdir / rel
         if not src.exists():
+            if copy:
+                # hi-res 是 §4 特征源,缺失即失败(渲染/GC 语义破坏)
+                raise RuntimeError(f"快照 hi-res artifact 缺失: {rel}")
             captured["referenced"].append({"path": rel, "missing": True})
             continue
         if copy:  # hi-res 立即拷出(否则链推进 >4 步被 GC)
@@ -244,7 +249,7 @@ def main() -> int:
     atexit.register(lambda: lock.rmdir() if lock.exists() else None)
 
     selection = json.load(open(REPO / args.selection))
-    kmax = selection["k_rollout"]
+    kmax = selection["budget"]["k_rollout"]
     snaps = selection["snapshots"]
     if args.snapshots:
         keep = set(args.snapshots.split(","))
