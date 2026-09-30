@@ -1,0 +1,11 @@
+{
+ "round": 2,
+ "decisions": {
+  "LC-RS-1R": {
+   "decision": "REJECT",
+   "family": "RELEASE_PREDICATE_STALL",
+   "n_elig": 6
+  }
+ },
+ "promoted": []
+}

@@ -67,15 +67,18 @@ def main() -> int:
         if r.get("outcome") and not r.get("infra_error") and r.get("k"):
             recs.append(r)
 
-    # Round 2(--no-frozen):冻结边 P̂ 复用 Round 1 同快照测量 —— 快照由
-    # episode 重放确定性重建(readback 逐位校验),边未变,重测同一量只
-    # 重复采样 pi0 非确定性;此处把 Round 1 冻结行以本轮 sid 重标并入
+    # Round 2(--no-frozen):冻结边 P̂ 复用 Round 1 同快照测量。注意:重放
+    # 含 pi0 原语 → 推理非确定性,跨进程快照态有 ~1e-4m 级漂移(实测
+    # base eef 差 2.5e-4;readback=0 只保证同进程内 restore 保真)。
+    # 因此合并行的 Verifier A 必须用**其本轮**的 base/ctx 重算(否则
+    # ${eef} 期望错配 → 假 A-FAIL);效力表 (eff) 按重标 sid 对齐。
     if rnd > 1:
         prev = REPO / f"logs/stageL_round{rnd - 1}/rollouts.jsonl"
         for ln in open(prev):
             r = json.loads(ln)
             if (r.get("outcome") and not r.get("infra_error") and r.get("k")
                     and not r.get("is_candidate")):
+                r["_orig_sid"] = r["snapshot_id"]   # 本轮 ctx/基准键
                 r["snapshot_id"] = (f"L{rnd}r_"
                                     + r["snapshot_id"].split("_", 1)[1])
                 r["round"] = rnd      # 仅作显示;测量本身来自 round-1
@@ -97,8 +100,12 @@ def main() -> int:
 
     def ctx_of(sid):
         if sid not in ctx_cache:
-            first = next(r for r in recs if r["snapshot_id"] == sid)
-            steps = _load_source_steps(snaps[sid]["dir"])
+            # 合并行按其本轮原始 sid 找首行(base 同轮);snaps 键统一为
+            # 当前轮前缀(L1r_/L2r_ 后缀部分一致)
+            first = next(r for r in recs
+                         if (r.get("_orig_sid") or r["snapshot_id"]) == sid)
+            snaps_key = f"L{rnd}r_" + sid.split("_", 1)[1]
+            steps = _load_source_steps(snaps[snaps_key]["dir"])
             ctx_cache[sid] = (
                 {"task_lang": _task_language(steps),
                  "last_pick": _last_pick_prompt(steps, first["T"])},
@@ -110,10 +117,12 @@ def main() -> int:
         REPO / f"analysis/stageL_candidate_edges_v{'0' if rnd == 1 else '1'}.jsonl")}
     edges = {**frozen, **cands}
 
-    # 逐 rollout 离线重算 Verifier A(一次,缓存复用)
+    # 逐 rollout 离线重算 Verifier A(一次,缓存复用;合并行用其本轮
+    # 原始 sid 的 base —— 跨轮 base 漂移 ~1e-4 会造成 ${eef} 假失配)
     for r in recs:
         e = edges.get(r["edge_id"])
-        r["_va"] = (verifier_a(e, *ctx_of(r["snapshot_id"]), r)
+        r["_va"] = (verifier_a(
+                        e, *ctx_of(r.get("_orig_sid") or r["snapshot_id"]), r)
                     if e is not None else {})
 
     # ---- 展开 CSV ------------------------------------------------------------
@@ -254,8 +263,25 @@ def main() -> int:
         md.append(f"| {cid} | {'PROMOTE' if ok else 'REJECT'} |")
     out_md = REPO / f"analysis/stageL_round{rnd}_decision.md"
     out_md.write_text("\n".join(md))
+    # 机器可读判定(终图冻结脚本消费):判定 + 关键量 + 门明细
+    out_json = REPO / f"analysis/stageL_round{rnd}_decisions.json"
+    detail = {}
+    for cid, ok in decisions.items():
+        c = cands[cid]
+        fam = c["failure_family"]
+        src_eps = set(c["source_evidence"]["episodes"])
+        fam_snaps = {s: m for s, m in snaps.items() if m["family"] == fam}
+        elig = {s for s, m in fam_snaps.items()
+                if m["dir"] not in src_eps and pv(cid, s) is not None}
+        detail[cid] = {"decision": "PROMOTE" if ok else "REJECT",
+                       "family": fam, "n_elig": len(elig)}
+    out_json.write_text(json.dumps(
+        {"round": rnd, "decisions": detail,
+         "promoted": [c for c, d in detail.items()
+                      if d["decision"] == "PROMOTE"]},
+        ensure_ascii=False, indent=1))
     print("\n".join(md[-8:]))
-    print(f"-> {out_csv}\n-> {out_md}")
+    print(f"-> {out_csv}\n-> {out_md}\n-> {out_json}")
     return 0
 
 

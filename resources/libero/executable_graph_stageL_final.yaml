@@ -1,0 +1,448 @@
+# Stage L — Executable Graph FINAL(2026-09-30 冻结)
+#
+# 构成 = executable_graph_v1.yaml 冻结边(逐字段原样)+ Stage L
+# Round 1/2 双验证晋升候选(meta.stage_l.promoted;零晋升时 ≡ 冻结图)。
+# 冻结纪律与 v1 相同:guard 只用 runtime observable;executor 只用
+# 已注册原语;确定性 priority 选择;零 LLM 边选择。
+
+meta:
+  version: stageL_final
+  frozen_date: '2026-09-30'
+  base_graph: resources/libero/executable_graph_v1.yaml
+  families:
+  - FALSE_GRASP
+  - MOVE_CONTACT_STALL
+  - RELEASE_PREDICATE_STALL
+  selection: deterministic_priority
+  llm_edge_selection: false
+  stage_l:
+    split_hash: 77695bed7074
+    rounds:
+      round1: 4/4 REJECT(DEV 584 rollouts)
+      round2: 1 候选:LC-RS-1R=REJECT
+    promoted: []
+    note: Stage L verify-to-evolve:零晋升时终图 ≡ 冻结图(逐字段),演化判定见 STAGE_L_FINAL_REPORT.md
+    git_head_at_freeze: da0d8de
+  graph_hash: 59fc95a753ac3628
+edges:
+- id: FG-3
+  source_state: FALSE_GRASP
+  failure_family: FALSE_GRASP
+  guard: {}
+  option_id: fg3_offset_regrasp
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: LAST_PICK_PROMPT + OFFSET_SUFFIX
+  executor:
+  - tool: pi0_pick
+    args:
+      prompt: ${prompt}
+      max_chunks: 14
+      lift_thresh: 0.05
+      gripper_closed_thresh: 0.06
+  expected_transition: 抬升 >= 5mm 且物体离支撑面跟随 EEF
+  verifier:
+    family: FALSE_GRASP
+  success_state: GRASP_CHECK
+  failure_state: FALSE_GRASP
+  fallback: FG-1
+  priority: 1
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 80
+    h1_family_hit: 19
+    h1_unique: 19
+  status: active
+- id: FG-2
+  source_state: FALSE_GRASP
+  failure_family: FALSE_GRASP
+  guard:
+    target_localized: true
+    consec_pick_fails:
+      lt: 3
+  option_id: fg2_plain_regrasp
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: LAST_PICK_PROMPT
+  executor:
+  - tool: pi0_pick
+    args:
+      prompt: ${prompt}
+      max_chunks: 14
+      lift_thresh: 0.05
+      gripper_closed_thresh: 0.06
+  expected_transition: 同抓点重试后抬升 >= 5mm
+  verifier:
+    family: FALSE_GRASP
+  success_state: GRASP_CHECK
+  failure_state: FALSE_GRASP
+  fallback: FG-3
+  priority: 2
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 0
+    h1_family_hit: 0
+    h1_unique: 0
+    note: guard 在 H1 全程未通过(FG 菜单 80 次均为 FG-1/FG-3)
+  status: active
+- id: FG-1
+  source_state: FALSE_GRASP
+  failure_family: FALSE_GRASP
+  guard: {}
+  option_id: fg1_perceive_hires
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: TASK_LANG
+  executor:
+  - tool: segment
+    args:
+      prompt: ${prompt}
+      camera: agentview
+      min_score: 0.2
+  - tool: back_project
+    args:
+      resolution: high
+      row_range: ${mask_rows}
+      col_range: ${mask_cols}
+  expected_transition: hi-res 回投影给出可用目标坐标
+  verifier:
+    family: FALSE_GRASP
+    extra:
+      found: true
+  success_state: PRE_GRASP
+  failure_state: FALSE_GRASP
+  fallback: UN-1
+  priority: 3
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 80
+    h1_family_hit: 0
+    h1_unique: 0
+  status: active
+- id: MS-2
+  source_state: MOVE_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: ms2_waypoint_approach
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      obj: OBJ_XYZ
+      eef: EEF
+      waypoint: '[obj.x, obj.y, max(eef.z, obj.z + 0.06)]'
+  executor:
+  - tool: segment
+    args:
+      prompt: ${TASK_LANG}
+      camera: agentview
+      min_score: 0.2
+  - tool: back_project
+    args:
+      resolution: high
+      row_range: ${mask_rows}
+      col_range: ${mask_cols}
+  - tool: move_to
+    args:
+      xyz: ${waypoint}
+      max_steps: 60
+  expected_transition: 先到中途点,对目标残差下降 > 5mm
+  verifier:
+    family: MOVE_CONTACT_STALL
+  success_state: MOVE_PROGRESS
+  failure_state: MOVE_STALL
+  fallback: MS-3
+  priority: 1
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 0
+    h1_family_hit: 0
+    h1_unique: 0
+    note: MOVE_STALL 在 H1 无 fire,无家族证据
+  status: active
+- id: MS-3
+  source_state: MOVE_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: ms3_retreat_reapproach
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      eef: EEF
+      retreat: '[eef.x, eef.y, eef.z + 0.06]'
+      obj: OBJ_XYZ
+      approach: '[obj.x, obj.y, obj.z + 0.06]'
+  executor:
+  - tool: move_to
+    args:
+      xyz: ${retreat}
+      max_steps: 40
+  - tool: segment
+    args:
+      prompt: ${TASK_LANG}
+      camera: agentview
+      min_score: 0.2
+  - tool: back_project
+    args:
+      resolution: high
+      row_range: ${mask_rows}
+      col_range: ${mask_cols}
+  - tool: move_to
+    args:
+      xyz: ${approach}
+      max_steps: 60
+  expected_transition: 抬升退开换路径后,残差下降 > 5mm
+  verifier:
+    family: MOVE_CONTACT_STALL
+  success_state: MOVE_PROGRESS
+  failure_state: MOVE_STALL
+  fallback: UN-1
+  priority: 2
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 0
+    h1_family_hit: 0
+    h1_unique: 0
+  status: active
+- id: MS-1
+  source_state: MOVE_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: ms1_perceive
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: TASK_LANG
+  executor:
+  - tool: segment
+    args:
+      prompt: ${prompt}
+      camera: agentview
+      min_score: 0.2
+  - tool: back_project
+    args:
+      resolution: high
+      row_range: ${mask_rows}
+      col_range: ${mask_cols}
+  expected_transition: 回投影刷新目标坐标
+  verifier:
+    family: MOVE_CONTACT_STALL
+    extra:
+      found: true
+  success_state: MOVE_STALL
+  failure_state: MOVE_STALL
+  fallback: MS-2
+  priority: 3
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 0
+    h1_family_hit: 0
+    h1_unique: 0
+  status: active
+- id: CS-2
+  source_state: CONTACT_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: cs2_grip_adjust_retry
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: LAST_PICK_PROMPT(无则 TASK_LANG)
+  executor:
+  - tool: set_gripper
+    args:
+      gripper: -1.0
+      steps: 5
+  - tool: pi0_doubled
+    args:
+      prompt: ${prompt}
+      max_chunks: 20
+  expected_transition: 调开爪距后接触技能触发任务谓词
+  verifier:
+    family: MOVE_CONTACT_STALL
+  success_state: DONE
+  failure_state: CONTACT_STALL
+  fallback: CS-3
+  priority: 1
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 6
+    h1_family_hit: 2
+    h1_unique: 2
+  status: active
+- id: CS-3
+  source_state: CONTACT_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: cs3_contact_settling
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      eef: EEF
+      settle: '[eef.x, eef.y, eef.z - 0.02]'
+      prompt: LAST_PICK_PROMPT(无则 TASK_LANG)
+  executor:
+  - tool: move_to
+    args:
+      xyz: ${settle}
+      max_steps: 30
+  - tool: pi0_doubled
+    args:
+      prompt: ${prompt}
+      max_chunks: 20
+  expected_transition: 低位 settling 接触触发谓词
+  verifier:
+    family: MOVE_CONTACT_STALL
+  success_state: DONE
+  failure_state: CONTACT_STALL
+  fallback: UN-1
+  priority: 2
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 6
+    h1_family_hit: 0
+    h1_unique: 0
+    note: contact_settling 家族证据 2 次来自 RS 菜单(RS-3)
+  status: active
+- id: CS-1
+  source_state: CONTACT_STALL
+  failure_family: MOVE_CONTACT_STALL
+  guard: {}
+  option_id: cs1_perceive
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: TASK_LANG
+  executor:
+  - tool: segment
+    args:
+      prompt: ${prompt}
+      camera: agentview
+      min_score: 0.2
+  - tool: back_project
+    args:
+      resolution: high
+      row_range: ${mask_rows}
+      col_range: ${mask_cols}
+  expected_transition: hi-res 回投影确认接触目标实际位置
+  verifier:
+    family: MOVE_CONTACT_STALL
+    extra:
+      found: true
+  success_state: CONTACT_STALL
+  failure_state: CONTACT_STALL
+  fallback: CS-2
+  priority: 3
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 6
+    h1_family_hit: 0
+    h1_unique: 0
+  status: active
+- id: RS-2
+  source_state: RELEASE_PREDICATE_STALL
+  failure_family: RELEASE_PREDICATE_STALL
+  guard: {}
+  option_id: rs2_repick_replace
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      prompt: LAST_PICK_PROMPT
+      eef: EEF
+      deeper: '[eef.x, eef.y, eef.z - 0.03]'
+  executor:
+  - tool: pi0_pick
+    args:
+      prompt: ${prompt}
+      max_chunks: 14
+      lift_thresh: 0.05
+      gripper_closed_thresh: 0.06
+  - tool: move_to
+    args:
+      xyz: ${deeper}
+      max_steps: 40
+  - tool: release
+    args:
+      max_steps: 20
+  expected_transition: 重抓后更深放置,任务谓词触发
+  verifier:
+    family: RELEASE_PREDICATE_STALL
+  success_state: DONE
+  failure_state: RELEASE_PREDICATE_STALL
+  fallback: RS-3
+  priority: 1
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 18
+    h1_family_hit: 6
+    h1_unique: 6
+  status: active
+- id: RS-3
+  source_state: RELEASE_PREDICATE_STALL
+  failure_family: RELEASE_PREDICATE_STALL
+  guard: {}
+  option_id: rs3_contact_settling
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      eef: EEF
+      settle: '[eef.x, eef.y, eef.z - 0.02]'
+  executor:
+  - tool: set_gripper
+    args:
+      gripper: -0.3
+      steps: 5
+  - tool: move_to
+    args:
+      xyz: ${settle}
+      max_steps: 30
+  expected_transition: 低开爪沉降接触触发谓词
+  verifier:
+    family: RELEASE_PREDICATE_STALL
+  success_state: DONE
+  failure_state: RELEASE_PREDICATE_STALL
+  fallback: UN-1
+  priority: 2
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 18
+    h1_family_hit: 2
+    h1_unique: 2
+  status: active
+- id: RS-1
+  source_state: RELEASE_PREDICATE_STALL
+  failure_family: RELEASE_PREDICATE_STALL
+  guard:
+    actions_since_release:
+      lte: 6
+  option_id: rs1_micro_reposition
+  parameterizer:
+    source: runtime_observable
+    bindings:
+      eef: EEF
+      nudge: '[eef.x, eef.y + 0.02, eef.z]'
+      home: ${eef}
+  executor:
+  - tool: move_to
+    args:
+      xyz: ${nudge}
+      max_steps: 30
+  - tool: move_to
+    args:
+      xyz: ${home}
+      max_steps: 30
+  expected_transition: 微移回位后谓词在数步内触发
+  verifier:
+    family: RELEASE_PREDICATE_STALL
+  success_state: DONE
+  failure_state: RELEASE_PREDICATE_STALL
+  fallback: RS-2
+  priority: 3
+  max_attempts: 1
+  historical_evidence:
+    h1_menu: 18
+    h1_family_hit: 0
+    h1_unique: 0
+  status: active

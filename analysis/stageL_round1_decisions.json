@@ -1,0 +1,26 @@
+{
+ "round": 1,
+ "decisions": {
+  "LC-FG-1": {
+   "decision": "REJECT",
+   "family": "FALSE_GRASP",
+   "n_elig": 9
+  },
+  "LC-FG-2": {
+   "decision": "REJECT",
+   "family": "FALSE_GRASP",
+   "n_elig": 9
+  },
+  "LC-RS-1": {
+   "decision": "REJECT",
+   "family": "RELEASE_PREDICATE_STALL",
+   "n_elig": 6
+  },
+  "LC-RS-2": {
+   "decision": "REJECT",
+   "family": "RELEASE_PREDICATE_STALL",
+   "n_elig": 7
+  }
+ },
+ "promoted": []
+}

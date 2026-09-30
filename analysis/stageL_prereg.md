@@ -253,3 +253,15 @@ Q9 特化增益够大? Q10 是否有资格重启 Rule/学习打分器/WM/Router?
    found=False)、LC-RS-2 prompt 指向原位置(词表内无修复)、仅 LC-RS-1
    有证据支持的最小修复(t9s6 下降步)→ v1 仅 1 候选 LC-RS-1R,其余
    REJECTED 终态(analysis/stageL_candidate_edges_v1.jsonl)。
+8. (2026-09-30,Round 2 后)Round 2 LC-RS-1R REJECT → 两轮零晋升,终图
+   ≡ 冻结图(executable_graph_stageL_final.yaml,promoted=[])。
+   **HELDOUT 24 快照未执行**:Gate A 比 COV_evo−COV_frozen 与
+   BEST_evo−BEST_frozen,进化图 = 冻结图 + ∅ 候选 ⇒ 两图边集恒等 ⇒
+   两差在任何评测集上恒为 0 < +0.15/+0.10,任何测量不可能改变判定
+   (数学恒等式,非估计);§16 "Gate A FAIL → STOP"。HELDOUT split
+   保持原封(从未被挖掘/评测/策略接触),留给未来新 prereg。
+9. (2026-09-30)Round 2 分析层 bug 修正:合并 Round 1 冻结行曾被以
+   Round 2 base 重算 Verifier A → 96 条假 A-FAIL(跨进程快照态漂移
+   ~2.5e-4m,重放含 pi0 原语非确定性;readback=0 只担保同进程 restore);
+   修正为按行本 轮 ctx 重算后 A-FAIL=0,RS 基线回归 Round 1 数字
+   (RS-2 P̂_h 0.15)。运行期内嵌 Verifier A 全程 0 违规,不受影响。
