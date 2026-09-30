@@ -195,6 +195,7 @@ def run_snapshot(snap: dict, edges: dict, gpu: int, shared_kwargs: dict,
                         else:
                             r = ex.exec_edge(edge, ctx)
                             rec.update(r)
+                            rec["final_step"] = toolkit._next_step  # z_post 帧定位(§6 L_latent)
                             rec["snapshot_rgb"] = {
                                 "outdir": str(outdir.name), **rgb}
                             ok = True

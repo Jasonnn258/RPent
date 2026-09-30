@@ -1,0 +1,14 @@
+{
+ "model_id": "facebook/dinov2-base",
+ "local_snapshot": "/workspace/yjx/rpent_data/.cache/huggingface/hub/models--facebook--dinov2-base/snapshots/f9e44c814b77203eaa57a6bdbbd535f21ede1415",
+ "patch_tokens": 256,
+ "hidden_dim": 768,
+ "processor_size": {
+  "shortest_edge": 256
+ },
+ "probe_output_shape": [
+  1,
+  257,
+  768
+ ]
+}

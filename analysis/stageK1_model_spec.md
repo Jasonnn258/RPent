@@ -15,8 +15,9 @@ _状态:**DRAFT** —— 数据集采集完成、split manifest 冻结后定稿;
 
 ## 1. 冻结特征(§4)
 
-- encoder:facebook/dinov2-base(ViT-B/14,224²,patch 16×16=256 + CLS,
-  dim 768),版本指纹 analysis/stageK1_encoder_fingerprint.json,
+- encoder:facebook/dinov2-base(ViT-B/14,输入 224²,patch 16×16=256 + CLS,
+  dim 768),本地快照 commit `f9e44c814b77`(指纹文件
+  analysis/stageK1_encoder_fingerprint.json,probe [1,257,768]),
   **全程冻结不训练**;
 - 帧选择:agentview 标定帧(images_cam,256² → processor resize 224²)
   与 wrist 帧(images_wrist)各取 patch-token 均值池化 + CLS,
