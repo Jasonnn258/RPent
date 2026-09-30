@@ -242,3 +242,14 @@ Q9 特化增益够大? Q10 是否有资格重启 Rule/学习打分器/WM/Router?
    GRASP_CONFIRMED 型(pi0_pick + lift)单独计数报告;
 5. K 数据集侧冻结边基线同批重跑(不复用 K 数字),K 数字仅作参考并
    列报告。
+6. (2026-09-30,Round 2 启动前)Round 2 冻结边基线**复用 Round 1 同快照
+   测量**(--no-frozen,不重跑):快照由 episode 重放确定性重建且每 rollout
+   restore readback 逐位校验,冻结边未变,重跑同一 (snapshot, edge, 协议)
+   仅重复采样 pi0 非确定性、无信息增量;候选行全部为 Round 2 新跑。
+   §10 比较量 = 候选(R2)vs 冻结(R1)同快照配对差,协议同 §8;
+7. (2026-09-30,Round 2 启动前)Round 1 全 REJECT 后的修复取舍依据
+   Round 1 DEV rollout 取证(§17-6 复用同一数据源,无 HELDOUT 信息):
+   LC-FG-1/2 感知死(SAM3 0.009–0.059 ≪ 阈值 0.2,降阈值至 0.1 仍全
+   found=False)、LC-RS-2 prompt 指向原位置(词表内无修复)、仅 LC-RS-1
+   有证据支持的最小修复(t9s6 下降步)→ v1 仅 1 候选 LC-RS-1R,其余
+   REJECTED 终态(analysis/stageL_candidate_edges_v1.jsonl)。

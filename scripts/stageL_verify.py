@@ -205,7 +205,8 @@ def run_snapshot(snap: dict, frozen: dict, cands: list[dict], gpu: int,
         # 边池:冻结合法边 + 族匹配候选;候选标 source_excluded
         pool = []
         for eid in snap["legal_edges"]:
-            pool.append((frozen[eid], False))
+            if eid in frozen:      # --no-frozen(Round 2)时词表为空 → 跳过
+                pool.append((frozen[eid], False))
         for c in cands:
             if c["failure_family"] == snap["family"]:
                 pool.append((c, snap["episode_dir"] in
@@ -290,6 +291,9 @@ def main() -> int:
     ap.add_argument("--gpu", type=int, default=0)
     ap.add_argument("--max-rollouts", type=int, default=BUDGET_CAP)
     ap.add_argument("--snapshots", default=None)
+    # Round 2:冻结边 P̂ 复用 Round 1 同快照测量(确定性 restore,readback
+    # 逐位校验),只跑新候选 —— 省预算且避免重复测量同一量
+    ap.add_argument("--no-frozen", action="store_true")
     args = ap.parse_args()
     args.max_rollouts = min(args.max_rollouts, BUDGET_CAP)
 
@@ -326,7 +330,7 @@ def main() -> int:
         keep = set(args.snapshots.split(","))
         snaps = [s for s in snaps if s["snapshot_id"] in keep]
 
-    frozen = load_edges()
+    frozen = {} if args.no_frozen else load_edges()
     cands = load_candidates(REPO / args.candidates)
     log_root = REPO / f"logs/stageL_round{args.round}"
     log_root.mkdir(parents=True, exist_ok=True)

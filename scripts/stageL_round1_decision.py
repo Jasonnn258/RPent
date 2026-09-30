@@ -67,6 +67,20 @@ def main() -> int:
         if r.get("outcome") and not r.get("infra_error") and r.get("k"):
             recs.append(r)
 
+    # Round 2(--no-frozen):冻结边 P̂ 复用 Round 1 同快照测量 —— 快照由
+    # episode 重放确定性重建(readback 逐位校验),边未变,重测同一量只
+    # 重复采样 pi0 非确定性;此处把 Round 1 冻结行以本轮 sid 重标并入
+    if rnd > 1:
+        prev = REPO / f"logs/stageL_round{rnd - 1}/rollouts.jsonl"
+        for ln in open(prev):
+            r = json.loads(ln)
+            if (r.get("outcome") and not r.get("infra_error") and r.get("k")
+                    and not r.get("is_candidate")):
+                r["snapshot_id"] = (f"L{rnd}r_"
+                                    + r["snapshot_id"].split("_", 1)[1])
+                r["round"] = rnd      # 仅作显示;测量本身来自 round-1
+                recs.append(r)
+
     # ---- 快照/ctx 重建 ------------------------------------------------------
     snaps = {}
     for r in csv.DictReader(open(REPO / "analysis/stageL_split_manifest.csv")):
