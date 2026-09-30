@@ -94,7 +94,12 @@ REJECT_UNEXECUTABLE(编译期静态检查,不进入执行)。**
 
 **Verifier A —— 执行一致性**:实际执行 trace 与声明 action_sequence
 逐位比对 —— 工具序列全等 ∧ 解析参数数值差 ≤ 1e-4 ∧ prompt 串全等。
-A FAIL 的 rollout 不计入效力统计(单列账目)。
+**修订 v1.1(2026-09-30,任何验证运行前)**:感知无果链中止是执行器
+冻结语义(K 同栈:链中止记 NO_EFFECT),属候选真实行为而非一致性
+违规 —— A 判定改为**前缀语义**:实际 trace 须为声明序列的前缀且参数/
+prompt 全等、无任何未声明动作;感知无果早止 = A-PASS(chain_abort=true,
+outcome NO_EFFECT,计入效力统计)。A FAIL(未声明动作/参数超差/prompt
+不匹配/执行器私换)的 rollout 不计入效力统计(单列账目)。
 执行语义与 K 完全同栈:链中感知无果 → 链中止记 NO_EFFECT;原语异常 →
 ERROR;序列完成后判定窗口 4 样本 × 5 步保持。
 
