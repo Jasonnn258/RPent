@@ -80,15 +80,16 @@ class MDNHead(nn.Module):
     def __init__(self, dim_in: int, dim_out: int = 3, k: int = 2):
         super().__init__()
         self.k = k
-        self.net = nn.Linear(dim_in, k * (2 + dim_out))
+        self.net = nn.Linear(dim_in, k * (1 + 2 * dim_out))
 
     def loss(self, h, target):
-        o = self.net(h).view(-1, self.k, 2 + target.shape[-1])
-        pi, mu, logvar = o[..., 0], o[..., 1], o[..., 2]
+        d = target.shape[-1]
+        o = self.net(h).view(-1, self.k, 1 + 2 * d)
+        log_pi = torch.log_softmax(o[..., 0], -1)        # [B,k]
+        mu, logvar = o[..., 1:1 + d], o[..., 1 + d:]     # [B,k,d]
         logvar = logvar.clamp(-6, 6)
-        norm = torch.distributions.Normal(mu, logvar.exp())
-        ll = norm.log_prob(target.unsqueeze(1)).sum(-1)  # [B,k]
-        log_pi = torch.log_softmax(pi, -1)
+        ll = torch.distributions.Normal(mu, logvar.exp()).log_prob(
+            target.unsqueeze(1)).sum(-1)                 # [B,k]
         return -torch.logsumexp(log_pi + ll, -1).mean()
 
 
@@ -116,7 +117,7 @@ class Arm(nn.Module):
         self.z_proj = nn.Sequential(nn.Linear(in_z, h), nn.GELU())
         self.state_proj = nn.Sequential(nn.Linear(s_dim, h), nn.GELU())
         if arm == "B2":
-            self.cell = nn.GRUCell(h, h)
+            self.cell = nn.GRUCell(64, h)  # input=edge_emb(64), hidden=h(512)
             self.zpost_head = nn.Linear(h, z_dim)
         fuse = h * (2 if arm == "B2" else 1)
         self.trunk = nn.Sequential(nn.Linear(fuse, h), nn.GELU(),
@@ -131,7 +132,7 @@ class Arm(nn.Module):
             return h0, None
         if self.arm in ("B1", "B3"):
             return h0, None
-        h1 = self.cell(h0, self.edge_emb(edge_idx))
+        h1 = self.cell(self.edge_emb(edge_idx), h0)  # input=edge_emb, hidden=h0
         return h0, h1
 
     def forward(self, batch, edge_idx):
@@ -158,6 +159,109 @@ def batchify(samples, device):
     }
 
 
+def run_training(arm: str, seed: int, epochs: int = 80, lam_state: float = 0.3,
+                 lam_trans: float = 1.0, lam_harm: float = 0.5, batch: int = 64,
+                 save: bool = True, tag: str = "") -> dict:
+    """训练一个 (arm, seed, λ) 组合;minibatch 64 + VAL early-stop(耐心 10)。
+
+    λ 网格扫描与正式训练共用同一入口(协议一致);save=False 供网格扫描,
+    不落 checkpoint。返回 {best_val_ce, epochs_run, ckpt 名}。
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    samples, edges = load_samples()
+    edge_ix = {e: i for i, e in enumerate(edges)}
+    tr = [x for x in samples if x["split"] == "TRAIN"]
+    va = [x for x in samples if x["split"] == "VAL"]
+    if not tr or not va:
+        raise SystemExit("TRAIN/VAL 为空 —— 检查 manifest")
+    print(f"[{arm}s{seed}{tag}] TRAIN {len(tr)} VAL {len(va)} edges {edges}",
+          flush=True)
+
+    model = Arm(arm, s_dim=len(tr[0]["s"]), n_edges=len(edges)).to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
+    bt, bv = batchify(tr, device), batchify(va, device)
+    if arm == "B3":  # oracle 输入 = z_pre ⊕ z_post
+        bt["z"] = torch.cat([bt["z"], bt["z_post"]], -1)
+        bv["z"] = torch.cat([bv["z"], bv["z_post"]], -1)
+    et = torch.tensor([edge_ix[x["edge"]] for x in tr], device=device)
+    ev = torch.tensor([edge_ix[x["edge"]] for x in va], device=device)
+    g = torch.Generator().manual_seed(seed)  # minibatch 洗牌可复现
+
+    ckpt = hist_path = None
+    if save:
+        OUTDIR.mkdir(parents=True, exist_ok=True)
+        ckpt = OUTDIR / f"ckpt_{arm}_s{seed}{tag}.pt"
+        hist_path = OUTDIR / f"hist_{arm}_s{seed}{tag}.jsonl"
+    best, best_state, best_epoch, hist = 1e9, None, -1, []
+    ce = nn.CrossEntropyLoss()
+    bce = nn.BCEWithLogitsLoss()
+    cos = nn.CosineSimilarity(dim=-1)
+
+    for epoch in range(epochs):
+        model.train()
+        perm = torch.randperm(len(tr), generator=g)
+        ep_loss, nb = 0.0, 0
+        for b0 in range(0, len(tr), batch):
+            idx = perm[b0:b0 + batch].to(device)
+            b = {k: v[idx] for k, v in bt.items()}
+            ei = et[idx]
+            opt.zero_grad()
+            out = model(b, ei)
+            l_trans = ce(out["logits"], b["y"])
+            l_harm = bce(out["harm"], b["harm"])
+            l_state = model.mdn.loss(out["mdn_h"], b["phys"])
+            loss = lam_trans * l_trans + lam_harm * l_harm + lam_state * l_state
+            if arm == "B2":  # L_latent:ẑ_post vs 冻结 DINOv2 z_post
+                z_hat = model.zpost_head(out["h1"])
+                l_lat = (1 - cos(z_hat, b["z_post"]).mean()) \
+                    + (z_hat - b["z_post"]).pow(2).mean()
+                loss = loss + l_lat
+            loss.backward()
+            opt.step()
+            ep_loss += loss.item()
+            nb += 1
+
+        model.eval()
+        with torch.no_grad():
+            ov = model(bv, ev)
+            vl = ce(ov["logits"], bv["y"]).item()
+        hist.append({"epoch": epoch, "train_loss": round(ep_loss / nb, 5),
+                     "val_ce": round(vl, 5)})
+        if vl < best - 1e-5:
+            best, best_epoch = vl, epoch
+            best_state = {k: v.detach().clone()
+                          for k, v in model.state_dict().items()}
+        elif epoch - best_epoch > 10:  # early stop patience 10
+            break
+
+    if save:
+        model.load_state_dict(best_state)
+        cfg = {"arm": arm, "seed": seed, "epochs": epochs, "batch": batch,
+               "lambda_state": lam_state, "lambda_transition": lam_trans,
+               "lambda_harm": lam_harm}
+        meta = {
+            "arm": arm, "seed": seed,
+            "git_commit": subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=REPO,
+                capture_output=True, text=True).stdout.strip(),
+            "config": cfg,
+            "config_hash": hashlib.md5(json.dumps(cfg).encode()).hexdigest()[:12],
+            "split_hash": hashlib.md5("".join(
+                sorted(f"{x['rid']}:{x['split']}" for x in samples)).encode()).hexdigest()[:12],
+            "encoder": json.load(open(REPO / "analysis/stageK1_encoder_fingerprint.json")),
+            "edge_vocab": edges, "best_val_ce": best, "epochs_run": len(hist),
+        }
+        torch.save({"state_dict": model.state_dict(), "meta": meta}, ckpt)
+        hist_path.write_text("\n".join(json.dumps(h) for h in hist))
+        print(f"[{arm}s{seed}{tag}] done: best_val_ce={best:.5f} "
+              f"({len(hist)} epochs) -> {ckpt.name}", flush=True)
+    return {"arm": arm, "seed": seed, "lambda_state": lam_state,
+            "lambda_transition": lam_trans, "lambda_harm": lam_harm,
+            "best_val_ce": best, "epochs_run": len(hist)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--arm", required=True, choices=["B0", "B1", "B2", "B3"])
@@ -167,82 +271,9 @@ def main() -> int:
     ap.add_argument("--lambda-transition", type=float, default=1.0)
     ap.add_argument("--lambda-harm", type=float, default=0.5)
     args = ap.parse_args()
-
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    samples, edges = load_samples()
-    edge_ix = {e: i for i, e in enumerate(edges)}
-    tr = [x for x in samples if x["split"] == "TRAIN"]
-    va = [x for x in samples if x["split"] == "VAL"]
-    if not tr or not va:
-        raise SystemExit("TRAIN/VAL 为空 —— 检查 manifest")
-    print(f"[{args.arm}s{args.seed}] TRAIN {len(tr)} VAL {len(va)} "
-          f"edges {edges}", flush=True)
-
-    model = Arm(args.arm, s_dim=len(tr[0]["s"]), n_edges=len(edges)).to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
-    bt, bv = batchify(tr, device), batchify(va, device)
-    if args.arm == "B3":  # oracle 输入 = z_pre ⊕ z_post
-        bt["z"] = torch.cat([bt["z"], bt["z_post"]], -1)
-        bv["z"] = torch.cat([bv["z"], bv["z_post"]], -1)
-    et = torch.tensor([edge_ix[x["edge"]] for x in tr], device=device)
-    ev = torch.tensor([edge_ix[x["edge"]] for x in va], device=device)
-
-    OUTDIR.mkdir(parents=True, exist_ok=True)
-    ckpt = OUTDIR / f"ckpt_{args.arm}_s{args.seed}.pt"
-    hist_path = OUTDIR / f"hist_{args.arm}_s{args.seed}.jsonl"
-    best, best_state, best_epoch, hist = 1e9, None, -1, []
-    ce = nn.CrossEntropyLoss()
-    bce = nn.BCEWithLogitsLoss()
-    cos = nn.CosineSimilarity(dim=-1)
-
-    for epoch in range(args.epochs):
-        model.train()
-        opt.zero_grad()
-        out = model(bt, et)
-        l_trans = ce(out["logits"], bt["y"])
-        l_harm = bce(out["harm"], bt["harm"])
-        l_state = model.mdn.loss(out["mdn_h"], bt["phys"])
-        loss = args.lambda_transition * l_trans + args.lambda_harm * l_harm \
-            + args.lambda_state * l_state
-        if args.arm == "B2":  # L_latent:ẑ_post vs 冻结 DINOv2 z_post
-            z_hat = model.zpost_head(out["h1"])
-            l_lat = (1 - cos(z_hat, bt["z_post"]).mean()) \
-                + (z_hat - bt["z_post"]).pow(2).mean()
-            loss = loss + l_lat
-        loss.backward()
-        opt.step()
-
-        model.eval()
-        with torch.no_grad():
-            ov = model(bv, ev)
-            vl = ce(ov["logits"], bv["y"]).item()
-        hist.append({"epoch": epoch, "train_loss": round(loss.item(), 5),
-                     "val_ce": round(vl, 5)})
-        if vl < best - 1e-5:
-            best, best_state, best_epoch = vl, \
-                {k: v.detach().clone() for k, v in model.state_dict().items()}, epoch
-        elif epoch - best_epoch > 10:  # early stop patience 10
-            break
-
-    model.load_state_dict(best_state)
-    meta = {
-        "arm": args.arm, "seed": args.seed,
-        "git_commit": subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=REPO,
-            capture_output=True, text=True).stdout.strip(),
-        "config": vars(args),
-        "config_hash": hashlib.md5(json.dumps(vars(args)).encode()).hexdigest()[:12],
-        "split_hash": hashlib.md5("".join(
-            sorted(f"{x['rid']}:{x['split']}" for x in samples)).encode()).hexdigest()[:12],
-        "encoder": json.load(open(REPO / "analysis/stageK1_encoder_fingerprint.json")),
-        "edge_vocab": edges, "best_val_ce": best, "epochs_run": len(hist),
-    }
-    torch.save({"state_dict": model.state_dict(), "meta": meta}, ckpt)
-    hist_path.write_text("\n".join(json.dumps(h) for h in hist))
-    print(f"[{args.arm}s{args.seed}] done: best_val_ce={best:.5f} "
-          f"({len(hist)} epochs) -> {ckpt.name}", flush=True)
+    run_training(args.arm, args.seed, epochs=args.epochs,
+                 lam_state=args.lambda_state, lam_trans=args.lambda_transition,
+                 lam_harm=args.lambda_harm)
     return 0
 
 

@@ -1,0 +1,35 @@
+{
+  "stage": "K1",
+  "status": "FROZEN_BEFORE_TRAINING",
+  "spec": "analysis/stageK1_model_spec.md (FINAL)",
+  "dataset": {
+    "manifest": "analysis/stageK_transition_dataset_manifest.csv",
+    "feature_store": "analysis/stageK1_feature_store.npz",
+    "n_samples": 312,
+    "split": {"TRAIN": 172, "VAL": 64, "TEST": 76},
+    "k_rollout": 4,
+    "edge_vocab": ["FG-1", "FG-3", "RS-1", "RS-2", "RS-3"],
+    "outcome_counts": {"NO_EFFECT": 248, "VERIFIED_RECOVERY": 48, "HARM": 16},
+    "commit": "e6e4b48"
+  },
+  "encoder": {
+    "model_id": "facebook/dinov2-base",
+    "snapshot_commit": "f9e44c814b77203eaa57a6bdbbd535f21ede1415",
+    "probe_output_shape": [1, 257, 768],
+    "frozen": true,
+    "fingerprint": "analysis/stageK1_encoder_fingerprint.json"
+  },
+  "training": {
+    "arms": ["B0_STATE_ONLY", "B1_STATIC_VISUAL", "B2_GRAPH_WORLD_MODEL", "B3_ORACLE_FUTURE"],
+    "seeds": [0, 1, 2],
+    "optimizer": "AdamW lr=1e-4 wd=1e-4",
+    "batch": 64,
+    "max_epochs": 80,
+    "early_stop": "VAL CE, patience 10",
+    "lambda_state": 0.1,
+    "lambda_transition": 3.0,
+    "lambda_harm": 0.1,
+    "lambda_selection": "VAL CE over 27-point grid, B2 seed 0, no ties (analysis/stageK1_lambda_grid.csv)"
+  },
+  "test_discipline": "TEST 只在 stagek1_eval.py §9 门触一次;λ/early-stop 只看 VAL"
+}

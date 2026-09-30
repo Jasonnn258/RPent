@@ -1,7 +1,9 @@
 # Stage K1 模型规格(草稿)—— B0/B1/B2/B3 四臂
 
-_状态:**DRAFT** —— 数据集采集完成、split manifest 冻结后定稿;定稿先于
-任何训练。规格依据:Stage K spec §4-§6;数据集 = analysis/stageK_dataset_selection.json。_
+_状态:**FINAL(定稿于任何正式训练之前)** —— 数据集 manifest 已冻结
+(commit e6e4b48:312 样本),λ 网格已在 VAL 上跑毕并冻结(本文件 §7)。
+规格依据:Stage K spec §4-§6;数据集 = analysis/stageK_dataset_selection.json
++ analysis/stageK_transition_dataset_manifest.csv。_
 
 ## 0. 任务定义
 
@@ -19,19 +21,20 @@ _状态:**DRAFT** —— 数据集采集完成、split manifest 冻结后定稿;
   dim 768),本地快照 commit `f9e44c814b77`(指纹文件
   analysis/stageK1_encoder_fingerprint.json,probe [1,257,768]),
   **全程冻结不训练**;
-- 帧选择:agentview 标定帧(images_cam,256² → processor resize 224²)
-  与 wrist 帧(images_wrist)各取 patch-token 均值池化 + CLS,
-  拼接 → z ∈ R^3072;
-- z_pre = 快照帧(采集时已拷出/登记);z_post = 链+判定窗结束帧
-  (低清 images/,采集时已保留);
+- 帧选择(装配脚本 stagek1_build_dataset.py 实况):每相机一帧,
+  patch-token 均值池化 ⊕ CLS(各 768)→ 1536/帧,agentview⊕wrist → z ∈ R^3072;
+- z_pre = 快照 hi-res 拷出帧(images_cam_hi / images_wrist_hi,
+  采集时即时拷出以躲 5 步 GC 窗口);z_post = rollout 终帧低清
+  (images/image_{final_step}.png + images_wrist/image_wrist_{final_step}.png,
+  final_step 由 states.json 对齐重建,34/34 零违例);
 - mask pooling:仅当该 rollout 感知步 found=True 时另记 box 内 patch
   均值(诊断用);**主特征不用 mask**(h1 语料分割稀疏,28/148)。
 
 ## 2. 低维状态(runtime 可见的本体/夹爪通道)
 
-s = [eef_xyz(3), gripper_opening(1), one-hot(task 5), one-hot(family 2),
-one-hot(edge_id 7)] —— **GT 物体位姿不进 s**(graph spec §5.4 红线;
-物体位姿只出现在训练目标里)。
+s = [eef_xyz(3), gripper_opening(1), one-hot(task 3: t3/t5/t9),
+one-hot(family 2), one-hot(edge_id 5)] = 14 维 —— **GT 物体位姿不进 s**
+(graph spec §5.4 红线;物体位姿只出现在训练目标里)。
 
 ## 3. 四臂
 
@@ -49,7 +52,7 @@ one-hot(edge_id 7)] —— **GT 物体位姿不进 s**(graph spec §5.4 红线;
 
 ```
 z_pre(3072)+s → proj → h0(512)
-edge_emb = nn.Embedding(12)(冻结图的边表)
+edge_emb = nn.Embedding(5)(数据集实际边词表,见 §7)
 h1 = GRUCell(h0, edge_emb)            # action-conditioned latent 转移
 Δ̂ 分布:MDN(2 分量高斯混合)over 物理量向量
 p(outcome) = softmax(head(h0 ⊕ h1))   # 3 类 + 温度缩放(calibration)
@@ -69,8 +72,10 @@ L = L_latent + λ_state·L_physical_state + λ_transition·L_verified_transition
 - L_physical_state = MDN NLL(Δeef_z, Δgrip, Δooi_z);
 - L_verified_transition = CE(3 类结局);
 - L_harm = CE(HARM 二分类);
-- λ 初值 state=0.3 / transition=1.0 / harm=0.5,VAL 上网格
-  {0.1,0.3,1.0}×{0.3,1.0,3.0}×{0.1,0.5,1.0} 冻结一次;
+- λ 网格 {0.1,0.3,1.0}×{0.3,1.0,3.0}×{0.1,0.5,1.0} 已在 VAL 上跑毕
+  (B2 seed 0,27 组,stagek1_lambda_grid.py → stageK1_lambda_grid.csv),
+  **冻结值 state=0.1 / transition=3.0 / harm=0.1**(VAL CE 0.3018,无平手),
+  对四臂统一使用;温度缩放为可学 log_T,随主损失共同优化,不设单独校验集;
 - 禁:final episode success / planner 决策 / 任何 hidden GT 作 runtime 输入。
 
 ## 6. 训练协议
@@ -81,9 +86,13 @@ L = L_latent + λ_state·L_physical_state + λ_transition·L_verified_transition
 - checkpoint 记录 git commit / config hash / split hash / encoder 指纹 /
   seed(spec §15)。
 
-## 7. 待定稿时填入的槽位
+## 7. 定稿槽位(已填,冻结)
 
-- [ ] K_ROLLOUT 与数据集规模(stageK0_decision.md + selection.json);
-- [ ] 每 split 样本数(FG/RPS × TRAIN/VAL/TEST);
-- [ ] edge_id 词表(实际出现于数据集的边,预期 FG-1/FG-3/RS-1..3);
-- [ ] λ 网格与冻结值、温度缩放校验集(VAL 子集)。
+- K_ROLLOUT = 4(stageK0_decision.md);数据集 312 rollouts;
+- 每 split 样本数(TRAIN/VAL/TEST):FG 112/40/40(14/5/5 快照 × 8),
+  RPS 60/24/36(5/2/3 快照 × 12);合计 172/64/76;
+- edge_id 词表(5):FG-1, FG-3, RS-1, RS-2, RS-3;
+- λ 冻结值:state=0.1 / transition=3.0 / harm=0.1(§5);
+- 结局分布(全数据集):NO_EFFECT 248 / VERIFIED_RECOVERY 48(全在
+  FG-3)/ HARM 16(FG-3 9 + RS-2 7)—— VERIFIED 只由 FG-3 产生,
+  §9 门在此分布上评判,不作任何事后调整。
