@@ -154,16 +154,28 @@ class EdgeExecutor:
         return raw
 
     def _resolve_arg(self, v, bindings, ctx, names):
-        if isinstance(v, str) and v.startswith("${") and v.endswith("}"):
-            name = v[2:-1]
+        """参数值 → 实参;${name} 引用的名字空间 = bindings。
+
+        binding 值本身可为 ${name} 引用(图 v1 唯一实例:RS-1 的
+        home='${eef}' → eef → 'EEF' → 快照夹爪位)——先展开引用链
+        (深度护栏 4)再按语义解析。修复前执行器只展开一层,RS-1 第二步
+        move_to 收到字面 "${eef}" 报 ERROR(t3s5/t3s7 各 16 条,补采在案)。
+        """
+        if not (isinstance(v, str) and v.startswith("${") and v.endswith("}")):
+            return v
+        raw = v  # 当前待解原文;${} 引用可能嵌套指向另一个 binding
+        for _ in range(4):
+            name = raw[2:-1]
             if name in bindings:
                 raw = bindings[name]
             elif name == "TASK_LANG":
                 return ctx["task_lang"]
             else:
                 raise ValueError(f"未绑定参数 ${{{name}}}")
-            return self._resolve_binding(raw, ctx, names)
-        return v
+            if not (isinstance(raw, str) and raw.startswith("${")
+                    and raw.endswith("}")):
+                return self._resolve_binding(raw, ctx, names)
+        raise ValueError(f"绑定引用链过深: {v}")
 
     # ---- 边执行 ----------------------------------------------------------
 
@@ -176,6 +188,16 @@ class EdgeExecutor:
         chain, samples = [], [("base", base)]
         outcome = None
         perception_found = None
+
+        # 含感知步的链:先把快照帧 dump 成"下一步"的 artifact,使 segment
+        # 读到的 _latest_step 图 = 精确快照帧(否则 k>1 的 rollout 会读到
+        # 上一 rollout 判定窗的 dump,近似而非逐位)。不推进 _next_step,
+        # 后续 toolkit._step 的 post-dump 会覆盖同一步号记录。
+        if any(s["tool"] == "segment" for s in edge["executor"]):
+            from robots.libero import tools as _lt
+            _lt.dump_state(self.prims, str(self.outdir),
+                           step_idx=self.toolkit._next_step + 1,
+                           log={"snapshot": True})
 
         for step_spec in edge["executor"]:
             tool = step_spec["tool"]
