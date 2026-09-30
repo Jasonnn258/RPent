@@ -154,12 +154,20 @@ class EdgeExecutor:
         return raw
 
     def _resolve_arg(self, v, bindings, ctx, names):
-        """参数值 → 实参;${name} 引用的名字空间 = bindings。
+        """参数值 → 实参;${name} 名字空间 = bindings ∪ 运行期 names。
 
+        运行期名:mask_rows / mask_cols(segment box 取整行/列范围,
+        感知步后有效 —— FG-1/CS-1/MS-1/MS-2/MS-3 的 back_project 用)。
         binding 值本身可为 ${name} 引用(图 v1 唯一实例:RS-1 的
         home='${eef}' → eef → 'EEF' → 快照夹爪位)——先展开引用链
-        (深度护栏 4)再按语义解析。修复前执行器只展开一层,RS-1 第二步
-        move_to 收到字面 "${eef}" 报 ERROR(t3s5/t3s7 各 16 条,补采在案)。
+        (深度护栏 4)再按语义解析。
+
+        两处修复(修复前主跑各产生 32 条无效,补采在案):
+        1) 嵌套 ${} 只展开一层 → RS-1 第二步 move_to 收到字面 "${eef}"
+           报 ERROR(t3s5/t3s7 RS-1 ×16);
+        2) mask_rows/mask_cols 不在查找空间 → CS-1 back_project 报
+           未绑定(t9s5/t9s8 CS-1 ×16 infra ValueError;FG 快照
+           segment 恒 found=False 早退未暴露,CS 快照感知命中才触发)。
         """
         if not (isinstance(v, str) and v.startswith("${") and v.endswith("}")):
             return v
@@ -168,6 +176,8 @@ class EdgeExecutor:
             name = raw[2:-1]
             if name in bindings:
                 raw = bindings[name]
+            elif name in names:  # 运行期名(mask_rows/mask_cols)
+                return names[name]
             elif name == "TASK_LANG":
                 return ctx["task_lang"]
             else:

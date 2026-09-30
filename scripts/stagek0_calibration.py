@@ -178,6 +178,9 @@ def main() -> int:
                     help="只跑前 N 个快照(冒烟;全量运行禁止)")
     ap.add_argument("--kmax", type=int, default=K_MAX,
                     help="每边 rollout 数上限(冒烟可降;全量=16)")
+    ap.add_argument("--only", default=None,
+                    help="仅重跑指定组合 snap_id:edge_id[,…](infra 补采;"
+                         "记录后写覆盖,前后均保留)")
     args = ap.parse_args()
 
     # 防重锁(CLAUDE.md 纪律;存在即拒绝)
@@ -194,6 +197,16 @@ def main() -> int:
     snaps = selection["snapshots"]
     if args.snapshots:
         snaps = snaps[: args.snapshots]
+    if args.only:
+        want: dict[str, list] = {}
+        for tok in args.only.split(","):
+            s, _, e = tok.partition(":")
+            want.setdefault(s.strip(), []).append(e.strip())
+        snaps = [dict(s, legal_edges=[e for e in s["legal_edges"]
+                                      if e in want.get(s["snapshot_id"], [])])
+                 for s in snaps if s["snapshot_id"] in want]
+        snaps = [s for s in snaps if s["legal_edges"]]
+        print(f"[K0] 补采模式:{[s['snapshot_id'] for s in snaps]}", flush=True)
     edges = load_edges()
     log_root = REPO / args.log_root
     log_root.mkdir(parents=True, exist_ok=True)
