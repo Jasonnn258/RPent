@@ -262,9 +262,27 @@ events.jsonl` / `stageN0_control_labels.csv` / `stageN0_audit_dossiers/`);
 3. planner conditional statement 检测是文本模式匹配,存在漏检(→
    UNRESOLVED,方向保守)与误检(由开发期负例控制)两类风险;
 4. dev-viewed 排除会使资格框略缩(目标 ≤10 段);
-5. N=45 为推荐区间中值,统计功效以 §11 的 30 resolved 前提为界。
+5. N=45 为推荐区间中值,统计功效以 §11 的 30 resolved 前提为界;
+6. **未覆盖信道(开发期发现)**:PHYSICAL_ACTION result 中的 eef 位置状态
+   (尤其 rotate_wrist,无 VERIFIER 事件)被 planner 用于重算 waypoint 的
+   信道不在 §2 事件本体内;观察到 1 例(dev-viewed 排除)人工判 D、机器判 I。
+   详见 spec 附录 A.6。
 
 ## 偏离记录(运行后追加)
 
-(空——执行中任何偏离在此登记,含:判据实现与 spec 的出入、dev 阅读
-登记数、抽样配额因空层调整、human-resolved 未达 30 等。)
+1. **判据文本族语言**:spec §4 A′/F′ 示例正则为中文(G1–G4 等);实现发现
+   planner 推理语言为英文,故冻结常量区采用英文正则族(RE_ASSERT/RE_COND/
+   RE_DECIDE/RE_PURPOSE/RE_VC_A/B 等,中文词保底)。判据语义不变,
+   词面按数据实际语言重写。开发校准:旧 33 混淆 33/33。
+2. **VERIFIER 资格测试(spec §2/§5 细化)**:正结果须同句"验证量断言 ∧
+   配对条件"才具信息资格,否则标 NONINFORMATIVE(不参与聚合);
+   libero_terminated 不变复读不构成事件;EC5 收紧到 OBSERVE/GROUNDING。
+   全部成文于 spec 附录 A,与 v2 代码同 commit 冻结(先于抽样)。
+3. **dev_viewed 登记 n=7**(4 machine-I 方向校验 + 3 machine-D 火灾语义
+   校验;≤10 上限内;`stageN0_dev_viewed.csv`)。后果:machine-INDEPENDENT
+   资格池 5 → 约 1 条,抽样 q_I≈1,false_independent 门功效受限(门本身
+   已受 97%-D 输出分布限制)。
+4. **输出 schema**:jsonl 事件字段以实现为准(比 spec §6 更完整:input/
+   usable_fields/outcome/evidence 等;args_summary/result_summary 由其承担);
+   CSV 含 spec §6 全部列(machine_class=segment_label 别名,unknown_rate=
+   n_unresolved/n_information_events)。

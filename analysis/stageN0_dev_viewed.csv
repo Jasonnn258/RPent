@@ -1,0 +1,8 @@
+segment_id,date_viewed,reason,machine_label,human_judgment
+20260907-18:29:08_glm-5.3-flash_armC_libero_spatial_task_t9_s10_r2#f1,2026-10-01,开发抽查:machine-INDEPENDENT 方向校验(false_independent 风险),INDEPENDENT,questionable-DEPENDENT(rotate_wrist 结果 eef 落点被用于重算 waypoint;位置反馈信道不在 §2 本体 → 局限#6)
+20260915-18:12:26_glm-5.3-flash_armA_libero_spatial_task_t5_s4_r1#f1,2026-10-01,开发抽查:machine-INDEPENDENT 方向校验,INDEPENDENT,agree-INDEPENDENT(重抓参数变更源自 t0 结果=initiation,窗口零信息事件)
+20260917-10:35:57_glm-5.3-flash_memB2_libero_spatial_task_t9_s9_r1#f0,2026-10-01,开发抽查:machine-INDEPENDENT 方向校验,INDEPENDENT,agree-INDEPENDENT(dossier_21 同型:initiation 直接套配方,无窗内新信息)
+20260920-18:44:20_glm-5.3-flash_g0D_libero_spatial_task_t5_s5_r1#f0,2026-10-01,开发抽查:machine-INDEPENDENT 方向校验,INDEPENDENT,agree-INDEPENDENT(flag 复读无新值,NONINFORMATIVE 判定正确)
+20260917-13:43:09_glm-5.3-flash_memB1_libero_spatial_task_t5_s2_r1#f0,2026-10-01,开发抽查:machine-DEPENDENT 火灾语义校验(seed 20261001 抽取),DEPENDENT,agree-DEPENDENT(看图断言 bowl ON plate 门控记忆配方,M 盲区类)
+20260918-09:27:49_glm-5.3-flash_memO2_libero_spatial_task_t9_s10_r1#f2,2026-10-01,开发抽查:machine-DEPENDENT 火灾语义校验,DEPENDENT,agree-DEPENDENT(观察门控停止/再试决策)
+20260922-02:26:09_glm-5.3-flash_g05P0_libero_spatial_task_t3_s17_r1#f0,2026-10-01,开发抽查:machine-DEPENDENT 火灾语义校验,DEPENDENT,agree-DEPENDENT(腕视图偏移→重定位参数)

@@ -209,3 +209,65 @@ q_{D,f} = round(q_D·|eligible ∩ D ∩ f| / |eligible ∩ D|);余数给最大�
   `stageN0_measurement_results.md`;
 - 门:§11(prereg)——overall ≥90% ∧ false_independent ≤5% ∧
   human-resolved ≥30,三者缺一即 MEASUREMENT NOT QUALIFIED。
+
+## 附录 A — VERIFIER 资格测试与聚合细则(开发期定稿,冻结于 v2 代码 commit)
+
+§2/§5 的事件边界在开发期(旧 33 失败模式发现)细化如下;实现见
+`scripts/stageN0_analyze.py`。本附录与 v2 代码同 commit 冻结,此后修改即偏离。
+
+### A.1 t0-uncertainty 资格测试(VERIFIER 正结果)
+
+一个 VERIFIER 事件(动作级验证结果到达)只有当其取值在 t0 未定时有信息资格:
+
+- **负结果**(pick success=False ∨ peak_lift 不足;move final_dist≥0.05)→
+  恒具资格(失败在 t0 未定),走 D′(负验证 → 控制变更 + pre-commitment 否决);
+- **正结果** → 仅当决策 span 内存在**同句**的
+  `动作级验证量断言(RE_VERIFY_ASSERT)∧ 配对条件(RE_VC_A:条件词…验证量 /
+  RE_VC_B:验证量…顺序词)` 且执行决定成立(RE_DECIDE 或同消息发射下一动作)
+  时才具资格(判 DEPENDENT,记 `verifier_branch`);否则标
+  `NONINFORMATIVE`。
+- 理由:预期成功的叙述性复读在 t0 已被恢复决策预设,不构成新信息;
+  同句配对要求防跨段巧合配对(开发期 dossier_21 型假阳性的根因)。
+- 已知风险:会把"预期成功但若失败会反应"的潜在门控压成 NONINFORMATIVE
+  ——该方向的漏检由 §3 人工盲审度量,false_independent 门兜底。
+
+### A.2 libero_terminated 不变复读不构成事件
+
+所有 PHYSICAL_ACTION result 都携带 libero_terminated;值与 t0 相同的复读
+不是独立信息事件(否则 control-dependency 问题退化为平凡:每个动作结果
+都成事件、一切皆 DEPENDENT)。flag 信道由 **STATE_UPDATE(实际翻转)**测量;
+窗口内翻 True 且其后无 PHYSICAL_ACTION → `termination`(DEPENDENT)。
+RE_VC_A/B 与 RE_VERIFY_ASSERT 的词表刻意排除 terminated/predicate/
+still false 族词汇。
+
+### A.3 NONINFORMATIVE 与段级聚合
+
+- NONINFORMATIVE 事件**不参与**段级聚合(既非 DEPENDENT 亦非 UNRESOLVED
+  证据);`n_noninformative` 单列落盘供审计;
+- 段内全部事件为 NONINFORMATIVE 或窗口零事件 → 段 = INDEPENDENT
+  (等价于"零 qualifying information event",§4-prereg 第 3 条)。
+
+### A.4 EC5 适用范围收紧
+
+EC5(pre-commitment → INDEPENDENT)仅对 OBSERVE/GROUNDING 事件可用;
+VERIFIER 事件不得用 EC5 判 INDEPENDENT(预印参数不证明结果无关,见 A.1
+风险)。必要否决:pre 段有观察目的表达(RE_PURPOSE)或 post 段有观察
+内容断言(RE_ASSERT)→ 不得判 INDEPENDENT。
+
+### A.5 盲审卷宗头部契约(事件边界共享)
+
+每份卷宗头部必须写明 qualifying information event 定义:本体 4 类
+(OBSERVE / GROUNDING / VERIFIER(仅 pick/doubled/move_to/move_pose/
+set_gripper 五族,按 A.1 资格测试)/ STATE_UPDATE(实际翻转))+ A.2
+排除(flag 不变复读),并注明 t0 自身结果属 initiation、不计窗口信息。
+审计人只对 qualifying 事件回答 §3 反事实问题。不写 v2 标签/聚合。
+
+### A.6 已知未覆盖信道(记 prereg 局限 #6)
+
+PHYSICAL_ACTION result 中的 **eef 位置状态**(尤其 rotate_wrist——无
+VERIFIER 事件)被 planner 用于重算下游 waypoint 的信道不在 §2 本体内。
+开发期观察到 1 例(`20260907-18:29:08…#f1`:rotate_wrist 后 TCP 落点被
+显式用于拆分两跳 traverse;人工判 DEPENDENT、机器 INDEPENDENT)。该段
+已 dev-viewed 排除;本信道本轮不测量。机器-I 资格池因开发抽查缩至
+约 1 条,false_independent 门的统计功效受此限制(prereg 偏离记录同步
+登记)。
