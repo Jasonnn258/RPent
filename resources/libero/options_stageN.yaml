@@ -1,0 +1,89 @@
+# Stage N1 procedure 机读定义(与 analysis/stageN1_option_spec.md 逐字对应)
+# 两臂唯一核心差异:M 的中间信息事件不进控制;O 经 rule_id 规则改变控制。
+version: stageN1-v0
+frozen: 2026-10-01
+budget:
+  max_actions: 5
+  max_picks: 2
+  repeats_per_arm: 3
+  snapshots_per_procedure: 12
+  selection_seed: 20261003
+info_state_fields:      # O 显式维护(§16);M 仅记录
+  target_visible:       {source: segment, field: score, ge: 0.3}
+  target_grounded:      {source: segment, field: world_xyz, valid: true}
+  target_pose_valid:    {source: segment, field: world_xyz, z_gt: 0.85}
+  support_relation:     {source: state_flag, field: libero_terminated}
+  latest_action_result: {source: step_result}
+  latest_verifier_result: {source: pick_result_fields}
+  retry_count:          {source: policy}
+
+procedures:
+  P1_RPS_REPICK:
+    family: RELEASE_PREDICATE_STALL
+    precondition: {t0_action: release, t0_flag: "libero_terminated == False"}
+    pick_params: {prompt: "pick up the black patterned bowl", max_chunks: 12,
+                  lift_thresh: 0.05, gripper_closed_thresh: 0.06}
+    move_params: {gripper: -1, step_clip: 0.015, max_steps: 60}
+    segment_prompt: "the black patterned bowl on the plate"
+    M:
+      steps:
+        - {action: move_to, target: [eef_t0_x, eef_t0_y, "eef_t0_z+0.10"]}
+        - {action: move_to, target: [eef_t0_x, eef_t0_y, 0.99]}
+        - {action: pi0_pick}
+        - {action: pi0_pick}
+    O:
+      steps:
+        - {action: move_to, target: [eef_t0_x, eef_t0_y, "eef_t0_z+0.10"]}
+      rules:
+        R1_termination:  {after: retreat, on: state_flag.libero_terminated,
+                          then: EARLY_STOP}
+        R2_pose_update:  {after: retreat, on: segment.score>=0.3,
+                          then: "descend_xy := segment.world_xyz.xy"}
+        R3_retry:        {after: pick1,
+                          on: "final_gripper_opening > 0.05 and not terminated",
+                          then: [re_segment, move_to_low, pi0_pick]}
+        R3_hold_end:     {after: pick1, on: held_or_terminated,
+                          then: HOLD_END}
+  P2_FG_RETRY:
+    family: FALSE_GRASP
+    precondition: {t0_action: pi0_pick, t0_flag: "success == False"}
+    baseline_segments:                # t0 双臂同感,M 参数在此冻结
+      bowl: {prompt: "the black patterned bowl", camera: agentview, min_score: 0.3}
+      plate: {prompt: "the plate", camera: agentview, min_score: 0.3}
+    pick_params: {prompt: task_language, max_chunks: 20,
+                  lift_thresh: 0.05, gripper_closed_thresh: 0.06}
+    retry_params: {prompt: task_language, max_chunks: 12,
+                   lift_thresh: 0.05, gripper_closed_thresh: 0.06}
+    move_params: {gripper: -1, step_clip: 0.015, max_steps: 60}
+    M:
+      steps:
+        - {action: move_to, target: ["seg_bowl_xy+(0,0.045)", 1.155]}
+        - {action: pi0_pick}
+        - {action: set_gripper, close: +1}
+        - {action: move_to, target: ["seg_plate_xy+(0,0.045)", 1.05]}
+        - {action: release}
+    O:
+      steps:
+        - {action: move_to, target: ["seg_bowl_xy+(0,0.045)", 1.155]}
+        - {action: pi0_pick}
+      rules:
+        R1_termination: {after: pick1, on: state_flag.libero_terminated,
+                         then: EARLY_STOP}
+        R2_carry_end:   {after: pick1,
+                         on: "min_gripper_opening < 0.03",
+                         then: [set_gripper_close, move_to_plate, release]}
+        R3_retry_end:   {after: pick1, on: "min_gripper_opening >= 0.03",
+                         then: [re_segment,
+                                "move_to(new_xy+(0,0.045), 1.135)",
+                                pi0_pick_retry]}
+metrics:
+  validated_recovery: "env.check_success() at END"
+  harm: "success==False and (dz_target < -0.03 or |dxy_target| > 0.08)"
+  realization: ">=1 provenance realized"
+  rescue: "snapshot: M all-fail and O >=1 realized recovery"
+gates:
+  delta_recovery_pp: {ge: 15}
+  delta_harm_pp: {le: 3}
+  rescue_rate: {ge: 0.10}
+  realization_rate: {ge: 0.20}
+  mechanism_split_pp: {delta_realized_minus_not: {ge: 10}}
