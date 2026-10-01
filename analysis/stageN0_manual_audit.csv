@@ -1,0 +1,46 @@
+audit_id,label,evidence_event,dependency_type
+dossier_00,DEPENDENT,[msg81-84] read_image 断言 bowl 直立落盘→才选 retreat-settle 修复,observation_gate
+dossier_01,DEPENDENT,[msg86-88] read_image 断言 bowl on plate 偏上左沿→选 near-goal regrasp(pi0_pick 新 prompt),observation_gate
+dossier_02,DEPENDENT,[msg54-56] read_image 断言 upright on plate→执行 A1 short local repick,observation_gate
+dossier_03,DEPENDENT,[msg64-66] read_image 断言 seated on plate→执行 A1 short local repick,observation_gate
+dossier_04,DEPENDENT,[msg62-66] read_image+back_project 测得 bowl on plate 偏心 1.4cm→选 pi0_doubled 收尾,observation_gate
+dossier_05,DEPENDENT,[msg76-78] read_image 断言 bowl on plate+gripper 悬挡→选 retreat-clear 再 pi0_doubled,observation_gate
+dossier_06,DEPENDENT,[msg75-79] read_image+back_project 量化 bowl 偏心 3cm→决定 pi0_doubled 收尾,observation_gate
+dossier_07,DEPENDENT,"[msg59-61] back_project 得 bowl(0.017,0.183)→move_to 同值预定位+重抓计划",pose_update
+dossier_08,DEPENDENT,[msg43-45] read_image 断言 seated upright on plate→A1 repick+先降低位,observation_gate
+dossier_09,DEPENDENT,[msg72-74] read_image 断言 visibly seated on plate→A1 repick+先降低位,observation_gate
+dossier_10,DEPENDENT,[msg67-69] read_image 断言 upright seated on plate→A1 repick+预定位,observation_gate
+dossier_11,DEPENDENT,[msg56-58] read_image 断言 seated on plate→A1 repick+先降低位,observation_gate
+dossier_12,DEPENDENT,[msg56-58] read_image 断言 seated on plate→t5 recovery 降低位+repick,observation_gate
+dossier_13,DEPENDENT,[msg44-46] read_image 断言 seated on plate(A1)→repick+预定位,observation_gate
+dossier_14,DEPENDENT,[msg54-56] read_image 断言 on plate well centered→分支保留 pi0_doubled 收尾(自述否则 corrective push),observation_gate
+dossier_15,DEPENDENT,[msg47-49] read_image 断言 upright seated on plate→A1 降低位+short local repick,observation_gate
+dossier_16,DEPENDENT,"[msg64-66] read_image 定位 bowl 偏盘心~6cm(-x,-y)悬沿→选 closed-gripper 定心推(推挤方向由观察向量决定)",observation_gate
+dossier_17,DEPENDENT,[msg80-87] 两次 read_image 定位 back-left 悬沿+确认 pi0_doubled 未推动→改指尖定心推,observation_gate
+dossier_18,DEPENDENT,[msg45-49+msg59-61] back_project 测 3.6cm 偏心+倾角→改重抓重放;held-bowl offset(+0.024+0.045)直接换算 eef 目标,pose_update
+dossier_19,DEPENDENT,[msg48-50] read_image 断言 seated on plate→A1 repick(且警示 distractor 须先 re-hover);repick 失败后再看图改标准预算,observation_gate
+dossier_20,DEPENDENT,[msg61-76] 三次 read_image 逐次评估(上左倾斜/已居中/未扰动)门控 pi0_doubled 两次与 retreat,observation_gate
+dossier_21,DEPENDENT,[msg63-76] 三次 read_image(居中直立/-x 边偏/未改变)依次门控 retreat/pi0_doubled/远退+最终 regrasp-settle,observation_gate
+dossier_22,DEPENDENT,[msg52-63] read_image 判 up-left 偏心→pi0_doubled;segment 误定位被拒→back_project 测 -y 4cm→re-grasp 预定位目标,pose_update
+dossier_23,DEPENDENT,"[msg64-68] 抓取失败后 wrist read_image 确认抓空+bowl 未动,back_project(-0.263-0.158)→降低预定位再抓",pose_update
+dossier_24,DEPENDENT,[msg43-45] wrist read_image 判 fingers 抓空短于 rim(y差~5cm)→A1 降低加深预位+全任务语言重试,observation_gate
+dossier_25,DEPENDENT,[msg47-55] read_image 确认掉落+agentview back_project 误中机械臂被拒+wrist back_project 重定位(+x nudge)→新预位,pose_update
+dossier_26,DEPENDENT,[msg68-70] read_image 判 descent 停在顶沿抓空→降预位让包住侧壁+换 spatial qualifier prompt,observation_gate
+dossier_27,DEPENDENT,[msg33-37] wrist read_image+back_project 修正 ~10cm -x 定位偏差→按重定位轴再预位+全任务语言重试,pose_update
+dossier_28,DEPENDENT,[msg32-36] read_image 确认未动+back_project 测 +x nudge 5cm→低位重预位+全任务语言重试,pose_update
+dossier_29,DEPENDENT,"[msg38-42] wrist read_image 确认 reopen 失败+bowl 未动,back_project 复核→低位重预位+全任务语言",pose_update
+dossier_30,DEPENDENT,[msg60-62] read_image 判 ~1cm 差距左侧抓空→开爪+3.5cm x 补偿重预位再抓,pose_update
+dossier_31,DEPENDENT,[msg54-66] read_image 推翻失败判定(bowl 内腔夹持)+back_project 算 held offset 定搬运目标+失速后再看图用 pitch 杠杆,observation_gate
+dossier_32,DEPENDENT,[msg57-63] wrist read_image 推翻 success:false(bowl rim 夹持中)→锁爪改脚本化收尾;agentview 定 plate 相对位形,observation_gate
+dossier_33,DEPENDENT,[msg25-41] 连续 read_image 确认目标碗被碰落至柜后不可达→改抓唯一可见同款 distractor 碗+back_project 定位新目标,target_grounding
+dossier_34,DEPENDENT,[msg39-53] 双 back_project(wrist 精化预位+bowl-on-plate 中心定收尾 settle)逐级决定预位与终步目标,pose_update
+dossier_35,DEPENDENT,[msg37-48] wrist read_image+back_project 推翻边缘偏差锚点(0.083-0.34)→lower/deeper 预位;看图确认已带至盘上→release,pose_update
+dossier_36,DEPENDENT,[msg44-57] wrist read_image 判指爪跨在 rim 两侧→原地闭爪 rim-hook;两次 back_project(盘中心+held offset)定搬运目标,observation_gate
+dossier_37,DEPENDENT,[msg37-51] read_image 确认 rim 夹持→锁爪;back_project rim 点被拒(打中爪体)→SAM3 segment 测 offset→定 eef 放置目标,pose_update
+dossier_38,DEPENDENT,[msg39-53] read_image 推翻 success:false(碗中爪中)+两次 held-offset 重测定 eef 目标;move_to 失速(负结果)→换 move_pose 回正,pose_update
+dossier_39,DEPENDENT,[msg38-53] read_image 判 rim 夹持→firm+lift 后看图确认空中持有;held-offset 多次采样(拒斜视偏差)定放置,pose_update
+dossier_40,DEPENDENT,[msg50-64] wrist read_image 判 A1 空抓→降低重试;再看图推翻 success:false→锁爪+back_project 盘中心定搬运,observation_gate
+dossier_41,DEPENDENT,[msg56-74] read_image 确认持有→锁爪;两阶段 back_project(盘中心+wrist hang offset)定 hover/settle 目标,pose_update
+dossier_42,DEPENDENT,[msg33-37] wrist read_image 判 A1 失败+bowl 仍在柜上;back_project 测 +x ~7cm nudge→按新位置重预位再抓,pose_update
+dossier_43,DEPENDENT,[msg62-64] read_image 确认 bowl 未被扰动仍在盘上+对照 s0 获胜几何(高位 drop-settle vs 低位软停)→改短重抓+高位重放策略,observation_gate
+dossier_44,DEPENDENT,[msg57-70] read_image 判未变化+segment 误定位被拒→back_project 测 -y 4cm 定预位;再抓空后再看图降预位包侧壁,pose_update
