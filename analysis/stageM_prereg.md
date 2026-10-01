@@ -216,4 +216,21 @@ stageM1_rollouts.csv / stageM1_feedback_events.jsonl / stageM1_results.md。
 
 ## 偏离记录(运行后追加)
 
-(空)
+1. **transcript 可用性**:§2 估计缺失 9 集;实际因 transcript 覆盖不足/
+   对齐失败而 beyond→UNRESOLVED 的规模约 100 集(池 502 集的 ~20%)。
+   最终 UNRESOLVED 22/187 段,未入比率,方向与预注册一致。
+2. **对齐算法迭代 3 轮**:98 align-fail → sf-anchor+名称校验 → 错误结果
+   丢弃修正 → 两段式区间匹配(498/502=99.2% 对齐)。每轮变更均为机械性
+   修正,但开发过程可见聚合计数(非盲);最终版先于盲审冻结。
+3. **n_audit 的 n 取值**:公式中 n 未显式定义分母;执行时取 RESOLVED=165
+   → n_audit=33(⌈0.2×165⌉)。若取总段 187 则为 38;取样先于 seeing
+   analyzer 标签分布的 audit 侧输出。
+4. **排除 3 条开发期抽查段**(SPOT_CHECKED 集合,曾人工翻看原始轨迹),
+   不入抽样框,防止非首盲污染。
+5. **盲审执行者为 assistant(Claude)**:结构盲(dossier 不含 analyzer
+   任何输出)但非失忆盲(判据代码在 #135 已读)。预期分歧标记与实际
+   分歧集高度重合(标记的 7 条中 4 条为真分歧,其余 3 条经 D-late 一致),
+   支持人工标签追踪语义而非机械模仿;该局限仍需披露。
+6. **结果**:agreement label/FID 双 87.9% <90% → M0 measurement invalid →
+   Stage M STOP(详见 `stageM0_decision.md`);未做任何"修判据→重审"循环。
+
