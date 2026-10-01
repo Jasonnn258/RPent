@@ -282,7 +282,16 @@ events.jsonl` / `stageN0_control_labels.csv` / `stageN0_audit_dossiers/`);
    校验;≤10 上限内;`stageN0_dev_viewed.csv`)。后果:machine-INDEPENDENT
    资格池 5 → 约 1 条,抽样 q_I≈1,false_independent 门功效受限(门本身
    已受 97%-D 输出分布限制)。
-4. **输出 schema**:jsonl 事件字段以实现为准(比 spec §6 更完整:input/
+4. **输出 schema**:jsonl 事件字段以实现为准(比 §6 更完整:input/
    usable_fields/outcome/evidence 等;args_summary/result_summary 由其承担);
    CSV 含 spec §6 全部列(machine_class=segment_label 别名,unknown_rate=
    n_unresolved/n_information_events)。
+5. **eligible∩INDEPENDENT = 0 → q_I=0,audit 45/45 machine-DEPENDENT**
+   (2026-10-01 抽样时发现):机器 I 池共 5 条 = 2 条 M 期 SPOT_CHECKED +
+   1 条旧 33 + 2 条本次开发抽查(§6 登记排除)——全部被排除,非抽样选择。
+   后果:盲审样本中机器 I 为 0,**false_independent 分子结构性为 0,该安全
+   门轴在正式 audit 中空转**;测量资格判定实际由 overall agreement 与
+   false_dependent 方向承载。I 方向的全部既有证据(仅上下文,非门输入):
+   5 条机器 I 已全部在开发期被人工检视——4 条判 I 一致(其中旧 33 的 1 条
+   对齐 M 盲审人工标签)、1 条存疑(rotate_wrist 位置信道,局限 #6)。
+   manifest 首行 sha256 只覆盖注释行以下字节(自引用无解,采用此约定)。
