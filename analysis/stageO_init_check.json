@@ -1,0 +1,170 @@
+[
+ {
+  "snapshot_id": "osnap_00",
+  "task": "3",
+  "seed": "16",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.20505941652450613,
+   0.009777328922617685,
+   1.1746259658663345
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_01",
+  "task": "3",
+  "seed": "23",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.2140659119647543,
+   -0.0067561323706044705,
+   1.1712980616431665
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_02",
+  "task": "5",
+  "seed": "21",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.21938819443593302,
+   -0.002396640061681899,
+   1.1564679548524581
+  ],
+  "manifest_succ_at_t0": "True"
+ },
+ {
+  "snapshot_id": "osnap_03",
+  "task": "5",
+  "seed": "25",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.21008262756831675,
+   0.004746523535278545,
+   1.1733652098049596
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_04",
+  "task": "9",
+  "seed": "13",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.20420872577604976,
+   -0.006111949268715195,
+   1.1692305706614672
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_05",
+  "task": "9",
+  "seed": "14",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.20292155090969594,
+   0.00813193319302456,
+   1.1864233206148844
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_06",
+  "task": "9",
+  "seed": "21",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.2043736220182859,
+   7.067831233859177e-05,
+   1.1745438676144624
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_07",
+  "task": "9",
+  "seed": "22",
+  "family": "FALSE_GRASP",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.20170944462718315,
+   -0.011991048823512238,
+   1.1814390160027857
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_08",
+  "task": "3",
+  "seed": "22",
+  "family": "RELEASE_PREDICATE_STALL",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.21545840125143562,
+   -0.007363975672056928,
+   1.1678740037483342
+  ],
+  "manifest_succ_at_t0": "True"
+ },
+ {
+  "snapshot_id": "osnap_09",
+  "task": "5",
+  "seed": "26",
+  "family": "RELEASE_PREDICATE_STALL",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.20627297364325986,
+   0.01072014326698313,
+   1.184330792982511
+  ],
+  "manifest_succ_at_t0": "True"
+ },
+ {
+  "snapshot_id": "osnap_10",
+  "task": "9",
+  "seed": "24",
+  "family": "RELEASE_PREDICATE_STALL",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.2104514515743969,
+   0.013888069338321199,
+   1.1715188934717775
+  ],
+  "manifest_succ_at_t0": "False"
+ },
+ {
+  "snapshot_id": "osnap_11",
+  "task": "9",
+  "seed": "28",
+  "family": "RELEASE_PREDICATE_STALL",
+  "init_check_success": false,
+  "init_terminated": false,
+  "init_eef": [
+   -0.2131431962491992,
+   -0.00990875921175987,
+   1.1757596654346039
+  ],
+  "manifest_succ_at_t0": "True"
+ }
+]

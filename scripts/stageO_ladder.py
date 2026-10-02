@@ -291,19 +291,13 @@ def recovery_present(flags: list[bool]) -> bool:
 
 # ---- 各臂执行器 --------------------------------------------------------------
 def boot_arm(snap: dict, gpu: int, shared_kwargs: dict, tag: str):
-    """boot + manifest hash 断言;≤3 次重试,败则 None。"""
+    """boot(dev-O5:事件复现守卫在 rt.boot_snapshot 内);≤3 次重试,败则 None。"""
     for attempt in range(1, MAX_INFRA_RETRY + 1):
         try:
             outdir = LOG_ROOT / (
                 f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{tag}")
-            ctx = rt.boot_snapshot(snap, gpu, shared_kwargs, outdir,
-                                   note=tag)
-            if snap.get("state_sha16") and \
-                    ctx["state_hash"] != snap["state_sha16"]:
-                raise rt.InfraError(
-                    f"state hash mismatch {ctx['state_hash']} != "
-                    f"{snap['state_sha16']}")
-            return ctx
+            return rt.boot_snapshot(snap, gpu, shared_kwargs, outdir,
+                                    note=tag)
         except Exception as exc:
             log(f"    boot INFRA({attempt}/{MAX_INFRA_RETRY}) {tag}: "
                 f"{type(exc).__name__}: {str(exc)[:120]}")
@@ -746,6 +740,9 @@ def process_snapshot(snap: dict, gpu: int, shared_kwargs, sink: Sink, K: int,
                      refs: dict, done: dict[tuple[str, str], set[int]],
                      sanity: set[str]):
     sid = snap["snapshot_id"]
+    if sid in rt.init_degenerate_ids():
+        log(f"{sid} ALREADY_RECOVERED_AT_INIT(dev-O5)→ 跳过全臂")
+        return
     log(f"{sid} {snap['family']} t{snap['task']}s{snap['seed']} T{snap['t0']}")
     steps = rt.load_steps(snap["episode_dir"])
 
@@ -865,6 +862,11 @@ def main() -> int:
                        for i in range(n)) for a, n in checks)
 
     todo = [s for s in snaps if needs_work(s)]
+    # dev-O5:init 退化快照跳过(process_snapshot 内同判,此处省排程)
+    degenerate = rt.init_degenerate_ids() & {s["snapshot_id"] for s in snaps}
+    if degenerate:
+        log(f"ALREADY_RECOVERED_AT_INIT 跳过:{sorted(degenerate)}")
+        todo = [s for s in todo if s["snapshot_id"] not in degenerate]
     log(f"todo {len(todo)}/{len(snaps)} snapshots(workers={args.workers})")
 
     try:

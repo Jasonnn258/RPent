@@ -76,14 +76,11 @@ def attempt_records(snap, gpu, shared_kwargs) -> list[dict]:
     for k in range(1, K_REF + 1):
         outdir = LOG_ROOT / (
             f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_ref{k}_{tag}")
+        # dev-O5:不再断言跨 boot hash 相等(prefix 含 Pi0.5 重采样,结构性
+        # 不可达);boot 内事件复现/契约守卫由 boot_snapshot(validate_event)承担
         ctx = rt.boot_snapshot(snap, gpu, shared_kwargs, outdir,
                                note=f"ref{k} {tag}")
         try:
-            # manifest 一致性断言:重放出的 S 必须与冻结 hash 一致(provenance)
-            if snap.get("state_sha16") and ctx["state_hash"] != snap["state_sha16"]:
-                raise rt.InfraError(
-                    f"state hash mismatch: replay {ctx['state_hash']} != "
-                    f"manifest {snap['state_sha16']}")
             rec = rt.run_planner_continuation(ctx, snap, snap["family"])
             rec.update({"snapshot_id": snap["snapshot_id"],
                         "family": snap["family"], "attempt_idx": k,
@@ -135,6 +132,11 @@ def main() -> int:
             if reference_success(d) or counts[d["snapshot_id"]] >= K_REF:
                 done.add(d["snapshot_id"])
     todo = [s for s in snaps if s["snapshot_id"] not in done]
+    # dev-O5:init 即成功的确定性退化快照跳过(分析层单列,不产 reference)
+    degenerate = rt.init_degenerate_ids() & {s["snapshot_id"] for s in snaps}
+    if degenerate:
+        log(f"ALREADY_RECOVERED_AT_INIT 跳过:{sorted(degenerate)}")
+        todo = [s for s in todo if s["snapshot_id"] not in degenerate]
     log(f"manifest {len(snaps)} | todo {len(todo)}"
         + (f"(resume skip {sorted(done)})" if done else ""))
 

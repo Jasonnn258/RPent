@@ -375,3 +375,51 @@ ladder rollout 之前落盘;当时已运行的部分 = §7 采集(非 confirmato
   可读 `states.json`(system prompt 明示);共用目录会让第 k 次 run
   看到前序 run 的步(额外信息,违反 §32-33 干净比较)。不改任何 policy
   语义,只改运行目录布局;O4 与 reference 同构(同一续跑代码路径)。
+
+## 附录 C-2 — dev-O5(重放有效性与 hash 断言修正;2026-10-02,
+## reference 首次启动后 4 快照全 INFRA 时发现;当时零有效 confirmatory 数据)
+
+**现象**:reference 首启 12 快照中前 4 个连续 3×INFRA:"state hash
+mismatch: replay X != manifest Y",且同快照三次重试 hash 互不相同。
+
+**根因(两条,均为 instrumentation 层,prereg 冻结件本身无错)**:
+
+1. *跨 boot hash 相等结构性不可达*:prefix 1..t0 含 Pi0.5 技能(FG 的
+   t0 即 pi0_pick;RPS 的 prefix 含 pick),重放 = 重新采样,而 J0 已冻结
+   "Pi0.5 同 obs 推断非确定"→ 每次重放产生不同轨迹与 save_state 字节。
+   实现里 stageO_reference/stageO_ladder 自加的"重放 hash 必须等于
+   manifest state_sha16"断言超出 prereg §2 的冻结仪器(§2 只要求
+   **boot 内** restore 读回 == 0.0,该检查保留且始终通过)。修正 =
+   删除该断言;state_len 结构校验(=92)保留;manifest state_sha16 降级
+   为 freeze 时指纹(provenance)。
+2. *家族事件在重放中不复现 → boot 无效*:freeze 取证(logs/stageO_freeze
+   各 states.json 的 t0 步结果)显示 12 快照中 5 个的 freeze 重放未复现
+   定义性事件——osnap_01/02 重放 t0 pick **成功**(success=True,osnap_02
+   还 terminated=True);osnap_08/09/11 重放 t0 release **触发了谓词**
+   (libero_terminated=True)。这些 freeze 状态不是失败态;若不设防,
+   后续 boot 也会以一定概率抽到"事件不复现"的重放,此时 base 已(可能)
+   满足 §5.1 契约 → 所有臂平凡通过,污染 recovery 测量。
+   init 取证(scripts/stageO_init_check.py,t0=0 不重放;证据 =
+   analysis/stageO_init_check.json):**12/12 init check_success=False**
+   → manifest 中 4 个 check_success_at_t0=True(02/08/09/11)均为单次
+   重放抽样的运气,非确定性退化 → 无快照需要剔除,全部 12 个保留,
+   有效性由逐 boot 守卫保证。
+
+**修正(instrumentation,不改任何臂语义/预算/契约)**:
+
+- `rt.boot_snapshot(validate_event=True)` 新增 boot 有效性守卫,违反者
+  抛 InfraError(§12 infra,调用方 ≤3 重试):①重放的 t0 步结果必须复现
+  家族事件(FG:success 非 True;RPS:libero_terminated 非 True);
+  ②base check_success 必须为 False(否则 §5.1 附加通过路径平凡成立)。
+  各臂(含 reference/O4)从"事件复现"的同一条件下测量,conditioning
+  一致、无偏。
+- 若某快照始终抽不到有效 boot(3×INFRA)→ 各臂记 INFRA_ABORT 行,
+  分析层标 NO_VALID_BOOT 单列(不入分布/门);init 退化(本次为空集,
+  机制保留)标 ALREADY_RECOVERED_AT_INIT 单列。
+- 已污染的 stageO_reference_traces.jsonl 头 4 行(纯 hash 断言失败的
+  infra_abort 行,零有效 attempt)截断后重启 reference;该文件不含任何
+  有效数据,截断不损失信息。
+
+**时间戳**:发现于 2026-10-02 09:27(reference 首启后 2 分钟),修复
+commit 先于 reference 重启;期间零有效 confirmatory rollout、零有效
+reference attempt 落盘。

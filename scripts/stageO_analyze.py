@@ -169,6 +169,11 @@ def main() -> int:
     reent = load_reentry()
     trans = load_transitions()
     sids = [s["snapshot_id"] for s in mani]
+    # dev-O5 两类不可测量快照(单列,不入分布/门):
+    # - ALREADY_RECOVERED_AT_INIT:init 态 check_success=True(stageO_init_check)
+    # - NO_VALID_BOOT:所有臂零有效行(事件在重放中不复现,boot 守卫全拒)
+    degenerate = rt.init_degenerate_ids() & set(sids)
+    meas = [s for s in sids if s not in degenerate]
     K = read_k_rollout()
     ts = datetime.now().isoformat()
 
@@ -187,29 +192,37 @@ def main() -> int:
                for sid in sids for arm in ARMS}
 
     # ---- first-source 三版 -------------------------------------------------
+    no_valid = [s for s in meas
+                if all(n_valid[(s, a)] == 0 for a in ARMS)]
+    labeled = [s for s in meas if s not in no_valid]
     labels = {}
     for oc, col in (("union", "first_recovery_source"),
                     ("reentry", "first_reentry_source"),
                     ("task", "first_task_recovery_source")):
         for sid in sids:
-            labels[(sid, col)] = ladder_label(
-                {a: present[(sid, a, oc)] for a in ARMS},
-                ref_ok=refs.get(sid) is not None)
+            if sid in degenerate:
+                labels[(sid, col)] = "ALREADY_RECOVERED_AT_INIT"
+            elif sid in no_valid:
+                labels[(sid, col)] = "NO_VALID_BOOT"
+            else:
+                labels[(sid, col)] = ladder_label(
+                    {a: present[(sid, a, oc)] for a in ARMS},
+                    ref_ok=refs.get(sid) is not None)
 
-    # ---- P(Ox first) 分布 ---------------------------------------------------
+    # ---- P(Ox first) 分布(只计可测量快照)-----------------------------------
     dist = {oc: defaultdict(int) for oc in
             ("union", "reentry", "task")}
-    for sid in sids:
+    for sid in labeled:
         for oc, col in (("union", "first_recovery_source"),
                         ("reentry", "first_reentry_source"),
                         ("task", "first_task_recovery_source")):
             dist[oc][labels[(sid, col)]] += 1
 
-    # ---- Δ 配对(机制定位)---------------------------------------------------
+    # ---- Δ 配对(机制定位;只配可测量快照)------------------------------------
     def paired(a: str, b: str) -> dict:
         """Δab = rate(a) − rate(b),task 结局,paired by snapshot。"""
         ds, pairs = [], []
-        for sid in sids:
+        for sid in labeled:
             ra, rb = rate[(sid, a)], rate[(sid, b)]
             if ra is None or rb is None:
                 continue
@@ -228,15 +241,15 @@ def main() -> int:
         "Δ34": paired("O4", "O3"),
     }
 
-    # ---- 假设判定(§30,独立)----------------------------------------------
-    o1_present_task = [s for s in sids if present[(s, "O1", "task")]]
-    o2_where_o1_not = [s for s in sids
+    # ---- 假设判定(§30,独立;只计可测量快照)--------------------------------
+    o1_present_task = [s for s in labeled if present[(s, "O1", "task")]]
+    o2_where_o1_not = [s for s in labeled
                        if present[(s, "O2", "task")]
                        and not present[(s, "O1", "task")]]
-    o3_where_o2_not = [s for s in sids
+    o3_where_o2_not = [s for s in labeled
                        if present[(s, "O3", "task")]
                        and not present[(s, "O2", "task")]]
-    o4_where_o3_not = [s for s in sids
+    o4_where_o3_not = [s for s in labeled
                        if present[(s, "O4", "task")]
                        and not present[(s, "O3", "task")]]
     d01 = deltas["Δ01"]
@@ -268,7 +281,7 @@ def main() -> int:
             e["subgoal_changed"] or e["diverged_from_O3"]
             for e in o4_replan_evidence)) else
         ("INCONCLUSIVE" if len(o4_where_o3_not) > 0 else "NOT SUPPORTED"))
-    all_below = all(not present[(s, a, "task")] for s in sids
+    all_below = all(not present[(s, a, "task")] for s in labeled
                     for a in ("O1", "O2", "O3"))
     ox_path = REPO / "analysis/stageO_expert_check.csv"
     ox_ok = False
@@ -311,7 +324,7 @@ def main() -> int:
             ref_rf[0] += 1
 
     # ---- reentry 早于 task recovery(§31 讨论 input)-----------------------
-    early_re = [(s, a) for s in sids for a in ARMS
+    early_re = [(s, a) for s in labeled for a in ARMS
                 if present[(s, a, "reentry")]
                 and not present[(s, a, "task")]]
 
@@ -365,11 +378,20 @@ def main() -> int:
     md = []
     md.append("# Stage O 假设判定与 first-source 分析(§27-§30)\n\n")
     md.append(f"- 生成:{ts}(确定性 analyzer,零 LLM)\n")
-    md.append(f"- 快照 {len(sids)} 个 | K_ROLLOUT={K} | "
+    md.append(f"- 快照 {len(sids)} 个(可测量 {len(labeled)};init 退化 "
+              f"{len(degenerate)}:{sorted(degenerate) or '无'};零有效 boot "
+              f"{len(no_valid)}:{no_valid or '无'})| K_ROLLOUT={K} | "
               f"reference OK={sum(1 for v in refs.values() if v)}\n")
     md.append(f"- rollout 行 {len(rows)}(infra_abort {n_infra} = "
               f"{(n_infra / len(rows) * 100 if rows else 0):.1f}%;"
-              f"§12 门 <2%)\n\n")
+              f"§12 门 <2%)\n")
+    if degenerate or no_valid:
+        md.append("\n## 不可测量快照(dev-O5 单列,不入分布/门)\n\n")
+        md.append(f"- ALREADY_RECOVERED_AT_INIT:init 态 check_success=True,"
+                  f"任何重放下 §5.1 契约平凡成立,无法测量 recovery:"
+                  f"{sorted(degenerate) or '无'}\n")
+        md.append(f"- NO_VALID_BOOT:全部臂零有效行(家族事件在重放中"
+                  f"不复现,boot 守卫拒绝):{no_valid or '无'}\n")
 
     md.append("## First-source 分布(spec §28 P(Ox first))\n\n")
     for oc, name in (("task", "TASK_RECOVERY 契约版"),

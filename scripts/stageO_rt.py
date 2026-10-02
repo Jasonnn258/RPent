@@ -68,6 +68,25 @@ RE_PROBE_MAX_PRIMS = 3
 MAX_INFRA_RETRY = 3
 
 
+def init_degenerate_ids() -> set[str]:
+    """dev-O5:init 即 check_success=True 的确定性退化快照(统一口径)。
+
+    这些快照在任何重放下 base 都平凡满足 §5.1 契约(check_success 附加
+    通过路径),无法测量 recovery:runner 跳过(省无效 boot),分析层
+    单列(ALREADY_RECOVERED_AT_INIT)。证据文件 stageO_init_check.json
+    (t0=0 不重放、纯 init 态测量)随 dev-O5 commit 冻结。
+    """
+    p = REPO / "analysis/stageO_init_check.json"
+    if not p.exists():
+        return set()
+    try:
+        recs = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    return {r.get("snapshot_id") for r in recs
+            if r.get("init_check_success") is True}
+
+
 class InfraError(Exception):
     """infra 级失败(读回≠0 / env 崩溃 / RPC 异常):重试,不混入指标。"""
 
@@ -126,10 +145,17 @@ def jsonable(o):
 
 # ---- 快照启动 / restore -----------------------------------------------------
 def boot_snapshot(snap: dict, gpu: int, shared_kwargs: dict,
-                  outdir: Path, note=""):
+                  outdir: Path, note="", validate_event: bool = True):
     """起 env(同源 task/seed)+ toolkit + 重放 prefix 1..t0 + save_state。
 
     返回 dict(toolkit/prims/env/S/baseline)。infra 异常向上抛。
+
+    validate_event(dev-O5):重放有效性守卫——重放实例必须复现该快照的
+    定义性家族事件(t0 结果),且 base 不得已满足恢复契约;违反 → InfraError
+    (调用方按 infra 重试)。prefix 含 Pi0.5 技能,重放必然重采样(J0 冻结:
+    同 obs 动作非确定),因此跨 boot 逐位 hash 相等不可达,prereg §2 只冻结
+    boot 内 readback==0(restore_checked);state_sha16 仅作 freeze 时指纹。
+    validate_event=False 供 init 取证(t0=0 无重放)使用。
     """
     from rpent.dashboard.events import NullDashboardEventSink
     from rpent.envs import get_env_spec, get_toolkit
@@ -170,7 +196,29 @@ def boot_snapshot(snap: dict, gpu: int, shared_kwargs: dict,
                              f"{type(exc).__name__}: {exc}") from exc
 
     S = env.save_state()
+    # 结构性校验:save_state 长度必须与 manifest 冻结值一致(固定长度状态向量)
+    if snap.get("state_len") and len(S) != int(snap["state_len"]):
+        raise InfraError(f"state len {len(S)} != manifest "
+                         f"{snap['state_len']}")
     base = measure(env)
+    if validate_event and t0i > 0:
+        # dev-O5 家族事件复现守卫:重放出的 t0 步结果必须仍是该家族事件
+        replayed = json.load(open(outdir / "states.json"))
+        t0_rec = next((s for s in reversed(replayed)
+                       if s.get("command")
+                       and s.get("step_idx") == t0i), None)
+        t0_res = (t0_rec or {}).get("result") or {}
+        if snap.get("family") == "FALSE_GRASP" \
+                and t0_res.get("success") is True:
+            raise InfraError("replay t0 pick succeeded — family event "
+                             "not reproduced")
+        if snap.get("family") == "RELEASE_PREDICATE_STALL" \
+                and t0_res.get("libero_terminated") is True:
+            raise InfraError("replay t0 release terminated — family event "
+                             "not reproduced")
+        if base["check_success"]:
+            raise InfraError("base check_success True — recovery contract "
+                             "trivially met at t0")
     if base["eef"] is None:
         raise InfraError("baseline robot0_eef_pos missing")
     target = (base["meas"].get("obj_of_interest") or [""])[0]
