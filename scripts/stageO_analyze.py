@@ -40,7 +40,8 @@ OUT_CSV = REPO / "analysis/stageO_first_source.csv"
 OUT_MD = REPO / "analysis/stageO_hypothesis_results.md"
 
 ARMS = ["O0", "O1", "O2", "O3", "O4"]
-SKIP_NOTES = {"no_pi05_cmd_in_prefix", "no_pi05_in_ref_domain"}
+SKIP_NOTES = {"no_pi05_cmd_in_prefix", "no_pi05_in_ref_domain",
+              "oracle_prompt_missing"}
 
 
 def read_csv_skip_comments(path: Path) -> list[dict]:

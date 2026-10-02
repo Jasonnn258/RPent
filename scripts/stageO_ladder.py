@@ -498,7 +498,17 @@ def arm_sample(sink: Sink, snap: dict, gpu: int, shared_kwargs, steps, K: int,
         # 唯一差异 = conditioning:pi05 族换 prompt,move_to 类换 xyz(prereg §6)
         kwargs = dict(kwargs)
         if action in rt.PI05_TOOLS:
-            kwargs["prompt"] = orc["kwargs"].get("prompt")
+            op = orc["kwargs"].get("prompt")
+            if not op:      # reference 同族调用无 prompt(异常态)→ O2 不可跑
+                for ri2 in range(n_exp):
+                    if ri2 in done:
+                        continue
+                    r = base_row(snap, arm, ri2, K, n_exp)
+                    r["note"] = "oracle_prompt_missing"
+                    sink.rollout(r)
+                stop_ctx(ctx)
+                return None
+            kwargs["prompt"] = op
         elif action == "move_to":
             kwargs["xyz"] = orc["kwargs"].get("xyz")
         oracle_step = orc["step"]
