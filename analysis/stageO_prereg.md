@@ -312,6 +312,16 @@ capability 到底来自哪里",再由用户决定下一条研究线。
 - t5:14,15,16,17,19,21,22,23,24,25
 - t9:13,14,18,19,21,22,23,24,25
 
+**预运行修订(2026-10-02,TEST 前零运行)**:为对冲 RPS 事件率不确定导致
+配额不满,grid 扩至 seeds 13–28(t3:13–18,21–28;t5:14–17,19,21–28;
+t9:13,14,18,19,21–28;共 41 格),扫描顺序与配额规则不变。
+
+**族配额分配规则(冻结)**:每 episode 确定性检测 FG_first(首个
+pi0_pick success==False 步)与 RPS_first(首个 release terminated==False 步);
+配额均开放时,取事件在 episode 内更早者(并列取 FG);仅一族开放时取该族
+事件(无则该 episode 记 logged-excluded);两配额满即停。episode 最终
+success/fail 不参与筛选(禁结果筛选)。
+
 ## 附录 B — K_ROLLOUT 校准结果(TEST 前追加 + commit)
 
 (待校准运行后填写;填写前 confirmatory TEST 不得开始。)
