@@ -313,8 +313,11 @@ capability 到底来自哪里",再由用户决定下一条研究线。
 - t9:13,14,18,19,21,22,23,24,25
 
 **预运行修订(2026-10-02,TEST 前零运行)**:为对冲 RPS 事件率不确定导致
-配额不满,grid 扩至 seeds 13–28(t3:13–18,21–28;t5:14–17,19,21–28;
-t9:13,14,18,19,21–28;共 41 格),扫描顺序与配额规则不变。
+配额不满,grid 扩至 seeds 13–28 窗口 = **13–18, 21–28**(19/20 不入窗),
+再扣除排除集:t3:13–18,21–28(**14 格**);t5:14–17,21–28(**12 格**,
+13/18 被排除);t9:13,14,18,21–28(**11 格**,15/16/17 被排除);
+**共 37 格**(= stageO_collect.py 冻结 GRID;此前本文误写 41 格并在
+t5/t9 行列入不存在的 seed 19,见附录 C dev-O1)。扫描顺序与配额规则不变。
 
 **族配额分配规则(冻结)**:每 episode 确定性检测 FG_first(首个
 pi0_pick success==False 步)与 RPS_first(首个 release terminated==False 步);
@@ -325,3 +328,33 @@ success/fail 不参与筛选(禁结果筛选)。
 ## 附录 B — K_ROLLOUT 校准结果(TEST 前追加 + commit)
 
 (待校准运行后填写;填写前 confirmatory TEST 不得开始。)
+
+## 附录 C — 预运行修订与澄清(dev-O1..dev-O4,TEST 前,零 confirmatory 数据)
+
+§35 允许 confirmatory 前修订冻结件(须完整记录)。以下四条均在任何
+ladder rollout 之前落盘;当时已运行的部分 = §7 采集(非 confirmatory)
+与 §8 校准(在 N 池上,非 O-B 数据)。
+
+- **dev-O1(附录 A grid 枚举勘误)**:修订前文本写"共 41 格"且 t5/t9 行
+  含 seed 19——19 不在冻结窗口(13–18, 21–28)内,41 为笔误加总。
+  实际冻结 grid(stageO_collect.py 自始未变)= 37 格(14+12+11)。
+  已采集格(t3 s13–16)在两种枚举下一致,零数据影响。
+- **dev-O2(O3 序列域 = 含达成动作)**:§6 O3"成功点(不含)之前全部
+  动作步"操作化为 reference `steps[:contract_at_step]`(**含**契约命中
+  的那一步;无中途 latch 而 check_success 收尾的 trace 取全量动作步;
+  latch 后的 skipped 步天然不在域内)。理由:若排除达成动作,O3 在
+  reference 成功的每一步都定义性缺最后一步、结构性失败,违背 §6 O3
+  "冻结序列是否承载恢复能力"的检验目的,§27 Δ23/Δ34 也要求 O3 可达
+  成功。"不含"解释为:成功点本身(测量事件)不是序列元素。
+- **dev-O3(全臂采集范围)**:除 §10 明文的例外(O1 达标且非 25% sanity
+  子集的快照停在 O1),其余快照跑**全部**可用臂(O0/O1 恒跑;reference
+  可用加 O2/O3;O4 恒跑),即 §13 预算行的每快照 O0 8 + O1 16 + O2 16
+  + O3 K + O4 K。理由:§27-28 的 Δ01/Δ12/Δ23/Δ34 paired-by-snapshot
+  要求同一快照上各臂成功率;§10 的 sequential 结构用于**定标签**
+  (FIRST_RECOVERY_SOURCE),不截断数据采集。
+- **dev-O4(reference attempt 与 O4 rollout 独立 boot/instrumentation)**:
+  每次 reference attempt 与每次 O4 rollout 都单独 boot(独立 output
+  directory,states.json 只含本 run 的 1..t0 重放步)。理由:planner
+  可读 `states.json`(system prompt 明示);共用目录会让第 k 次 run
+  看到前序 run 的步(额外信息,违反 §32-33 干净比较)。不改任何 policy
+  语义,只改运行目录布局;O4 与 reference 同构(同一续跑代码路径)。

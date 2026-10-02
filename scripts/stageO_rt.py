@@ -432,6 +432,45 @@ def render_task_prompts(snap: dict, outdir: Path) -> tuple[str, str]:
     return system_prompt, user_msg
 
 
+# ---- §22 turn 记录(从 planner transcript 消息抽取紧凑摘要)-----------------
+def extract_turns(messages) -> list[dict]:
+    """planner messages → 每 assistant turn 一条紧凑记录(§22)。
+
+    next_skill = 该 turn 首个 tool_use;reason = thinking/tail 文本末 300 字;
+    obs_excerpt = 该 turn 之前最近一条 tool 结果前 200 字(observation summary)。
+    原始 transcript 由 api_loop 落 outdir,此处只留分析所需摘要。
+    """
+    turns = []
+    last_tool_res = ""
+    for m in messages or []:
+        if not isinstance(m, dict):
+            continue
+        role = m.get("role")
+        if role == "tool":
+            last_tool_res = str(m.get("content", ""))[:200]
+            continue
+        if role != "assistant":
+            continue
+        blocks = m.get("content") or []
+        text = [b.get("text", "") for b in blocks
+                if isinstance(b, dict) and b.get("type") == "text"]
+        think = [b.get("thinking", "") for b in blocks
+                 if isinstance(b, dict) and b.get("type") == "thinking"]
+        tools = [b for b in blocks
+                 if isinstance(b, dict) and b.get("type") == "tool_use"]
+        reason = (think[-1] if think else (text[-1] if text else "")) or ""
+        tu = tools[0] if tools else None
+        args = (tu.get("input") or {}) if tu else {}
+        turns.append({
+            "turn_idx": len(turns) + 1,
+            "next_skill": tu.get("name") if tu else None,
+            "skill_args_excerpt": {k: str(v)[:80] for k, v in args.items()},
+            "reason_excerpt": reason.strip()[-300:],
+            "obs_excerpt": last_tool_res,
+        })
+    return turns
+
+
 # ---- planner 续跑(reference 与 O4 共用)-----------------------------------
 def run_planner_continuation(ctx: dict, snap: dict, family: str,
                              max_turns: int | None = None,
@@ -462,6 +501,7 @@ def run_planner_continuation(ctx: dict, snap: dict, family: str,
         dashboard_events=NullDashboardEventSink(), no_images=False)
     t1 = time.time()
     agent_error = None
+    result = None
     try:
         result = planner.solve(
             system_prompt=system_prompt, user_message=cont_user,
@@ -478,6 +518,9 @@ def run_planner_continuation(ctx: dict, snap: dict, family: str,
     final = measure(ctx["env"])
     met = guard.contract_latched or task_recovery(
         family, final, ctx["base"], ctx["target"])
+    # §22 turn 摘录:messages 在 solve 正常返回时才有
+    turns = extract_turns(getattr(result, "messages", None)) \
+        if result is not None else []
     return {
         "contract_met": bool(met),
         "contract_at_step": guard.contract_at_step,
@@ -488,6 +531,7 @@ def run_planner_continuation(ctx: dict, snap: dict, family: str,
         "wall_s": wall, "agent_error": agent_error,
         "finish": jsonable(finish) if finish else None,
         "steps": guard.steps, "final": final,
+        "turns": turns,
     }
 
 

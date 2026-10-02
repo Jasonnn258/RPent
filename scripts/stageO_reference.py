@@ -64,19 +64,26 @@ def reference_success(rec: dict) -> bool:
 
 
 def attempt_records(snap, gpu, shared_kwargs) -> list[dict]:
-    """一次完整 boot + ≤K_REF attempts;infra 抛 rt.InfraError。"""
+    """>=K_REF attempts;每次 attempt 独立 boot(独立 outdir)。
+
+    独立 boot 的原因(instrumentation,prereg §12 纪律):planner 可读
+    outdir/states.json,共用 outdir 会让 attempt k 看到 attempt<k 的步
+    (额外信息,违反 §32-33 干净比较;且 O4 必须与 reference 同构)。
+    infra 抛 rt.InfraError。
+    """
     tag = f"{snap['snapshot_id']}_t{snap['task']}s{snap['seed']}T{snap['t0']}"
-    outdir = LOG_ROOT / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{tag}"
-    ctx = rt.boot_snapshot(snap, gpu, shared_kwargs, outdir,
-                           note=f"ref {tag}")
-    try:
-        # manifest 一致性断言:重放出的 S 必须与冻结 hash 一致(provenance)
-        if snap.get("state_sha16") and ctx["state_hash"] != snap["state_sha16"]:
-            raise rt.InfraError(
-                f"state hash mismatch: replay {ctx['state_hash']} != "
-                f"manifest {snap['state_sha16']}")
-        attempts = []
-        for k in range(1, K_REF + 1):
+    attempts = []
+    for k in range(1, K_REF + 1):
+        outdir = LOG_ROOT / (
+            f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_ref{k}_{tag}")
+        ctx = rt.boot_snapshot(snap, gpu, shared_kwargs, outdir,
+                               note=f"ref{k} {tag}")
+        try:
+            # manifest 一致性断言:重放出的 S 必须与冻结 hash 一致(provenance)
+            if snap.get("state_sha16") and ctx["state_hash"] != snap["state_sha16"]:
+                raise rt.InfraError(
+                    f"state hash mismatch: replay {ctx['state_hash']} != "
+                    f"manifest {snap['state_sha16']}")
             rec = rt.run_planner_continuation(ctx, snap, snap["family"])
             rec.update({"snapshot_id": snap["snapshot_id"],
                         "family": snap["family"], "attempt_idx": k,
@@ -87,16 +94,16 @@ def attempt_records(snap, gpu, shared_kwargs) -> list[dict]:
                 f"succ={rec['check_success']} prims={rec['n_prims']} "
                 f"pi05={rec['n_pi05']} wall={rec['wall_s']}s "
                 f"err={str(rec['agent_error'])[:80]}")
-            if reference_success(rec):
-                break
-        return attempts
-    finally:
-        # 收尾:停本快照 env daemon(共享 vla/sam3 不动)
-        for d in ctx.get("daemons") or []:
-            try:
-                d.stop()
-            except Exception:
-                pass
+        finally:
+            # 收尾:停本次 attempt 的 env daemon(共享 vla/sam3 不动)
+            for d in ctx.get("daemons") or []:
+                try:
+                    d.stop()
+                except Exception:
+                    pass
+        if reference_success(rec):
+            break
+    return attempts
 
 
 def main() -> int:
