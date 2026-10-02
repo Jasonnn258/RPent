@@ -536,6 +536,9 @@ def run_planner_continuation(ctx: dict, snap: dict, family: str,
 
 
 # ---- 环境块(N1 教训:缺一个就 vla_server 卡 gs:// 300s)--------------------
+ENV_FILE = "/workspace/yjx/rpent_data/rpent_env.sh"
+
+
 def apply_env_overrides() -> None:
     e = _os.environ
     e["MUJOCO_GL"] = "osmesa"
@@ -544,3 +547,16 @@ def apply_env_overrides() -> None:
     e.pop("LIBGL_ALWAYS_SOFTWARE", None)
     e.setdefault("OPENPI_DATA_HOME",
                  "/workspace/yjx/rpent_data/.cache/openpi")
+    # GLM planner 凭据(进程内 build_planner 需要;key 值绝不打印/落日志)
+    if not e.get("ANTHROPIC_API_KEY"):
+        try:
+            with open(ENV_FILE) as f:
+                for line in f:
+                    if line.startswith("GLM_API_KEY="):
+                        e["ANTHROPIC_API_KEY"] = (
+                            line.split("=", 1)[1].strip().strip('"')
+                            .strip("'"))
+        except OSError:
+            pass
+        assert e.get("ANTHROPIC_API_KEY"), (
+            f"GLM_API_KEY missing in {ENV_FILE} — GLM planner would 401")
