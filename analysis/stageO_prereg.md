@@ -327,7 +327,24 @@ success/fail 不参与筛选(禁结果筛选)。
 
 ## 附录 B — K_ROLLOUT 校准结果(TEST 前追加 + commit)
 
-(待校准运行后填写;填写前 confirmatory TEST 不得开始。)
+运行 2026-10-02 06:31 完成(脚本 scripts/stageO_calibrate.py,完整记录
+analysis/stageO_calibration.md)。校准子集(N 池前 3 FG + 前 3 RPS):
+snap_00/01/06(FG)、snap_02/03/04(RPS)。每快照 O1 式独立采样 16 次。
+
+| snapshot | family | action | prompt | k/16 | p̂(16) |
+|---|---|---|---|---|---|
+| snap_00 | FALSE_GRASP | pi0_pick | pick up the bowl on the stove | 0/16 | 0.000 |
+| snap_01 | FALSE_GRASP | pi0_pick | pick up the black bowl | 0/16 | 0.000 |
+| snap_06 | FALSE_GRASP | pi0_pick | pick up the black bowl on the cookie box | 0/16 | 0.000 |
+| snap_02 | RELEASE_PREDICATE_STALL | pi0_pick | pick up the bowl on the stove | 0/16 | 0.000 |
+| snap_03 | RELEASE_PREDICATE_STALL | pi0_pick | pick up the black patterned bowl | 0/16 | 0.000 |
+| snap_04 | RELEASE_PREDICATE_STALL | pi0_pick | pick up the black patterned bowl | 0/16 | 0.000 |
+
+稳定性 median|p̂(K)−p̂(2K)|:K=4/6/8 全 0.000(全零平台)。
+数据退化(六快照 p̂ 全 0)→ 冻结规则第三分支:
+
+**K_ROLLOUT = 8**(spec 建议默认;bootstrap 95% CI 全 [0,0],
+seed=20261002)。此处冻结,此后禁改。
 
 ## 附录 C — 预运行修订与澄清(dev-O1..dev-O4,TEST 前,零 confirmatory 数据)
 
