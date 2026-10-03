@@ -423,3 +423,34 @@ mismatch: replay X != manifest Y",且同快照三次重试 hash 互不相同。
 **时间戳**:发现于 2026-10-02 09:27(reference 首启后 2 分钟),修复
 commit 先于 reference 重启;期间零有效 confirmatory rollout、零有效
 reference attempt 落盘。
+
+## 附录 C-3 — dev-O6(infra 缺口补测;2026-10-03,ladder 完成后、
+## 终报与任何假设结论定稿前)
+
+**背景**:confirmatory ladder 2026-10-02 22:23 完成(480 行)。整体
+infra_abort 36 行 = 7.5%,超 §12 的 2% 门 → 按 §12"暂停解释、先修基建"
+停止并报告用户;用户裁定补测缺口(2026-10-03)。
+
+**36 行归属**(全部 RPS 族,全部 dev-O5 守卫拒绝型,零 API/vla 故障):
+boot 级 32(osnap_09 O0×8、osnap_09 O3×8、osnap_11 O1×16)+
+rollout 级 4(osnap_08 O0)。缺口对判定的实质影响:osnap_09 的 O3
+未测直接卡 H_C 门槛(2/3 个快照);osnap_11 的 O1 未测影响其
+first-source 标签(现落 REFERENCE_UNAVAILABLE);osnap_09 O0 少一个
+Δ01 配对点;osnap_08 O0 仅 4/8(2/4 已可判 present)。
+
+**修正(instrumentation,零 arm 语义/预算/契约改动;commit 先于补测)**:
+
+- `stageO_ladder.py` 新增 `--fill`(done_rollouts(ignore_infra=True):
+  infra_abort 行不算终态,needs_work 因此只重新进入 infra 缺口格子;
+  旧 infra 行仍保留在 CSV,§12 不变)与 `--max-retries`(运行时覆盖
+  MAX_INFRA_RETRY,默认仍为冻结值 3;补测用 8);
+- `run_with_retry` 默认参数改为运行时解析(修 def 时绑定不会随覆盖更新
+  的隐患);
+- 补测范围 = 仅上述 4 格(osnap_08 O0 缺的 4 次、osnap_09 O0×8、
+  osnap_09 O3×8、osnap_11 O1×16),其余格子 done 集完备不会重跑;
+  sequential gate(O1 达标非 sanity 即停)照旧,补测不改变任何臂的
+  执行路径。
+- 若 8 次重试仍失败:格子保持 infra 缺口,终报如实记录,不做进一步补救。
+
+**时间戳**:2026-10-03 09:5x,commit 先于 fill 运行;补测行追加进
+stageO_rollouts.csv 后重跑 analyzer(幂等),旧 36 行 infra 保留。

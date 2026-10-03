@@ -267,13 +267,19 @@ class Sink:
             self.f3.flush()
 
 
-def done_rollouts() -> dict[tuple[str, str], set[int]]:
-    """已落盘 (snapshot, arm) → rollout_idx 集合(INFRA_ABORT 行视为已终态)。"""
+def done_rollouts(ignore_infra: bool = False) -> dict[tuple[str, str], set[int]]:
+    """已落盘 (snapshot, arm) → rollout_idx 集合(INFRA_ABORT 行视为已终态)。
+
+    ignore_infra=True(dev-O6 补测 --fill):infra_abort 行不算终态,使
+    needs_work 只重新进入 infra 缺口格子;旧 infra 行仍保留在 CSV(§12)。
+    """
     out: dict[tuple[str, str], set[int]] = {}
     if not ROLL_CSV.exists():
         return out
     lines = [l for l in open(ROLL_CSV, encoding="utf-8") if not l.startswith("#")]
     for r in csv.DictReader(io.StringIO("".join(lines))):
+        if ignore_infra and r.get("infra_abort"):
+            continue
         key = (r["snapshot_id"], r["arm"])
         try:
             out.setdefault(key, set()).add(int(r["rollout_idx"]))
@@ -357,8 +363,14 @@ def finish_rollout(sink: Sink, ctx: dict, snap: dict, steps: list[dict],
     return contract
 
 
-def run_with_retry(fn, ri: int, max_tries: int = MAX_INFRA_RETRY):
-    """rollout 级 infra 重试:返回 (result | None, n_tries)。"""
+def run_with_retry(fn, ri: int, max_tries: int | None = None):
+    """rollout 级 infra 重试:返回 (result | None, n_tries)。
+
+    max_tries 缺省在调用时读模块常量(dev-O6:--max-retries 覆盖后,
+    def 时绑定默认值不会更新,故改为运行时解析)。
+    """
+    if max_tries is None:
+        max_tries = MAX_INFRA_RETRY
     for attempt in range(1, max_tries + 1):
         try:
             return fn(), attempt
@@ -812,7 +824,20 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--only", default=None,
                     help="只跑指定 snapshot_id(调试)")
+    ap.add_argument("--fill", action="store_true",
+                    help="dev-O6 补测:CSV 里 infra_abort 行不算终态,"
+                         "只重新进入 infra 缺口格子(与 --max-retries 连用)")
+    ap.add_argument("--max-retries", type=int, default=MAX_INFRA_RETRY,
+                    help="boot/rollout 级 infra 重试次数(默认 3 = 冻结值;"
+                         "补测建议 8,见 prereg dev-O6)")
     args = ap.parse_args()
+
+    global MAX_INFRA_RETRY
+    if args.max_retries != MAX_INFRA_RETRY:
+        MAX_INFRA_RETRY = args.max_retries
+        log(f"MAX_INFRA_RETRY={MAX_INFRA_RETRY}(dev-O6 补测覆盖)")
+    if args.fill:
+        log("dev-O6 补测模式:忽略 infra_abort 终态,只跑缺口格子")
 
     rt.apply_env_overrides()
     ox.pg.preflight(label="stageO_ladder", lock_name="stageO_ladder.lock")
@@ -858,7 +883,7 @@ def main() -> int:
         checks = [("O0", K), ("O1", O12_SAMPLES), ("O4", K)]
         if refs.get(sid) is not None:
             checks += [("O2", O12_SAMPLES), ("O3", K)]
-        return any(any(i not in done_rollouts().get((sid, a), set())
+        return any(any(i not in done_rollouts(args.fill).get((sid, a), set())
                        for i in range(n)) for a, n in checks)
 
     todo = [s for s in snaps if needs_work(s)]
@@ -874,7 +899,7 @@ def main() -> int:
             for s in todo:
                 try:
                     process_snapshot(s, args.gpu, shared_kwargs, sink, K,
-                                     refs, done_rollouts(), sanity)
+                                     refs, done_rollouts(args.fill), sanity)
                 except Exception as exc:
                     log(f"{s['snapshot_id']} SNAPSHOT EXC "
                         f"{type(exc).__name__}: {exc}\n"
@@ -892,7 +917,7 @@ def main() -> int:
                         s = pending.popleft()
                     try:
                         process_snapshot(s, args.gpu, shared_kwargs, sink, K,
-                                         refs, done_rollouts(), sanity)
+                                         refs, done_rollouts(args.fill), sanity)
                     except Exception as exc:
                         log(f"{s['snapshot_id']} SNAPSHOT EXC "
                             f"{type(exc).__name__}: {exc}\n"
