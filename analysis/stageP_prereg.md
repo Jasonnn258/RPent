@@ -261,3 +261,24 @@ Stage P 任何 confirmatory 证据**;P1/P2 TEST 与 P3 TEST 相互独立。
 - P2:特征构建(纯离线)+ 2 模型 × 3 特征集 DEV 网格(分钟级)+ TEST 一次。
 - P3:12-18 快照 × (A:1 + B:8 + C:1-8) candidate 执行 + 采集 ~25-40 集。
 超限先报告再继续(§13 纪律同 Stage O)。
+
+## 附录 C — deviation 记录(只追加)
+
+### dev-P1(2026-10-03,P0 裁决后)— 指纹期望证伪 + gate 公式修正
+
+- **事实**:P0 运行(48 replay,零 infra)测得同一 frozen chunk 从同一
+  restore 态执行 3 次,end EE pose 与目标物位移向量跨 replay **非逐位相等**:
+  ≤7.8e-4 m 的系统性**单调**漂移(90 个逐列增量 89 个同号),§5 的
+  "预期 0.0"被证伪。机制假说:flat state 不含 MuJoCo 求解器 warm-start/
+  接触历史,restore 只保证读回逐位(J0 口径),不保证重执行逐位。
+- **后果与吸收**:标签与 chunk-class 阈值比漂移大 20-400 倍,双 agreement
+  (transition 48/48=1.0000、flags 46/48=0.9583)直接达标;唯一翻转 =
+  osnap_01 cand1 的 flag_gripper_closed(夹爪开口恰在 0.06 阈值邻域,
+  边界敏感)。
+- **裁决修正**:stageP_replay.py 首版误把数值指纹折进 pass 条件(严于本
+  文 §5 冻结 gate = 双 agreement ≥95%,指纹"另报"),自动判 FAIL;已按
+  冻结文本修正为 PASS。CSV 数据零改动,重出 decision 仅用已冻结数据。
+  commit 先于 decision 重出(见 git log)。
+- **对 P1/P2 的约束(新增,冻结)**:P2 verifier 特征禁依赖处于阈值
+  ~1e-3 m 邻域内的单一 flag(P0 实测边界翻转);P1 标签不受影响(契约
+  阈值量级安全)。

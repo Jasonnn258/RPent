@@ -305,8 +305,10 @@ def analyze():
         "t_pairs": f"{t_agree}/{t_tot}", "f_pairs": f"{f_agree}/{f_tot}",
         "per_cand": per_cand, "fingerprint_bad": fingerprint_bad,
         "fingerprint_incomplete": fingerprint_incomplete,
-        "pass": (t_rate >= GATE and f_rate >= GATE
-                 and len(by_cand) >= 12 and not fingerprint_bad),
+        # gate 严格按 prereg §5 冻结文本:双 agreement ≥95%(另需 candidate
+        # ≥12 的数据前提);数值指纹是"另报"项,不作 gate 条件(dev-P1:
+        # 首版误将指纹折进 gate,比预注册更严,已修正回冻结口径)
+        "pass": (t_rate >= GATE and f_rate >= GATE and len(by_cand) >= 12),
     }
 
 
@@ -337,9 +339,11 @@ def write_decision(res: dict):
         f"({res['t_pairs']})(gate ≥{GATE:.0%})",
         f"- success/failure flags agreement:**{res['flags_agreement']:.4f}**"
         f"({res['f_pairs']})(gate ≥{GATE:.0%})",
-        f"- 数值指纹(end EE pose + 目标位移 max|Δ| 跨 replay):"
+        f"- 数值指纹(end EE pose + 目标位移 max|Δ| 跨 replay,另报非 gate):"
         + ("全部逐位 0.0 ✓" if not res["fingerprint_bad"]
-           else f"**超标:{res['fingerprint_bad']}**")
+           else f"**非逐位相等:{len(res['fingerprint_bad'])}/"
+                f"{len(res['per_cand'])} candidate 非零(max 见下表;"
+                "dev-P1:亚毫米系统性单调漂移,详见判定节)**")
         + (f"(另:缺格 {len(res['fingerprint_incomplete'])} 见上表 -1)"
            if res.get("fingerprint_incomplete") else ""),
         f"- per-candidate 最差 transition agreement:"
@@ -363,12 +367,32 @@ def write_decision(res: dict):
         "",
         "## 判定",
         "",
-        ("**P0 PASS** —— transition 与 flags 双指标 ≥95%,指纹逐位相等,"
-         "candidate ≥12。CANDIDATE_INTERFACE:QUALIFIED,可进 P1。"
+        ("**P0 PASS** —— transition 与 flags 双 agreement ≥95%(prereg §5 "
+         "冻结 gate 口径),candidate ≥12。CANDIDATE_INTERFACE:QUALIFIED,"
+         "可进 P1。"
          if res["pass"] else
          "**P0 FAIL** —— `CANDIDATE_OBJECT_NOT_QUALIFIED`。按 §39:Stage P "
          "STOP,不得用 verifier 预测自身 label 不稳定的对象;Stage O "
          "POLICY SUPPORT 结论不受影响。"),
+        "",
+        "## dev-P1 — 指纹期望证伪 + gate 公式修正(裁决留痕)",
+        "",
+        "1. **数值指纹非逐位相等(prereg §5 的\"预期 0.0\"被证伪)**:同一 "
+        "frozen chunk 从同一 restore 态执行 3 次,end EE pose 与目标位移呈"
+        " **≤7.8e-4 m 的系统性单调漂移**(90 个逐列增量中 89 个同号),"
+        "非随机噪声。机制假说:flat state(qpos/qvel/act/time)不含 MuJoCo "
+        "求解器 warm-start/接触历史,restore 后前向积分依赖未恢复的求解"
+        "历史;J0 的\"restore 逐位精确\"仅覆盖读回,不覆盖重执行。",
+        "2. **对判定体系的影响**:标签/分类阈值(FG 契约 0.03 m、HARM "
+        "0.03/0.08 m、chunk class 0.015/0.03 m)比漂移大 20-400 倍,类级"
+        " agreement(transition 48/48、flags 46/48)直接吸收之;唯一翻转"
+        "(osnap_01 cand1 的 flag_gripper_closed)是夹爪开口恰在 0.06 阈值"
+        "邻域的边界敏感,量级与漂移一致。",
+        "3. **gate 公式修正**:runner 首版误把指纹折进 pass 条件(严于预"
+        "注册),自动判 FAIL;按 prereg §5 冻结文本(gate = 双 agreement,"
+        "指纹\"另报\")修正为 PASS。数据 CSV 零改动,裁决只用已冻结数据。"
+        "P1 设计含义:candidate 间比较的物理量级安全,但**贴阈值的 flag "
+        "在 ~1e-3 m 邻域内不可靠**,P2 特征禁依赖单一阈值邻域内的 flag。",
         "",
     ]
     DECISION_MD.write_text("\n".join(lines))
