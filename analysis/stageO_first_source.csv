@@ -1,0 +1,13 @@
+snapshot_id,ref_available,first_recovery_source,first_reentry_source,first_task_recovery_source,O0_rate,O0_n,O0_present_task,O0_present_reentry,O1_rate,O1_n,O1_present_task,O1_present_reentry,O2_rate,O2_n,O2_present_task,O2_present_reentry,O3_rate,O3_n,O3_present_task,O3_present_reentry,O4_rate,O4_n,O4_present_task,O4_present_reentry
+osnap_00,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,0.0,8,False,False,1.0,16,True,False,—,0,False,False,1.0,8,True,False,0.125,8,False,False
+osnap_01,,O1_POLICY_SUPPORT,REFERENCE_UNAVAILABLE,O1_POLICY_SUPPORT,0.0,8,False,False,0.75,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
+osnap_02,True,O1_POLICY_SUPPORT,O1_POLICY_SUPPORT,O4_REPLANNING,0.0,8,False,False,0.188,16,False,True,—,0,False,False,0.0,8,False,True,0.375,8,True,True
+osnap_03,,O4_REPLANNING_BELOW_UNTESTED,O4_REPLANNING_BELOW_UNTESTED,O4_REPLANNING_BELOW_UNTESTED,0.0,8,False,False,0.062,16,False,False,—,0,False,False,—,0,False,False,0.25,8,True,True
+osnap_04,False,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,0.0,8,False,False,0.125,16,False,False,—,0,False,False,—,0,False,False,0.0,8,False,False
+osnap_05,True,NO_SOURCE_FOUND,NO_SOURCE_FOUND,NO_SOURCE_FOUND,0.0,8,False,False,0.062,16,False,False,—,0,False,False,0.125,8,False,False,0.0,8,False,False
+osnap_06,False,O1_POLICY_SUPPORT,REFERENCE_UNAVAILABLE,O1_POLICY_SUPPORT,0.0,8,False,False,0.75,16,True,False,—,0,False,False,—,0,False,False,0.0,8,False,False
+osnap_07,True,O3_FIXED_SEQUENCE,NO_SOURCE_FOUND,O3_FIXED_SEQUENCE,0.0,8,False,False,0.0,16,False,False,0.0,16,False,False,0.25,8,True,False,0.125,8,False,False
+osnap_08,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,0.5,4,True,False,0.875,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
+osnap_09,True,O4_REPLANNING,NO_SOURCE_FOUND,NO_SOURCE_FOUND,—,0,False,False,0.0,16,False,False,0.0,16,False,False,—,0,False,False,0.125,8,False,False
+osnap_10,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,1.0,8,True,False,0.312,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
+osnap_11,,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,0.625,8,True,False,—,0,False,False,—,0,False,False,—,0,False,False,0.0,8,False,False
