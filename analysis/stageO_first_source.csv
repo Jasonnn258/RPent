@@ -7,7 +7,7 @@ osnap_04,False,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE
 osnap_05,True,NO_SOURCE_FOUND,NO_SOURCE_FOUND,NO_SOURCE_FOUND,0.0,8,False,False,0.062,16,False,False,—,0,False,False,0.125,8,False,False,0.0,8,False,False
 osnap_06,False,O1_POLICY_SUPPORT,REFERENCE_UNAVAILABLE,O1_POLICY_SUPPORT,0.0,8,False,False,0.75,16,True,False,—,0,False,False,—,0,False,False,0.0,8,False,False
 osnap_07,True,O3_FIXED_SEQUENCE,NO_SOURCE_FOUND,O3_FIXED_SEQUENCE,0.0,8,False,False,0.0,16,False,False,0.0,16,False,False,0.25,8,True,False,0.125,8,False,False
-osnap_08,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,0.5,4,True,False,0.875,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
-osnap_09,True,O4_REPLANNING,NO_SOURCE_FOUND,NO_SOURCE_FOUND,—,0,False,False,0.0,16,False,False,0.0,16,False,False,—,0,False,False,0.125,8,False,False
+osnap_08,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,0.75,8,True,False,0.875,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
+osnap_09,True,O4_REPLANNING,NO_SOURCE_FOUND,NO_SOURCE_FOUND,1.0,8,True,True,0.0,16,False,False,0.0,16,False,False,0.0,8,False,False,0.125,8,False,False
 osnap_10,True,O1_POLICY_SUPPORT,NO_SOURCE_FOUND,O1_POLICY_SUPPORT,1.0,8,True,False,0.312,16,True,False,—,0,False,False,—,0,False,False,—,0,False,False
-osnap_11,,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,0.625,8,True,False,—,0,False,False,—,0,False,False,—,0,False,False,0.0,8,False,False
+osnap_11,,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,REFERENCE_UNAVAILABLE,0.625,8,True,False,0.125,16,False,False,—,0,False,False,—,0,False,False,0.0,8,False,False
