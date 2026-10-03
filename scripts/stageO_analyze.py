@@ -34,6 +34,7 @@ import stageO_ladder as L            # 复用 load_references / recovery_present
 MANI = REPO / "analysis/stageO_split_manifest.csv"
 REFJ = REPO / "analysis/stageO_reference_traces.jsonl"
 ROLL = REPO / "analysis/stageO_rollouts.csv"
+CALIB = REPO / "analysis/stageO_calibration.md"
 REENT = REPO / "analysis/stageO_reentry_results.csv"
 TRANS = REPO / "analysis/stageO_arm_transitions.jsonl"
 OUT_CSV = REPO / "analysis/stageO_first_source.csv"
