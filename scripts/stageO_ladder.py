@@ -819,6 +819,7 @@ def process_snapshot(snap: dict, gpu: int, shared_kwargs, sink: Sink, K: int,
 
 # ---- 主入口 ------------------------------------------------------------------
 def main() -> int:
+    global MAX_INFRA_RETRY        # dev-O6:--max-retries 运行时覆盖
     ap = argparse.ArgumentParser()
     ap.add_argument("--gpu", type=int, default=0)
     ap.add_argument("--workers", type=int, default=2)
@@ -832,7 +833,6 @@ def main() -> int:
                          "补测建议 8,见 prereg dev-O6)")
     args = ap.parse_args()
 
-    global MAX_INFRA_RETRY
     if args.max_retries != MAX_INFRA_RETRY:
         MAX_INFRA_RETRY = args.max_retries
         log(f"MAX_INFRA_RETRY={MAX_INFRA_RETRY}(dev-O6 补测覆盖)")
