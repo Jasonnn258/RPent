@@ -36,6 +36,7 @@ LEDGER = REPO / "analysis/stageP_collect_ledger.csv"
 OUT = REPO / "analysis/stageP_split_manifest.csv"
 LOG_ROOT = REPO / "logs/stageP_freeze"
 SPLIT_SEED = 20261003       # §6 预注册复核 seed(规则确定,不实际消费)
+FG_QUOTA = 28               # dev-P2 顺序停止上限(容差上限)
 
 FIELDS = ["snapshot_id", "family", "procedure", "task", "seed", "t0",
           "episode_dir", "collect_seq", "split", "event_rule", "collect_ts",
@@ -56,6 +57,15 @@ def main() -> int:
     rows = [r for r in csv.DictReader(open(LEDGER, encoding="utf-8"))
             if r.get("included") == "True"]
     assert rows, "ledger 无 included 行(采集未完成或全失败)"
+    # dev-P2 停止规则上限:并发窗口(3 workers)可能越过配额在途全中,
+    # 采集实测 30>28;按冻结的容差上限确定性截断(collect 序前 28,
+    # 非结果筛选),被截行留在 ledger 不物化。
+    dropped = rows[FG_QUOTA:]
+    rows = rows[:FG_QUOTA]
+    if dropped:
+        log(f"配额截断:ledger included {len(rows)+len(dropped)} → 取前 "
+            f"{FG_QUOTA}(丢弃 collect 序 {FG_QUOTA+1}.."
+            f"{len(rows)+len(dropped)}:{[(d['task'], d['seed']) for d in dropped]})")
     log(f"ledger included {len(rows)} FG 快照;DEV/TEST = collect 序奇偶"
         f"(seed {SPLIT_SEED} 仅记录);开始物化")
 
