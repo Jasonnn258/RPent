@@ -1,0 +1,9 @@
+# Stage P1 Decision — Support Geometry Gate
+
+生成:2026-10-04T16:00:41.709865 | gate(prereg §7/§15,TEST):Oracle@8−Oracle@1 ≥15pp ∧ SUPPORTED ≥50% ∧ MIXED ≥30%
+
+- Oracle@8−Oracle@1 = **0.100** (需 ≥0.15)→ FAIL
+- SUPPORTED_SNAPSHOT_RATE = **1.000** (需 ≥0.50)→ PASS
+- MIXED_SUPPORT_RATE = **0.600** (需 ≥0.30)→ PASS
+
+**P1 FAIL** — REPEATED ROLLOUT SUPPORT EXISTS, BUT WITHIN-STATE CANDIDATE DIVERSITY IS INSUFFICIENT FOR SELECTION STUDY。按 §39:Stage P STOP,禁训 verifier。
