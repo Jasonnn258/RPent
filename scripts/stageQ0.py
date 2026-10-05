@@ -63,6 +63,12 @@ GATE_DISAG = 0.10     # §5:双臂恢复率差 >10pp
 GATE_TRANS = 0.90     # §5:transition-class 配对一致率 <90%
 
 WLOCK = threading.Lock()
+# boot 相全局锁:toolkit._step 的 output_dir 取自全局 get_output_dir(),
+# 多 worker 并发 init_output_dir 会互相覆盖 → 记录写进对方目录
+# (Stage P P1 psnap_01/18 boot-infra 三连败同根因,dev-Q1)。boot 相含
+# replay + fail-pick 全部串行;exec 相(sample/chunk/continuation)不落
+# states.json,可并行。
+BOOT_LOCK = threading.Lock()
 
 DELTA_COLS = ["snapshot_id", "task", "seed", "t0", "wall_s",
               "eef_dx", "eef_dy", "eef_dz", "eef_norm", "gripper_delta",
@@ -111,12 +117,13 @@ def boot_with_retries(snap, gpu, shared, tag):
     for attempt in range(1, MAX_INFRA_RETRY + 1):
         ctx = None
         try:
-            outdir = LOG_ROOT / (
-                f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}_{tag}")
-            ctx = qt.boot_to_pre(snap, gpu, shared, outdir)
-            cap_pre = qt.capture_state(ctx, ctx["S"], "S_pre")
-            S_post = qt.run_fail_pick(ctx, snap)     # 守卫在同 boot 内
-            cap_post = qt.capture_state(ctx, S_post, "S_post")
+            with BOOT_LOCK:
+                outdir = LOG_ROOT / (
+                    f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}_{tag}")
+                ctx = qt.boot_to_pre(snap, gpu, shared, outdir)
+                cap_pre = qt.capture_state(ctx, ctx["S"], "S_pre")
+                S_post = qt.run_fail_pick(ctx, snap)  # 守卫在同 boot 内
+                cap_post = qt.capture_state(ctx, S_post, "S_post")
             return ctx, S_post, cap_pre, cap_post
         except Exception as exc:
             if ctx:
@@ -416,14 +423,17 @@ def main() -> int:
                   if DELTA_CSV.exists() else []):
             if r.get("note") != "INFRA_ABORT_3attempts":
                 done.add(r["snapshot_id"])
-        # C 集事件还须已有 LIVE/RESTORED audit 行才算完成(防冒烟/中断
-        # 只写了 delta 就被 resume 跳过)
-        audited = set()
+        # C 集事件还须 4 条非 infra audit 行齐(LIVE/RESTORED × r1/r2)
+        audited: dict[str, set] = {}
         if AUDIT_CSV.exists():
             for r in csv.DictReader(open(AUDIT_CSV)):
                 if not r.get("infra_abort"):
-                    audited.add(r["snapshot_id"])
-        done = {s for s in done if s not in cids or s in audited}
+                    audited.setdefault(r["snapshot_id"], set()).add(
+                        (r["arm"], r["rep"]))
+        need = {("LIVE", "1"), ("LIVE", "2"),
+                ("RESTORED", "1"), ("RESTORED", "2")}
+        done = {s for s in done
+                if s not in cids or need <= audited.get(s, set())}
         pending = deque(e for e in events
                         if e["snapshot_id"] not in done)
         log(f"resume:{len(done)} 已完成,{len(pending)} 待跑")

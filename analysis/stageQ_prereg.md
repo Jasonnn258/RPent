@@ -237,4 +237,15 @@ World Model / new perception / SFT / OPD / RL / simulator snapshot redesign。
 
 ## 附录 C — deviation 记录(只追加)
 
-(dev-Q 起编号;空 = 无)
+**dev-Q1(2026-10-05,Q0 首轮作废重跑)** — Q0 首轮 2-worker 运行出现大量
+"fail-pick t0 not logged" 假 infra。根因:`toolkit._step` 的 dump 目录取自
+**全局** `get_output_dir()`(robots/libero/toolkit.py:83),多 worker 各自
+`init_output_dir` 互相覆盖 → 步记录写进对方 outdir。Stage P P1 的
+psnap_01/psnap_18 boot-infra 三连败为同一竞态(该阶段为假 infra,数据未受
+污染:dev-O5 守卫只在 success=True 时拒绝,漏记只造成静默通过)。
+修复:(a) boot 相(replay + fail-pick + 捕获)加全局 BOOT_LOCK 串行化;
+(b) t0 记录改为 ≤5s 轮询读回,废除计数式守卫;(c) resume 完备性收紧
+(C 集事件须 4 条非 infra audit 行齐)。首轮产物(7 delta + 13 audit 行)
+归档 logs/stageQ0/race_partial/ 不入分析,Q0 全量重跑。契约/门/采样零改动。
+执行耗时修正:continuation 每 chunk 实测 ~2s(附录 B 预算的保守估计偏高,
+总时长按实测下调,预算结构不变)。

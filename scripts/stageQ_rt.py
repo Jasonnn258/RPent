@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -120,23 +121,30 @@ def run_fail_pick(ctx: dict, snap: dict) -> str:
     """执行 step t0 原命令(重采样的失败 pick)→ 守卫必须仍为 FG。
 
     返回 S_post(save_state 字节);守卫违反 → InfraError(调用方重试)。
+    t0 记录以轮询方式读回(dump_state 同步追加;多 worker 下
+    get_output_dir 为全局量,由调用方 BOOT_LOCK 串行化 boot 相)。
     """
     t0i = int(snap["t0"])
     t0_step = next(s for s in ctx["steps"]
                    if s.get("step_idx") == t0i and s.get("command"))
     cmd = t0_step["command"]
     kwargs = {k: v for k, v in cmd.items() if k != "action"}
-    n_before = len(json.load(open(ctx["outdir"] / "states.json")))
     try:
         ctx["toolkit"]._step(cmd["action"], **kwargs)
     except Exception as exc:
         raise rt.InfraError(f"fail-pick step {t0i}: "
                             f"{type(exc).__name__}: {exc}") from exc
-    res = read_step_result(ctx["outdir"], t0i)
-    # 记录追加完整性守卫:重放日志必须包含 t0 步(states.json 追加式)
-    n_after = len(json.load(open(ctx["outdir"] / "states.json")))
-    if n_after <= n_before:
-        raise rt.InfraError(f"fail-pick t0 not logged ({n_before}->{n_after})")
+    res = None
+    for _ in range(20):                     # 轮询 ≤5s 等 t0 记录落盘
+        try:
+            res = read_step_result(ctx["outdir"], t0i)
+        except (OSError, ValueError):
+            res = {}
+        if res:
+            break
+        time.sleep(0.25)
+    if not res:
+        raise rt.InfraError(f"fail-pick t0 record not found (poll 5s)")
     if snap.get("family") == "FALSE_GRASP" and res.get("success") is True:
         raise rt.InfraError("replayed t0 pick succeeded — FG event not "
                             "reproduced")
