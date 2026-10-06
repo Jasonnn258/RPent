@@ -325,5 +325,8 @@ def read_manifest(path: Path) -> list[dict]:
              if not l.startswith("#")]
     import csv, io
     rows = list(csv.DictReader(io.StringIO("\n".join(lines))))
-    return [r for r in rows if r.get("state_sha16")
-            and r["state_sha16"] != "INFRA_ABORT_3attempts"]
+    # P manifest 用 state_sha16,Q manifest 用 pre_sha16(同 boot 成对,双 sha)
+    def sha(r):
+        return r.get("pre_sha16") or r.get("state_sha16")
+    return [r for r in rows if sha(r)
+            and sha(r) != "INFRA_ABORT_3attempts"]
