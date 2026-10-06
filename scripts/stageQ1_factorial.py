@@ -601,8 +601,11 @@ def main() -> int:
             except Exception:
                 pass
 
-    write_reports(analyze())
-    log("Q1 factorial 完成,报告已写")
+    if not args.smoke:
+        write_reports(analyze())
+        log("Q1 factorial 完成,报告已写")
+    else:
+        log("SMOKE 完成(不写分析产物)")
     return 0
 
 
