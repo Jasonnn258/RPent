@@ -249,3 +249,22 @@ psnap_01/psnap_18 boot-infra 三连败为同一竞态(该阶段为假 infra,数�
 归档 logs/stageQ0/race_partial/ 不入分析,Q0 全量重跑。契约/门/采样零改动。
 执行耗时修正:continuation 每 chunk 实测 ~2s(附录 B 预算的保守估计偏高,
 总时长按实测下调,预算结构不变)。
+
+**dev-Q2(2026-10-06,Q1 执行阶段 FG 不可复现 + 样本量)** — freeze 阶段
+2/20(qsnap_12/15)、factorial 阶段 5/18(qsnap_04/07/10/16/18)事件触发
+dev-O5 守卫"replayed t0 pick succeeded"三次 → 按本文件 §3 冻结规则记
+INFRA_ABORT,完成事件 = 13(DEV 5 / TEST 8,TEST 低于规划的 ~10)。三点
+说明:(a) §14 的 >2% infra 暂停解释条款针对 instrumentation 失败;此处
+守卫按设计工作,事件级 t0 结果本身是随机的(Pi0.5 重采样),无
+instrumentation 可修,不加试不加采(§3 冻结 3 次上限,TEST 已见结果后
+改协议属违规);(b) 由此产生**选择偏差朝 H_QA 不利方向**:存活事件 =
+失败可稳定复现的子群(全阶段 t0 重执行共 36 次成功 vs transcript 记录
+失败,清单见终报),H_QA 的 candidate 级估计只在该子群内解释;
+(c) qsnap_17 boot 重试后 A_pre 追加重采(bank pre=8),执行 bank 按冻结
+序取首批 4 + 第二 boot 的 A_post×4(跨 boot 混合,sha 全记录;cell 内
+候选源一致,无对称性破坏)。判定门/契约/统计单位零改动。
+
+**dev-Q3(2026-10-06,freeze manifest 字段名)** — stageQ_freeze 写
+pre_sha16/post_sha16(同 boot 成对双指纹),stageQ_rt.read_manifest 原按
+Stage P 的 state_sha16 过滤 → 已兼容两格式(factorial 启动前发现并修复,
+未影响任何执行)。
