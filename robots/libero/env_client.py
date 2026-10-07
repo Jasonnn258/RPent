@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 
+from rpent.utils import rtrace
 from rpent.utils.rpc import RpcClient
 
 
@@ -62,6 +63,9 @@ class LiberoEnvClient:
         assert not (self.episode_terminated or self.episode_truncated), (
             "env.step called after the episode signaled term/trunc"
         )
+        # Stage R 仪器(默认关闭):底层动作流日志(逐位保真,支撑 prefix replay)
+        if rtrace.enabled():
+            rtrace.log_env_call("step", action)
         ret = self._client.call(
             "env.step", args=(action,), timeout_s=_TIMEOUT_S["env.step"]
         )
@@ -83,6 +87,9 @@ class LiberoEnvClient:
         )
         if return_all_frames is None:
             return_all_frames = self.return_all_frames
+        # Stage R 仪器(默认关闭):chunk 动作流日志(pick 技能附逐 chunk 测量)
+        if rtrace.enabled():
+            rtrace.log_env_call("chunk", actions)
         ret = self._client.call(
             "env.chunk_step",
             args=(actions,),

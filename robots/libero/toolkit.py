@@ -13,6 +13,7 @@ from typing import Any
 from robots.libero import tools as libero_tools
 from rpent.dashboard.events import DashboardEventSink, ToolResultEvent
 from rpent.tools.toolkit import ToolCancelled, Toolkit
+from rpent.utils import rtrace
 from rpent.utils.logging import get_logger, get_output_dir
 
 
@@ -62,6 +63,10 @@ class LiberoToolkit(Toolkit):
         """
         command = {"action": name, **kwargs}
         t0 = time.time()
+        # Stage R 仪器(默认关闭,RPENT_STAGE_R_TRACE=1):技能边界快照 + 起止标记
+        if rtrace.enabled():
+            rtrace.begin_step(self._next_step + 1, name, kwargs,
+                              self._primitives.env)
         start_frame = self._primitives.recorded_frame_count()
         try:
             result = getattr(self._primitives, name)(**kwargs)
@@ -78,6 +83,10 @@ class LiberoToolkit(Toolkit):
             result_dict = result
         else:
             result_dict = {"value": result}
+
+        # Stage R 仪器:post 快照 + 终态测量(pick 类)
+        if rtrace.enabled():
+            rtrace.end_step(self._next_step + 1, result_dict)
 
         self._next_step += 1
         step_idx = self._next_step
