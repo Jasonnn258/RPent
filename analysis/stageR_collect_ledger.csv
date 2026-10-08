@@ -1,0 +1,188 @@
+task,seed,episode_dir,rc,classify,wall_s,retries,fg_first,rps_first,t0,t0_skill,meas_points,stable_fg,included,note
+3,122,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:43:26_vanilla_libero_spatial_t3_s122,0,success,574.8,0,,,,,,False,False,fg_absent
+3,121,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:41:56_vanilla_libero_spatial_t3_s121,0,policy_fail,690.9,0,,,,,,False,False,fg_absent
+3,123,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:44:56_vanilla_libero_spatial_t3_s123,0,policy_fail,626.5,0,,,,,,False,False,fg_absent
+3,124,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:53:00_vanilla_libero_spatial_t3_s124,0,success,708.5,0,,,,,,False,False,fg_absent
+3,125,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:53:27_vanilla_libero_spatial_t3_s125,0,success,693.9,0,3,,3,pi0_pick,15,False,False,acq_point@14(dz/lift 或 check_success)
+3,126,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-12:55:22_vanilla_libero_spatial_t3_s126,0,success,745.3,0,,,,,,False,False,fg_absent
+3,127,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:04:49_vanilla_libero_spatial_t3_s127,0,success,773.3,0,,,,,,False,False,fg_absent
+3,129,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:07:47_vanilla_libero_spatial_t3_s129,0,success,779.0,0,,,,,,False,False,fg_absent
+3,128,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:05:00_vanilla_libero_spatial_t3_s128,0,policy_fail,1155.7,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,130,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:17:42_vanilla_libero_spatial_t3_s130,0,success,701.5,0,,,,,,False,False,fg_absent
+3,131,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:20:46_vanilla_libero_spatial_t3_s131,0,success,887.7,0,,,,,,False,False,fg_absent
+3,132,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:24:16_vanilla_libero_spatial_t3_s132,0,policy_fail,959.2,0,3,8,3,pi0_pick,15,True,True,stable_fg_event
+3,133,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:29:24_vanilla_libero_spatial_t3_s133,0,success,743.1,0,,,,,,False,False,fg_absent
+3,134,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:35:34_vanilla_libero_spatial_t3_s134,0,policy_fail,707.4,0,4,,4,pi0_pick,21,True,True,stable_fg_event
+3,136,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:41:47_vanilla_libero_spatial_t3_s136,0,success,742.5,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,135,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:40:15_vanilla_libero_spatial_t3_s135,0,success,1036.1,0,,,,,,False,False,fg_absent
+3,137,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:47:22_vanilla_libero_spatial_t3_s137,0,success,690.5,0,,,,,,False,False,fg_absent
+3,138,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:54:09_vanilla_libero_spatial_t3_s138,0,policy_fail,549.2,0,,,,,,False,False,fg_absent
+3,139,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:57:31_vanilla_libero_spatial_t3_s139,0,success,642.3,0,,,,,,False,False,fg_absent
+3,140,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-13:58:52_vanilla_libero_spatial_t3_s140,0,policy_fail,759.6,0,3,6,3,pi0_pick,17,False,False,acq_point@7(dz/lift 或 check_success)
+3,141,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:03:19_vanilla_libero_spatial_t3_s141,0,success,792.4,0,,,,,,False,False,fg_absent
+3,142,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:08:14_vanilla_libero_spatial_t3_s142,0,success,588.3,0,3,,3,pi0_pick,15,False,False,acq_point@8(dz/lift 或 check_success)
+3,143,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:11:32_vanilla_libero_spatial_t3_s143,0,success,698.1,0,,,,,,False,False,fg_absent
+3,144,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:16:31_vanilla_libero_spatial_t3_s144,0,success,869.1,0,,,,,,False,False,fg_absent
+3,145,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:18:02_vanilla_libero_spatial_t3_s145,0,success,989.9,0,,,,,,False,False,fg_absent
+3,146,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:23:10_vanilla_libero_spatial_t3_s146,0,success,802.1,0,,,,,,False,False,fg_absent
+3,147,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:31:00_vanilla_libero_spatial_t3_s147,0,policy_fail,894.2,0,,9,,,,False,False,fg_absent
+3,148,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:34:32_vanilla_libero_spatial_t3_s148,0,success,826.1,0,,,,,,False,False,fg_absent
+3,149,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:36:32_vanilla_libero_spatial_t3_s149,0,success,777.5,0,,,,,,False,False,fg_absent
+3,151,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:48:18_vanilla_libero_spatial_t3_s151,0,success,599.7,0,3,,3,pi0_pick,17,True,True,stable_fg_event
+3,150,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:45:54_vanilla_libero_spatial_t3_s150,0,policy_fail,771.9,0,,,,,,False,False,fg_absent
+3,152,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:49:30_vanilla_libero_spatial_t3_s152,0,success,560.5,0,,,,,,False,False,fg_absent
+3,155,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:58:50_vanilla_libero_spatial_t3_s155,0,success,562.1,0,,,,,,False,False,fg_absent
+3,153,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:58:18_vanilla_libero_spatial_t3_s153,0,policy_fail,628.8,0,,,,,,False,False,fg_absent
+3,154,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-14:58:46_vanilla_libero_spatial_t3_s154,0,policy_fail,679.3,0,,,,,,False,False,fg_absent
+3,156,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:08:12_vanilla_libero_spatial_t3_s156,0,success,538.9,0,,,,,,False,False,fg_absent
+3,158,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:10:05_vanilla_libero_spatial_t3_s158,0,policy_fail,637.8,0,,,,,,False,False,fg_absent
+3,157,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:08:47_vanilla_libero_spatial_t3_s157,0,success,837.4,0,,,,,,False,False,fg_absent
+3,159,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:17:11_vanilla_libero_spatial_t3_s159,0,success,470.1,0,,,,,,False,False,fg_absent
+3,160,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:20:43_vanilla_libero_spatial_t3_s160,0,success,737.4,0,,,,,,False,False,fg_absent
+3,161,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:22:44_vanilla_libero_spatial_t3_s161,0,success,731.0,0,,,,,,False,False,fg_absent
+3,162,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:25:01_vanilla_libero_spatial_t3_s162,0,success,721.0,0,,,,,,False,False,fg_absent
+3,163,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:33:01_vanilla_libero_spatial_t3_s163,0,policy_fail,543.8,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,164,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:34:55_vanilla_libero_spatial_t3_s164,0,success,795.2,0,,,,,,False,False,fg_absent
+3,165,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:37:02_vanilla_libero_spatial_t3_s165,0,success,784.2,0,,,,,,False,False,fg_absent
+3,166,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:42:04_vanilla_libero_spatial_t3_s166,0,success,675.0,0,,,,,,False,False,fg_absent
+3,168,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:50:07_vanilla_libero_spatial_t3_s168,0,success,424.5,0,,,,,,False,False,fg_absent
+3,167,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:48:10_vanilla_libero_spatial_t3_s167,0,success,624.0,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,169,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:53:19_vanilla_libero_spatial_t3_s169,0,success,774.4,0,,,,,,False,False,fg_absent
+3,171,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:58:34_vanilla_libero_spatial_t3_s171,0,policy_fail,626.7,0,,,,,,False,False,fg_absent
+3,170,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-15:57:11_vanilla_libero_spatial_t3_s170,0,success,743.3,0,,,,,,False,False,fg_absent
+3,172,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:06:14_vanilla_libero_spatial_t3_s172,0,policy_fail,649.6,0,,,,,,False,False,fg_absent
+3,174,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:09:34_vanilla_libero_spatial_t3_s174,0,success,845.0,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,173,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:09:01_vanilla_libero_spatial_t3_s173,0,policy_fail,915.7,0,3,,3,pi0_pick,15,True,True,stable_fg_event
+3,175,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:17:04_vanilla_libero_spatial_t3_s175,0,success,804.5,0,,,,,,False,False,fg_absent
+3,176,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:23:39_vanilla_libero_spatial_t3_s176,0,success,733.4,0,4,,4,pi0_pick,15,False,False,acq_point@13(dz/lift 或 check_success)
+3,177,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:24:17_vanilla_libero_spatial_t3_s177,0,policy_fail,818.3,0,,,,,,False,False,fg_absent
+3,178,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:30:28_vanilla_libero_spatial_t3_s178,0,policy_fail,529.7,0,,,,,,False,False,fg_absent
+3,179,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:35:53_vanilla_libero_spatial_t3_s179,0,success,750.2,0,,,,,,False,False,fg_absent
+3,180,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:37:55_vanilla_libero_spatial_t3_s180,0,policy_fail,730.8,0,,,,,,False,False,fg_absent
+3,181,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:39:18_vanilla_libero_spatial_t3_s181,0,policy_fail,875.5,0,,,,,,False,False,fg_absent
+3,182,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:48:23_vanilla_libero_spatial_t3_s182,0,success,502.8,0,,,,,,False,False,fg_absent
+3,183,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:50:06_vanilla_libero_spatial_t3_s183,0,success,703.3,0,,,,,,False,False,fg_absent
+3,184,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:53:53_vanilla_libero_spatial_t3_s184,0,policy_fail,1003.9,0,3,5,3,pi0_pick,13,True,True,stable_fg_event
+3,186,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:01:49_vanilla_libero_spatial_t3_s186,0,policy_fail,551.6,0,,,,,,False,False,fg_absent
+3,185,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-16:56:46_vanilla_libero_spatial_t3_s185,0,success,1046.7,0,,,,,,False,False,fg_absent
+3,187,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:10:37_vanilla_libero_spatial_t3_s187,0,success,487.1,0,4,,4,pi0_pick,15,True,True,stable_fg_event
+3,188,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:11:01_vanilla_libero_spatial_t3_s188,0,policy_fail,958.4,0,10,7,,,,False,False,rps_first@7
+3,189,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:14:13_vanilla_libero_spatial_t3_s189,0,success,829.8,0,,,,,,False,False,fg_absent
+3,190,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:18:44_vanilla_libero_spatial_t3_s190,0,success,816.4,0,,,,,,False,False,fg_absent
+5,121,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:26:59_vanilla_libero_spatial_t5_s121,0,success,778.3,0,,8,,,,False,False,fg_absent
+5,122,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:28:02_vanilla_libero_spatial_t5_s122,0,policy_fail,724.0,0,,,,,,False,False,fg_absent
+5,123,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:32:21_vanilla_libero_spatial_t5_s123,0,success,672.1,0,3,,3,pi0_pick,21,False,False,acq_point@6(dz/lift 或 check_success)
+5,124,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:39:58_vanilla_libero_spatial_t5_s124,0,success,393.5,0,,,,,,False,False,fg_absent
+5,125,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:40:06_vanilla_libero_spatial_t5_s125,0,success,630.7,0,,10,,,,False,False,fg_absent
+5,126,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:43:33_vanilla_libero_spatial_t5_s126,0,policy_fail,472.5,0,,,,,,False,False,fg_absent
+5,127,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:46:31_vanilla_libero_spatial_t5_s127,0,policy_fail,976.8,0,,8,,,,False,False,fg_absent
+5,128,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:50:37_vanilla_libero_spatial_t5_s128,0,success,875.1,0,,,,,,False,False,fg_absent
+5,129,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-17:51:25_vanilla_libero_spatial_t5_s129,0,success,1122.7,0,,6,,,,False,False,fg_absent
+5,130,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:02:48_vanilla_libero_spatial_t5_s130,0,success,811.5,0,,,,,,False,False,fg_absent
+5,131,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:05:12_vanilla_libero_spatial_t5_s131,0,success,1229.6,0,3,,3,pi0_pick,21,False,False,acq_point@15(dz/lift 或 check_success)
+5,132,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:10:08_vanilla_libero_spatial_t5_s132,0,policy_fail,961.0,0,,,,,,False,False,fg_absent
+5,133,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:16:19_vanilla_libero_spatial_t5_s133,0,success,1110.8,0,,,,,,False,False,fg_absent
+5,134,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:25:42_vanilla_libero_spatial_t5_s134,0,policy_fail,930.5,0,,,,,,False,False,fg_absent
+5,135,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:26:09_vanilla_libero_spatial_t5_s135,0,policy_fail,941.7,0,,,,,,False,False,fg_absent
+5,136,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:34:50_vanilla_libero_spatial_t5_s136,0,success,840.0,0,,,,,,False,False,fg_absent
+5,138,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:41:51_vanilla_libero_spatial_t5_s138,0,success,895.8,0,,,,,,False,False,fg_absent
+5,137,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:41:12_vanilla_libero_spatial_t5_s137,0,policy_fail,939.9,0,3,,3,pi0_pick,21,True,True,stable_fg_event
+5,139,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:48:50_vanilla_libero_spatial_t5_s139,0,success,967.0,0,,,,,,False,False,fg_absent
+5,140,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:56:47_vanilla_libero_spatial_t5_s140,0,success,616.7,0,,,,,,False,False,fg_absent
+5,141,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-18:56:52_vanilla_libero_spatial_t5_s141,0,success,965.0,0,,10,,,,False,False,fg_absent
+5,142,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:04:57_vanilla_libero_spatial_t5_s142,0,policy_fail,621.5,0,,,,,,False,False,fg_absent
+5,143,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:07:03_vanilla_libero_spatial_t5_s143,0,success,1069.9,0,2,6,2,pi0_pick,21,False,False,acq_point@13(dz/lift 或 check_success)
+5,144,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:12:57_vanilla_libero_spatial_t5_s144,0,policy_fail,902.9,0,,,,,,False,False,fg_absent
+5,145,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:15:19_vanilla_libero_spatial_t5_s145,0,success,1234.6,0,,10,,,,False,False,fg_absent
+5,146,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:24:53_vanilla_libero_spatial_t5_s146,0,policy_fail,1106.9,0,,,,,,False,False,fg_absent
+5,147,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:28:00_vanilla_libero_spatial_t5_s147,0,policy_fail,1234.8,0,12,9,,,,False,False,rps_first@9
+5,148,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:35:53_vanilla_libero_spatial_t5_s148,0,success,1055.3,0,,9,,,,False,False,fg_absent
+5,149,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:43:20_vanilla_libero_spatial_t5_s149,0,success,622.0,0,2,,2,pi0_pick,21,False,False,acq_point@10(dz/lift 或 check_success)
+5,150,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:48:35_vanilla_libero_spatial_t5_s150,0,success,527.1,0,3,,3,pi0_pick,21,False,False,acq_point@7(dz/lift 或 check_success)
+5,151,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:53:29_vanilla_libero_spatial_t5_s151,0,policy_fail,768.7,0,,9,,,,False,False,fg_absent
+5,152,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:53:42_vanilla_libero_spatial_t5_s152,0,policy_fail,875.3,0,,8,,,,False,False,fg_absent
+5,153,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-19:57:22_vanilla_libero_spatial_t5_s153,0,policy_fail,1136.1,0,3,,3,pi0_pick,21,False,False,acq_point@6(dz/lift 或 check_success)
+5,154,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:06:17_vanilla_libero_spatial_t5_s154,0,policy_fail,833.0,0,3,,3,pi0_pick,21,True,True,stable_fg_event
+5,155,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:08:17_vanilla_libero_spatial_t5_s155,0,success,884.8,0,,,,,,False,False,fg_absent
+5,156,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:16:18_vanilla_libero_spatial_t5_s156,0,success,1093.2,0,,8,,,,False,False,fg_absent
+5,157,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:20:10_vanilla_libero_spatial_t5_s157,0,success,968.2,0,3,,3,pi0_pick,21,False,False,acq_point@15(dz/lift 或 check_success)
+5,158,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:23:02_vanilla_libero_spatial_t5_s158,0,success,1106.3,0,,8,,,,False,False,fg_absent
+5,161,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:41:29_vanilla_libero_spatial_t5_s161,0,success,635.7,0,,,,,,False,False,fg_absent
+5,159,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:34:31_vanilla_libero_spatial_t5_s159,0,policy_fail,1081.4,0,,,,,,False,False,fg_absent
+5,160,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:36:18_vanilla_libero_spatial_t5_s160,0,policy_fail,1213.7,0,2,9,2,pi0_pick,21,True,True,stable_fg_event
+5,163,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:52:33_vanilla_libero_spatial_t5_s163,0,success,1031.3,0,,9,,,,False,False,fg_absent
+5,162,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:52:04_vanilla_libero_spatial_t5_s162,0,policy_fail,1244.9,0,,,,,,False,False,fg_absent
+5,165,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:09:44_vanilla_libero_spatial_t5_s165,0,success,775.9,0,3,,3,pi0_pick,21,False,False,acq_point@12(dz/lift 或 check_success)
+5,164,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-20:56:32_vanilla_libero_spatial_t5_s164,0,policy_fail,1593.9,0,,9,,,,False,False,fg_absent
+5,166,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:12:49_vanilla_libero_spatial_t5_s166,0,success,738.0,0,3,,3,pi0_pick,21,False,False,acq_point@11(dz/lift 或 check_success)
+5,167,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:22:40_vanilla_libero_spatial_t5_s167,0,policy_fail,1418.3,0,3,,3,pi0_pick,21,True,True,stable_fg_event
+5,168,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:23:06_vanilla_libero_spatial_t5_s168,0,policy_fail,1425.6,0,3,12,3,pi0_pick,19,False,False,acq_point@8(dz/lift 或 check_success)
+5,169,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:25:07_vanilla_libero_spatial_t5_s169,0,policy_fail,1504.8,0,2,,2,pi0_pick,21,True,True,stable_fg_event
+5,170,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:46:18_vanilla_libero_spatial_t5_s170,0,success,421.2,0,,,,,,False,False,fg_absent
+5,171,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:46:52_vanilla_libero_spatial_t5_s171,0,policy_fail,640.5,0,,,,,,False,False,fg_absent
+5,172,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:50:12_vanilla_libero_spatial_t5_s172,0,policy_fail,768.7,0,,,,,,False,False,fg_absent
+5,173,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:53:19_vanilla_libero_spatial_t5_s173,0,success,806.2,0,,7,,,,False,False,fg_absent
+5,174,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-21:57:32_vanilla_libero_spatial_t5_s174,0,success,1045.1,0,3,,3,pi0_pick,9,False,False,acq_point@6(dz/lift 或 check_success)
+5,175,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:03:01_vanilla_libero_spatial_t5_s175,0,policy_fail,974.2,0,3,,3,pi0_pick,21,False,False,acq_point@6(dz/lift 或 check_success)
+5,176,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:06:46_vanilla_libero_spatial_t5_s176,0,success,912.2,0,,,,,,False,False,fg_absent
+5,177,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:14:57_vanilla_libero_spatial_t5_s177,0,success,857.2,0,,,,,,False,False,fg_absent
+5,179,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:21:58_vanilla_libero_spatial_t5_s179,0,policy_fail,669.6,0,,,,,,False,False,fg_absent
+5,178,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:19:15_vanilla_libero_spatial_t5_s178,0,policy_fail,1080.8,0,3,,3,pi0_pick,21,True,True,stable_fg_event
+5,180,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:29:15_vanilla_libero_spatial_t5_s180,0,success,482.7,0,,,,,,False,False,fg_absent
+5,181,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:33:07_vanilla_libero_spatial_t5_s181,0,success,1049.1,0,,,,,,False,False,fg_absent
+5,182,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:37:16_vanilla_libero_spatial_t5_s182,0,success,839.7,0,,,,,,False,False,fg_absent
+5,183,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:37:17_vanilla_libero_spatial_t5_s183,0,success,961.0,0,,,,,,False,False,fg_absent
+5,185,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:51:15_vanilla_libero_spatial_t5_s185,0,success,666.2,0,,,,,,False,False,fg_absent
+5,184,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:50:37_vanilla_libero_spatial_t5_s184,0,policy_fail,828.9,0,2,,2,pi0_pick,21,False,False,acq_point@10(dz/lift 或 check_success)
+5,186,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-22:53:18_vanilla_libero_spatial_t5_s186,0,policy_fail,999.1,0,,7,,,,False,False,fg_absent
+5,187,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:02:22_vanilla_libero_spatial_t5_s187,0,policy_fail,821.5,0,3,,3,pi0_pick,21,False,False,acq_point@17(dz/lift 或 check_success)
+5,188,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:04:25_vanilla_libero_spatial_t5_s188,0,policy_fail,919.1,0,3,,3,pi0_pick,21,True,True,stable_fg_event
+5,189,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:09:57_vanilla_libero_spatial_t5_s189,0,success,1031.4,0,3,,3,pi0_pick,21,False,False,acq_point@15(dz/lift 或 check_success)
+5,190,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:16:03_vanilla_libero_spatial_t5_s190,0,success,931.5,0,,7,,,,False,False,fg_absent
+9,121,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:19:45_vanilla_libero_spatial_t9_s121,0,policy_fail,904.2,0,5,,5,pi0_pick,17,False,False,acq_point@4(dz/lift 或 check_success)
+9,123,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:31:35_vanilla_libero_spatial_t9_s123,0,policy_fail,906.8,0,6,,6,pi0_pick,17,True,True,stable_fg_event
+9,122,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:27:09_vanilla_libero_spatial_t9_s122,0,policy_fail,1176.1,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,124,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:34:49_vanilla_libero_spatial_t9_s124,0,policy_fail,1092.1,0,5,11,5,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,126,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:46:45_vanilla_libero_spatial_t9_s126,0,policy_fail,922.7,0,4,,4,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,125,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:46:42_vanilla_libero_spatial_t9_s125,0,policy_fail,1113.6,0,3,,3,pi0_pick,17,False,False,acq_point@7(dz/lift 或 check_success)
+9,127,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261007-23:53:01_vanilla_libero_spatial_t9_s127,0,policy_fail,956.9,0,,,,,,False,False,fg_absent
+9,129,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:05:15_vanilla_libero_spatial_t9_s129,0,policy_fail,883.3,0,,,,,,False,False,fg_absent
+9,130,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:08:58_vanilla_libero_spatial_t9_s130,0,policy_fail,712.7,0,5,,5,pi0_pick,17,False,False,acq_point@7(dz/lift 或 check_success)
+9,128,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:02:08_vanilla_libero_spatial_t9_s128,0,policy_fail,1128.6,0,4,,4,pi0_pick,17,False,False,acq_point@13(dz/lift 或 check_success)
+9,131,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:19:58_vanilla_libero_spatial_t9_s131,0,success,569.8,0,4,,4,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,132,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:20:51_vanilla_libero_spatial_t9_s132,0,policy_fail,864.1,0,5,,5,pi0_pick,17,False,False,acq_point@6(dz/lift 或 check_success)
+9,133,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:20:56_vanilla_libero_spatial_t9_s133,0,policy_fail,917.8,0,5,,5,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,134,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:29:28_vanilla_libero_spatial_t9_s134,0,policy_fail,513.2,0,5,,5,pi0_pick,17,False,False,acq_point@6(dz/lift 或 check_success)
+9,135,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:35:15_vanilla_libero_spatial_t9_s135,0,policy_fail,515.3,0,,,,,,False,False,fg_absent
+9,136,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:36:14_vanilla_libero_spatial_t9_s136,0,policy_fail,681.4,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,137,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:38:02_vanilla_libero_spatial_t9_s137,0,policy_fail,1120.5,0,3,,3,pi0_pick,17,False,False,acq_point@4(dz/lift 或 check_success)
+9,138,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:43:50_vanilla_libero_spatial_t9_s138,0,policy_fail,909.3,0,5,,5,pi0_pick,17,True,True,stable_fg_event
+9,139,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:47:36_vanilla_libero_spatial_t9_s139,0,policy_fail,806.7,0,5,,5,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,140,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:56:42_vanilla_libero_spatial_t9_s140,0,policy_fail,692.6,0,5,,5,pi0_pick,17,True,True,stable_fg_event
+9,141,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-00:58:59_vanilla_libero_spatial_t9_s141,0,policy_fail,730.9,0,4,,4,pi0_pick,17,False,False,acq_point@7(dz/lift 或 check_success)
+9,142,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:01:02_vanilla_libero_spatial_t9_s142,0,policy_fail,801.5,0,5,8,5,pi0_pick,17,False,False,acq_point@7(dz/lift 或 check_success)
+9,143,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:08:15_vanilla_libero_spatial_t9_s143,0,policy_fail,755.2,0,5,,5,pi0_pick,17,False,False,acq_point@8(dz/lift 或 check_success)
+9,145,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:14:24_vanilla_libero_spatial_t9_s145,0,success,1051.8,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,146,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:20:50_vanilla_libero_spatial_t9_s146,0,policy_fail,696.7,0,6,,6,pi0_pick,17,False,False,acq_point@10(dz/lift 或 check_success)
+9,144,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:11:10_vanilla_libero_spatial_t9_s144,0,policy_fail,1300.7,0,5,11,5,pi0_pick,17,True,True,stable_fg_event
+9,148,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:32:27_vanilla_libero_spatial_t9_s148,0,policy_fail,779.6,0,5,,5,pi0_pick,17,False,False,acq_point@12(dz/lift 或 check_success)
+9,149,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:32:51_vanilla_libero_spatial_t9_s149,0,policy_fail,816.2,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,147,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:31:56_vanilla_libero_spatial_t9_s147,0,policy_fail,875.9,0,5,,5,pi0_pick,17,False,False,acq_point@8(dz/lift 或 check_success)
+9,150,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:45:26_vanilla_libero_spatial_t9_s150,0,policy_fail,596.1,0,,,,,,False,False,fg_absent
+9,152,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:46:31_vanilla_libero_spatial_t9_s152,0,policy_fail,1115.7,0,5,,5,pi0_pick,17,True,True,stable_fg_event
+9,151,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:46:27_vanilla_libero_spatial_t9_s151,0,policy_fail,1168.0,0,5,,5,pi0_pick,17,True,True,stable_fg_event
+9,153,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-01:55:22_vanilla_libero_spatial_t9_s153,0,policy_fail,758.9,0,6,,6,pi0_pick,17,False,False,acq_point@6(dz/lift 或 check_success)
+9,154,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:05:07_vanilla_libero_spatial_t9_s154,0,policy_fail,804.8,0,5,,5,pi0_pick,17,False,False,acq_point@10(dz/lift 或 check_success)
+9,155,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:05:55_vanilla_libero_spatial_t9_s155,0,policy_fail,868.8,0,6,,6,pi0_pick,17,True,True,stable_fg_event
+9,156,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:08:01_vanilla_libero_spatial_t9_s156,0,policy_fail,1288.1,0,,,,,,False,False,fg_absent
+9,157,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:18:32_vanilla_libero_spatial_t9_s157,0,policy_fail,1016.9,0,5,,5,pi0_pick,17,False,False,acq_point@10(dz/lift 或 check_success)
+9,158,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:20:24_vanilla_libero_spatial_t9_s158,0,policy_fail,1128.5,0,6,,6,pi0_pick,17,False,False,acq_point@6(dz/lift 或 check_success)
+9,161,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:39:13_vanilla_libero_spatial_t9_s161,0,policy_fail,760.6,0,4,,4,pi0_pick,21,False,False,acq_point@17(dz/lift 或 check_success)
+9,160,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:35:29_vanilla_libero_spatial_t9_s160,0,policy_fail,1032.2,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,159,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:29:29_vanilla_libero_spatial_t9_s159,0,policy_fail,1413.7,0,4,,4,pi0_pick,17,True,True,stable_fg_event
+9,164,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:53:03_vanilla_libero_spatial_t9_s164,0,policy_fail,748.6,0,5,,5,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,162,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:51:53_vanilla_libero_spatial_t9_s162,0,policy_fail,1131.4,0,5,,5,pi0_pick,17,False,False,acq_point@8(dz/lift 或 check_success)
+9,163,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-02:52:41_vanilla_libero_spatial_t9_s163,0,success,1277.5,0,4,,4,pi0_pick,17,False,False,acq_point@5(dz/lift 或 check_success)
+9,165,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-03:05:32_vanilla_libero_spatial_t9_s165,0,policy_fail,747.2,0,6,,6,pi0_pick,17,True,True,stable_fg_event
+9,166,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-03:10:45_vanilla_libero_spatial_t9_s166,0,policy_fail,672.0,0,,,,,,False,False,fg_absent
+9,167,/workspace/yjx/workspace/RPent/logs/stageR_collect/20261008-03:13:59_vanilla_libero_spatial_t9_s167,0,success,555.2,0,,,,,,False,False,fg_absent

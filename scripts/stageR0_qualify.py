@@ -117,12 +117,8 @@ def run_live(ev, gpu, shared, probe, trial_idx) -> dict:
             qt.boot_to_pre, ev, gpu, shared, outdir,
             label=f"{ev['event_id']}-live{trial_idx}-boot")
     try:
-        ctx["target"] = ctx.get("target") or None
-        # boot_to_pre 的 target 来自其自身 measure;event target 一致性不强制
         cps = []
-        out = srr.exec_trial(ctx, {"target": ctx["target"],
-                                   "prompt": ev["prompt"]},
-                             probe, cps, "LIVE", trial_idx)
+        out = srr.exec_trial(ctx, ev, probe, cps, "LIVE", trial_idx)
         return {"stable": out["stable"], "acquisition": out["acquisition"],
                 "terminated_in_chunk": out["terminated_in_chunk"],
                 "chunk_class": out["chunk_class"], "sha_match": "",

@@ -212,6 +212,13 @@ MEASURE FAILURE PERSISTENCE。
    predict_action_batch(eval)输出,Stage P P0 粒度一致);
 5. R1 无 DEV/TEST 分裂(刻画研究),§8/§10 全部门在 R1 首次执行前冻结。
 
-## 附录 B — deviation 记录(只追加)
+## 附录 B — deviation 日志(只追加)
 
-(暂无)
+- **dev-r1-fix(2026-10-08 05:59)**:R1 首次启动(04:58)存在队列切分 bug ——
+  `stageR_rt.load_events` 的 `ord` 误用 ledger 行号,而 8/24 切分依据 included
+  序号,导致 manifest 32 事件全部标记 R1_COHORT、8 个 R0 DEV 事件(r09/r12)
+  进入执行队列。05:01 发现后停止,实际多跑 4 个 trial(r09 SAME 1-3、
+  r12 SAME 1,均为 DEV 事件,不在最终 cohort 内)。处置:修 `ord` 为 included
+  序号(1..N);删除错误 manifest/events jsonl/rollouts CSV 重新冻结;
+  `stageR_trial_checkpoints.jsonl` 保留 4 条越轨 trial 作审计痕迹(R2 不读)。
+  对判定无影响:cohort 24 事件(r54..r185)的全部 trial 在修复后从零执行。

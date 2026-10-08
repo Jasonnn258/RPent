@@ -107,10 +107,13 @@ def write_manifest(events: list[dict], method: str) -> None:
     rows, jl = [], []
     for ev in events:
         role = "R0_DEV" if ev["ord"] <= DEV_EVENTS else "R1_COHORT"
-        rows.append({**{k: ev[k] for k in
-                        ("event_id", "ord", "task", "seed", "t0", "role",
-                         "n_prefix", "pre_sha16", "post_sha16",
-                         "a_fail_sha16", "prompt")},
+        rows.append({"event_id": ev["event_id"], "ord": ev["ord"],
+                     "task": ev["task"], "seed": ev["seed"], "t0": ev["t0"],
+                     "role": role, "n_prefix": ev["n_prefix"],
+                     "pre_sha16": ev["pre_sha16"],
+                     "post_sha16": ev["post_sha16"],
+                     "a_fail_sha16": ev["a_fail_sha16"],
+                     "prompt": ev["prompt"],
                      "a_fail_shape": "x".join(map(str, ev["a_fail"].shape)),
                      "method": method if role == "R1_COHORT" else "n/a"})
         jl.append({"event_id": ev["event_id"], "task": ev["task"],

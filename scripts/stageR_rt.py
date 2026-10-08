@@ -40,14 +40,18 @@ MAX_INFRA_RETRY = 3
 # ---- 事件装载(collect 序;零结果条件化)-----------------------------------
 
 def load_events() -> list[dict]:
-    """collect ledger 中 included=True 的行,按采集顺序 = 冻结队列序。"""
+    """collect ledger 中 included=True 的行,按采集顺序 = 冻结队列序。
+
+    ord = included 序号(1..N,队列序),不是 ledger 行号 —— R0/R1 的
+    8/24 切分(dev-r1-fix)依据此序;event_id 仍按 ledger 行号命名(冻结)。
+    """
     with open(LEDGER, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     evs = []
     for i, r in enumerate(rows, 1):
         if r.get("included") != "True":
             continue
-        evs.append({"event_id": f"r{i:02d}", "ord": i,
+        evs.append({"event_id": f"r{i:02d}", "ord": len(evs) + 1,
                     "task": int(r["task"]), "seed": int(r["seed"]),
                     "episode_dir": r["episode_dir"], "t0": int(r["t0"]),
                     "note": r.get("note", "")})
@@ -183,9 +187,9 @@ def reconstruct_prefix(ctx: dict, ev: dict) -> dict:
 
 
 def reconstruct(ctx: dict, ev: dict, method: str) -> dict:
-    if method == "SNAPSHOT":
+    if method in ("SNAPSHOT", "SNAP"):        # SNAP = CSV 臂名(R0)
         return reconstruct_snapshot(ctx, ev)
-    if method == "PREFIX":
+    if method in ("PREFIX", "PREFIX_REPLAY"):
         return reconstruct_prefix(ctx, ev)
     raise ValueError(method)
 
@@ -196,10 +200,13 @@ def exec_trial(ctx: dict, ev: dict, actions, cps_out: list,
                arm: str, trial_idx: int) -> dict:
     """一次尝试:candidate 执行 + 单次 hold-through continuation + 双契约。
 
-    返回 {arm, trial, acquisition, stable, terminated_in_chunk,
-    chunk_class, consistency, cand_sha}。
+    target 取自 ctx(重建/boot 后 _finish_base 的运行时测量为准,
+    事件文件不含该字段);prompt 取自事件。返回 {arm, trial,
+    acquisition, stable, terminated_in_chunk, chunk_class, consistency,
+    cand_sha}。
     """
-    out = qt.exec_from_current(ctx, ev["target"], ev["prompt"], actions,
+    target = ctx.get("target") or ev.get("target")
+    out = qt.exec_from_current(ctx, target, ev["prompt"], actions,
                                cps_out, r_cont=1)
     rep = out["reps"][0]
     return {"arm": arm, "trial": trial_idx,
