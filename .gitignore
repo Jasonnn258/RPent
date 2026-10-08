@@ -40,3 +40,4 @@ rpent-logs*.tar.zst
 # never hides the source package rpent/memory/ (see note in commit history).
 /rpent/rpent/
 .claude/
+analysis/stageR_trial_checkpoints.jsonl
