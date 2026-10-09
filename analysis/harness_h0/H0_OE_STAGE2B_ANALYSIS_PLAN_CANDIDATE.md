@@ -43,30 +43,28 @@
 
 在每一个完整事件留一验证折 `e`，对其余 `23` 个事件、SAME 臂全部冻结 K=8 个结果，用固定弱平滑：
 
-[
-hat p_{0,-e}=rac{1+sum_{j
-e e}sum_{t=1}^{8}Y_{j,SAME,t}}
-                       {2+8	imes23}.
-]
+\[
+\hat p_{0,-e}=\frac{1+\sum_{j\ne e}\sum_{t=1}^{8}Y_{j,\mathrm{SAME},t}}{2+8\times23}.
+\]
 
 这里加 1/2 对应 `Beta(1,1)` 先验的平滑预测；**固定的 pooled q** 不从被预测事件的前两次失败更新，因为 M0 假定同质 q。它是弱但合法的预测基线，不可被称为真实世界的充分模型。
 
 ### 3.3 M1 事件异质、条件 iid：Beta-Binomial 候选
 
 对每个事件-臂的潜在重建成功率，假定
-[
-q_{ea}sim Beta(alpha_a,eta_a),quad
-Y_{eaj}|q_{ea}overset{cond}{sim}Bernoulli(q_{ea}).
-]
+\[
+q_{ea}\sim \mathrm{Beta}(\alpha_a,\beta_a),\quad
+Y_{eaj}\mid q_{ea}\overset{\mathrm{cond}}{\sim}\mathrm{Bernoulli}(q_{ea}).
+\]
 
-- **限定候选参数族**：(alpha=mu	au, eta=(1-mu)	au)；
-  (muin{0.05,0.10,ldots,0.95})，
-  (	auin{0.5,1,2,4,8,16,32,64,128})。
-- 对每个留一折，只用另外 23 个训练事件 SAME 臂 8 次结果，最大化按 event 相加的 Beta-Binomial **边际对数似然**，挑选 (mu,	au)；若并列，先选更大的 (	au)，再选较小的 (mu)。网格是**冻结准备候选**，尚未得到审批，更未拟合。
+- **限定候选参数族**：\(\alpha=\mu\tau,\ \beta=(1-\mu)\tau\)；
+  \(\mu\in\{0.05,0.10,\ldots,0.95\}\)，
+  \(\tau\in\{0.5,1,2,4,8,16,32,64,128\}\)。
+- 对每个留一折，只用另外 23 个训练事件 SAME 臂 8 次结果，最大化按 event 相加的 Beta-Binomial **边际对数似然**，挑选 \(\mu,\tau\)；若并列，先选更大的 \(\tau\)，再选较小的 \(\mu\)。网格是**冻结准备候选**，尚未得到审批，更未拟合。
 - 因前两次已失败，留出事件对下一次试次的预测为
-  [
-  hat p_{1,-e}^{(2)}=rac{hatalpha_{-e}}{hatalpha_{-e}+hateta_{-e}+2}.
-  ]
+  \[
+  \hat p_{1,-e}^{(2)}=\frac{\hat\alpha_{-e}}{\hat\alpha_{-e}+\hat\beta_{-e}+2}.
+  \]
   只允许使用留出事件的前两次 outcome 以更新当前事件条件后验，绝不能读取当前事件 Y3..Y8 或完整 E/A/P/U 类型。
 - 若边际拟合不可定义或数值不稳定：标记 `M1_FIT_FAILED`，预定报告失败/弃权；不允许在看到误差后临时换更优模型并当作预注册分析。
 
@@ -75,8 +73,8 @@ Y_{eaj}|q_{ea}overset{cond}{sim}Bernoulli(q_{ea}).
 ### 3.4 预测损失、交叉拟合、聚类不确定性
 
 - **独立训练/评估隔离**：`leave-one-event-out` 共 24 个折；每折以剩余 23 个**完整事件**拟合 M0/M1，留出事件只用于前缀条件与下一次 trial 评价。禁止 trial 行级 random split、用留出事件未来 suffix 选择模型、先看总体 Brier 再调超参。
-- 对有效主风险集事件，(ell_m(e)=(Y_{e,SAME,3}-hat p_{m,-e})^2)，事件级差 (Delta_e=ell_0(e)-ell_1(e))。**唯一主指标候选** (arDelta=operatorname{mean}_{eligible e}Delta_e)，正值代表 M1 平均 Brier loss 较小；不得将已发表 Stage R 的 h(k) 当独立新证据。
-- **拟议不确定性**：在完成 24 折的 out-of-fold 预测后，对**有效 event** 的成对 (Delta_e) 进行 event-level bootstrap（提议 10,000 次，seed=20261007，和既有 Stage R 稳定规则相容），取 2.5%/97.5% 百分位区间；仅作为**小样本探索性不确定性**，避免无条件宣称严格 95% coverage。
+- 对有效主风险集事件，\(\ell_m(e)=(Y_{e,\mathrm{SAME},3}-\hat p_{m,-e})^2\)，事件级差 \(\Delta_e=\ell_0(e)-\ell_1(e)\)。**唯一主指标候选** \(\bar\Delta=\operatorname{mean}_{e\in\mathcal E_{\mathrm{eligible}}}\Delta_e\)，正值代表 M1 平均 Brier loss 较小；不得将已发表 Stage R 的 h(k) 当独立新证据。
+- **拟议不确定性**：在完成 24 折的 out-of-fold 预测后，对**有效 event** 的成对 \(\Delta_e\) 进行 event-level bootstrap（提议 10,000 次，seed=20261007，和既有 Stage R 稳定规则相容），取 2.5%/97.5% 百分位区间；仅作为**小样本探索性不确定性**，避免无条件宣称严格 95% coverage。
 - **拟议方向门**：只有 95% 事件级 bootstrap 区间的下界大于 0，且满足下列风险集/完整性最低条件，才可写 `PREDICTIVE_ADVANTAGE_OBSERVED_IN_RETROSPECTIVE_COHORT`；否则 `INCONCLUSIVE` 或 `NOT_SUPPORTED`，不能将 0 纳入区间的结果说成“证实没有改善”。所有门槛均**尚未冻结**，不自动批准统计检验。
 - **提前完整性门**：如果有效主风险集事件少于候选阈值 **12** 个（为保守报告纪律设定的下限，**不是经功效分析得出的科学阈值**）、或任何正式 R1 主 trial 结果/主键缺失，主比较降级为 `DESCRIPTIVE_ONLY / INCONCLUSIVE`，不能事后换 k 或补新 rollout 来救结果。
 
@@ -87,11 +85,12 @@ Y_{eaj}|q_{ea}overset{cond}{sim}Bernoulli(q_{ea}).
 ## 4. OE1a/D：同源物理 outcome 契约分歧（陪报，不再检验旧 gap）
 
 基于相同合法 R1 cohort 的每臂 8 次试验，保持 primary `Y=STABLE`，secondary `A=ACQ`：
-[
-d_a=E[A-Y | entered_FG,a],quad
-q^{discord}_a=P(A=1,Y=0 | entered_FG,a),quad
-r_a=P(Y=0|A=1,entered_FG,a).
-]
+
+\[
+d_a=\mathbb E[A-Y\mid \mathrm{entered\_FG},a],\quad
+q^{\mathrm{discord}}_a=P(A=1,Y=0\mid\mathrm{entered\_FG},a),\quad
+r_a=P(Y=0\mid A=1,\mathrm{entered\_FG},a).
+\]
 
 - 源码 `stageQ_rt.py` 给出 `stable⇒acquisition`，所以在这批相同试次中 `d_a=q^{discord}_a` **按定义严格相等**，无需为两者做“显著性一致”检验。
 - 允许在**未来另外获批的数据运行**中按 event 聚类给出描述性差值/条件比例与区间（分母为零则 `NOT_ESTIMABLE`），但已发布 `SAME +34.4pp`、`POLICY +37.5pp` 是同一数据的旧结果；不能当作新结果、独立假阳率或 N1 新算法证据。
