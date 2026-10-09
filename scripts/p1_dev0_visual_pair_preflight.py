@@ -128,6 +128,13 @@ def evaluate(out_root: Path, manifest: list[dict]):
             counts[camera + "_verified_pair"] += 1
             counts[camera + "_identical_file_hash"] += int(a["sha"] == b["sha"])
             counts[camera + "_different_file_hash"] += int(a["sha"] != b["sha"])
+    # Preserve a stable exported schema: a failed image pair has zero
+    # verified pairs, rather than omitting the counter entirely.
+    # This is report-only normalization; it never changes the actual QA gate.
+    for camera in CAMS:
+        for suffix in ("pair_attempted", "verified_pair",
+                       "identical_file_hash", "different_file_hash"):
+            counts.setdefault(camera + "_" + suffix, 0)
     n_probed = counts["probe_events"]
     # This gate is only file provenance/geometry and camera-convention
     # feasibility; it is NOT a visual classification or causal experiment gate.
