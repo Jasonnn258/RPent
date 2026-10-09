@@ -33,7 +33,7 @@ Stage 2A 已确认 R1 480 个 CSV 唯一键与 checkpoint 逐键一致，同时�
 | 科学对象 | 只测 `entered stable FALSE_GRASP` 后独立重建 `S_pre` 的未来成功预测，非自然重试/Skill edit | PASS |
 | 唯一主终点 | SAME 臂前两次冻结 STABLE 全败时预测第三次，`Y_{SAME,3}`；不把 E/P 全16试后视标签作为独立真值 | PASS（定义层） |
 | baseline M0 | 留一事件，其余23个 event+当前留出事件已知的**两次失败**，共享 `q` 做 Beta(1,1) 更新 | PASS（公平信息接入） |
-| baseline M1 | 同一 LOEO 训练事件拟合 `Beta(alpha,eta)` 混合率；留出事件只以已发生两失败更新其 `q_e` | PASS（候选模型，假设未经数据检验） |
+| baseline M1 | 同一 LOEO 训练事件拟合 `Beta(alpha,beta)` 混合率；留出事件只以已发生两失败更新其 `q_e` | PASS（候选模型，假设未经数据检验） |
 | 评价 | 完整 event 留一、唯一主指标 Brier loss 的 event-level paired 差 | PASS（设计） |
 | 小样本推断 | 固定 OOF `Δ_e` 的事件 bootstrap **不含模型重拟合不确定性**；明确只能描述，不能作名义显著性/算法通过的证明 | PASS WITH LIMITATIONS |
 | OE1a | ACQ/STABLE 同源、嵌套，作为合同分歧描述；不主张独立假阳率 | PASS |
