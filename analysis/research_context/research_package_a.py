@@ -485,17 +485,25 @@ def outcomes(root, output, strict=True):
         full["primary_descriptive"] = s
         full["primary_cluster_bootstrap_95"] = bootstrap(primary)
         full["primary_untruncated_sensitivity"] = stats([r for r in primary if not r["truncated"]])
-        order_by_ep = defaultdict(int)
+        # Pick order is defined on ALL original picks in each episode.
+        # Defining order only on PRIMARY would relabel second calls as "first"
+        # if the actual first pick was terminal-excluded.
+        original_rank = {}
+        episode_steps = defaultdict(list)
+        for x in records:
+            episode_steps[x["episode_id"]].append(x["step_idx"])
+        for ep, steps in episode_steps.items():
+            for rank, step in enumerate(sorted(steps), start=1):
+                original_rank[(ep, step)] = rank
         per_task = defaultdict(list)
         per_order = defaultdict(list)
-        for r in sorted(primary, key=lambda x: (x["episode_id"], x["step_idx"])):
-            order_by_ep[r["episode_id"]] += 1
-            per_order["first_pick" if order_by_ep[r["episode_id"]] == 1 else "repeat_pick"].append(r)
+        by_id_step = {(x["episode_id"], x["step_idx"]): x for x in eligible}
         for r in primary:
-            matching = next((x for x in eligible if x["episode_id"] == r["episode_id"] and
-                             x["step_idx"] == r["step_idx"]), None)
-            if matching:
-                per_task[str(matching["task"])].append(r)
+            key = (r["episode_id"], r["step_idx"])
+            per_order["first_pick" if original_rank.get(key) == 1 else "repeat_pick"].append(r)
+            match = by_id_step.get(key)
+            if match:
+                per_task[str(match["task"])].append(r)
         full["descriptive_by_task"] = {k: stats(v) for k, v in per_task.items()}
         full["descriptive_by_pick_order"] = {k: stats(v) for k, v in per_order.items()}
         full["complete_case_sensitivity"] = stats([r for r in primary if r["complete_case"]])
