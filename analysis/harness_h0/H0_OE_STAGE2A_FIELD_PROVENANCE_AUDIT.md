@@ -99,6 +99,46 @@ time_like_keys: []
 
 **阶段许可不变**：本地只读 schema 补查属于已获批 Stage 2A；正式预注册冻结、数值估计/检验和 Stage 2B 新内容仍需单独授权。
 
+## 5.1 用户服务器全文件 key-only schema 核验（追加）
+
+> **用户终端回传**：脚本只逐行解析 JSON、统计结构完整性和键名，不分析成功率、任何物理测量数值或新效果指标。本记录只描述用户返回的检查结果，不声称模型直接访问了服务器字节。
+
+```text
+records: 484
+checkpoints: 12641
+malformed: 0
+empty_cps: 0
+record_schemas: {('arm', 'cps', 'event_id', 'trial'): 484}
+checkpoint_schemas: {('check_success', 'eef', 'grip', 'meas', 'obj', 'obs', 'pos', 'terminated'): 12641}
+meas_keys: ['obj_of_interest', 'obs']
+obs_keys: ['akita_black_bowl_1_pos', 'akita_black_bowl_1_quat',
+           'akita_black_bowl_1_to_robot0_eef_pos', 'akita_black_bowl_1_to_robot0_eef_quat',
+           'akita_black_bowl_2_pos', 'akita_black_bowl_2_quat',
+           'akita_black_bowl_2_to_robot0_eef_pos', 'akita_black_bowl_2_to_robot0_eef_quat',
+           'cookies_1_pos', 'cookies_1_quat',
+           'cookies_1_to_robot0_eef_pos', 'cookies_1_to_robot0_eef_quat',
+           'glazed_rim_porcelain_ramekin_1_pos', 'glazed_rim_porcelain_ramekin_1_quat',
+           'glazed_rim_porcelain_ramekin_1_to_robot0_eef_pos',
+           'glazed_rim_porcelain_ramekin_1_to_robot0_eef_quat',
+           'object-state', 'plate_1_pos', 'plate_1_quat',
+           'plate_1_to_robot0_eef_pos', 'plate_1_to_robot0_eef_quat',
+           'robot0_eef_pos', 'robot0_eef_quat',
+           'robot0_gripper_qpos', 'robot0_gripper_qvel',
+           'robot0_joint_pos', 'robot0_joint_pos_cos', 'robot0_joint_pos_sin',
+           'robot0_joint_vel', 'robot0_proprio-state']
+time_field_paths: []
+```
+
+**Gate 更新（严格分维度）**
+
+- `FULL_SCHEMA_PASS`：在扫描到的 484 个非空记录上，顶层字段集合完全一致；全部 12,641 个 `cps` 字典具有同一组一级键；没有 JSON 解析异常/空列表。脚本还检查了 `meas/obs` 的字典键集合。
+- `TIME_NAMED_FIELD_NOT_OBSERVED`：此前脚本仅识别键名中含 `time` 或 `stamp` 的路径，且递归深度受限（原脚本在 `depth>3` 时终止）。本次结果没有此类路径，但**不能排除隐藏在不含 time/stamp 名称的编码值、外部日志或更深结构中的时间信息**。CSV `wall_s` 仍然只是每 trial 耗时。
+- `NO_INDEPENDENT_REFERENCE_IDENTIFIED`：键名显示 sim `check_success`、EEF、物体位姿及 robot proprio，未见显式独立未来 label/合法决策时代理；只能说“**本审计没有找到**”，而非证明不存在任何别处的参考信号。
+- **`KEY_RECONCILIATION_PENDING`（新阻断）**：现有 GitHub 冻结 trial CSV 的 SAME=192、RESAMPLE=192、NATURAL=96，总计 **480** 个事件-臂-试次键；本地 checkpoint JSONL 有 **484** 个记录。相差 4 条，尚未比较本地 JSONL 与 CSV 的 `(event_id,arm,trial)` Counter，**不得猜测**是重复、旧尝试、DEV、INFRA 等何种原因。记录数差异也意味着当前不能宣称“全部记录逐试次配对”。
+- 仍未确认：逐个 checkpoint 的完整时间序列语义、外部 `episode_dir` 中的其他 reference、独立观测合法性、真正的 M2 顺序因果可辨识性。
+
+**立即可做的后续（仍是已获批 Stage 2A 只读结构审计）**：对本地 checkpoint JSONL 与两个 CSV 计算 `(event_id,arm,trial)` 键的 Counter 差，并只打印重复/缺失/额外的键以及计数；不读取或聚合 `stable/acquisition/check_success` 值，不写文件、不运行模型。将结果回填本文后再考虑把 key Gate 置 PASS。
+
 ## 6. 数据读回可复现性与审计纪律
 
 - 本文所有结构计数只对 `(event_id,arm,trial)` 和 `role` 进行索引检查；没有基于 `stable`/`acquisition` 做成功计数、置信区间、性能对照或统计检验。
