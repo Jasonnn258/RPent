@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import p1_dev0_posthoc_audit as qa
-from p1_dev0_manifest import manifest
+from p1_dev0_manifest import manifest, write_sealed
 
 
 def emit(path, records):
@@ -67,6 +67,25 @@ class PosthocAuditTest(unittest.TestCase):
             self.assertEqual(report["science_gate"], "HOLD_NO_ARM_ACTION_CONTRAST")
             self.assertEqual(report["shadow_not_causal"]["n_probe_snapshots_checked"],
                              2)
+
+    def test_manifest_sha_seal_is_required(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            rows = manifest()
+            write_sealed(out, rows, 187)
+            self.assertEqual(
+                qa.verified_manifest(out / "manifest.jsonl",
+                                     out / "manifest.sha256.json"), rows
+            )
+            # A changed assignment after the outcome cannot be substituted.
+            rows[0]["arm"] = "D3" if rows[0]["arm"] != "D3" else "D0"
+            (out / "manifest.jsonl").write_text(
+                "".join(json.dumps(r, ensure_ascii=False, sort_keys=True,
+                                   separators=(",", ":"))+"\n" for r in rows),
+                encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "FROZEN_MANIFEST_SHA_MISMATCH"):
+                qa.verified_manifest(out / "manifest.jsonl",
+                                     out / "manifest.sha256.json")
 
     def test_unknown_manifest_rejected(self):
         with tempfile.TemporaryDirectory() as td:
