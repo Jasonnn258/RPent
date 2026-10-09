@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import sys
 from collections import Counter, defaultdict
 from dataclasses import fields
@@ -155,12 +156,33 @@ def audit(manifest, out_root, policy_path=POLICY):
                 deny_privileged_payload(payload)
                 d2 = choose(LegalEvidence(**{**clean, "arm": "D2"}))
                 d3 = choose(LegalEvidence(**{**clean, "arm": "D3"}))
+                # This is LEGAL proprio recorded in policy_input, not sim
+                # object coordinates/check_success. Aggregate counts only.
+                gap = clean.get("post_gripper_gap")
+                pre_z, post_z = clean.get("pre_eef_z"), clean.get("post_eef_z")
+                finite_gap = type(gap) in (int, float) and math.isfinite(gap)
+                finite_dz = (type(pre_z) in (int, float) and
+                             type(post_z) in (int, float) and
+                             math.isfinite(pre_z) and math.isfinite(post_z))
+                probe_legal = (by["probe"][0].get("post_legal") or {})
+                if probe_legal:
+                    # Detect inconsistent value forwarding from probe record
+                    # into the policy_input actually used in DEV0.
+                    if (probe_legal.get("gripper_gap") != gap or
+                        probe_legal.get("eef_z") != post_z):
+                        event_quality["probe_vs_policy_input_mismatch"] += 1
+                else:
+                    event_quality["probe_legal_not_recorded"] += 1
                 shadow_rows.append({
                     "task": task, "observed_arm": arm,
                     "actual_decision": by["decision"][0].get("decision"),
                     "d2_shadow": d2.decision, "d3_shadow": d3.decision,
                     "d2_rationale": d2.rationale_code,
                     "d3_rationale": d3.rationale_code,
+                    "gap_finite": finite_gap,
+                    "gripper_closed_by_rule": finite_gap and gap < .06,
+                    "dz_finite": finite_dz,
+                    "eef_delta_ge_0p03": finite_dz and post_z - pre_z >= .03,
                 })
             except (TypeError, ValueError, KeyError) as exc:
                 event_quality["shadow_unavailable_or_invalid"] += 1
@@ -216,6 +238,19 @@ def audit(manifest, out_root, policy_path=POLICY):
             "d3_legal_heuristic_decision_counts": dict(shadow_d3),
             "different_D2_vs_D3": sum(
                 r["d2_shadow"] != r["d3_shadow"] for r in shadow_rows),
+            "diagnostic_not_physical_truth": {
+                "finite_gripper_gap": sum(r["gap_finite"] for r in shadow_rows),
+                "post_gap_lt_0p06": sum(r["gripper_closed_by_rule"] for r in shadow_rows),
+                "finite_eef_z_delta": sum(r["dz_finite"] for r in shadow_rows),
+                "eef_z_delta_ge_0p03": sum(r["eef_delta_ge_0p03"] for r in shadow_rows),
+                "d2_continue_d3_retry": sum(
+                    r["d2_shadow"] == "CONTINUE_CAUTION" and
+                    r["d3_shadow"] == "RETRY" for r in shadow_rows),
+                "probe_vs_policy_input_mismatch": event_quality[
+                    "probe_vs_policy_input_mismatch"],
+                "probe_legal_not_recorded": event_quality[
+                    "probe_legal_not_recorded"],
+            },
             "note": "Shadow decisions use existing legal observations only; "
                     "actions and future outcomes are NOT counterfactuals.",
         },
