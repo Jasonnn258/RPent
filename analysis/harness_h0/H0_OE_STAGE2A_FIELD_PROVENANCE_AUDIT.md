@@ -139,6 +139,45 @@ time_field_paths: []
 
 **立即可做的后续（仍是已获批 Stage 2A 只读结构审计）**：对本地 checkpoint JSONL 与两个 CSV 计算 `(event_id,arm,trial)` 键的 Counter 差，并只打印重复/缺失/额外的键以及计数；不读取或聚合 `stable/acquisition/check_success` 值，不写文件、不运行模型。将结果回填本文后再考虑把 key Gate 置 PASS。
 
+## 5.2 CSV ↔ checkpoint 双向键对账与 DEV 来源归类（最终补审）
+
+> 2026-10-09 用户再次在服务器执行**只读** Counter 双向差集检查；输出仅为事件/臂/试次标识、计数、重复键数量、臂内记录数，**未读取/计算稳定成功标签、物理状态、试次性能**。
+
+```text
+CSV records: 480
+Checkpoint records: 484
+Unique CSV keys: 480
+Unique checkpoint keys: 484
+Checkpoint arm counts: {'NATURAL': 96, 'RESAMPLE': 192, 'SAME': 196}
+Extra checkpoint keys:
+('r09', 'SAME', 1) count: 1
+('r09', 'SAME', 2) count: 1
+('r09', 'SAME', 3) count: 1
+('r12', 'SAME', 1) count: 1
+Missing checkpoint keys: (none)
+Duplicate checkpoint keys: (none)
+extra_records: 4
+missing_records: 0
+duplicate_key_count: 0
+```
+
+**冻结 manifest 独立交叉核对（GitHub `analysis/stageR_manifest.csv`）**：
+
+| event_id | ord | role | 额外 SAME trial |
+|---|---:|---|---|
+| `r09` | 1 | `R0_DEV` | 1, 2, 3 |
+| `r12` | 2 | `R0_DEV` | 1 |
+
+- **`R1_COHORT_KEY_JOIN_PASS`**：CSV 的全部 480 个唯一键都在 checkpoint 中各存在恰好一次；checkpoint 多出的四键**全部属于冻结 manifest 的 DEV 事件**，均不属于 R1 cohort。按冻结 manifest `role=R1_COHORT` 过滤的 checkpoint 键集与正式 R1 CSV 键集一致，可作为**未来获批离线研究的结构资格**。必须坚持冻结事件 role/ord 分离，而不是根据 event_id 数字大小或事后成功率选样本。
+- **`EXTRA_DEV_ROWS_IDENTIFIED_4`**：混合 JSONL 的四条额外记录在**事件角色层面**已被识别为 DEV 事件数据。它们仍留在原始 JSONL，不能删除、重写、自动聚合进 R1 的 24-event 数据。
+- **`DEV_WRITE_ORIGIN_NOT_VERIFIED`**：为何 DEV 事件的这四次 SAME 记录进入 R1 checkpoint 文件仍未确定。现有冻结源码 `scripts/stageR1_run.py:153-157` 在单个 trial 内**先追加 checkpoint JSONL**，而 `:183-184` 随后写 CSV，这说明二者并非原子落盘、存在脱配风险；但**不能仅凭该写入顺序证明**这四行由中断、某次 DEV pilot 或历史脚本生成。冻结 `stageR0_qualify.py` 主要维护其独立 R0 CSV，不足以归因这些行的生成者。
+- 原先 §5.1 的 `KEY_RECONCILIATION_PENDING` 属于**检查前的历史状态，已被本节的新审计结论取代**；不会因此修改旧报告或篡改原始记录。
+
+**本轮最终状态（分维度）**：
+`FULL_SCHEMA_PASS / R1_COHORT_KEY_JOIN_PASS / EXTRA_DEV_ROWS_IDENTIFIED_4 / DEV_WRITE_ORIGIN_NOT_VERIFIED / NO_INDEPENDENT_REFERENCE_IDENTIFIED`。
+
+这项结论只关闭 Stage 2A 的**样本结构对账阻断**；并不证明原始 checkpoint 的物理因果真实性、独立物理 reference、时间序列因果、预测模型效果或 Runtime/Evolution 权限。OE1b、M2 实际时序因果与在线授权继续 HOLD；Stage 2B、正式预注册冻结、离线统计仍需用户单独批准。
+
 ## 6. 数据读回可复现性与审计纪律
 
 - 本文所有结构计数只对 `(event_id,arm,trial)` 和 `role` 进行索引检查；没有基于 `stable`/`acquisition` 做成功计数、置信区间、性能对照或统计检验。
