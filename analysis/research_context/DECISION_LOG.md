@@ -218,6 +218,15 @@
 - **下一步**：复跑一次无 GPU 的视觉合成测试验证代码修复，不再重复 5/5 已通过的配对统计；研究上如果要继续，应使用这些已有合法 RGB 做独立的对象-爪口可辨识性分析，既不能用模拟器物体世界坐标当在线特征，也不能借此启动新的 rollout 或修改冻结结果。
 - **授权**：历史 DEV0 Stage CLOSED；独立未来在线 P1 新实验需要新阶段 L2，Stage R §36 原 Hard STOP/S1 ON_HOLD 继续。
 
+## D-023 · RGB 对照图生成已实测通过，切换到视觉可辨识性离线审阅
+
+- **日期/来源**：2026-10-09，用户在服务器 `03fa204` 对视觉配对+图板两个模块联合执行 6 项合成测试，6/6 全通过（0.607s）；执行 `scripts/p1_dev0_visual_review.py` 报 `PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`、`n_boards=5`，产物在私有 `artifacts/p1_dev0/visual_review`。
+- **已经证明**：5 张 Agentview/Wrist 前后及差分拼图的本地生成流程实际运行；修复后的 zero-counter 测试已通过；Wrist Post 的纵向翻转处理可在合成测试中正确对齐既有源保存约定。既有 Stage R 与 DEV0 原始数据未被重跑或改写。
+- **未证明**：未直接查看私有图像内容，没有物体/夹爪语义分割、目标相对夹爪位置标签、持握真值、视觉分类准确率或证据驱动动作的收益；差分图受夹爪自身运动、遮挡影响。
+- **下一阶段决策**：不再开展文件级重复审计。增加单个**离线本地 HTML 可辨识性审阅器** `scripts/p1_dev0_visual_annotation.py`（代码与纯合成测试已提交，尚未执行服务器单测）；通过自包含且离线的审阅页检查目标/夹爪是否可见、遮挡程度和主观视觉关系，可以保留 UNKNOWN。仅生成/汇总本地审阅注记；**任何人类视觉标签都不是独立 sim truth**，不进入 Runtime/Evolution。
+- **边界**：旧 DEV0 已 CLOSED，不补跑 3 个预算跳过 episode。图像、内嵌图片的本地 HTML 和标注留在 gitignored `artifacts/`，不自动上传 GitHub/外部服务。新仿真或 Runtime 对照仍需独立有界 L2 授权。
+- **当前 Gate**：`VISUAL_RGB_BOARD_SERVER_PASS / OBSERVABILITY_REVIEW_PENDING / PHYSICAL_LABEL_UNVALIDATED / L2_HOLD`。
+
 ## 新决策追加模板
 
 ```markdown
