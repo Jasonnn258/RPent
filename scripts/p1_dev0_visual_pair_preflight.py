@@ -117,8 +117,10 @@ def evaluate(out_root: Path, manifest: list[dict]):
             a, b = artifact_status(pre.get(before_key)), artifact_status(post.get(after_key))
             counts[camera + "_pair_attempted"] += 1
             if not a["ok"] or not b["ok"]:
-                causes[camera + "_pre_" + a["why"]] += int(not a["ok"])
-                causes[camera + "_post_" + b["why"]] += int(not b["ok"])
+                if not a["ok"]:
+                    causes[camera + "_pre_" + a["why"]] += 1
+                if not b["ok"]:
+                    causes[camera + "_post_" + b["why"]] += 1
                 continue
             if a["geometry"] != b["geometry"]:
                 causes[camera + "_geometry_mismatch"] += 1
@@ -129,9 +131,13 @@ def evaluate(out_root: Path, manifest: list[dict]):
     n_probed = counts["probe_events"]
     # This gate is only file provenance/geometry and camera-convention
     # feasibility; it is NOT a visual classification or causal experiment gate.
-    gate = ("PAIRED_ASSETS_COMPLETE"
-            if n_probed > 0 and all(counts[c + "_verified_pair"] == n_probed for c in CAMS)
-            else "HOLD_MISSING_OR_UNVERIFIED_ASSETS")
+    if (counts["with_event_file"] != 21 or counts["triggered"] != 6
+            or n_probed != 5):
+        gate = "HOLD_COHORT_ACCOUNTING_MISMATCH"
+    elif all(counts[c + "_verified_pair"] == n_probed for c in CAMS):
+        gate = "PAIRED_ASSETS_COMPLETE"
+    else:
+        gate = "HOLD_MISSING_OR_UNVERIFIED_ASSETS"
     return {
         "protocol": "P1_DEV0_VISUAL_PAIR_PREFLIGHT_V1",
         "gate": gate,
