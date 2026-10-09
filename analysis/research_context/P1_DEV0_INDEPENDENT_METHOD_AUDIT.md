@@ -4,6 +4,36 @@
 >
 > 事后审计辅助工具：`scripts/p1_dev0_posthoc_audit.py`（只读），合成测试：`analysis/research_context/test_p1_dev0_posthoc_audit.py`。任何后验 shadow 比较不得用于反向修改冻结指标或冒充新实验。
 
+## 2026-10-09 聚合诊断 v2 实际服务器回传：机制已定位
+
+用户在同一服务器运行增强版 `scripts/p1_dev0_posthoc_audit.py` 和合成测试，**4/4 OK**，`policy_sha_match=true`、`science_gate=HOLD_NO_ARM_ACTION_CONTRAST`。冻结 manifest 24 条中 21 条有事件，6 个触发，其中 5 个 probe 后合法观测的**新增聚合实测**：
+
+| 诊断字段 | 实际结果 | 解释 |
+|---|---:|---|
+| `finite_gripper_gap` | 5 | 均有效 |
+| `post_gap_lt_0p06` | **5** | D2 静态闭合条件全满足 |
+| `finite_eef_z_delta` | 5 | 均有效 |
+| `eef_z_delta_ge_0p03` | **0** | D3 新增 EEF 高度条件全不满足 |
+| `d2_continue_d3_retry` | **5** | 已观察合法输入上策略确有规则分歧 |
+| `probe_vs_policy_input_mismatch` | **0** | 当前所核对的 `post_legal.gripper_gap/eef_z` 与真正策略输入相符 |
+| `probe_legal_not_recorded` | **0** | probe 合法本体记录均存在 |
+
+**裁决：原“夹爪全开”是报告解释错误；D2/D3 分歧是合法观测之上的冻结规则失配，非 probe→policy 字段传递错误。** 现有 D3 把维持 EEF 位姿的 probe 中 EEF 上升 3cm 当作正面验证必要条件，导致这五个样本全部 `RETRY`。但 `gap<0.06` 不能识别目标是否被真实夹持；因此 **D2=CONTINUE 和 D3=RETRY 都没有可信物理真值支持**，绝不后验将两者之一认作正确。
+
+### 后续新增的源码级视觉证据边界
+
+已核对 `rpent/utils/p1_dev0.py` 和 `robots/libero/tools.py:dump_state`：
+
+- `trigger.pre_images` 有 `policy_image_agentview_low` 和 `image_wrist_low` 路径/哈希，`probe.post_frames` 有 `probe_agentview`、`probe_wrist`；旧 DEV0 已保存原始可见的图像**引用**，但文件在当前服务器是否仍存在尚需核验。
+- `pre policy_image_agentview_low` 与 `post probe_agentview` 均由 `primitives._last_obs["main_images"]` 写出，具有相同的 policy image 存储约定；仍需考虑时刻/场景差异。
+- **关键相机变换差异**：`dump_state` 将 `raw_obs()["robot0_eye_in_hand_image"][::-1]` 写为 `pre image_wrist_low`；`_run_probe` 将 `raw_obs()["robot0_eye_in_hand_image"]` **未经翻转**写为 `post probe_wrist`。未经纵向坐标翻转就做 wrist 图像差分会得到错误的“物体移动”信号。
+- 已提交只读 `scripts/p1_dev0_visual_pair_preflight.py` 与合成测试（**提交时尚未执行实际服务器测试/图像扫描**），它验证 21/6/5 冻结事件数量、两视角 pre/post 产物哈希和 PNG 头尺寸，并提示 wrist 需上下对齐。输出仅汇总 Gate，不上传任何原图或私有路径。
+- **图像资产齐全仍不等于具备可靠持握监督标签**：像素变化可能来自手爪运动/遮挡/镜头朝向，不得用裸差分直接作为 outcome；下一正式研究须独立验证真正的持握信号（RGB 物体相对 gripper 位移、遮挡/抓持姿态与合法状态）并严格隔离 audit truth。前瞻验证/动作收益需新的 L2。
+
+**更新 Gate：`V2_DIAGNOSTIC_CONFIRMED / RULE_SEMANTIC_MISMATCH_IDENTIFIED / VISUAL_PAIR_DATA_AVAILABILITY_UNTESTED / NO_NEW_ROLLOUT_AUTHORIZED`**。
+
+---
+
 ## 2026-10-09 服务器事后审计回传：重大解释勘误（优先于本文旧推断）
 
 用户在原服务器上执行 `test_p1_dev0_posthoc_audit.py`：**4/4 synthetic tests OK**；然后运行 `scripts/p1_dev0_posthoc_audit.py`，回传 `science_gate=HOLD_NO_ARM_ACTION_CONTRAST`，`policy_sha_match=true`。数据级汇总：manifest 24、事件文件 21、触发 6、未触发 15、无事件 3（t9_s1006/s1007/s1008，Runner 报告为预算跳过；不能由 event 缺失本身推断原因）。六个真实动作均为 RETRY。4 次 FIXED_HORIZON overshoot [3,23,8,18]，2 次 EPISODE_END shortfall [120,70]；GPU 22215.374972105026 s，超过原 21600 s 硬额度 **615.3749721050262 s**，`hard_budget_pass=false`。
