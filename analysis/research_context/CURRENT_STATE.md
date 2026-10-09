@@ -12,9 +12,11 @@
 
 > **P1-DEV0 最新独立方法复审（2026-10-09）**：当前 GitHub HEAD 已含运行报告（21/24 episodes，6 triggers，0 D2 arm 触发，6/6 实际决策/动作均为 RETRY）。代码审查进一步确认 Hook 实际为**工具返回交付 Planner 之前的 Harness 拦截**；D3 只判断新图像文件存在+proprio 而未分析像素；所谓 6/6 审计只有 4 次在 H=200 后首技能边界取样，另外 2 次提前结束，固定窗口并未统一；6.17 GPU·hour 越过预算硬上限 0.17h。原 analyzer 的 `no_events_infra` 混合无事件与 3 个预算跳过项。已提交 `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md`、`scripts/p1_dev0_posthoc_audit.py` 与合成测试，**新事后脚本还未在服务器执行，不能提前声称该脚本 PASS**。P1-DEV0 **阶段 CLOSED，禁止补跑剩余 3 格**；只允许继续已有数据只读复核；后续正式 P1 需新独立预注册/有界 L2 授权。
 
+> **P1-DEV0 服务器后验审计结果（2026-10-09，用户回传）**：4/4 synthetic tests OK，原版 `p1_dev0_posthoc_audit.py` 的 `science_gate=HOLD_NO_ARM_ACTION_CONTRAST`、冻结 policy 哈希匹配。24 分配/21 真实事件/6 触发/15 未触发/3 无事件（原 runner 归因为预算跳过），6/6 真实决定=RETRY。**影子决策重大新发现：5 个 probe 后合法观测，D2 静态规则 5/5 CONTINUE、D3 合法启发式 5/5 RETRY，二者分歧 5/5；没有影子动作的真实后续 outcome，不能推出方法收益。**该事实与原执行报告所写 5 次 `post_gap>=0.06` 相矛盾；已于 `P1_DEV0_EXECUTION_REPORT.md` 和 `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md` 追加更正，不改冻结数据。H=200 后边界审计4次(+3/+23/+8/+18)，提前结束2次(早120/70步)。GPU=22215.37s、超过21600s上限615.37s，hard budget FAIL。**后续聚合诊断增强版代码已提交但未实测**：`scripts/p1_dev0_posthoc_audit.py` 加 probe→policy 传值、gap 与 EEF dz 阈值核验，须只读执行验证。P1-DEV0 CLOSED，不补跑，正式 P1 新 L2 HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_CLOSED / P1_DEV0_21_OF_24_EXECUTED_STAGE_CLOSED / ENGINEERING_PARTIAL_GO / ZERO_ACTION_CONTRAST / GPU_HARD_BUDGET_OVER / POSTHOC_AUDIT_READY_UNRUN / FURTHER_L2_HOLD`**
+**`PACKAGE_A_CLOSED / DEV0_21_OF_24_CLOSED / POSTHOC_ORIGINAL_PASS_4_OF_4 / PRODUCTION_ALL_RETRY / SHADOW_D2_CONTINUE_5_OF_5_D3_RETRY_5_OF_5 / CONTRADICTORY_REPORT_ERRATUM / GPU_HARD_BUDGET_FAIL / DIAGNOSTIC_V2_UNRUN / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -37,6 +39,7 @@
 | **P1 v1.1** | **已修正 H-P1m 对“异质性 ⇒ 不可交换/Conformal 失效”的错误推断**；要求合法在线前缀定义风险组、完成声明覆盖/弃权约束、DEV 锁定最强基线。A0 与 C 的结果构念不同 | 研究设计仅为候选；真实闭环实验仍 HOLD(新预注册+授权+§36 局部解除) |
 | **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%；export QA 26/26 PASS | 用户服务器回传，独立的字段/数据行工程核验已跑；详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 |
 | **P1-DEV0 已执行** | 21/24 新 episode(3 个 SKIPPED_GPU_BUDGET)、6 触发全审计、0 hook_error/0 censor/0 infra;D1 遮蔽、特权键隔离、事件外置全部核验通过;判定 GO(工程)/HOLD(确认性) | 触发率 6/21 且 t9 集中(t5 0/8)、D2 臂 0 触发未生产暴露;详见 `P1_DEV0_EXECUTION_REPORT.md` |
+| **DEV0 posthoc（用户服务器回传）** | 4/4 tests OK;24 分配/21 事件/6 触发;6/6 实际 RETRY;5 probe 影子 D2=CONTINUE 5/5、D3=RETRY 5/5;GPU 超限 615.37s;H 时窗 4 后取+2提前终局 | 规则分歧≠反事实收益；原报告“gap 全开”已勘误。增强版只读观测聚合核验待服务器运行 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -58,7 +61,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. 服务器只读运行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_dev0_posthoc_audit.py' -v` 和 `python3 scripts/p1_dev0_posthoc_audit.py --out-root /workspace/yjx/rpent_data/p1_dev0`，查看归档分母、物理窗口差异、实际策略分支与有版本锁的离线 shadow 对照。**不调用仿真、不碰冻结 event 与 A0 outcome 文件。**
+1. **原后验审计已完成（4/4 OK）**：影子分歧 5/5（D2 继续、D3 重试）与原执行报告的 gap 断言不一致。下一步仅运行增强后的同一个只读审计器（已加入 probe→policy 原始合法测量一致性、gripper gap 与 EEF dz 条件的聚合检查），用新输出确认冲突来源；不触碰冻结事件/原分析文件、不启动仿真。
 2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
 3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
 
