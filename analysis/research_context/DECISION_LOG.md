@@ -66,6 +66,30 @@
 - **不能推出什么**：文档契约完成 ≠ 数据集已发布；无独立外部验证、无在线 Harness 收益、无新算法创新。
 - **重新开启条件**：完成字段可见性与标签来源审查、数据使用授权、按 event/episode 隔离的评测协议，再考虑 v0.1 实际物化；P1 要另立预注册和实验授权。
 
+## D-009 · Stage2J-v2 候选交付:B1/B2/B3 全部解决,设计层重获冻结资格,执行仍 HOLD
+
+- **日期/来源**:2026-10-09;基线 `4d155b9`;Stage2K(`2b3710e`)B1-B3;Stage2J v1 `762bf1a`(原文保留不改写)。
+- **状态**:DESIGN_COMPLETE(候选);冻结与执行各自另行批准。
+- **决定**:v2 以三项结构性修订解决 Stage2K 判定的阻断——
+  1. **B1**:参考改三值状态机 POSITIVE/NEGATIVE/UNKNOWN + 预定义完整应观测点集 Q(= chunks_used+1 个点,逐点 VALID/MISSING/NONFINITE 分记);POSITIVE 由单有效真点即sound(存在性单调),NEGATIVE 需 Q 完备——不对称是构造性 sound 而非调参;UNKNOWN 不进 2×2 主表、率单独报;完全案例敏感性表并列;不假设 MAR。
+  2. **B2**:勘误登记 v1 `result.episode_truncated` 字段不存在(pick 返回字典 tools.py:254-272 无此键);截断唯一合法来源=states.json 步级顶层(dump_state tools.py:1147,且经 view_driver_state :1621 在线投影=合法可见协变量);对齐断言 A1(result↔states 终局旗一致)/A2(join)/A3(|Q|=chunks_used+1);PRIMARY 语义修正为"flag=True⇒运动学锁存;flag=False⇒退出前未触发锁存(预算耗尽或截断两路径)",撤回 v1"纯运动学"过强断言;截断 NEGATIVE 申报为删失负例,PRIMARY_UNTRUNCATED 敏感性子集预登记。
+  3. **B3**:主交付从单一 raw concordance 改为六件套普查包(M0 类别结构先行/M1 全 2×2+UNKNOWN 列/M2 双条件风险 R_accept 与 R_miss 各两变体/M3 一致率+双常数基线+κ/M4 聚类区间/M5 宣称语言冻结);消费者条件伴报 C1(P1 立项时主指标切向 R_accept)**现在预登记**,杜绝读数后挑指标;可估性门 E1-E4。
+- **证据**:`analysis/harness_h0/H0_OE_STAGE2J_V2_A0_PREREG_CANDIDATE.md` + 源码行号级复核。
+- **不能推出什么**:设计完成 ≠ 已冻结/已执行;235 结构 PASS ≠ 类别/字段资格;FGONLY 仍是研究代理非接触/保持/任务 oracle。
+- **重新开启条件**:用户批准冻结(独立于执行);执行另需检查 B + outcome 读取双重授权。
+
+## D-010 · EERD 字段级契约补全 + P1 最小可证伪问题 + 方向分级与文档轮次封顶
+
+- **日期/来源**:2026-10-09;EERD 契约 `70d57ba` + 本轮配套规范;P1 问题文档;Stage2K B4 三分解。
+- **状态**:研究设计 GO(文档);物化/打标签/闭环实验 HOLD。
+- **决定**:
+  1. **EERD**:新增字段级来源表(A 子集 17 行/B 子集 9 行,逐字段文件→路径→产码行号→语义→可见性→质量规则)、三操作视图权限矩阵(online_eligible/audit_only/reconstruction_metadata,物理分离+黑名单校验)、样本分组(A 按 episode、B 按 parent_failure_event_id、cross_dataset_provenance_group 防同源泄漏——24 R1 事件源 episode 在 187 内)、物化前置验收门 G-QA-1..8(join/对齐/完整性账本先行/视图隔离/假名化/源哈希/schema 阶段零 outcome 读/标签纪律)。
+  2. **P1**:冻结最小可证伪假设 H-P1(等预算错误完成率差)+ 机制定位子假设 H-P1m(收益须集中于持续性失败子群=exchangeability 失配处)+ 五对照(C-1 无验证/C-2 固定间隔/C-3 始终/C-4 静态阈值含 conformal/C-5 随机同时机)+ 证伪条件预写死;与 CheckVLA/Zetta/RegenHarness 的机制差异全部转为可检验对照,无差异则如实让渡;C 子集字段需求与"不可从 A/B 构造"理由表(Stage2G D2 合法性 vs 协议固定性不可兼得)。
+  3. **方向分级**:理论充分四项(PAEG/Stage2J 设计/EERD/P1 问题)进入**文档轮次封顶**——无新数据或外部实质缺陷不再修订;需实验两项(A0 数值普查、C cohort+P1 闭环);停止五项(A/B 上新回顾性代理、C 前机制变体细化、任何在线接线、S1 重开、以及"用户不授权 C"情形下 P1/P2 收官为可接受终态)。
+- **对照/替代**:Stage2K 建议的"完全案例 or 三值"取舍→v2 双轨(三值主+完全案例敏感性);P1 基线强度取 conformal 为最强静态形态而非稻草人。
+- **不能推出什么**:文档 ≠ 数据集已发布;P1 问题可证伪 ≠ 机制有效;分级不含任何执行授权。
+- **重新开启条件**:用户对 A0/C/收官三选一;§36 局部解除只能随 P1 预注册整体批准。
+
 ## 新决策追加模板
 
 ```markdown
