@@ -92,3 +92,41 @@ Potential strong baselines: immediate retry, always verify, fixed/scheduled veri
 - **FUTURE L2**: prospective D2 verification/cost study requires a single new bounded protocol, budget and user approval.
 
 **Status: `PACKAGE_A_A0_SERVER_PASS / MISMATCH_CORRECTED_SEMANTICS / EERD_INTERNAL_DATA_REPORTED_CREATED / FULL_DATASET_QA_PENDING / P1_FUTURE_L2_HOLD`.**
+
+## 6. Export QA final server receipt (user-reported)
+
+**Date:** 2026-10-09. User performed `git pull --ff-only` on the research branch (fast-forward to `741278a`) and then executed:
+
+```bash
+python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a
+```
+
+The terminal reported:
+
+```json
+{
+  "gate": "PASS",
+  "checks_passed": 26,
+  "checks_total": 26,
+  "failures": [],
+  "counts": {
+    "A_pick_rows": 235,
+    "A_primary_rows": 206,
+    "A_label_unknown": 0,
+    "B_trials": 480,
+    "B_parent_events": 24
+  },
+  "conventional_confusion": {
+    "TP": 101,
+    "FP": 2,
+    "FN": 56,
+    "TN": 47
+  }
+}
+```
+
+**Gate disposition: `PACKAGE_A_CLOSED_INTERNAL_V01`.** The pre-existing source files, sealed A0 result file, private data exports, and frozen Stage R artifacts are untouched by this Git documentation update. The export auditor writes only supplemental `PACKAGE_A_EXPORT_QA.json` and `A0_CORRECTED_CONFUSION_DISPLAY.md` into the gitignored private output directory.
+
+**Meaning of QA PASS:** Exported rows, sample IDs, A/B joins, whitelisted/blacklisted field names, flag-reference mapping, 24-event arm allocation (8 SAME + 8 RESAMPLE + 4 NATURAL) and a script checksum consistency check passed. Some checks compare against already-reported expected numbers, so this **does not constitute independent statistical replication**; field-name checks alone do not mathematically prove every possible value-based privileged-information leakage is absent. There is no added validation of physical ground-truth independence, across-task generalization, or downstream Harness decision benefit.
+
+**Authorized next phase:** Research Package A L1 work is complete. P1 prospective C cohort and online verification/recovery research remain L2-HOLD pending separate stage-level scope/experiment approval. No further A0 reruns or document-only audit cycles are required by default.
