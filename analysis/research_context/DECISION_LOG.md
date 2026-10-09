@@ -188,6 +188,17 @@
 - **授权决定**：原 DEV0 L2 范围耗尽并 CLOSED；本轮不补跑 3 格、不复活 Stage R，不批准新实验。下一步只有在新的独立 L2 研究包里确定真实可辨识证据、预交付工具决策 boundary、hard-budget watchdog、任务分层与独立未来标签，才可执行新 cohort。
 - **来源边界**：复审为源码/已提交报告层级，不能替代读取完整私有轨迹的额外复核；如真实事后工具与报告冲突，提交证据后重新审议。
 
+## D-020 · 5 个真实 probe 观测上的策略影子分歧、原执行报告夹爪状态勘误
+
+- **日期/证据**：2026-10-09，用户在服务器执行 `test_p1_dev0_posthoc_audit.py`（4/4 OK）和第一版 `scripts/p1_dev0_posthoc_audit.py`；返回 `policy_sha_match=true`、`science_gate=HOLD_NO_ARM_ACTION_CONTRAST`。该输出为用户实测服务器的脱敏结构结果；本对话没有直接读取原始 event JSONL。
+- **完整分母**：24 manifest，21 个实际有事件的 episode，6 trigger、15 观测内未触发，缺事件三格 `p1dev0_t9_s1006/s1007/s1008`。原 runner 报告判其为预算跳过，单靠事件文件缺失不能推断 infra 或 budget；原审计器保持 `UNDETERMINED_FROM_EVENT_FILE_ALONE` 是正确的。
+- **真实结果**：6/6 实际 decisions=RETRY、actions=RETRY。H=200 审计4条在首技能边界 H+{3,23,8,18}；2 条早于 H 共{120,70} 步。GPU `22215.374972105026s`，比 `21600s` 上限多 `615.3749721050262s`，`hard_budget_pass=false`。
+- **新增决定性观察**：冻结 Policy SHA 一致，`n_probe_snapshots_checked=5`，影子 `D2:CONTINUE_CAUTION=5/5`、`D3:RETRY=5/5`，**同一合法 probe 后输入策略分歧 5/5**。这是候选策略的**行动规则支持/分歧证据**，不是已实际执行的反事实动作/结局；D2 真实试验臂仍未触发，无法比较 physical outcome。
+- **勘误与解释撤回**：旧 `P1_DEV0_EXECUTION_REPORT.md` §5.1 的“5 次 probe 后 `post_gap>=0.06`，物理上确实没抓住”与冻结策略 D2 的`gap<0.06→CONTINUE` 严格不相容，且原报告 t3_s1002 样例已记 `post_gap=0.0025`。**撤回“5 次全开”与“物理上确实没抓住”的结论**；不得把闭合指距代理当真实抓持。对旧执行报告和独立方法审计只追加显式更正，不修改原始 run/event/策略。
+- **待验证的机制**：D3 的继续条件还要求 `post_eef_z-pre_eef_z≥0.03`，而物理 probe 定义为保持 EEF 位姿；shadow D3 全 RETRY 可能因这一额外门槛（也可能存在非有限值或合法取值不一致）。已增强**只读**事后审计器，聚合计数 `gap<.06`、EEF dz≥.03、有无 NaN/Inf，以及 `probe.post_legal` 与 `decision.policy_input` 的一致性，配套合成测试。**增强版未在服务器运行**，此处不预断数字。
+- **科研含义**：后续需要验证可区分“仅夹爪闭合 vs 真持握”的合法新证据，避免 D2 因主动夹紧形成系统性假继续，也避免 D3 用不相干的 EEF dz 条件形成系统性假重试。正式方法实验只能在独立新 L2 方案、硬预算与未来物理 outcome 下开展；当前 DEV0 CLOSED，不补跑 3 格、不调冻结阈值。
+- **验收状态**：`POSTHOC_V1_SERVER_PASS / PHYSICAL_EVIDENCE_INCONSISTENCY_IDENTIFIED / AGGREGATE_DIAGNOSTIC_V2_UNRUN / P1_NEW_L2_HOLD`。
+
 ## 新决策追加模板
 
 ```markdown
