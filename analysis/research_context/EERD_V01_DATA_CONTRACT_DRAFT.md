@@ -2,6 +2,7 @@
 
 > 2026-10-09 | **DRAFT / SCHEMA-ONLY / ZERO DATA EXPORT / NO OUTCOME READ**。
 > 基于 Stage2I 服务器回传、Stage2J 候选、Stage2K 独立审查、PAEG `METHOD_SPEC.md` v0.2.2。
+> **配套规范(2026-10-09 追加)**:`EERD_V01_FIELD_PROVENANCE_QA_SPEC.md` — A/B 子集字段级来源表、三视图证据权限矩阵、样本分组/跨子集防泄漏、物化前验收门 G-QA-1..8。本文不因配套规范改动而回写。
 > 不是完成或公开发布的数据集；不批准任何 outcome 值读取、特权真值在线消费、仿真/rollout/训练、Stage R §36 改动。
 
 ## 0. 目的与不可混淆的任务
