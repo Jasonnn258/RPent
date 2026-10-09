@@ -114,6 +114,17 @@
 - **实际结果**：GitHub 代码与文档已提交；**当前工具环境没有私有服务器原始轨迹，因此尚无 A0 样本资格/结果值统计、没有 EERD 数据集实际物化、合成测试尚未在服务器运行**。把待完成步骤收束为一次服务器执行，收到结果后直接处理异常/验收，阶段内不再就已授权 L1 子任务询问。
 - **防跑偏要求**：只认服务器实际回传的 `schema_qa.json`、`a0_result.json`、A0 报告与文件哈希；不把预注册通过、脚本存在或 synthetic tests 编写等同于真实结果。任何 STOP 门失败停本阶段受影响的分析，不后验改指标。
 
+## D-013 · A0 真实服务器统计完成：主要错位位于工具失败反馈侧
+
+- **日期/来源**：2026-10-09；用户在服务器执行 Research Package A，并贴回终端输出；运行分支 `30f2a1e`；协议 `RPENT-PACKAGE-A-STAGE2J-V2-EERD-V01-20261009`。已将脱敏汇总独立存档于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md`。
+- **状态**：**SCHEMA_PASS / A0_OUTCOME_PASS / B_BASIC_QA_PASS / EXPORT_FINAL_QA_PENDING**。三个合成回归测试服务器报告 OK；真实输入 187 episodes，235 picks，全部结构及字段资格合格，PRIMARY 206，UNKNOWN=0；B 24 events×480 trials 通过现有基本 QA。
+- **关键实测**：在不涉及 terminal 镜像的 PRIMARY 中，`flag=True` 103 与 `flag=False` 103；FGONLY POSITIVE 157 / NEGATIVE 49。**按常规混淆矩阵语义** TP=101、FP=2、FN=56、TN=47。`R_accept=2/103=1.94%` (episode cluster bootstrap 95% [0,4.85%])；`R_miss=56/103=54.37%` (95% [45.26%,64.29%])；一致率 `148/206=71.84%` (95% [65.88%,77.56%])。FGONLY prevalence 高，always-positive 对照一致率 76.21%，不能以 raw concordance 单独选策略。
+- **源码级呈现陷阱**：冻结分析程序 `stats()` 的 `table.false_positive` 表示 `(flag=False, FGONLY=POSITIVE)`，是**传统 FN 56**；`table.true_negative` 表示 `(flag=True, FGONLY=NEGATIVE)`，是**传统 FP 2**。修正的是**结果展示语义**，不修改已冻结的原始统计文件、结果/主指标或样本资格。新增独立 `audit_package_a_exports.py` 用于服务器端验证并输出标准混淆矩阵的附属视图。
+- **主要解释与限制**：目前最强的描述性信号在工具失败侧（FGONLY 技内代理已有取得但工具报失败），但两者操作契约不同：FGONLY 存在于技内某个点，不保证 D2 时仍持握、更不保证未来真实完成。不能将 56 个“代理错位”直接称真实成功/不必重试，也不能据此证明恢复策略效果。
+- **研究路线影响**：P0/A0 已得到一次完整实测，不再重跑同一数据追数字；将 P1 候选问题聚焦为“失败反馈后何时验证物理状态、何时直接重试，是否在相同成本下改善 episode 级真实任务结果”，而不是仅重复失败归因概念；L2 新实验依然 HOLD。
+- **下一步**：在已有 L1 授权中做**一次导出产物复核**（A/B 分文件、样本数、跨视图键、泄漏边界、8+8+4 重建分组），只记录脱敏 Gate；真正的新前瞻 C cohort 要单独 L2 批准。
+- **不能推出什么**：A0 描述性结果 ≠ 实际接触/长期持握的真值分类；EERD 内部文件已由脚本生成 ≠ 所有八道 QA 均已独立通过或公开数据集已经发布；不存在本次 ChatGPT 环境直接读服务器文件的事实。
+
 ## 新决策追加模板
 
 ```markdown
