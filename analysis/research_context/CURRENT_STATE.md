@@ -6,9 +6,11 @@
 
 > **Research Package A 收官（2026-10-09，基于用户服务器回传）：**服务器合成测试 **3/3 OK**、Schema **PASS**、A0 outcome **PASS**，235/235 Pick 合格、PRIMARY=206、UNKNOWN=0；冻结 B=24 事件/480 trials。服务器随后执行 `audit_package_a_exports.py`，报告 **26/26 QA PASS、failures=[]**，A/B 关联与字段视图检查通过；常规混淆矩阵 **TP=101、FP=2、FN=56、TN=47**。原始封版统计文件不变，脱敏汇总归档于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6。**EERD v0.1 内部数据集已物化并通过目前约定的工程 QA；尚未经独立物理真值核验、跨任务泛化或外部发布审核。** Package A L1 阶段收官，P1 L2/L3 仍 HOLD。
 
+> **P1 已实际启动（2026-10-09，阶段：离线可行性核查）**：源码确认 `view_driver_state` 重读历史帧不产生新的物理观测；`set_gripper(+1, steps=N)` 会真实执行物理步、可能改变持握状态，必须设置 probe-then-blind 机械效应对照。已提交 `p1_d2_preflight.py`、合成回归测试及 `P1_L2_STAGE_GATE.md`（独立 DEV0 ≤24 新 episode、≤8h 墙钟/6 GPU·hour 的建议边界）。**真实服务器 D2 预检尚未执行；新仿真/Runtime L2 仍 HOLD**，须明确整阶段许可与 Stage R §36 局部例外。当前默认下一动作是服务器运行**一次只读 P1 预检**，不重新执行 A0。
+
 ## 1. 总状态
 
-**`PACKAGE_A_L1_CLOSED / A0_SERVER_PASS / EERD_V01_INTERNAL_EXPORT_QA_26_26_PASS / P1_L2_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_READONLY_PREFLIGHT_READY / P1_L2_DEV0_PROPOSED_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -35,7 +37,7 @@
 
 1. **P0 / Research Package A 正式收官（内部数据层）**：3/3 synthetic tests OK、A0 结果 PASS、Export QA 26/26 PASS；不再重复 A0 统计、改动冻结结果或增加无新证据的审查轮次。
 2. **已取得的主要科学现象**：在主分析 206 picks 中，`flag=False` 的 103 次里有 56 次 **技内某时刻 FGONLY 代理满足**；工具成功侧仅 2/103 次代理不成立。这支持“工具失败后先验证/还是直接重试”的**研究动机**，不能等同返回时已经抓稳或未来真实持握。
-3. **P1（L2 未授权）**：在真实 D2 决策边界验证“低成本额外观察后是否调整接受/重试/恢复决策”，比较固定预算强基线、固定后续窗口物理结果、覆盖率/弃权和总成本。需要单独一次整阶段授权后才能运行 C cohort 或修改 Runtime。
+3. **P1（只读预检已实现，L2 未授权）**：先执行 `p1_d2_preflight.py` 统计非终局 D2 合法前缀、已归档图像/状态可用性；之后候选 DEV0 预注册限定 24 新 episode、8 小时墙钟/6 GPU·hour，以 D0(no probe)/D1(probe-blind)/D2(probe-static)/D3(probe-evidence) 分离物理稳定化与信息使用收益。详见 `P1_L2_STAGE_GATE.md`，尚未运行仿真。
 4. **P2**：证据治理的跨任务记忆/技能演化仍属长远研究问题，现无经验证的更新收益。
 
 ## 4. 当前明确禁止的推断
@@ -50,9 +52,9 @@
 
 ## 5. 当前待办
 
-1. **无须继续执行 Package A 命令**：现有数据集仅供服务器内部离线研究；原始 audit-only 文件和密钥不得 push。
-2. 下一阶段若用户要求实际推进 Harness 方法，优先**一次性定义并申请 P1 L2 研究包**（研究问题、真实 D2 证据、验证动作与成本、样本/预算、对照、停止条件），独立于历史 Stage R，保持冻结不改。
-3. 新研究结果到来前不扩大 EERD 物化或声称发布 Benchmark。Stage R §36 HARD STOP、S1 ON_HOLD 不变。
+1. **服务器只读 D2 前置核查**（无需复跑 A0）：先执行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_d2_preflight.py' -v`，后执行 `python3 analysis/research_context/p1_d2_preflight.py --repo-root /workspace/yjx/workspace/RPent`；返回仅非私有的计数/Gate。
+2. 预检若通过，进入 `P1_L2_STAGE_GATE.md` 的**独立 24-episode DEV0 阶段级审批**。先锁新任务种子/随机化/成本/停止约束，再经代码接线和集成测试运行；不凭“go on”暗中解除 Stage R §36。
+3. 新 DEV0 数据到来后，按真实物理后续收益与机械效应对照判断是否值得更大的独立 TEST；P2 仍 HOLD。
 
 ## 6. 标准汇报格式
 
