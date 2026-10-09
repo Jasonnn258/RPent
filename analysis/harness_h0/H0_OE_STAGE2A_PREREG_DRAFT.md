@@ -82,7 +82,7 @@
 | `stageR_same_action_rollouts.csv` | 24×8，序号齐、无重复、两 outcome 字段非空 | 科研分析 ONLY |
 | `stageR_resample_rollouts.csv` | RESAMPLE 24×8，另含 NATURAL 24×4，必须过滤 | 科研分析 ONLY；NATURAL 不入 persistence |
 | `stageR_event_probabilities.csv` | 24 条 event 级索引匹配 | 已衍生的**事后结果**，不得用于预测输入/评估金标准 |
-| `stageR_trial_checkpoints.jsonl` | GitHub `.gitignore` 忽略；用户服务器确认存在且全文件扫描：484 个记录、12,641 个 cps，顶层和 cps 一级字段集合一致，解析/空 cps 错误为 0；扫描过 `meas/obs` 键，未找到键名含 `time/stamp` 的路径 | **FULL_SCHEMA_PASS / KEY_RECONCILIATION_PENDING**。已审计 CSV 合计 480 trial，须先查 484 记录与 480 trial 的键差；不存在独立 reference 的证据，不能把 schema 通过当作已验证所有结果 |
+| `stageR_trial_checkpoints.jsonl` | GitHub `.gitignore` 忽略；服务器本地扫描 484 条记录、12,641 个 cps，字段结构一致、解析错误 0、命名含 time/stamp 的字段路径未见；用户随后做 `(event_id,arm,trial)` Counter 逐键对账 | **FULL_SCHEMA_PASS / R1_COHORT_KEY_JOIN_PASS**。CSV 全部 480 个正式 trial 各有一条 checkpoint；另有 `r09` SAME 1–3 和 `r12` SAME 1 共四条，manifest 属 `R0_DEV`，须按冻结 `role=R1_COHORT` 排除；DEV 写入过程和独立 reference 仍未证实 |
 | `episode_dir/stageR_trace.jsonl`、`stageR_snapshots` | 只有路径索引和 provenance 代码在远端 | **LOCAL_ASSET_NOT_VERIFIED**，不得重新执行或新生成 |
 
 明确拒绝：将 `chunk_class` 中 sim object pose/EEF 底层测量伪装成在线代理；根据 `cand_sha` 生成额外因果动作偏差结论；将 NATURAL `S_post` 的结果用于 SAME/POLICY `S_pre` 预测模型的无条件验证。
@@ -93,7 +93,7 @@
 2. **明确 primary/secondary 问题数量**：不设多个事后任选 endpoint，OE1a/OE2a/OE3a 哪些可成为 formal primary、对应多个不确定性检验的控制方式；
 3. **统计估计规格**：M1 distribution/弱信息先验、重试前缀 k 集合、未来 m、损失函数、coverage/校准、missing/INFRA 处理、事件依赖和小样本偏差；
 4. **门槛/停规和功效预审**：不直接沿用旧草案 30%/10%/2× 门；在完整规格审查并独立获批前不选数值；
-5. **local-only checkpoint 来源**：用户已完成全文件 484 记录/12,641 cps 的键名与结构审计；尚须以 `(event_id,arm,trial)` 和 CSV 的 480 个 trial 作逐键双向对账，澄清数量相差 4 的来源。任何重复/额外/缺失均记录为结构异常或来源差异，不能改写 trial CSV，也不因此创建独立 reference；
+5. **local-only checkpoint 来源**：用户已完成全文件 484 记录/12,641 cps 的 schema 与 `(event_id,arm,trial)` 双向对账；480 个 R1 正式键完备，额外四键的 manifest 角色均为 `R0_DEV`。未来分析仅按**预先冻结**的 `role=R1_COHORT` 选 cohort，保留原 JSONL，不通过物理结果决定是否去留。四条 DEV 记录的历史写入路径仍未独立核实，不因此创建独立 reference；
 6. **冻结签名**：正式 prereg ID、commit SHA、脚本审查/hash、版本化禁止改动、执行日志与复算计划——本阶段一律**没有冻结**。
 
 本稿包含了潜在比较方法与拒判原则，但还**没有确定实际方法、参数、数值检验标准与执行代码**；不能作为直接运行任务单。
