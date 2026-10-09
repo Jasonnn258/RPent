@@ -1,6 +1,10 @@
 # NOVELTY_REVIEW — 独创性审计与收缩判定
 
-> 2026-10-09 | 版本 v0.1 | 配套 `METHOD_SPEC.md`(同日)。
+> 2026-10-09 | 版本 **v0.2** | 配套 `METHOD_SPEC.md`(同日 v0.2)。
+> v0.1 全文见 git 历史(commit `adf5d18`);本轮变更:①Zetta 对照按其仓库
+> main 分支源码重新核验([S-ext],修订 v0.1 的两处错误判定);②N1 按核验
+> 结果再收缩;③N2 表述随 METHOD_SPEC 公理 A2 修订(全局单调性→代价对齐)
+> 同步更新。逐项变更见 §0.1。
 > 任务:对照最接近的公开工作(重点 Zetta、EmbodiSkill、CheckVLA、RegenHarness;
 > 侧翼 SHAPER、SkillOpt、SafeManip、VASO、CommitFlow),判定 PAEG 各组件的
 > 不可替代性;**发现先例即主动收缩创新声明**(用户指令与提案 §4 收缩条款)。
@@ -8,12 +12,17 @@
 > **本轮核验方法与等级**:
 > - **[S] 源码级**:Zetta、EmbodiSkill、SkillOpt(S0 期 REFERENCE_CODE_AUDIT 完成,
 >   本轮引用其结论);
+> - **[S-ext] 外部仓库源码级(v0.2 新增)**:Zetta main 分支 tarball
+>   (codeload.github.com,2026-10-09 下载),对 `zetta/evolution/` 模块
+>   逐文件核验 unresolved/inconclusive 机制——v0.1 的"归因克制空白✓"判定
+>   即在此级被推翻;
 > - **[P-abs] 摘要级全文**:RegenHarness(arXiv 2609.27612)、CheckVLA(2607.26789)、
 >   CommitFlow(2609.21908)、SafeManip(2605.12386)、VASO(2606.05395)——
->   **本轮新增**:五篇 arXiv 摘要页全文逐句核验(此前仅有提案表格级 [P] 描述);
+>   v0.1 轮新增:五篇 arXiv 摘要页全文逐句核验(此前仅有提案表格级 [P] 描述);
 > - **[P] 出版页级**:SHAPER(2608.11350)。
 > - 摘要级核验的含义:确认机制存在性与概述,**不等同全文对齐**——凡结论依赖
->   "论文全文中不含 X"的判断,均标注残余风险(§6)。
+>   "论文全文中不含 X"的判断,均标注残余风险(§9)。源码级核验同理:
+>   Zetta 论文全文未读(残余风险 R5,§9)。
 > - 跨基准数字不可直接比较;所有外部结果按原作者报告表述。
 
 ---
@@ -22,28 +31,46 @@
 
 **提案的三条候选创新,经五篇新核验后:一条核心保持(C2)、两条按预设条款收缩
 (C1、C3)。方法整体仍具备可辩护的独立空间,但其表述必须从"提出双门/时效声明"
-收窄为"物理执行随机性下的失败持续性证据学 + 决策分层授权语义的统计特化"。**
+收窄为"物理执行随机性下的失败持续性证据学 + 决策分层授权语义的统计特化"。
+v0.2 追加:Zetta 源码重核推翻 v0.1 的"归因克制空白"判定,N1 再收缩一次
+("允许 abstain"的立场让渡,"abstain 的统计学判据"保留为核心)。**
 
-1. **C2(Persistence-Aware Attribution)= 核心创新,保持**。九个工作无一给出
-   "随机物理执行下,有限重复失败证据对持续性与可修复性的统计语义"。
-   EmbodiSkill 的 defect/lapse 分流在概念上最近,但判据是 LLM 反思式、无证据量
-   概念、无重建保真处理;RegenHarness 有执行记录驱动的演化治理但无统计化
-   持续性分析 [P-abs]。
-2. **C1(Decision-Dependent Eligibility)= 按条款收缩**。CheckVLA 已做
-   conformal 校准的干预风险阈值(单决策类型)[P-abs];RegenHarness 已有
-   identity/version-bound commit gate 骨架 [P-abs];Zetta 已有 Loop1/Loop3 双
-   时间尺度的工程分离 [S]。**"有两个门"与"校准过的门槛"均非空白**。收缩后
-   C1 = "同一证据面对不同决策类型的充分性差异作为形式对象(授权单调性、
-   abstain 一等公民、错误代价不对称的定性偏序)"。
-3. **C3(Temporal Claims)= 按条款收缩**。版本化事实(RegenHarness)、
+1. **C2(Persistence-Aware Attribution)= 核心创新,保持(v0.2 再收缩表述)**。
+   九个工作无一给出"随机物理执行下,有限重复失败证据对持续性与可修复性的
+   统计语义"。EmbodiSkill 的 defect/lapse 分流在概念上最近,但判据是 LLM
+   反思式、无证据量概念、无重建保真处理;RegenHarness 有执行记录驱动的演化
+   治理但无统计化持续性分析 [P-abs];**Zetta(v0.2 核验)已有 unresolved/
+   inconclusive 的克制出口 [S-ext],但其 unresolved 由 LLM 定性判断产生,
+   无证据量函数、无异质性/选择效应分析、无连败信息价值的统计处理**——
+   C2 的核心收缩为"持续性分类与 abstain 的**统计学判据**",而非"允许弃权"。
+2. **C1(Decision-Dependent Eligibility)= 按条款收缩(v0.2 表述更新)**。
+   CheckVLA 已做 conformal 校准的干预风险阈值(单决策类型)[P-abs];
+   RegenHarness 已有 identity/version-bound commit gate 骨架 [P-abs];
+   Zetta 已有 Loop1/Loop3 双时间尺度的工程分离 [S]。**"有两个门"与"校准过
+   的门槛"均非空白**。收缩后 C1 = "同一证据面对不同决策类型的充分性差异
+   作为形式对象(**代价对齐偏序**(v0.2:取代"授权单调性",METHOD_SPEC
+   §6.4)、abstain 一等公民、错误代价不对称的定性偏序)"。
+3. **C3(Temporal Claims)= 按条款收缩(不变)**。版本化事实(RegenHarness)、
    LTLf 时序谓词(SafeManip)、commitment 维持监控(CommitFlow)、进度证据
    保留(CheckVLA keyframe bank)均已有 [P-abs]。收缩后 C3 = "物理窗口失效
-   语义(time-to-validity、不可继承、撤销不追溯)与决策授权的耦合",仅作为
+   语义(闭窗终态不可否定、不可继承、撤销不追溯)与决策授权的耦合",仅作为
    C2 的信息底座,不单独主张。
+
+## 0.1 v0.1 → v0.2 变更日志
+
+| # | v0.1 判定 | v0.2 更正 | 依据 |
+|---|---|---|---|
+| 1 | §1.2 "归因克制/UNKNOWN:无(聚类必须产出候选),空白✓" | **错误,推翻**:Zetta 有 unresolved group(聚类视觉证据不支持共同机制时返回 unresolved 组而非 fallback 合并,stages.py:92)、inconclusive diagnosis 终态(lifecycle.py:3456)、no_actionable_cluster_diagnosis campaign 终态、inconclusive gate 不能 pass(models.py:731) | [S-ext] 源码行号级 |
+| 2 | §1.2 "重建保真降级:无,空白✓" | **部分推翻**:Zetta shadow replay 不完整时"retained as inconclusive evidence"(不前向填充、不丢弃)——已是"保真不足→降级证据用法"的定性机制;但无定量保真阈值(ρ*)与系统降档规则 | [S-ext] shadow_replay.py |
+| 3 | §1.3/§7 "PAEG 保持的差异:无 abstain、无证据量定标" | 前半句作废(Zetta 有克制出口);后半句加强:Zetta 源码自证"Confidence ranks hypotheses but is not evidence from a live intervention"(lifecycle.py:2577)且 `confidence_is_not_an_authorization_gate` 默认 0——**Zetta 自己承认其置信度不是证据、默认不作授权门**,这为"证据力的统计定标"空白提供了对方源码级的锚点 | [S-ext] |
+| 4 | §7 N1 "含连败时序结构的信息量" | 措辞收紧为"连败信息的分层解释(M0/M1/M2,异质性选择效应 vs 真时序)"——v0.1 的"h(k)<iid ⟹ 连败史携带超信息"是过度解读 | METHOD_SPEC §5.5 |
+| 5 | §7 N2 "授权单调偏序" | 改"代价对齐偏序 + 不可逆性约束"(v0.1 全局单调性被自身矩阵违反,已废弃) | METHOD_SPEC §6.4 |
 
 ---
 
-## 1. 重点对照一:Zetta(arXiv 2608.16590)[S-源码级 + P-项目页]
+---
+
+## 1. 重点对照一:Zetta(arXiv 2608.16590)[S-源码级 + P-项目页 + S-ext-v0.2]
 
 ### 1.1 机制摘要
 
@@ -54,27 +81,65 @@ Validation-Gated Skill Update(历史回归 + held-out 泛化门 → 版本化 sk
 memory)。LIBERO-Pro 90.8%(+56.3pt)。源码级确认:critic_runtime.py 的运行时
 监控、role1_recovery.py 的恢复与配对同 seed 重放 [S]。
 
-### 1.2 与 PAEG 逐组件对照
+**v0.2 补充(本轮 [S-ext] 新核验,修正 v0.1 的重大遗漏)**:Zetta 的演化
+模块(`zetta/evolution/`)内置一套**不可归因的处理机制**,v0.1 曾误判为
+"聚类必须产出候选、无归因克制"。实际机制(源码行号级):
+
+1. **unresolved group**(`stages.py:92`):聚类 prompt 明示"If the visual
+   evidence cannot support a common mechanism, return an unresolved group
+   rather than merging on a fallback label"——视觉证据不支持共同机制时,
+   返回 unresolved 组而非强行贴标签合并;
+2. **inconclusive diagnosis 终态**(`lifecycle.py:3456`):
+   `_diagnosis_is_inconclusive` 判定 root_cause 以 "inconclusive" 开头的
+   诊断;campaign 可终结于 `no_actionable_cluster_diagnosis`;
+3. **inconclusive gate 不能 pass**(`models.py:731-732`):门证据不足时
+   的语义是"不通过"(区别于"失败");
+4. **provisional authorization**(`lifecycle.py:3874+`):inconclusive 诊断下
+   允许"Auditably test a strong leading hypothesis without relabeling
+   diagnosis"——不重贴标签地测试一个可证伪候选,配 relaxed timeboxed gates;
+5. **不完整 shadow replay → inconclusive evidence**(`shadow_replay.py`):
+   重放不完整时不前向填充、不丢弃,保留为"inconclusive evidence for the
+   online gate";
+6. **置信度非证据的显式注释**(`lifecycle.py:2577-2579`):
+   "Confidence ranks hypotheses but is not evidence from a live
+   intervention";策略参数 `provisional_min_diagnosis_confidence` 默认 0,
+   `confidence_is_not_an_authorization_gate`——置信度默认**不**作为授权门,
+   仅排序假设,且若启用须显式预注册。
+
+### 1.2 与 PAEG 逐组件对照(v0.2 修订版)
 
 | PAEG 组件 | Zetta 对应物 | 判定 |
 |---|---|---|
-| 证据等级 L0-L3 | 无(critic 输出=代码化条件是否触发) | 空白 ✓ |
+| 证据等级 L0-L3 | 无(critic 输出=代码化条件是否触发;聚类证据分层为确定性 medoid 优先的定性预算) | 空白 ✓ |
 | Claim 时效/撤销 | 无(critic 是即时判断,无声明账本) | 空白 ✓ |
-| E/A/P/U 持续性分类 | Loop2 的失败聚类(启发式,LLM 辅助) | 概念近、机制异 |
-| 归因克制/UNKNOWN | 无(聚类必须产出候选) | 空白 ✓ |
-| 重建保真降级 | 无(shadow replay 式配对重放直接用作对照) | 空白 ✓ |
+| DETERMINING/E/A/P/U 持续性分类 | Loop2 的失败聚类(启发式,LLM 辅助)+ unresolved group | 概念近、机制异;**unresolved≈U 类的定性版(v0.2)** |
+| 归因克制/abstain 的**设计立场** | **有**:unresolved group / inconclusive 终态 / inconclusive gate(v0.1 误判"无") | **先例,让渡(v0.2 核心更正)** |
+| 归因克制的**统计学判据**(证据量函数/异质性后验/连败信息价值/κ 定标) | **无**:unresolved 由 LLM 视觉证据判断产生;源码自证 confidence 非证据且默认不作门 | **空白 ✓(N1 收缩后的核心)** |
+| 重建保真降级 | **部分有**:不完整 shadow replay → 保留为 inconclusive evidence(定性);无定量阈值 ρ*、无系统降档规则 | 部分让渡;定量语义保持 ◐ |
 | Runtime/Evolution 分层 | Loop1 vs Loop3(工程分离) | **结构先例,让渡** |
 | 验证门 | Loop3 held-out 门(工程 k 轮对比) | **先例,让渡** |
 | SAME 配对重放 | role1 的 paired same-seed [S] | **技术先例,让渡** |
 
-### 1.3 判定
+### 1.3 判定(v0.2 修订)
 
 Zetta 回答"闭环 critic-recovery 演化**是否有效**"(90.8%);PAEG 回答"其依赖的
-outcome 证据**何时才可信**"。**必须让渡的声明**:"双时间尺度分离"、"配对同
-seed 重放对照技术"、"held-out 晋升门"均不得列为 PAEG 创新。**保持的差异**:
-Zetta 的门是工程门槛(k 轮成功率对比),无证据充分性的形式语义、无 abstain、
-无证据量定标——PAEG 恰好为其 Loop2/Loop3 提供其缺失的输入质量学。
-互补而非竞争,与 H0 审计结论一致。
+outcome 证据**何时才可信**"。**必须让渡的声明(v0.2 扩充)**:
+- "双时间尺度分离"、"配对同 seed 重放对照技术"、"held-out 晋升门"(v0.1 已让渡);
+- **"允许分不出来/unresolved/inconclusive 的克制立场"(v0.2 新让渡)**——Zetta
+  已把"允许 inconclusive"做成了工程语义(终态、门、campaign 出口);
+- "不完整重放不作对照"(v0.2 新让渡)——shadow replay 的 inconclusive 保留
+  已是该思想的定性实现。
+
+**保持的差异(v0.2 收缩后)**:Zetta 的 unresolved/inconclusive 是 **LLM 定性
+判断驱动的工程出口**——何时返回 unresolved 由聚类 prompt 的视觉检视决定,
+无证据量概念、无异质性(选择效应)分析、无连败信息价值的统计解释;其源码
+自己承认"Confidence ranks hypotheses but is not evidence from a live
+intervention"且默认不作授权门 [S-ext]。PAEG/N1 的独立空间因此精确化为:
+**把"分不出来"从工程裁量变成统计对象**——证据量函数(evidence_mass 与 κ)、
+异质性混合下的连败后验(§5.5 M1)、abstain 的可证伪充分性判据(何时必须
+弃权 vs 何时证据已足)、重建保真的定量降级(ρ*)。仍为互补关系:PAEG 可
+为 Zetta 式系统的 unresolved/inconclusive 出口提供统计学判据,与 H0 审计
+结论一致。
 
 ---
 
@@ -90,11 +155,11 @@ ALFWorld/EmbodiedBench。
 
 | 维度 | EmbodiSkill | PAEG |
 |---|---|---|
-| 分类对象 | defect vs lapse 二分 | E/A/P/U 四类 + repairability 独立轴 |
+| 分类对象 | defect vs lapse 二分 | DETERMINING/E/A/P/U 五类 + repairability 独立轴 |
 | 判据来源 | LLM 轨迹反思 | 预注册统计序列(重复实验证据) |
-| 所需证据量 | 未处理(一次反思即分流) | 一等对象(evidence_mass + κ 槽位) |
-| 无法归因时 | 必须分到两类之一 | U 类显式 abstain(实证:U 型 4/24 [D]) |
-| 随机性处理 | 无(单轨迹语义判断) | 核心(边际率、连败结构 vs iid) |
+| 所需证据量 | 未处理(一次反思即分流) | 一等对象(evidence_mass + κ 槽位;单次失败=DETERMINING 非瞬态) |
+| 无法归因时 | 必须分到两类之一 | U 类显式 abstain(实证:U 型 4/24 [D];注:克制立场本身 Zetta 亦有 [S-ext],PAEG 差异在判据) |
+| 随机性处理 | 无(单轨迹语义判断) | 核心(边际率、连败结构的 M0/M1/M2 分层解释) |
 
 ### 2.3 判定
 
@@ -228,47 +293,69 @@ PAEG 拟议组件(收缩后编号)× 九工作。●=已占据 ◐=部分重叠 
 
 | 组件 | Zetta | EmbodiSkill | CheckVLA | RegenHarness | SHAPER | SkillOpt | SafeManip | VASO | CommitFlow |
 |---|---|---|---|---|---|---|---|---|---|
-| **C2-a** 持续性四分类 E/A/P/U | ◐ | ◐(二分) | ○ | ○ | ○ | ◐(lapse 保护区) | ○ | ○ | ○ |
-| **C2-b** 有限重复证据量语义 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ◐(论及 trace 证据不足) | ○ |
-| **C2-c** 重建保真降级 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| **C2-a** 持续性五分类 DETERMINING/E/A/P/U | ◐(unresolved group≈U 定性版,v0.2) | ◐(二分) | ○ | ○ | ○ | ◐(lapse 保护区) | ○ | ○ | ○ |
+| **C2-b** 有限重复证据量/abstain 的统计学判据 | ○(源码自证 confidence 非证据 [S-ext]) | ○ | ○ | ○ | ○ | ○ | ○ | ◐(论及 trace 证据不足) | ○ |
+| **C2-c** 重建保真定量降级(ρ* 阈值+降档规则) | ◐(inconclusive 保留,定性;v0.2) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | **C2-d** repairability 解耦 | ○ | ○ | ○ | ◐(bounded recovery 预算) | ○ | ○ | ○ | ○ | ○ |
-| **C1'** 分层授权语义(单调性+abstain) | ◐(工程双环) | ○ | ◐(单门校准) | ◐(commit 骨架) | ○ | ◐(晋升门) | ○ | ◐(形式门) | ◐(hold back) |
+| **C1'** 分层授权语义(代价对齐+abstain) | ◐(工程双环+inconclusive gate) | ○ | ◐(单门校准) | ◐(commit 骨架) | ○ | ◐(晋升门) | ○ | ◐(形式门) | ◐(hold back) |
 | **C3'** 物理时间有效性语义 | ○ | ○ | ○(keyframe 非授权) | ◐(版本化) | ○ | ○ | ◐(LTLf 时序) | ◐(时序规约) | ◐(maintain 条件) |
 | ~~已弃用~~ "校准决策门槛" | ○ | ○ | **●** | ○ | ○ | ○ | ○ | ○ | ○ |
 | ~~已弃用~~ "commit gate/版本化" | ◐ | ○ | ○ | **●** | ○ | ◐ | ○ | ○ | ○ |
 | ~~已弃用~~ "双时间尺度门" | **●** | ○ | ○ | ◐ | ○ | ○ | ○ | ○ | ○ |
 | ~~已弃用~~ "defect/lapse 思想" | ○ | **●** | ○ | ○ | ○ | **●** | ○ | ○ | ○ |
+| ~~已弃 v0.2~~ "允许 abstain/unresolved 的克制立场" | **●**(unresolved/inconclusive 终态与门) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| ~~已弃 v0.2~~ "不完整重放不作对照" | **●**(shadow replay inconclusive 保留) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
-读法:C2 行全 ○/◐ 且核心四格(C2-a/b/c 对全部)无 ●——收缩后的创新核成立;
-C1'/C3' 每行均有 ◐——只能以"收缩后形态"主张(见 §7)。
+读法(v0.2):C2 行全 ○/◐ 且无 ●——收缩后的创新核仍成立,但 v0.2 后 C2-a/
+C2-c 的 Zetta 列从 ○ 升为 ◐(克制立场与定性降级已被占),**核心资产进一步
+集中到 C2-b(abstain 的统计学判据:证据量函数、异质性后验、连败信息价值)
+与 C2-d**;C1'/C3' 每行均有 ◐——只能以"收缩后形态"主张(见 §7)。
 
 ---
 
-## 7. 收缩后的最终创新声明(三条,均待概念评审,非实测)
+## 7. 收缩后的最终创新声明(v0.2 再收缩版,均待概念评审,非实测)
 
-**N1(核心)= 随机物理执行下的失败持续性证据学(C2)**
+**N1(核心)= 失败持续性与弃权的统计学判据(C2,v0.2 收缩后)**
 
-> 在边际成功率随机、单次成败证据力弱的执行栈上,给出"有限重复失败证据 →
-> 持续性分类(E/A/P/U)→ 归因声称强度封顶 → 可修复性独立评估"的完整统计
-> 语义,含连败时序结构的信息量、双采样臂的动作特异性排除、重建保真不足的
-> 因果降级。最近邻(EmbodiSkill 二分/VASO trace 不足论述/RegenHarness 记录
-> 驱动 RSI)均不含该语义。RPent 实证底物:E/P 完美分离、h(k) vs iid 偏离、
-> 双臂对照、restore 一致率 [D]。
+> 在边际成功率随机、单次成败证据力弱的执行栈上,给出"何时必须弃权、何时
+> 证据足以分类"的**统计学判据**,以及分类后的层间推导纪律:
+>
+> 1. **证据量语义**(C2-b,核心):单次失败零分辨力(DETERMINING,非瞬态)、
+>    分流所需最小证据量(κ 槽位 + evidence_mass 序数)、证据边际价值随 n
+>    衰减(C_pol(4)=C_pol(8)×89% [D])——**这一层九工作均无**;Zetta 源码
+>    自证其置信度"ranks hypotheses but is not evidence"[S-ext];
+> 2. **异质性与连败信息的分层解释**(C2-b):同质 iid / 异质 iid 选择效应 /
+>    真时序(M0/M1/M2,METHOD_SPEC §5.5)——连败史何时携带超出边际率的
+>    信息、何时只是可交换混合的选择效应、止损判定为何只需 M1 层。该分析
+>    框架为 PAEG 独有表述;
+> 3. **双采样臂的动作特异性排除**(SAME/POLICY 对照 + contrast 语义);
+> 4. **重建保真的定量降级**(ρ* 阈值 + causal_grade 降档 + APPROXIMATE
+>    标注;Zetta 只有定性的 inconclusive 保留 [S-ext]);
+> 5. **层间推导白名单**(关联/持续性/因果/可修复四层,X1-X4 禁则——
+>    禁止由重复失败推出 Skill Defect)。
+>
+> **v0.2 让渡**(不得再声称):"允许 abstain/unresolved 的设计立场"
+> (Zetta unresolved group/inconclusive 终态 [S-ext]);"不完整重放不作
+> 对照"(Zetta shadow replay inconclusive 保留 [S-ext]);"执行偶发≠技能
+> 缺陷的思想"(EmbodiSkill [S])。
+> RPent 实证底物:E/P 完美分离、h(k) 低于同质 iid、双臂对照、restore 一致率 [D]。
 
-**N2(支撑)= 决策类型×证据强度的分层授权语义(C1 收缩后)**
+**N2(支撑)= 决策类型×证据强度的分层授权语义(C1 收缩后,v0.2 表述更新)**
 
 > 同一 append-only 证据面,对不同时间尺度的决策(立即判定 vs 长期更新候选)
-> 给出充分性判定,形式化为授权单调偏序 + abstain 一等公民 + 错误代价不对称的
-> 定性处理。不以"存在两个门"或"门槛经过校准"为创新(分别为 Zetta/
-> RegenHarness 与 CheckVLA 先例);创新在门族的**形式关系**与**共享证据面的
-> 两视角读取**(撤销不追溯的运行时/演化不对称)。
+> 给出充分性判定,形式化为**代价对齐偏序**(门槛随错误代价非递减,局部可比
+> 对上成立;v0.2 取代 v0.1 的全局授权单调性——后者被自身授权矩阵违反,
+> METHOD_SPEC §6.4)+ 不可逆性约束(不可逆决策门槛≥一切可逆决策)+
+> abstain 一等公民。不以"存在两个门"、"门槛经过校准"、"允许 inconclusive
+> 门"(v0.2 新增,Zetta [S-ext])为创新;创新在门族门槛的**代价对齐形式
+> 关系**与**共享证据面的两视角读取**(撤销不追溯的运行时/演化不对称)。
 
-**N3(底座)= 物理窗口有效性语义(C3 收缩后)**
+**N3(底座)= 物理窗口有效性语义(C3 收缩后,不变)**
 
-> 时效声明的物理失效条件(time-to-validity、不可继承、撤销不追溯)及其与
-> 决策授权的耦合。不以 ledger/版本化/时序谓词/维持监控为创新(分别为
-> RegenHarness/SafeManip/CommitFlow 先例);仅作为 N1/N2 的信息底座存在,
-> 不单独主张。
+> 时效声明的物理失效条件(闭窗终态不可被未来事件否定、不可继承、撤销不
+> 追溯)及其与决策授权的耦合。不以 ledger/版本化/时序谓词/维持监控为创新
+> (分别为 RegenHarness/SafeManip/CommitFlow 先例);仅作为 N1/N2 的信息
+> 底座存在,不单独主张。
 
 ---
 
@@ -278,55 +365,71 @@ C1'/C3' 每行均有 ◐——只能以"收缩后形态"主张(见 §7)。
 
 RQ("同一份物理证据,何时可授权何种决策")可操作:METHOD_SPEC 已把它分解为
 MQ1-MQ4 且每个子问题有对应形式对象与接口(§0 表)。可证伪性来自:N1 的
-分类规则与证据量语义可在既有底物上检验一致性(未来离线工作),N2 的单调性
-是可违反的不变量(若实证中 Evolution 门槛低于 Runtime,公理 A2 被证伪)。
+分类规则与证据量语义可在既有底物上检验一致性(未来离线工作),N2 的代价
+对齐是可违反的不变量(若实证中某高代价决策的门槛低于低代价决策且无结构
+理由,公理 A2a 被证伪;v0.2 的局部形式使该检验比 v0.1 的全局命题更精确)。
 
-### 8.2 独立方法创新?——**有条件成立**
+### 8.2 独立方法创新?——**有条件成立(v0.2 收窄后评估)**
 
-- 成立部分:N1 在九工作对照中无 ● 级撞车,且有 RPent 独有数据底物;
+- 成立部分:N1(v0.2 形态:abstain 的统计学判据 + 异质性/选择效应分析)
+  在九工作对照中仍无 ● 级撞车,且有 RPent 独有数据底物;Zetta 源码级核验
+  [S-ext] 反向加强了 C2-b 的空白判定(对方自证 confidence 非证据);
 - 条件部分:N2/N3 均为收缩后形态,单独不可辩;方法整体的新颖性集中在 N1,
   N2/N3 是其决策接口与信息底座——这与提案"以 Persistence-Aware Attribution
-  为主线"的定位一致,本轮审计支持该定位;
-- **最脆弱点**:若 RegenHarness 或 VASO 论文全文(本轮仅摘要级)内含统计化
-  证据强度语义(摘要未显示但正文可能有),N1 需进一步收窄至"双采样臂动作
-  特异性排除 + 重建保真降级"两个最具体的机制。已登记为残余风险 R1。
+  为主线"的定位一致;
+- v0.2 收窄的代价:Zetta 占据克制立场后,N1 中"允许弃权"的表述价值归零,
+  创新声明完全落在**判据的统计学内容**上——这使 N1 对"判据是否真有独立
+  内容"更敏感:M1/M2 分层、κ 定标、白名单推导必须在未来工作中给出可检验
+  的实质,否则 N1 退化为对 Zetta 工程出口的重新叙述;
+- **最脆弱点(更新)**:①RegenHarness 或 VASO 论文全文(仅摘要级)内含
+  统计化证据强度语义(R1,保留);②**新增**:Zetta 论文全文(源码已核、
+  论文未读)若把 unresolved 的判据数学化(R5),N1 需再收缩至"异质性
+  选择效应分析 + 双臂对照 + 层间白名单"。
 
-### 8.3 逻辑自洽的整体架构?——**基本自洽,两处已知张力**
+### 8.3 逻辑自洽的整体架构?——**基本自洽(v0.2 修复后,两处已知张力)**
 
 接口闭环检查:Outcome State(物理)→ Evidence Claim(观测化)→ Persistence/
 Attribution(跨尝试)→ Eligibility(决策)——四层单向数据流 + 审计横向,
 每层输入是下层的显式输出(METHOD_SPEC §1 图);三公理在四层各有落点
-(A1→L0-L3,A2→单调性,A3→U/abstain)。
+(A1→L0-L3,A2→代价对齐,A3→U/abstain 判据)。
 
-**张力 1(如实)**:temporal aliasing 下 `Held` 类 claim 可能长期滞留
+**v0.2 自洽性修复**(用户指令 1-5 对应的内在错误已全部消除):单次失败
+误标 E(§5.0/§5.3)、h(k) 过度解读(§5.5)、PA-Attr 层次混杂(§7.1/§7.5)、
+全局单调性自相矛盾(§6.4)、闭窗 claim 被未来事件否定(§4.1/§4.4/§9.2)。
+修复后的规范层无已知内在矛盾。
+
+**张力 1(如实,保留)**:temporal aliasing 下 `Held` 类 claim 可能长期滞留
 PROVISIONAL/UNKNOWN(METHOD_SPEC §10.4-2)——运行时授权在低频观测栈上
 表达力受限。这不是矛盾(克制是特性),但意味着 C3' 的运行时半边在当前
 观测粒度上部分空转,价值集中于演化半边。
-**张力 2(如实)**:双门语义与 §36 的边界依赖"规范 vs 实现"区分——
+**张力 2(如实,保留)**:双门语义与 §36 的边界依赖"规范 vs 实现"区分——
 REPORT_FAILURE=ALLOW 输出的是判定资格而非控制指令;若用户未来要求在线
 接线,需重新过 §36 审查。该张力是制度性的,不是逻辑缺陷。
 
 ### 8.4 综合判定
 
-**方法具备明确研究问题(是)、有条件的独立创新(N1 核心成立)、基本自洽的
-架构(两处张力已如实登记)。可以进入用户概念评审;任何实现/实验/定标仍需
-按 §36 与提案 §7 另行立项授权。**
+**方法具备明确研究问题(是)、有条件的独立创新(N1 核心成立,v0.2 收缩后
+内容集中在统计判据)、修复后自洽的架构(五处内在错误已消除,两处外部
+张力如实登记)。可以进入用户概念评审;任何实现/实验/定标仍需按 §36 与
+提案 §7 另行立项授权。**
 
 ---
 
-## 9. 残余风险登记
+## 9. 残余风险登记(v0.2 更新)
 
 | # | 风险 | 缓解 |
 |---|---|---|
 | R1 | RegenHarness/VASO/CheckVLA 全文含摘要未显示的统计证据语义 → N1 进一步收窄 | 若获全文再核;摘要级结论全部标注 [P-abs];收缩条款已预设两级退化路径 |
 | R2 | N1 的实证底物窄(P 型 5 事件全 t9、单模型单栈 [D]) | 方法文档已限定 scope=FALSE_GRASP@Pi0.5@libero_spatial 族;外推声明禁令写入 METHOD_SPEC §10.4 |
 | R3 | "统计分类规则 vs 学习式 classifier" 的 §36 边界判断存在解释空间 | 规则全部显式预注册、阈值显式槽位、零拟合;在线用途明示需另立授权(METHOD_SPEC §10.1) |
+| R4(v0.2) | N1 的统计学判据若未来无实质内容(定标工作未做、M1/M2 检验未执行),创新退化为对 Zetta 工程出口的重述 | H0 方向 1(H-OE2/H-OE3)获批后执行定标;在获得实质内容前,N1 声明保持"待概念评审,非实测"措辞 |
+| R5(v0.2) | Zetta 论文全文(未读)含 unresolved 判据的数学化表述 | 源码级结论标注 [S-ext] 并注明论文未读;若获论文再核;发生则 N1 收缩至异质性分析+双臂+白名单 |
 
 ## 附录:本轮核验文献清单
 
 | 工作 | arXiv | 核验等级 | 本轮动作 |
 |---|---|---|---|
-| Zetta | 2608.16590 | [S]+[P] | 引用 S0/H0 既有结论 |
+| Zetta | 2608.16590 | [S]+[P]+[S-ext] | **v0.2:main 分支源码重核**(evolution 模块 unresolved/inconclusive 六项机制,行号级;见 §1.1);论文全文未读(R5) |
 | EmbodiSkill | 2605.10332 | [S]+[P] | 引用 S0 既有结论 |
 | SkillOpt | 2605.23904 | [S] | 引用 S0 既有结论 |
 | SHAPER | 2608.11350 | [P] | 引用 H0 既有结论 |
