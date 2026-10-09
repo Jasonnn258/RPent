@@ -6,11 +6,11 @@
 
 > **Research Package A 收官（2026-10-09，基于用户服务器回传）：**服务器合成测试 **3/3 OK**、Schema **PASS**、A0 outcome **PASS**，235/235 Pick 合格、PRIMARY=206、UNKNOWN=0；冻结 B=24 事件/480 trials。服务器随后执行 `audit_package_a_exports.py`，报告 **26/26 QA PASS、failures=[]**，A/B 关联与字段视图检查通过；常规混淆矩阵 **TP=101、FP=2、FN=56、TN=47**。原始封版统计文件不变，脱敏汇总归档于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6。**EERD v0.1 内部数据集已物化并通过目前约定的工程 QA；尚未经独立物理真值核验、跨任务泛化或外部发布审核。** Package A L1 阶段收官，P1 L2/L3 仍 HOLD。
 
-> **P1 已实际启动（2026-10-09，阶段：离线可行性核查）**：源码确认 `view_driver_state` 重读历史帧不产生新的物理观测；`set_gripper(+1, steps=N)` 会真实执行物理步、可能改变持握状态，必须设置 probe-then-blind 机械效应对照。已提交 `p1_d2_preflight.py`、合成回归测试及 `P1_L2_STAGE_GATE.md`（独立 DEV0 ≤24 新 episode、≤8h 墙钟/6 GPU·hour 的建议边界）。**真实服务器 D2 预检尚未执行；新仿真/Runtime L2 仍 HOLD**，须明确整阶段许可与 Stage R §36 局部例外。当前默认下一动作是服务器运行**一次只读 P1 预检**，不重新执行 A0。
+> **P1 已实际启动（2026-10-09，阶段：离线可行性核查）**：源码确认 `view_driver_state` 重读历史帧不产生新的物理观测；`set_gripper(+1, steps=N)` 会真实执行物理步、可能改变持握状态，必须设置 probe-then-blind 机械效应对照。已提交 `p1_d2_preflight.py`、合成回归测试及 `P1_L2_STAGE_GATE.md`（独立 DEV0 ≤24 新 episode、≤8h 墙钟/6 GPU·hour 的建议边界）。**真实服务器 D2 预检已回传：2/2 合成测试 OK、206 合格 D2、103 次工具失败、low-res + proprio 206/206；结构 Gate PASS**。高分辨图当前归档仅 105/206。新增任务分层约束见 `P1_L2_STAGE_GATE.md` §3.1；新仿真/Runtime L2 仍 HOLD，须明确整阶段许可与 Stage R §36 局部例外。
 
 ## 1. 总状态
 
-**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_READONLY_PREFLIGHT_READY / P1_L2_DEV0_PROPOSED_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_PREFLIGHT_SERVER_STRUCTURE_PASS / P1_L2_DEV0_PROPOSED_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -29,6 +29,7 @@
 | Stage2E/F/G/H/I | D1/D2 分离;同技能 ACQ 与 D2 后保持分离;235/235 结构 PASS | `analysis/harness_h0/` 各阶段文档 |
 | **Stage2J v2** | B1 三值参考、B2 截断字段/对齐、B3 六件套与常数基线，均按 Package A 封版协议执行 | **A0 已在服务器执行并 PASS**，仅限单栈回顾性同技能代理一致性；历史 v1/v2 候选与冻结映射保留 |
 | **EERD v0.1** | A 已物化 235 行，B 已物化 480 行/24 个父事件；服务器 export QA 26/26 PASS，字段权限与分组关联已按检查脚本验收 | **内部研究数据集已构建**（用户服务器回传）；不得外发、用于 online/evolution 或声称物理真值独立核验 |
+| **P1 D2 preflight（真实服务器回传）** | `STRUCTURE_PASS_FOR_DESIGN`; 2/2 tests；206 非 terminal 非 truncation 合格 Pick，成功/失败各103；206/206 low-res RGB + proprio 结构有效；现存 hi-res 105/206；198/206 有自然后续命令；t3 fail=21/71、t5=30/77、t9=52/58 | 仅证明合法输入/现有目录结构，不能证明在线视觉验证准确率、因果恢复收益或物理标签有效性；详见 `P1_L2_STAGE_GATE.md` §3.1 |
 | **P1 v1.1** | **已修正 H-P1m 对“异质性 ⇒ 不可交换/Conformal 失效”的错误推断**；要求合法在线前缀定义风险组、完成声明覆盖/弃权约束、DEV 锁定最强基线。A0 与 C 的结果构念不同 | 研究设计仅为候选；真实闭环实验仍 HOLD(新预注册+授权+§36 局部解除) |
 | **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%；export QA 26/26 PASS | 用户服务器回传，独立的字段/数据行工程核验已跑；详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
@@ -37,7 +38,7 @@
 
 1. **P0 / Research Package A 正式收官（内部数据层）**：3/3 synthetic tests OK、A0 结果 PASS、Export QA 26/26 PASS；不再重复 A0 统计、改动冻结结果或增加无新证据的审查轮次。
 2. **已取得的主要科学现象**：在主分析 206 picks 中，`flag=False` 的 103 次里有 56 次 **技内某时刻 FGONLY 代理满足**；工具成功侧仅 2/103 次代理不成立。这支持“工具失败后先验证/还是直接重试”的**研究动机**，不能等同返回时已经抓稳或未来真实持握。
-3. **P1（只读预检已实现，L2 未授权）**：先执行 `p1_d2_preflight.py` 统计非终局 D2 合法前缀、已归档图像/状态可用性；之后候选 DEV0 预注册限定 24 新 episode、8 小时墙钟/6 GPU·hour，以 D0(no probe)/D1(probe-blind)/D2(probe-static)/D3(probe-evidence) 分离物理稳定化与信息使用收益。详见 `P1_L2_STAGE_GATE.md`，尚未运行仿真。
+3. **P1 D2 结构 PASS，L2 未授权**：服务器回传 206/206 可读低分辨相机与本体感知；103 个工具失败边界。t3:21/71 失败，t5:30/77，t9:52/58；t9 占历史失败 Pick 的 52/103，DEV0 必须按 task 预先分层、记录无触发 episode。候选 DEV0 ≤24 新 episode、≤8h/6 GPU·hour，比较 D0(no probe)/D1(probe-blind)/D2(probe-static)/D3(probe-evidence)，仅作接口可行性，**不能确认效应**；尚未运行仿真。
 4. **P2**：证据治理的跨任务记忆/技能演化仍属长远研究问题，现无经验证的更新收益。
 
 ## 4. 当前明确禁止的推断
@@ -52,8 +53,8 @@
 
 ## 5. 当前待办
 
-1. **服务器只读 D2 前置核查**（无需复跑 A0）：先执行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_d2_preflight.py' -v`，后执行 `python3 analysis/research_context/p1_d2_preflight.py --repo-root /workspace/yjx/workspace/RPent`；返回仅非私有的计数/Gate。
-2. 预检若通过，进入 `P1_L2_STAGE_GATE.md` 的**独立 24-episode DEV0 阶段级审批**。先锁新任务种子/随机化/成本/停止约束，再经代码接线和集成测试运行；不凭“go on”暗中解除 Stage R §36。
+1. **D2 只读前置核查已完成**：服务器 2/2 tests OK，`STRUCTURE_PASS_FOR_DESIGN`，206 合格 Pick，103 failure，198/206 后续 Planner step；低分辨图像与 proprio 均 206/206，高分辨现存仅105/206；**无需再运行此预检**。
+2. **进入 P1-DEV0 单次阶段级授权 Gate**：参照 `P1_L2_STAGE_GATE.md`，先锁新任务/seed 分层、4 臂随机化、首个可触发 D2、未触发计数、固定未来 horizon/预算/停止条件。最多 24 新 episode、8h/6 GPU·hour。须用户明确批准 L2 局部例外后才能仿真/Runtime 接线，不能沿用 Package A 的 L1 授权。
 3. 新 DEV0 数据到来后，按真实物理后续收益与机械效应对照判断是否值得更大的独立 TEST；P2 仍 HOLD。
 
 ## 6. 标准汇报格式
