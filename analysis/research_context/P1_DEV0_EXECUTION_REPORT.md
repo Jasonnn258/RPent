@@ -1,5 +1,7 @@
 # P1-DEV0 执行与独立验证报告(2026-10-09)
 
+> **后验勘误（2026-10-09，原始 DEV0 文件/策略冻结不变）**：随后由用户在私有服务器上运行 `scripts/p1_dev0_posthoc_audit.py`（4/4 synthetic tests OK，`policy_sha_match=true`），确认 5 个已实际执行 probe 的合法观测上，冻结策略的**离线影子决策** `D2=CONTINUE_CAUTION` **5/5**、`D3=RETRY` **5/5**；实际生产 6 次决定仍全部为 RETRY，D2 没有生产触发。故本文 §5.1 中“5 次 probe 后 `post_gap≥0.06`、物理上确实没抓住”的原断言**与冻结 D2 规则不相容，应撤回**；本文 §6 样例中 `post_gap=0.0025` 也直接与上述全称断言矛盾。按冻结 D2 规则，若 shadow 推演输入/路径一致，则五次 `D2=CONTINUE` 均要求 `post_gap<0.06`。**夹爪闭合代理不能证明物体被抓住**。此外，`D3=RETRY` 可能由 EEF z 增量未达规则阈值（或非有限数引起），旧版报告未提供逐样本合法观测值，需用新增只读聚合诊断确认，不能先宣称已经验证每条原始记录。更正只影响**解释**，不更改运行数据、冻结策略或正式 outcome。
+
 协议:P1-DEV0-L2-24EP-4ARM-20261009 | 授权:D-017(`P1_DEV0_AUTHORIZATION_AND_LOCK.md`)
 代码:冻结于 commit `62701a0`(hook+接线+runner v1);本次提交补 runner 两处启动修复 + 分析器 + 本报告。
 数据:`/workspace/yjx/rpent_data/p1_dev0/`(run_20261009_095754;不入 Git)
