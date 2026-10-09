@@ -39,7 +39,8 @@ class PosthocAuditTest(unittest.TestCase):
                 events = [
                     {"ev": "init"},
                     {"ev": "trigger", "env_steps": 100},
-                    {"ev": "probe", "env_steps_cost": 10},
+                    {"ev": "probe", "env_steps_cost": 10,
+                     "post_legal": {"gripper_gap": .08, "eef_z": .20}},
                     {"ev": "decision", "decision": "RETRY",
                      "policy_input": inputs},
                     {"ev": "action", "kind": "RETRY"},
@@ -68,6 +69,13 @@ class PosthocAuditTest(unittest.TestCase):
             self.assertEqual(report["science_gate"], "HOLD_NO_ARM_ACTION_CONTRAST")
             self.assertEqual(report["shadow_not_causal"]["n_probe_snapshots_checked"],
                              2)
+            di = report["shadow_not_causal"]["diagnostic_not_physical_truth"]
+            self.assertEqual(di["finite_gripper_gap"], 2)
+            self.assertEqual(di["post_gap_lt_0p06"], 0)
+            self.assertEqual(di["finite_eef_z_delta"], 2)
+            self.assertEqual(di["eef_z_delta_ge_0p03"], 0)
+            self.assertEqual(di["probe_vs_policy_input_mismatch"], 0)
+            self.assertEqual(di["probe_legal_not_recorded"], 0)
 
     def test_manifest_sha_seal_is_required(self):
         with tempfile.TemporaryDirectory() as td:
