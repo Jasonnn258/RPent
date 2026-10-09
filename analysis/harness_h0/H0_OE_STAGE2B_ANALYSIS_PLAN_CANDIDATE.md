@@ -41,13 +41,13 @@
 
 ### 3.2 M0 同质 Bernoulli：训练事件内估计 pooled success
 
-在每一个完整事件留一验证折 `e`，对其余 `23` 个事件、SAME 臂全部冻结 K=8 个结果，用固定弱平滑：
+在每一个完整事件留一验证折 `e`，用其余 `23` 个事件、SAME 臂全部 K=8 个结果形成 `Beta(1,1)` 平滑后的共享概率先验；对于该留出事件**在预测时已知的前两次失败**，M0 也依法更新同一个共享 `q`（确保与 M1 **消费相同合法前缀信息**）：
 
 \[
-\hat p_{0,-e}=\frac{1+\sum_{j\ne e}\sum_{t=1}^{8}Y_{j,\mathrm{SAME},t}}{2+8\times23}.
+\hat p_{0,-e}^{(2)}=\frac{1+\sum_{j\ne e}\sum_{t=1}^{8}Y_{j,\mathrm{SAME},t}}{2+8\times23+2}.
 \]
 
-这里加 1/2 对应 `Beta(1,1)` 先验的平滑预测；**固定的 pooled q** 不从被预测事件的前两次失败更新，因为 M0 假定同质 q。它是弱但合法的预测基线，不可被称为真实世界的充分模型。
+分母末尾的 `+2` 来自该留出事件已经发生的两次失败；这并未使用第三次及后续结果。与 M1 相比，M0 共享同一个 `q`、不会为单个事件引入独立难度分布，故前缀更新通常很弱。使用**不更新**留出前缀的 pooled-q 只能作为额外描述，不能作为不公平的正式主基线。
 
 ### 3.3 M1 事件异质、条件 iid：Beta-Binomial 候选
 
@@ -74,8 +74,8 @@ Y_{eaj}\mid q_{ea}\overset{\mathrm{cond}}{\sim}\mathrm{Bernoulli}(q_{ea}).
 
 - **独立训练/评估隔离**：`leave-one-event-out` 共 24 个折；每折以剩余 23 个**完整事件**拟合 M0/M1，留出事件只用于前缀条件与下一次 trial 评价。禁止 trial 行级 random split、用留出事件未来 suffix 选择模型、先看总体 Brier 再调超参。
 - 对有效主风险集事件，\(\ell_m(e)=(Y_{e,\mathrm{SAME},3}-\hat p_{m,-e})^2\)，事件级差 \(\Delta_e=\ell_0(e)-\ell_1(e)\)。**唯一主指标候选** \(\bar\Delta=\operatorname{mean}_{e\in\mathcal E_{\mathrm{eligible}}}\Delta_e\)，正值代表 M1 平均 Brier loss 较小；不得将已发表 Stage R 的 h(k) 当独立新证据。
-- **拟议不确定性**：在完成 24 折的 out-of-fold 预测后，对**有效 event** 的成对 \(\Delta_e\) 进行 event-level bootstrap（提议 10,000 次，seed=20261007，和既有 Stage R 稳定规则相容），取 2.5%/97.5% 百分位区间；仅作为**小样本探索性不确定性**，避免无条件宣称严格 95% coverage。
-- **拟议方向门**：只有 95% 事件级 bootstrap 区间的下界大于 0，且满足下列风险集/完整性最低条件，才可写 `PREDICTIVE_ADVANTAGE_OBSERVED_IN_RETROSPECTIVE_COHORT`；否则 `INCONCLUSIVE` 或 `NOT_SUPPORTED`，不能将 0 纳入区间的结果说成“证实没有改善”。所有门槛均**尚未冻结**，不自动批准统计检验。
+- **拟议不确定性**：完成 24 折的 OOF 预测后，对**有效 event** 的成对 \(\Delta_e\) 可报告 event-level bootstrap（候选 10,000 次，seed=20261007）的 2.5%/97.5% **描述性百分位区间**。**固定模型输出后仅重采样 \(\Delta_e\) 不能覆盖 LOEO 折间共同训练集与超参数估计的不确定性**，不能称为经证明的 nominal-95% 频率覆盖保证；若未来需要严格模型比较检验，必须另行审查包括**每个 resample 内重拟合与事件隔离**的完整嵌套推断流程，未经审查不可事后补上“显著”结论。
+- **拟议报告门（仅描述性）**：\(\bar\Delta>0\) 时只写 `M1_LOWER_OBSERVED_BRIER_IN_RETROSPECTIVE_COHORT`，并紧邻展示描述性区间、风险集大小和训练不确定性限制；\(\bar\Delta\le0\) 写 `NO_OBSERVED_BRIER_ADVANTAGE`。当分母不足或不确定性过大时标 `INCONCLUSIVE`。不以 naive CI 下界>0 伪称“具备确认性统计显著性”，更不允许升级为 `PAEG_NEW_ALGORITHM_VERIFIED`。该规则亦是**尚未冻结的候选**。
 - **提前完整性门**：如果有效主风险集事件少于候选阈值 **12** 个（为保守报告纪律设定的下限，**不是经功效分析得出的科学阈值**）、或任何正式 R1 主 trial 结果/主键缺失，主比较降级为 `DESCRIPTIVE_ONLY / INCONCLUSIVE`，不能事后换 k 或补新 rollout 来救结果。
 
 ### 3.5 必须报告的负面结果
