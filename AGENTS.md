@@ -10,13 +10,23 @@ This repository contains frozen historical experiments and a long-running Harnes
 4. `analysis/research_context/RESEARCH_AUTHORIZATION.md`: **scope-limited** authorization boundaries; check the actual current user instruction as well.
 5. Relevant frozen original protocol/report before using any historical measurement.
 
-## The current approved work package
+## Current authorization and frozen statuses
 
-Research Package A is approved for **L1 existing-data offline research**: source field qualification, A0 same-skill outcome/FGONLY descriptive analysis, EERD v0.1 internal materialization, offline QA and reporting. Its pre-outcome protocol lock is `analysis/harness_h0/H0_OE_STAGE2J_FROZEN_V2_PACKAGE_A.md`. Entry point is `bash analysis/research_context/run_package_a.sh` **only on the server with private traces**, after reviewing inputs and ensuring the existing run is not active.
+**Package A / EERD v0.1: CLOSED**, after server A0 outcome PASS and 26/26 export QA.
 
-Do not assume that a file existing on GitHub implies its experimental data exists here. Do not claim tests/statistics passed unless they were actually executed with visible results. Do not upload `artifacts/research_package_a/` or any private raw/derived audit data to Git.
+**P1-DEV0 bounded L2 pilot: CLOSED**. Refer to `analysis/research_context/P1_DEV0_AUTHORIZATION_AND_LOCK.md`, `P1_DEV0_EXECUTION_REPORT.md` and `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md`. The user-approved cap was 24 episodes / 8h wall / 6 GPU·hour / 2 workers. The committed run report states 21/24 executed, 6 triggered, 6 audited, a 0.17 GPU·hour overshoot, no D2 production trigger, all decisions RETRY. Do **not** rerun the skipped cells or start any further P1 simulation under this completed authorization.
 
-Stage R §36 HARD STOP and S1-DEV0 ON_HOLD continue to forbid **new rollout, simulator collection, Runtime/Planner/controller/verifier/retry wiring, training, production or deployment** without a new explicit L2/L3 stage authorization. The L1 package approval is not a permanent broad license to do unrelated future experiments.
+Read-only **post-hoc analysis of already collected P1-DEV0 artifacts** may continue without new simulation; `scripts/p1_dev0_posthoc_audit.py` separates budget-skipped/no-event rows from actual infra, checks unequal audit horizons, and computes noncausal shadow policy decisions. The audit is not a new rollout.
+
+**New P1 experiment / prospective collection / Runtime intervention requires a new explicit bounded L2 authorization and preregistration.** Stage R §36 historical HARD STOP and S1-DEV0 ON_HOLD continue. Neither private `/workspace/yjx/rpent_data/p1_dev0/` nor `artifacts/research_package_a/` belongs in Git or external APIs.
+
+Critical science distinctions:
+- Actual hook intercepts a *computed tool result before delivery to Planner* (pre-delivery harness adapter); an original false result is NOT necessarily sent to Planner.
+- D1 blinding is for the **first policy decision**, not proof of full trajectory-equivalent Planner observations after physical probes.
+- D3's `visual_frame_available` observes a frame file's existence; it does not inspect pixels or confirm actual held-object state.
+- The pilot's 4 H=200 skill-boundary audits overshot by 3–23 env steps; 2 additional `EPISODE_END` audits occurred **before** H. They do not constitute 6 equal-time horizons.
+- Realized arm actions were ALL RETRY, and D2 had no production trigger. No evidence-driven decision effect or confirmatory P1 method benefit has been identified.
+- The original analyzer's `no_events_infra` includes budget-skipped cells; do not use this as an infra-failure estimate. The posthoc audit does not retroactively revise frozen results.
 
 ## Research behavior
 
