@@ -26,6 +26,9 @@ Critical science distinctions:
 - D3's `visual_frame_available` observes a frame file's existence; it does not inspect pixels or confirm actual held-object state.
 - The pilot's 4 H=200 skill-boundary audits overshot by 3–23 env steps; 2 additional `EPISODE_END` audits occurred **before** H. They do not constitute 6 equal-time horizons.
 - Realized arm actions were ALL RETRY, and D2 had no production trigger. No evidence-driven decision effect or confirmatory P1 method benefit has been identified.
+- A later **user-executed** posthoc audit passed 4/4 existing synthetic tests, policy SHA matched, and on five observed probe snapshots yielded **D2 shadow CONTINUE 5/5 vs D3 shadow RETRY 5/5**. These are offline unexecuted branch outputs, not causal treatment outcomes.
+- Original DEV0 execution report's global “five post_gap>=0.06, physically not grasped” assertion is **withdrawn** as incompatible with frozen D2 decision logic (D2 CONTINUE requires gap<0.06) and its own t3_s1002 case post_gap=0.0025. See `DECISION_LOG.md` D-020 and top-of-file erratum in execution report. Do not reuse the false physical claim.
+- Enhanced `scripts/p1_dev0_posthoc_audit.py` performs read-only aggregated probe→policy consistency, gap and EEF-z-threshold diagnostics. **Enhanced version is not yet server-tested**; do not transfer the original 4/4 result to modified code.
 - The original analyzer's `no_events_infra` includes budget-skipped cells; do not use this as an infra-failure estimate. The posthoc audit does not retroactively revise frozen results.
 
 ## Research behavior
