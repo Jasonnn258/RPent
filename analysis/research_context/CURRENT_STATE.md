@@ -4,11 +4,11 @@
 >
 > 基线:Stage2K 独立复审 `2b3710e`、EERD 契约 `70d57ba`、本轮基线 `4d155b9`;本轮新增 Stage2J-v2 候选 + EERD 字段级 QA + P1 问题定义；2026-10-09 独立方法复审已修正 P1 v1.1（commit `92384e5`）及 EERD QA 两阶段账本（`a040bfa`）。Stage2J v1 原文保留为未冻结历史候选。所有新实验仍须单独批准。
 
-> **Research Package A 服务器执行回传（2026-10-09）：**用户已在服务器执行 `bash analysis/research_context/run_package_a.sh`，回传 **3/3 synthetic tests OK / schema PASS / outcome PASS / eligible 235/235 / PRIMARY 206 / UNKNOWN 0 / B 24 events×480 trials PASS**。结果与统计语义已记录于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md`（仅汇总，不提交原始 outcome JSONL）。源代码中原始 `table.false_positive` 表示 `flag=False, reference=POSITIVE`，常规混淆矩阵中应记 FN；标准矩阵 TP=101、FP=2、FN=56、TN=47。已新增独立本地导出审计 `audit_package_a_exports.py`，**尚待服务器运行以完成 A/B 输出行数、权限隔离和溯源关联的复核**。L2/L3 继续 HOLD。
+> **Research Package A 收官（2026-10-09，基于用户服务器回传）：**服务器合成测试 **3/3 OK**、Schema **PASS**、A0 outcome **PASS**，235/235 Pick 合格、PRIMARY=206、UNKNOWN=0；冻结 B=24 事件/480 trials。服务器随后执行 `audit_package_a_exports.py`，报告 **26/26 QA PASS、failures=[]**，A/B 关联与字段视图检查通过；常规混淆矩阵 **TP=101、FP=2、FN=56、TN=47**。原始封版统计文件不变，脱敏汇总归档于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6。**EERD v0.1 内部数据集已物化并通过目前约定的工程 QA；尚未经独立物理真值核验、跨任务泛化或外部发布审核。** Package A L1 阶段收官，P1 L2/L3 仍 HOLD。
 
 ## 1. 总状态
 
-**`PACKAGE_A_SERVER_A0_PASS / EERD_A_B_INTERNAL_OUTPUTS_REPORTED / EXPORT_QA_FINAL_PENDING / P1_L2_HOLD / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_L1_CLOSED / A0_SERVER_PASS / EERD_V01_INTERNAL_EXPORT_QA_26_26_PASS / P1_L2_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -25,18 +25,18 @@
 | Stage R R1 | 24 个筛选失败事件;480 正式重建 trial(+4 DEV 排除) | 非真实连续 retry;restore-SENSITIVE(APPROXIMATE) |
 | Stage2D | 回顾性弱信号(差 +0.0129,区间跨 0) | 小样本/同源真值;不支持因果与外推 |
 | Stage2E/F/G/H/I | D1/D2 分离;同技能 ACQ 与 D2 后保持分离;235/235 结构 PASS | `analysis/harness_h0/` 各阶段文档 |
-| **Stage2J v2** | **B1(三值参考状态机+应观测点集 Q)/B2(truncation 改 states 步级顶层+对齐断言 A1-A3+PRIMARY 语义修正)/B3(描述性普查包六件套+消费者条件伴报 C1 预登记)全部落地;设计层 freeze-eligible** | 本轮交付;v1 `762bf1a` 保留;执行仍 HOLD |
-| **EERD v0.1** | 契约草案 + A/B 字段来源/证据权限/样本分组/QA 八门；**G-QA-3 分 schema-only 完整性账本与 outcome 授权后的 UNKNOWN/flag 分层** | 仅文档；物化/导出/打标签 HOLD(D-008) |
+| **Stage2J v2** | B1 三值参考、B2 截断字段/对齐、B3 六件套与常数基线，均按 Package A 封版协议执行 | **A0 已在服务器执行并 PASS**，仅限单栈回顾性同技能代理一致性；历史 v1/v2 候选与冻结映射保留 |
+| **EERD v0.1** | A 已物化 235 行，B 已物化 480 行/24 个父事件；服务器 export QA 26/26 PASS，字段权限与分组关联已按检查脚本验收 | **内部研究数据集已构建**（用户服务器回传）；不得外发、用于 online/evolution 或声称物理真值独立核验 |
 | **P1 v1.1** | **已修正 H-P1m 对“异质性 ⇒ 不可交换/Conformal 失效”的错误推断**；要求合法在线前缀定义风险组、完成声明覆盖/弃权约束、DEV 锁定最强基线。A0 与 C 的结果构念不同 | 研究设计仅为候选；真实闭环实验仍 HOLD(新预注册+授权+§36 局部解除) |
-| **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；工具 flag True/False 各103。常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%，always-positive 基线 76.21%。B QA 24/480 PASS | 用户服务器回传；研究代理仅技内 FGONLY。详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md`；独立 export QA 待跑 |
+| **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%；export QA 26/26 PASS | 用户服务器回传，独立的字段/数据行工程核验已跑；详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
 
-1. **A0 数据及统计已跑完，禁止重复刷结果**：已拿到 235/235 资格、206 PRIMARY 的真实描述结果；原始 `a0_result.json` 和封版源码保持不变。最有研究价值的观察为工具失败侧的 56/103 FGONLY-positive 代理错位，不能把它直接解释成真实持握成功。
-2. **EERD v0.1 内部导出最后 QA**（L1 已授权）：在现有服务器仅运行 `python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a`，检查 A/B 输出行数、跨视图 join、字段权限及 B 每事件 8+8+4；只生成补充 QA / 标准混淆矩阵视图，不改变封版数据和指标。
-3. **P1（L2 未批准）**：未来前瞻实验聚焦 pick 失败反馈后的低成本二次核验、何时重试与未来固定 horizon 的实际物理结果；必须记录弃权覆盖/动作成本，强基线在 TEST 前锁定。现有 A0 不是 P1 事件级因果效应估计。
-4. **P2**：长期记忆/技能演化仍只有定义，无更新后独立外部证据。
+1. **P0 / Research Package A 正式收官（内部数据层）**：3/3 synthetic tests OK、A0 结果 PASS、Export QA 26/26 PASS；不再重复 A0 统计、改动冻结结果或增加无新证据的审查轮次。
+2. **已取得的主要科学现象**：在主分析 206 picks 中，`flag=False` 的 103 次里有 56 次 **技内某时刻 FGONLY 代理满足**；工具成功侧仅 2/103 次代理不成立。这支持“工具失败后先验证/还是直接重试”的**研究动机**，不能等同返回时已经抓稳或未来真实持握。
+3. **P1（L2 未授权）**：在真实 D2 决策边界验证“低成本额外观察后是否调整接受/重试/恢复决策”，比较固定预算强基线、固定后续窗口物理结果、覆盖率/弃权和总成本。需要单独一次整阶段授权后才能运行 C cohort 或修改 Runtime。
+4. **P2**：证据治理的跨任务记忆/技能演化仍属长远研究问题，现无经验证的更新收益。
 
 ## 4. 当前明确禁止的推断
 
@@ -50,9 +50,9 @@
 
 ## 5. 当前待办
 
-1. 服务器完成**一次性 L1 export QA**：`python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a`，核对是否得到 `gate=PASS`；若 FAIL 只修补导出/核验实现，不更改 A0 已冻结分析或原数据。
-2. 归档 `PACKAGE_A_EXPORT_QA.json` 的**清洗后汇总**，核验真实 EERD 物化质量并关闭 Research Package A。
-3. 若用户希望进入 P1 的新采集/验证/恢复，需另立一次 L2 完整阶段授权；Stage R §36 与 S1 停止状态保持不变。
+1. **无须继续执行 Package A 命令**：现有数据集仅供服务器内部离线研究；原始 audit-only 文件和密钥不得 push。
+2. 下一阶段若用户要求实际推进 Harness 方法，优先**一次性定义并申请 P1 L2 研究包**（研究问题、真实 D2 证据、验证动作与成本、样本/预算、对照、停止条件），独立于历史 Stage R，保持冻结不改。
+3. 新研究结果到来前不扩大 EERD 物化或声称发布 Benchmark。Stage R §36 HARD STOP、S1 ON_HOLD 不变。
 
 ## 6. 标准汇报格式
 
