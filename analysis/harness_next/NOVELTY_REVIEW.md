@@ -1,6 +1,6 @@
 # NOVELTY_REVIEW — 独创性审计与收缩判定
 
-> 2026-10-09 | 版本 **v0.2.1**(Method Consistency Finalization 轮)| 配套
+> 2026-10-09 | 版本 **v0.2.2**(Post-MCF evidence interface 修订)| 配套
 > `METHOD_SPEC.md`(同日 v0.2.1)。
 > v0.1 见 git `adf5d18`;v0.2 见 git `cc7e0d3`(Zetta 源码重核 + N1 收缩,
 > 变更日志 §0.1);v0.2.1 按 `V02_INDEPENDENT_REVIEW.md`(commit `431ddda`)
@@ -88,6 +88,45 @@ Evidence Qualification:经典统计工具如实标注为已有,创新限定在
 | 3 | §7 N2 含"不可逆性约束(不可逆决策门槛≥一切可逆决策)" | METHOD_SPEC v0.2.1 已删除 A2b 全称命题(改为决策三档建模);N2 表述同步删除该引用 | METHOD_SPEC §6.4 |
 
 ---
+
+---
+
+## 0.3 v0.2.2: Evidence Authorization Interface Repair 与外部原文边界
+
+> 来源: `POST_MCF_INTERFACE_AND_LITERATURE_AUDIT.md` 与
+> `EVIDENCE_INTERFACE_REPAIR_REPORT.md`。此节是**追加核验**,
+> 不回写 v0.1-v0.2.1 的历史审计结果。
+
+1. **来源可见性 ≠ 统计信息量**:完整 SAME/POLICY 8+8 是冻结
+   `S_pre` 的离线研究证据,不保证在线 Runtime 可用;若 E/A/P/U
+   标签依赖仅审计 sim 真值,就不能拿来驱动 Evolution candidate gate。
+   “证据统计上强”与“证据有决策使用权”须分开证明。
+2. **接口自洽性已修订(v0.2.2)**:进化门修复 UNIDENTIFIED/UNKNOWN
+   可能越过 D2 的反例;单次成功不再绕过 Stage R 冻结 E 判据;
+   仅离线 P 案例不再赋 Runtime `REPORT_FAILURE=ALLOW`。
+   这些是必要的规范正确性修复,**不能自动宣称算法创新**。
+3. **CheckVLA [F:论文 HTML 方法与限制段]**:
+   https://arxiv.org/html/2607.26789
+   其 conformal 校准针对“nominal-success 条件下,episode 第一次
+   不必要干预”的概率,以相同冻结流程下校准/部署 exchangeability
+   为前提;不覆盖失败召回、修复后安全、重复干预或分布偏移。
+   这证明“限定保证对象/有效前提”的方法思想已有先例,
+   不能为 PAEG 独占。
+4. **VASO [F:论文 HTML 方法与 Failure Case]**:
+   https://arxiv.org/html/2606.05395
+   其形式验证依赖 proposition-aligned labeling function 的正确性,
+   作者给出忽略速度第三维而得到虚假安全验证的具体反例。
+   这证明物理信号→命题映射保真性是成熟先例;
+   PAEG 的 L0–L3/claim 契约只有在聚焦物理 reset、双 outcome 合同与
+   合法消费权限的独特交互时才有条件讨论创新。
+5. **核验深度边界**:以上两篇只核验所述 HTML 原文方法/局限/失败例章节;
+   Zetta 源码先例继续标 [S-ext];RegenHarness 与 Zetta 本轮仍未成功
+   核验论文全文,不得据其摘要/源码缺乏某术语断言全文没有统计方法。
+
+**收缩后定位**：N1=Reliability-Aware Persistence Evidence Qualification
+仍是研究问题候选;“抽象权限/校准/条件保证本身新颖”的表述让渡。
+需要先证明真实可消费信号与独立结果目标可获得,再考虑离线定标;
+这次文档修订没有实验验证新算法。
 
 ---
 
