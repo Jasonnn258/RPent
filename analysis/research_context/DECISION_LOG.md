@@ -157,6 +157,15 @@
 - **研究边界**：预检证实在已有轨迹上具备输入字段和文件，不证明运行时新采集图像的新鲜度、视觉判断效果、对照可辨识性或物理因果收益。Stage R §36 原 Hard STOP、S1 ON_HOLD、P1 L2 未批准的事实不变。
 - **重开条件**：用户一次性授予有界的 P1-DEV0 L2 阶段权限（≤24 新 episodes / 8h 墙钟 / 6 GPU·hour 并固定 manifest、四臂和审计界线），或获得新的、足以改变数据有效性判断的证据。
 
+## D-017 · P1-DEV0 有界 L2 阶段批准与不可变随机化先行
+
+- **日期/授权**：2026-10-09。用户上一轮收到“是否批准 P1-DEV0 完整 L2 阶段”的明确问题（≤24 episode、2 worker、8h wall 或 6 GPU·hour）；随即回复“go on”。按该限定问题的上下文将其作为**本阶段范围内的继续许可**记录，详细在 `P1_DEV0_AUTHORIZATION_AND_LOCK.md`，不得用于 Stage R 历史改写或未来其他 L2/L3 活动。
+- **状态**：`L2_SCOPE_APPROVED / CODE_PREP_COMMITTED / NO_NEW_SIM_STARTED`。已提交 `p1_dev0_manifest.py`（task3/5/9×seed1001..1008=24，新任务/seed grid、任务×臂各2、SHA256 write-once）、`p1_dev0_policy.py`（四臂逻辑、D0/D1 blind parity、privileged payload fail-close），对应合成测试及 `prepare_p1_dev0.sh`。这些测试及真正 manifest seal **尚需服务器实际运行**。
+- **原因/方法选择**：历史 D2 有 206 合格调用、103 失败、合法 low-res RGB+proprio 齐备，但任务 9 的工具失败率远高于 3/5；故必须先随机分配并锁定任务分层，**不因没触发失败 D2 而重新挑 seed**。物理 probe 本身有干预效应；D1 必须遮蔽 probe 后证据，D2/D3 消费的只能是真实传递的合法新观察。
+- **风险与阻断**：纯 policy 模块只是**候选决策契约**，不等于 Runtime 已接线；D3 中“visual_frame_available”只是可见性元信息，并未完成视觉物体识别。必须实现且测试 Runtime 的 D1 blind 信息遮蔽、后续动作分支、总成本、固定 env-step horizon audit-only truth、运行预算 watchdog 才能实际启动 ≤24 episode。当前不允许把纯决策模块结果解释为 P1 物理收益。
+- **局部例外边界**：Stage R §36 HARD STOP 仅针对**本 P1-DEV0 阶段的新仿真**作有界例外；原 Stage R/S1 不解冻。确认性 HELDOUT、训练、自进化和生产部署未批准。
+- **下一动作**：服务器执行一次无 GPU 的 `bash analysis/research_context/prepare_p1_dev0.sh`，返回测试/Gate/manifest SHA；随后按已获批阶段实现并运行隔离 Runtime DEV0，出现信息泄漏/无法保证盲态对照/越预算 STOP，而不是重定义指标挽救。
+
 ## 新决策追加模板
 
 ```markdown
