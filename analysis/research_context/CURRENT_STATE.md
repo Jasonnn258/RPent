@@ -4,11 +4,11 @@
 >
 > 基线:Stage2K 独立复审 `2b3710e`、EERD 契约 `70d57ba`、本轮基线 `4d155b9`;本轮新增 Stage2J-v2 候选 + EERD 字段级 QA + P1 问题定义；2026-10-09 独立方法复审已修正 P1 v1.1（commit `92384e5`）及 EERD QA 两阶段账本（`a040bfa`）。Stage2J v1 原文保留为未冻结历史候选。所有新实验仍须单独批准。
 
-> **Research Package A 执行状态（2026-10-09）：L1 已获用户阶段级授权；A0 v2 已独立冻结为 `analysis/harness_h0/H0_OE_STAGE2J_FROZEN_V2_PACKAGE_A.md`；只读两阶段执行代码、合成测试、服务器一键入口已提交。当前 GitHub 工具环境无服务器私有原始轨迹访问，故**尚未运行真实 A0 / EERD 物化**；需在已有服务器执行 `bash analysis/research_context/run_package_a.sh`，回传 gates 与摘要。无需再次申请 L1 字段/outcome 权限。L2/L3 继续 HOLD。执行资产位于 `analysis/research_context/{RESEARCH_AUTHORIZATION.md,research_package_a.py,test_research_package_a.py,run_package_a.sh}`。合成测试代码已提交，但在本环境未执行。
+> **Research Package A 服务器执行回传（2026-10-09）：**用户已在服务器执行 `bash analysis/research_context/run_package_a.sh`，回传 **3/3 synthetic tests OK / schema PASS / outcome PASS / eligible 235/235 / PRIMARY 206 / UNKNOWN 0 / B 24 events×480 trials PASS**。结果与统计语义已记录于 `PACKAGE_A_A0_SERVER_RESULT_20261009.md`（仅汇总，不提交原始 outcome JSONL）。源代码中原始 `table.false_positive` 表示 `flag=False, reference=POSITIVE`，常规混淆矩阵中应记 FN；标准矩阵 TP=101、FP=2、FN=56、TN=47。已新增独立本地导出审计 `audit_package_a_exports.py`，**尚待服务器运行以完成 A/B 输出行数、权限隔离和溯源关联的复核**。L2/L3 继续 HOLD。
 
 ## 1. 总状态
 
-**`PACKAGE_A_L1_APPROVED / A0_V2_LOCKED / OFFLINE_EXECUTOR_COMMITTED / SERVER_OUTCOME_AWAITING_EXECUTION / P1_L2_HOLD / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_SERVER_A0_PASS / EERD_A_B_INTERNAL_OUTPUTS_REPORTED / EXPORT_QA_FINAL_PENDING / P1_L2_HOLD / RUNTIME_HARD_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -28,14 +28,15 @@
 | **Stage2J v2** | **B1(三值参考状态机+应观测点集 Q)/B2(truncation 改 states 步级顶层+对齐断言 A1-A3+PRIMARY 语义修正)/B3(描述性普查包六件套+消费者条件伴报 C1 预登记)全部落地;设计层 freeze-eligible** | 本轮交付;v1 `762bf1a` 保留;执行仍 HOLD |
 | **EERD v0.1** | 契约草案 + A/B 字段来源/证据权限/样本分组/QA 八门；**G-QA-3 分 schema-only 完整性账本与 outcome 授权后的 UNKNOWN/flag 分层** | 仅文档；物化/导出/打标签 HOLD(D-008) |
 | **P1 v1.1** | **已修正 H-P1m 对“异质性 ⇒ 不可交换/Conformal 失效”的错误推断**；要求合法在线前缀定义风险组、完成声明覆盖/弃权约束、DEV 锁定最强基线。A0 与 C 的结果构念不同 | 研究设计仅为候选；真实闭环实验仍 HOLD(新预注册+授权+§36 局部解除) |
+| **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；工具 flag True/False 各103。常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%，always-positive 基线 76.21%。B QA 24/480 PASS | 用户服务器回传；研究代理仅技内 FGONLY。详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md`；独立 export QA 待跑 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
 
-1. **P0/A0 数值普查(一次性,待用户决定)**:Stage2J v2 已解决全部设计阻断;执行需双重授权(检查 B 字段扫描 + outcome 读取)。产出可包含 EERD-A 结果阶段质量账本及工具 flag/FGONLY 参考的描述；**不是** P1（episode 级错误完成率）的功效先验。无具体消费者则默认不执行。
-2. **C cohort 采集 + P1 闭环对照(唯一能检验 PAEG 机制主张的路径)**:问题、对照、数据需求、治理骨架已齐;下一步只能是全新预注册 + 用户授权,不存在更多文档前置。
-3. **P2**:保持长期问题定义;无独立长期更新证据,不启动。
-4. **文档轮次封顶执行中**:四项理论文档不再空转;重开条件=新数据/外部实质缺陷/用户明示。
+1. **A0 数据及统计已跑完，禁止重复刷结果**：已拿到 235/235 资格、206 PRIMARY 的真实描述结果；原始 `a0_result.json` 和封版源码保持不变。最有研究价值的观察为工具失败侧的 56/103 FGONLY-positive 代理错位，不能把它直接解释成真实持握成功。
+2. **EERD v0.1 内部导出最后 QA**（L1 已授权）：在现有服务器仅运行 `python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a`，检查 A/B 输出行数、跨视图 join、字段权限及 B 每事件 8+8+4；只生成补充 QA / 标准混淆矩阵视图，不改变封版数据和指标。
+3. **P1（L2 未批准）**：未来前瞻实验聚焦 pick 失败反馈后的低成本二次核验、何时重试与未来固定 horizon 的实际物理结果；必须记录弃权覆盖/动作成本，强基线在 TEST 前锁定。现有 A0 不是 P1 事件级因果效应估计。
+4. **P2**：长期记忆/技能演化仍只有定义，无更新后独立外部证据。
 
 ## 4. 当前明确禁止的推断
 
@@ -47,11 +48,11 @@
 - 不在 UNKNOWN 参考上引用任何"一致率/可靠性"数字;不在多数类未披露时单独引用 raw concordance(Stage2J-v2 M0-M5 纪律)。
 - 不由 Stage R 连败 h(k) 下降推导 conformal 可交换性失效（PAEG M1 异质可交换足以解释）；不让 P1 无限弃权套利、不在 TEST 事后选最强对照。
 
-## 5. 当前待办(Next Action)
+## 5. 当前待办
 
-1. **[Package A 已获授权，等待服务器一次运行]** 在服务器仓库执行 `bash analysis/research_context/run_package_a.sh`，它先尝试纯合成回归测试，再完成 schema seal→A0 outcome→EERD A/B 私有输出和总结。读取已有 outcome 无需额外逐项批准，但本会话不能代替服务器执行。
-2. 文档轮次封顶生效:除非上述①/②产生新数据,不再新增理论修订轮次;P1 文档 §5.3 停止清单(五项)照此执行。
-3. 保留 Stage R §36 Hard STOP、S1 ON_HOLD;后续重要审查结论写入 `DECISION_LOG.md`。
+1. 服务器完成**一次性 L1 export QA**：`python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a`，核对是否得到 `gate=PASS`；若 FAIL 只修补导出/核验实现，不更改 A0 已冻结分析或原数据。
+2. 归档 `PACKAGE_A_EXPORT_QA.json` 的**清洗后汇总**，核验真实 EERD 物化质量并关闭 Research Package A。
+3. 若用户希望进入 P1 的新采集/验证/恢复，需另立一次 L2 完整阶段授权；Stage R §36 与 S1 停止状态保持不变。
 
 ## 6. 标准汇报格式
 
