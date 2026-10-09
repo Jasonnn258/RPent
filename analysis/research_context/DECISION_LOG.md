@@ -209,6 +209,15 @@
 - **后续研究门槛**：只有图像合法性、时间新鲜性和可比相机约定可验证后，才能设计/测试“视觉目标-爪口相对位置或时序一致性”的**离线候选验证器**；需要独立 audit-only 真值评价，但绝不把该真值输入 Runtime/Evolution。视觉差分变化不等于持握。任何新仿真/在线 action 的 P1 阶段须新的有界 L2 预注册与授权。DEV0 因实际 GPU 超额继续 CLOSED，不补旧3格。
 - **原因/选项**：转向观察与标签的构念有效性、对齐和价值检验，暂停无监督阈值追调；不将 EEF dz 门槛偷偷改为更易触发条件去复写 DEV0。
 
+## D-022 · 五组旧 DEV0 Probe 图像配对 QA 真实 PASS，单元测试零值键缺陷修补
+
+- **日期/来源**：2026-10-09，用户在服务器分支 `781339b` 运行 `test_p1_dev0_visual_pair_preflight.py` 与 `scripts/p1_dev0_visual_pair_preflight.py` 并回传终端记录。本轮追查 GitHub `scripts/p1_dev0_visual_pair_preflight.py`、测试及私有数据的**脱敏计数**；未直接访问服务器原图像。
+- **实测**：真实 Gate `PAIRED_ASSETS_COMPLETE`，事件文件21、未触发15、已触发6、其中未执行 probe1、真实 probe5；5/5 `policy_image_agentview_low→probe_agentview` 和 5/5 `image_wrist_low→probe_wrist` 配对记录路径、SHA256、PNG头尺寸合格，缺失/哈希错误报告为空。每个摄像头前后 SHA256 不同 5/5、相同0。
+- **工程例外**：合成回归为 3 项中 2 项 PASS，失败是测试调用 `new_report["counts"]["wrist_verified_pair"]`；在故意篡改文件而 `verified_pair=0` 时，原 Counter→dict 序列化**省略零值键**，所以抛 `KeyError`。这是结果模式稳定性/测试实现问题，**不改变真实数据 Gate**。已单独修复输出统计模式，强制 `*_verified_pair` 等四类预定字段在为零时仍输出0；修复后回归测试**尚未在服务器运行**。冻结实验、数据和 A0/DEV0 策略均未修改。
+- **科学裁决**：`VISUAL_PAIR_ASSET_QA_PASS / VISUAL_SEMANTIC_IDENTIFIABILITY_UNTESTED / SYNTHETIC_TEST_FIX_PENDING_RERUN / P1_NEXT_L2_HOLD`。文件字节不同不能证明对象真实移动，更不能证明物体被夹住。Pre wrist 由原始图像上下翻转保存，post wrist 直接保存原始图像，**比较像素前必须统一坐标方向**；现有 QA 仅查 SHA 和 PNG header，未做完整图像解码或识别物体。
+- **下一步**：复跑一次无 GPU 的视觉合成测试验证代码修复，不再重复 5/5 已通过的配对统计；研究上如果要继续，应使用这些已有合法 RGB 做独立的对象-爪口可辨识性分析，既不能用模拟器物体世界坐标当在线特征，也不能借此启动新的 rollout 或修改冻结结果。
+- **授权**：历史 DEV0 Stage CLOSED；独立未来在线 P1 新实验需要新阶段 L2，Stage R §36 原 Hard STOP/S1 ON_HOLD 继续。
+
 ## 新决策追加模板
 
 ```markdown
