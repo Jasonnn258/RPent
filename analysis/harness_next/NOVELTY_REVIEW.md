@@ -1,7 +1,7 @@
 # NOVELTY_REVIEW — 独创性审计与收缩判定
 
 > 2026-10-09 | 版本 **v0.2.2**(Post-MCF evidence interface 修订)| 配套
-> `METHOD_SPEC.md`(同日 v0.2.1)。
+> `METHOD_SPEC.md`(同日 v0.2.2)。
 > v0.1 见 git `adf5d18`;v0.2 见 git `cc7e0d3`(Zetta 源码重核 + N1 收缩,
 > 变更日志 §0.1);v0.2.1 按 `V02_INDEPENDENT_REVIEW.md`(commit `431ddda`)
 > 做两处更正:①Zetta 演化验证已有 exact McNemar 统计门(gating.py 源码级,
