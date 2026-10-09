@@ -43,7 +43,7 @@ MCF 确实修复了 B1-B4 的主要定义缺陷，不能抹去该轮工作。然
 
 ## 3. 外部文献进一步验证的保证边界
 
-### F1. CheckVLA [F：阅读全文 HTML]
+### F1. CheckVLA [F：论文 HTML 方法及边界章节原文核验]
 
 出处：https://arxiv.org/html/2607.26789，正文 “Calibrated Risk Triggering” 与 Appendix D/P。
 
@@ -51,7 +51,7 @@ MCF 确实修复了 B1-B4 的主要定义缺陷，不能抹去该轮工作。然
 - 作者明确说明这个概率保证**不**涵盖失败召回、干预后的安全、重复干预、分布漂移或跨 sim-to-real 转移。报告把 false-intervention calibration 和 alarm usefulness 分开。
 - **PAEG 应主动让渡**：conditional guarantee、分组切分防泄漏、明确 guarantee scope、保留历史 keyframe 的理念均有先例。新问题如存在，只能落在 `S_pre` 重建下的重复失败证据相较自然 `S_post` 的**可比性**、双契约及可授权消费范围，而不是“首次声明保证需条件”。
 
-### F2. VASO [F：阅读全文 HTML]
+### F2. VASO [F：论文 HTML 方法及失败案例章节原文核验]
 
 出处：https://arxiv.org/html/2606.05395，§4.2 “Guarantee and Assumption” 与 Appendix C “Failure Case”。
 
