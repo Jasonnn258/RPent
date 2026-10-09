@@ -176,6 +176,18 @@
 - **不能推出什么**：不能宣称 probe/验证策略对恢复或任务成功的任何效应（n≤3/臂、触发任务高度集中、D2 无数据）；不能引用 audit 交叉表作臂间比较；不能据 t5 0/8 触发断言该任务"不需要验证"（仅本批 seed）。
 - **重新开启条件**：正式 P1 新预注册 + 新 L2 授权，且设计须先按任务分层解决触发率/功效；修复 runner 两处已知缺陷（SKIPPED 未逐条落日志、预算 launch-gate 语义）。
 
+## D-019 · DEV0 完成后复审：Pre-delivery Hook、零实际策略分歧和不等时审计
+
+- **日期/证据**：2026-10-09；独立读取研究分支 `6d1060a` 的 `P1_DEV0_EXECUTION_REPORT.md`、Runtime Hook `rpent/utils/p1_dev0.py`、`robots/libero/toolkit.py`、`scripts/p1_dev0_run.py` 与 `scripts/p1_dev0_analyze.py`；目标化审查存 `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md`。本轮尚未直接访问服务器私有事件文件，所有 21/24、6/6、6.17 GPU·h 均为 GitHub 已提交的运行报告所载数据。
+- **判定**：`PARTIAL_ENGINEERING_GO / P1_METHOD_GAIN_UNIDENTIFIED / P1_DEV0_CLOSED / POSTHOC_AUDIT_ONLY`。对 D-018 的 `ENGINEERING_GO` 作解释性限定，不改写原历史报告。
+- **核心发现 1**：`LiberoToolkit._step` 先完成 pick + `dump_state`，再进入 `maybe_intervene`，最后将视图返回 Planner。此方法是**工具结果计算后、Planner tool-return 交付前**的 Harness Adapter 拦截。D0/D1 的原 false flag 被 Harness 消费且往往只把自动 retry 后视图交给 Planner；不能宣称 Planner 已收到 false 再作策略决策。
+- **核心发现 2**：D2 从未发生生产触发，6 次真实决策/动作全部 `RETRY`，缺少任何实际“继续 vs 重试”对照；D3 的 `visual_frame_available` 仅检查文件 SHA/存在性，**未分析图像像素**；其 EEF_z 差值取自维持 EEF 位姿的夹爪 probe 过程，不能当作物体抬升。
+- **核心发现 3**：审计 4 次在 H 后的下一技能边界（+3/+8/+18/+23 步），另 2 次为 H 前 `EPISODE_END`（−120/−70 步），不同实际窗口不能直接合并作单一 H 时点成功率。
+- **预算与分母**：已报告 GPU 6.17h 大于 6.0h 硬上限，launch-gate 在飞任务导致越限；`scripts/p1_dev0_analyze.py` 将全部无事件文件行归为 `no_events_infra`，会误把 3 个 budget-skipped 计作 infra。修正解释应分配 24 / 运行 21 / 触发 6 / 未触发 15 / 无事件 3（具体原因以 Runner 报告为准），不要把缺失等同于 infra。
+- **工程行动**：新增**只读** `scripts/p1_dev0_posthoc_audit.py` 与 synthetic tests；按源数据原样补充严格分母、审计时刻/缺口、预算 gate、合法 probe 观测上的 D2/D3 shadow policy 可达性（不构造未执行动作的任务 outcome，且要求冻结 policy SHA 匹配）。未在服务器运行的新脚本不得声称 PASS。
+- **授权决定**：原 DEV0 L2 范围耗尽并 CLOSED；本轮不补跑 3 格、不复活 Stage R，不批准新实验。下一步只有在新的独立 L2 研究包里确定真实可辨识证据、预交付工具决策 boundary、hard-budget watchdog、任务分层与独立未来标签，才可执行新 cohort。
+- **来源边界**：复审为源码/已提交报告层级，不能替代读取完整私有轨迹的额外复核；如真实事后工具与报告冲突，提交证据后重新审议。
+
 ## 新决策追加模板
 
 ```markdown
