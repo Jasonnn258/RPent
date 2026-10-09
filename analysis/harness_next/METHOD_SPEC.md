@@ -1036,8 +1036,9 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 
 **代价对齐检验(v0.2.1,对照 §6.4 A2a——仅可比对,无 A2b)**:矩阵满足
 ——ARCHIVE/QUARANTINE 零门槛 ↔ 其假阳代价近零;REPORT_COMPLETION 需 L2+
-↔ 其假阳是信用损耗;PROPOSE_REVIEW 需双臂+证据量+修复证据+保真度四重
-条件 ↔ 其假阳是跨 episode 审查流污染(提名可撤销,但审查成本实质;
+↔ 其假阳是信用损耗;PROPOSE_REVIEW 须同时满足合法可消费的 P 类 outcome、
+充分证据量、L2 持续性、repairability 正面证据与至少 MODERATE 的
+因果可辨识性,缺任一项均不得提名 ↔ 其假阳是跨 episode 审查流污染(提名可撤销,但审查成本实质;
 下游 PROMOTE-DEPLOY 一旦执行才难逆——该层不在本方法授权内,§6.4 三档)。
 **注意该排列不再由"门类"解释**:ARCHIVE(Evolution 门)门槛低于
 REPORT_FAILURE(Runtime 门),正是 v0.1 全局单调性命题的反例,也是改为
@@ -1085,14 +1086,18 @@ unknown_clauses=[];repairability=UNKNOWN。
 **双门判定**:Runtime——CONTINUE=ALLOW(重试自由);REPORT_COMPLETION=DENY;
 REPORT_FAILURE=DENY(单次失败不构成失败上报资格)。Evolution——ARCHIVE
 (仅归档;与 E 型**动作相同**——都不触发演化,但账本记录 DETERMINING 而非
-E,后续若积累出翻盘证据才改判 E、积累出双臂全败才进入 P 路径)。
+E,只有合法完整的 Stage R 双臂证据满足 SAME≥2/8 才可在**事后**
+研究标签中判 E;仅翻盘一次不得改判 E,双臂全败也只有在完整离线
+契约下才构成 P 研究标签)。
 
-**实证对照(语义修正)**:E 型事件 14/14 在 16 试内出现成功 [D] 是**事后**
-标签的判据——它在事件窗口结束后把"翻盘已发生"归类为 E。它**不能**读作
+**实证对照(语义修正)**:E 型事件 14/14 在 16 试内至少一次成功 [D]
+是已由 **SAME≥2/8 冻结规则**判为 E 后的回看性质,
+并非“至少一次成功即可归 E”的判据。它**不能**读作
 "单次失败时预测翻盘概率高":单次失败时刻,该事件将落入 E 还是 P 未知
 (先验混合:E 型比例 14/24,但单次观测的似然比对两类几乎无分辨)。
-归档不提名正是与"单次无分辨力"一致的克制——克制的根据是**无信息**,
-不是"信息偏向瞬态"。
+归档不提名与“单次证据不足以授权持续性判断”一致;
+单次失败在 M1 下仍可能更新后验,不能说成数学上的**零信息**,
+也不能说“信息偏向瞬态”。
 
 ### 9.2 场景 B:抓取成功后滑落(SLIP_LOST,TRANSIENT_SUCCESS)
 
@@ -1111,8 +1116,9 @@ E,后续若积累出翻盘证据才改判 E、积累出双臂全败才进入 P �
 **PA-Attr**:kind=SLIP_LOST(由"曾 ACQUIRED(闭窗 CONFIRMED)后开窗持续
 断言被否定(`Maintained` CONTRADICTED + 物体 z 骤降反证)"的模式判出——
 FAIL_KIND 自动机的用途;v0.2 注:判定链不再引用"闭窗 CONFIRMED 被 CONTRADICTED"
-这一被删除的非法转换);若重试后成功 → E + TRANSIENT 特征
-标记(acquired 与 stable 的分离模式);causal_grade=DESCRIPTIVE。
+这一被删除的非法转换);若未来重试成功,仅能记录一次翻盘和
+TRANSIENT 特征,不能据此直接赋 Stage R E 标签;
+无合格干预/对照时 causal_grade 默认 UNIDENTIFIED。
 
 **双门判定**:Runtime——REPORT_COMPLETION=DENY(t3 后无 active 的任务级
 claim);HOLD_AND_OBSERVE=触发(声明降级);重取(新的 pick attempt)按
@@ -1185,8 +1191,9 @@ verifier / Planner redesign / SFT / OPD / RL。本方法的位置:
   规则显式预注册、阈值显式待定标、无拟合;但若未来实现中被用于在线动作
   决策,则整体落入 adaptive controller 禁区——**实现与在线接线须另立阶段、
   另行预注册、用户显式批准**(与提案 §7 一致);
-- 双门的输出语义是"资格判定",REPORT_FAILURE=ALLOW 的意思是"证据足以支持
-  该判定",不是"系统将自动止损"。
+- 双门输出仅是证据资格,不是自动控制指令。即使将来某合法在线证据
+  使 REPORT_FAILURE=ALLOW,也不意味着自动止损;完整离线双臂 P 标签
+  对 Runtime 必须为 N/A,不得通过 §9.3 案例偷渡。
 
 ### 10.2 防火墙
 
