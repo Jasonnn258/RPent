@@ -104,6 +104,16 @@
 - **不能推出什么**：修订 ≠ P1 控制器实现/方法收益，也不证明任何 conformal 假设在新的 C cohort 中成立或失效；未运行实验、未读取 outcome。
 - **重新开启条件**：新 cohort 和数据审查获得单独明确授权；尚需独立预注册与规划，不自动解除 Stage R §36 HARD STOP。
 
+## D-012 · 用户批准 Research Package A 的阶段级 L1 离线授权
+
+- **日期/来源**：2026-10-09；用户明确同意“阶段级授权，执行 Research Package”——承接上一轮所定义的 Research Package A。
+- **状态**：`APPROVED_L1_SCOPE / EXECUTOR_COMMITTED / SERVER_EXECUTION_PENDING`。
+- **决定**：在一次授权内完成已有 187 原始 episode / 235 pick 的字段验收、Stage2J v2 FGONLY 三值标签、A0 描述性统计与 Episode 聚类区间，以及 EERD v0.1 A/B 内部数据视图与 QA；只读原始数据和 Stage R 冻结结果；不需要每个字段、统计子步骤再次请求许可。
+- **冻结依据**：`analysis/research_context/RESEARCH_AUTHORIZATION.md`；独立 A0 冻结执行映射 `analysis/harness_h0/H0_OE_STAGE2J_FROZEN_V2_PACKAGE_A.md`；源代码 `analysis/research_context/research_package_a.py`；合成测试 `test_research_package_a.py`；一键服务器入口 `run_package_a.sh`。
+- **保留边界**：新 rollout / C cohort / P1 干预 / 训练 / Runtime 编辑均未获批；Stage R §36 HARD STOP 和 S1 ON_HOLD 继续有效。允许 L1 内部数据物化不等于对外发布或给模型使用研究审计真值。
+- **实际结果**：GitHub 代码与文档已提交；**当前工具环境没有私有服务器原始轨迹，因此尚无 A0 样本资格/结果值统计、没有 EERD 数据集实际物化、合成测试尚未在服务器运行**。把待完成步骤收束为一次服务器执行，收到结果后直接处理异常/验收，阶段内不再就已授权 L1 子任务询问。
+- **防跑偏要求**：只认服务器实际回传的 `schema_qa.json`、`a0_result.json`、A0 报告与文件哈希；不把预注册通过、脚本存在或 synthetic tests 编写等同于真实结果。任何 STOP 门失败停本阶段受影响的分析，不后验改指标。
+
 ## 新决策追加模板
 
 ```markdown
