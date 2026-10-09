@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from rpent.utils import rtrace
+from rpent.utils import p1_dev0, rtrace
 from rpent.utils.rpc import RpcClient
 
 
@@ -71,6 +71,9 @@ class LiberoEnvClient:
         )
         _, _, term, trunc, _ = ret
         self.check_done(term, trunc)
+        # P1-DEV0 仪器(默认关闭):物理 env-step 计数(固定 horizon 审计用)
+        if p1_dev0.enabled():
+            p1_dev0.count_env_steps(1)
         return ret
 
     def chunk_step(self, actions, *, return_all_frames: bool | None = None) -> tuple[Any, Any, Any, Any, Any]:
@@ -98,6 +101,9 @@ class LiberoEnvClient:
         )
         _, _, term, trunc, _ = ret
         self.check_done(term, trunc)
+        # P1-DEV0 仪器(默认关闭):chunk 的物理 env-step 计数
+        if p1_dev0.enabled():
+            p1_dev0.count_env_steps(len(actions))
         return ret
 
     def raw_obs(self) -> dict:

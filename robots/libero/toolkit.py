@@ -13,7 +13,7 @@ from typing import Any
 from robots.libero import tools as libero_tools
 from rpent.dashboard.events import DashboardEventSink, ToolResultEvent
 from rpent.tools.toolkit import ToolCancelled, Toolkit
-from rpent.utils import rtrace
+from rpent.utils import p1_dev0, rtrace
 from rpent.utils.logging import get_logger, get_output_dir
 
 
@@ -106,6 +106,13 @@ class LiberoToolkit(Toolkit):
             step_idx=step_idx,
             log={"command": command, "result": result_dict, "elapsed_s": elapsed},
         )
+        # P1-DEV0 实验路径(默认关闭,RPENT_P1_DEV0=1):首个合格 false-pick
+        # D2 边界的四臂干预钩子。返回 None → 走下方 vanilla 路径,行为不变。
+        if p1_dev0.enabled():
+            hooked = p1_dev0.maybe_intervene(
+                self, name, kwargs, result_dict, step_idx, elapsed)
+            if hooked is not None:
+                return hooked
         out = libero_tools.view_driver_state(step_idx)
         out["agent_elapsed_s"] = elapsed
         if result_dict.get("interrupted"):
@@ -151,6 +158,10 @@ class LiberoToolkit(Toolkit):
     def close(self) -> None:
         """Flush the agent-side video buffer to disk (end-of-run).
         """
+        # P1-DEV0 实验路径(默认关闭):episode 结束审计兜底(提前终止的
+        # episode 未到固定 horizon 时在此取样 audit-only outcome)。
+        if p1_dev0.enabled():
+            p1_dev0.finalize(self)
         if self._video_path is None:
             return
         try:
