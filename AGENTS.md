@@ -18,6 +18,8 @@ This repository contains frozen historical experiments and a long-running Harnes
 
 Read-only **post-hoc analysis of already collected P1-DEV0 artifacts** may continue without new simulation; `scripts/p1_dev0_posthoc_audit.py` separates budget-skipped/no-event rows from actual infra, checks unequal audit horizons, and computes noncausal shadow policy decisions. The audit is not a new rollout.
 
+**Read-only local RGB evidence review** is allowed on the five existing DEV0 boards. Server already ran the combined visual alignment tests (6/6 OK) and wrote five local private RGB boards. `scripts/p1_dev0_visual_annotation.py` now builds a self-contained private HTML reviewer and aggregates human judgments of target/gripper **visual observability** only; the new script's tests have not yet run on the server. Human visual judgments are NOT physical grasp oracle labels, and must not be injected into online Runtime/Evolution or published with the private images. Never push private generated HTML/image content to Git.
+
 **New P1 experiment / prospective collection / Runtime intervention requires a new explicit bounded L2 authorization and preregistration.** Stage R §36 historical HARD STOP and S1-DEV0 ON_HOLD continue. Neither private `/workspace/yjx/rpent_data/p1_dev0/` nor `artifacts/research_package_a/` belongs in Git or external APIs.
 
 Critical science distinctions:
