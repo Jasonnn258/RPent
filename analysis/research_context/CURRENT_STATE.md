@@ -4,9 +4,11 @@
 >
 > 基线:Stage2K 独立复审 `2b3710e`、EERD 契约 `70d57ba`、本轮基线 `4d155b9`;本轮新增 Stage2J-v2 候选 + EERD 字段级 QA + P1 问题定义；2026-10-09 独立方法复审已修正 P1 v1.1（commit `92384e5`）及 EERD QA 两阶段账本（`a040bfa`）。Stage2J v1 原文保留为未冻结历史候选。所有新实验仍须单独批准。
 
+> **Research Package A 执行状态（2026-10-09）：L1 已获用户阶段级授权；A0 v2 已独立冻结为 `analysis/harness_h0/H0_OE_STAGE2J_FROZEN_V2_PACKAGE_A.md`；只读两阶段执行代码、合成测试、服务器一键入口已提交。当前 GitHub 工具环境无服务器私有原始轨迹访问，故**尚未运行真实 A0 / EERD 物化**；需在已有服务器执行 `bash analysis/research_context/run_package_a.sh`，回传 gates 与摘要。无需再次申请 L1 字段/outcome 权限。L2/L3 继续 HOLD。执行资产位于 `analysis/research_context/{RESEARCH_AUTHORIZATION.md,research_package_a.py,test_research_package_a.py,run_package_a.sh}`。合成测试代码已提交，但在本环境未执行。
+
 ## 1. 总状态
 
-**`P0_STRUCTURE_PASS / STAGE2J_V2_DRAFT_NOT_FROZEN / EERD_QA_SCHEMA_VS_OUTCOME_SEPARATED / P1_V1_1_METHOD_CORRECTED / DOCUMENT_ROUNDS_CAPPED / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_L1_APPROVED / A0_V2_LOCKED / OFFLINE_EXECUTOR_COMMITTED / SERVER_OUTCOME_AWAITING_EXECUTION / P1_L2_HOLD / RUNTIME_HARD_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -47,7 +49,7 @@
 
 ## 5. 当前待办(Next Action)
 
-1. **[等用户决策]** ① 仅授权 A0 检查 B / outcome 普查（按 Stage2J v2，经冻结审核后）；② 授权起草新的 C cohort / P1 预注册（**起草不等于允许采集或局部解除 §36**，执行需另行批准）；③ 收官并归档。**A0 是可选工程前置，不是 C 的科学必需条件。**
+1. **[Package A 已获授权，等待服务器一次运行]** 在服务器仓库执行 `bash analysis/research_context/run_package_a.sh`，它先尝试纯合成回归测试，再完成 schema seal→A0 outcome→EERD A/B 私有输出和总结。读取已有 outcome 无需额外逐项批准，但本会话不能代替服务器执行。
 2. 文档轮次封顶生效:除非上述①/②产生新数据,不再新增理论修订轮次;P1 文档 §5.3 停止清单(五项)照此执行。
 3. 保留 Stage R §36 Hard STOP、S1 ON_HOLD;后续重要审查结论写入 `DECISION_LOG.md`。
 
