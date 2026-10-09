@@ -18,9 +18,11 @@
 
 > **视觉图像配对真实验收（2026-10-09，用户服务器回传）**：只读 `p1_dev0_visual_pair_preflight.py` 得到 `PAIRED_ASSETS_COMPLETE`；21 有事件/15 无触发/6 触发/其中5个物理 Probe，原始 agentview 与 wrist 前后 PNG 文件分别 **5/5 SHA256+头部尺寸合格**，均前后哈希不同；`failure_reasons={}`。这是**图像文件存在与溯源证据**，尚未完成像素语义、物体是否可见、真实持握或独立标签效度的验证。首次服务器运行的合成单测为 **2/3 PASS + 1 个 `KeyError: wrist_verified_pair`**：失败场景有效配对数=0 时 Counter 转字典省略零键，测试用下标读取。已在 `scripts/p1_dev0_visual_pair_preflight.py` 给固定统计键补零，**修正版尚未在服务器回归测试**；真实数据 PASS 可保留，不能声称整个质量门“测试全绿”。Pre wrist PNG 与 Post wrist PNG 的纵向翻转差异仍需在真正比较像素前显式校正。旧 DEV0 继续 CLOSED，不准补跑；下一阶段以离线合法视觉证据的语义可辨识性为问题，新 L2 仍 HOLD。
 
+> **P1 视觉审阅板真实生成完成（2026-10-09，用户服务器回传）**：修复后双脚本合成单测 **6/6 OK（0.607s）**；`scripts/p1_dev0_visual_review.py` 报 `PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`、`n_boards=5`，已在私有 `artifacts/p1_dev0/visual_review/` 生成 5 张 Agentview 前后/差分、Wrist 前后纵向对齐/差分拼图。**真实图像内容尚未被本对话看到或评估，不可报告目标可见、抓持或标签效果**。为减少重复人工命令，已提交 `scripts/p1_dev0_visual_annotation.py` 与离线单测：生成不联网的本地 HTML 审阅表，允许五样本一次性进行可见性/遮挡/空间关系人工审查，并离线汇总。新审阅器**尚未在服务器测试/运行**；人工主观观察不等于物理真值标签。P1-DEV0 CLOSED、新仿真 L2 HOLD。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VISUAL_PAIR_DATA_GATE_PASS_5_5_BOTH_CAMERAS / VISUAL_UNIT_TEST_2_OF_3_ONE_ZERO_COUNTER_ERROR / FIX_COMMITTED_RERUN_PENDING / GRASP_SEMANTICS_UNVERIFIED / NEXT_L2_HOLD`**
+**`P1_DEV0_CLOSED / VISUAL_PAIR_ASSETS_PASS_5_OF_5 / VISUAL_TESTS_6_OF_6_SERVER_PASS / FIVE_PRIVATE_RGB_BOARDS_WRITTEN / LOCAL_OBSERVABILITY_REVIEW_TOOL_UNRUN / PHYSICAL_GRASP_UNVERIFIED / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -45,6 +47,7 @@
 | **P1-DEV0 已执行** | 21/24 新 episode(3 个 SKIPPED_GPU_BUDGET)、6 触发全审计、0 hook_error/0 censor/0 infra;D1 遮蔽、特权键隔离、事件外置全部核验通过;判定 GO(工程)/HOLD(确认性) | 触发率 6/21 且 t9 集中(t5 0/8)、D2 臂 0 触发未生产暴露;详见 `P1_DEV0_EXECUTION_REPORT.md` |
 | **DEV0 增强版后验诊断（用户服务器回传）** | 4/4 tests OK，5/5 gap<0.06，0/5 EEF dz≥0.03，probe→policy 不一致0，D2/D3 影子分歧 5/5；未实际执行的 D2 结果仍未知 | 规则失配已确认，夹爪闭合≠真实持握；Pre wrist PNG 被纵向翻转而 Post wrist 原样写出；只读视觉文件配对 Gate 待跑 |
 | **DEV0 视觉证据配对（用户服务器回传）** | `PAIRED_ASSETS_COMPLETE`;5/5 probe 对 agentview 与 wrist 图像哈希/PNG 头尺寸合格，5/5 两相机前后哈希均不同；`failure_reasons={}` | 只验证静态文件与视图配对；合成测试 2/3（零字段 KeyError），归零输出已修待复跑；wrist 纵向方向不一致，尚无任何视觉持握识别结果 |
+| **DEV0 RGB 本地对照（用户服务器回传）** | 修复后合成回归 6/6 OK；`PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`，5 张真实 Agentview/Wrist 对照图写入服务器本地 | 图片尚未被视觉审阅或物理真值评价；离线人工标注工具已提交未执行 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -66,7 +69,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **视觉文件数据 Gate 已 PASS（5/5 双摄像头配对）**；原合成测试 2/3，一例零字段 `KeyError` 已修复。另已实现 `scripts/p1_dev0_visual_review.py`，只读取已存在且 SHA 验证过的 5 对 Agentview/Wrist PNG，修正 wrist 纵向存储方向，生成服务器本地 5 张 RGB 前后/绝对差分拼图与纯描述性像素统计，绝不推断物体已持握。配套 `test_p1_dev0_visual_review.py` **均尚未在服务器运行**。下一步一次性运行两个合成测试及本地拼图程序，输出放在 gitignored `artifacts/p1_dev0/visual_review/`；不启动仿真或训练。
+1. **RGB 资产与图像对照 Gate 已完成**：服务器 6/6 tests OK 且 5 张对照图已真实写入私有目录；不再重复图片哈希/拼图。下一步运行 `test_p1_dev0_visual_annotation.py` 和 `scripts/p1_dev0_visual_annotation.py build`，在既有五张图上生成**不联网的离线 HTML 审阅表**，判断目标/夹爪可见性与遮挡。网页可在本地浏览器查看（通过可信远程文件传输/VS Code Remote），私有 PNG 及其内嵌 HTML 不得提交 Git。
 2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
 3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
 
