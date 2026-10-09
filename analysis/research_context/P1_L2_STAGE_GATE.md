@@ -23,6 +23,33 @@
 
 输出 `artifacts/p1_d2_preflight/summary.json`（忽略提交）。此步骤只报告 **输入可用性**；若主要合法输入根本不可获得，则在投入 GPU 前 STOP 或更换独立新采集设计。
 
+## 3.1 真实 D2 preflight 回执：结构合格，但按 task 分层是必要约束
+
+**来源**：2026-10-09 用户服务器在 research branch `3a39cb7` 执行 `test_p1_d2_preflight.py`（2/2 OK）及 `p1_d2_preflight.py`；以下为**用户回传的实际计数**，当前 GitHub 客户端未读取服务器源文件及 `artifacts/p1_d2_preflight/summary.json`。
+
+- `gate=STRUCTURE_PASS_FOR_DESIGN`；187 ledger episodes（186 含 Pick）；235 原始 Pick，29 terminal/truncated 排除；合法非终局且非截断 D2 候选 **206**，tool fail/true **103/103**。
+- 206/206 合法 `robot0_eef_pos`、`robot0_eef_quat`、`robot0_gripper_qpos` 通过有限数校验；206/206 现存 agentview(low)、calibrated agentview(low)、wrist(low) 图像。
+- 高分辨率 `agentview_hi` 和 `wrist_hi` **现存 105/206，缺失 101/206**。源码可能删除较早步的高分辨图，因此不能说过去 D2 时无法访问高分辨图；**未来实验的最低共同合法观测接口只依赖 low-res 与 proprio，不把高分辨率当作无条件可用**。
+- 至少有后续 Planner command step 记录 **198/206**：只是自然轨迹元数据，不是受控验证/恢复或固定未来 held-grasp oracle。
+- **任务层面显著不平衡**：
+
+| task | 合格 D2 Pick | tool fail | fail 比例 | tool success | 后续 step |
+|---|---:|---:|---:|---:|---:|
+| t3 | 71 | 21 | 29.6% | 50 | 69 |
+| t5 | 77 | 30 | 39.0% | 47 | 74 |
+| t9 | 58 | 52 | 89.7% | 6 | 55 |
+| all | 206 | 103 | 50.0% | 103 | 198 |
+
+**科学解释边界**：task9 占 103 次工具失败的 52 次（50.5%）；“工具失败”的任务依赖性**不能等同**于 FGONLY 错位的任务依赖性，因为本次预检没有读取 FGONLY 或按任务返回物理真值。所有数以 Pick call 为单位，episode 内重复调用不独立。
+
+**对 DEV0 的实际影响**：
+1. 先在新任务/seed manifest 固定**任务分层的 episode 分配**和每个实验臂的比例；报告 arm×task 的可触发失败 D2 计数，不得在看到效果后改任务混合权重或跳过不触发 episode。
+2. 最多 24 新 episode 的 DEV0 **仅做可执行性与触发率试验**；4 臂下每臂可触发样本可能极少，**不做确证性优劣判断**。应事先声明不触发事件的计数与意向性分析分母，避免事后把“凑满 24 个失败 D2”误写成固定 24 episode。
+3. 四臂的随机化应在干预前确定，**每个 episode 只指定首个合格 Pick 失败 D2 作为干预资格事件**；不重复干预直到看到满意结果。可采用 episode 分配并保持未触发记录；干预时刻、随机分配和是否实际触发分别落盘。
+4. 对已有图像做同一时刻的额外分析是**reinspection**；单纯 `view_driver_state` 不增加物理时间。物理 probe 有物理效应，必须有 D1 probe-blind 对照。观测前后图像应在当时实际生成并存证，不依赖旧帧目录回看。
+
+**Gate**：`P1_D2_PREFLIGHT_STRUCT_PASS / L2_DEV0_STILL_NOT_AUTHORIZED`。
+
 ## 4. 未来 L2 范围（需阶段级明确批准，不能仅因 P1 文档存在即执行）
 
 **建议边界：独立 P1-DEV0 可行性实验，最多 24 个新前瞻 episode，最多并发 2 个 worker；最多 8 小时墙钟 / 6 GPU·hour，任何先达到的预算即 STOP。** 任务/新种子网格及随机化分配在首次 rollout 前冻结并写入新阶段 manifest；不能沿用 Stage R 121–190 冻结事件做 intervention。不存在“跑到好看为止”。
