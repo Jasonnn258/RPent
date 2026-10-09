@@ -147,6 +147,16 @@
 - **不能推出什么**：原 A0 的 56/103 技内代理错位不等于 D2 真正持握，不提供新试验效应量；D2 档案图像缺失可能由后续清理造成，不能直接称历史时刻缺失。
 - **重开条件**：只读 D2 Gate 回传、用户授予明确有界 L2 DEV0 或有方法构念的实质新证据。历史 Stage R/S1 冻结保持。
 
+## D-016 · D2 合法输入资格已由服务器实测验证，P1 DEV0 应按任务分层
+
+- **日期/证据**：2026-10-09 用户服务器在 `3a39cb7` 执行 `test_p1_d2_preflight.py`（2/2 PASS）和只读 `p1_d2_preflight.py`，回传完整脱敏计数与 `STRUCTURE_PASS_FOR_DESIGN`；研究接口见 `P1_L2_STAGE_GATE.md` §3.1。
+- **状态**：`P1_D2_PREFLIGHT_STRUCTURE_PASS / PROPOSED_L2_DEV0 / NO_L2_AUTHORIZATION`。
+- **结果**：187 原始 episodes、235 Pick；29 terminal/truncation 排除；206 个 D2 合格 Pick，其中 103 tool failure、103 tool success。206/206 已归档 low-res agentview/calibration/wrist 图像，EEF pos/quat 和 gripper qpos 均有限；hi-res 现存 105、缺失 101（可能因后续归档清理）；198/206 有自然后续 Planner 命令记录。
+- **新风险**：tool failure 分布 t3=21/71 (29.6%)、t5=30/77 (39.0%)、t9=52/58 (89.7%)；task9 占全部 103 次工具失败中的 52 次。未经分层的新实验会把任务难度/触发率与验证策略效果混淆。现有预检**没有按任务计算 FGONLY mismatch**，不能据此声称 task9 物理漏报最多。
+- **决定**：P1-DEV0 新任务/seed/arm 分配应预先按 task 固定；最多 24 新 episode 四臂初期验证仅做可行性与触发分母核验，不能用少量/非均衡触发结果做显著性结论；建议只在每个 episode 首个合法失败 D2 定义干预资格、记录未触发者。新增物理 probe 对结果的直接作用须由 probe-then-blind 对照单列。
+- **研究边界**：预检证实在已有轨迹上具备输入字段和文件，不证明运行时新采集图像的新鲜度、视觉判断效果、对照可辨识性或物理因果收益。Stage R §36 原 Hard STOP、S1 ON_HOLD、P1 L2 未批准的事实不变。
+- **重开条件**：用户一次性授予有界的 P1-DEV0 L2 阶段权限（≤24 新 episodes / 8h 墙钟 / 6 GPU·hour 并固定 manifest、四臂和审计界线），或获得新的、足以改变数据有效性判断的证据。
+
 ## 新决策追加模板
 
 ```markdown
