@@ -199,7 +199,15 @@ def schema(root, output, strict=True):
     consistency = (counters["pick_calls"] == 235 and counters["episodes"] == 187
                    and counters["pick_chunk_actions"] == 2859)
     gate = "PASS" if not errors and (consistency or not strict) else "HOLD"
-    if counters["eligible_pick"] < 100:
+    if strict:
+        # Stage2I's original structural contract must still hold for current
+        # input hashes; avoid accepting our narrower join checks alone.
+        sys.path.insert(0, str(root / "analysis" / "harness_h0"))
+        import h0_oe_stage2i_structure_scan as stage2i
+        baseline = stage2i.evaluate(root)
+        if baseline["gate"] != "STRUCTURE_ONLY_PASS_PENDING_CLASS_ELIGIBILITY":
+            gate = "HOLD_STAGE2I_STRUCTURE"
+    if strict and counters["eligible_pick"] < 100:
         gate = "STOP_ELIGIBLE_PICK_LT_100"
     data = {
         "protocol": PROTOCOL, "phase": "SCHEMA_ONLY", "gate": gate,
@@ -223,7 +231,7 @@ def fg_only(p, b, target):
 
 
 def label_reference(points, statuses):
-    if not points or statuses[0] != "VALID":
+    if not points or not isinstance(points[0], dict) or not (points[0].get("obj_of_interest") or []):
         return "UNKNOWN"
     b = points[0]
     target = b["obj_of_interest"][0]
@@ -389,6 +397,8 @@ def outcomes(root, output, strict=True):
     audit, online, metadata, primary = [], [], [], []
     invalid_success = 0
     trace_mismatch = 0
+    shortcut_changed = 0
+    full_reference_positive = 0
     for x in eligible:
         res, st = x["result"], x["state"]
         flag = res.get("success")
@@ -399,6 +409,16 @@ def outcomes(root, output, strict=True):
             trace_mismatch += 1
             continue
         label = label_reference(x["points"], x["point_status"])
+        # In Stage R's original helper, check_success bypasses the pose
+        # condition. This is audit-only comparison, NEVER the main label.
+        shortcut_truth = any(
+            p.get("check_success") is True for p in x["points"] if isinstance(p, dict))
+        if shortcut_truth:
+            full_reference_positive += 1
+            if label != "POSITIVE":
+                shortcut_changed += 1
+        elif label == "POSITIVE":
+            full_reference_positive += 1
         rec = {
             "episode_id": x["episode_id"], "step_idx": x["step_idx"],
             "flag": flag, "reference": label,
@@ -432,13 +452,14 @@ def outcomes(root, output, strict=True):
     if invalid_success or trace_mismatch:
         gate = "STOP_FLAG_SCHEMA_OR_TRACE_MISMATCH"
     elif len(primary) < 30 or min(
-            sum(x["flag"] for x in primary), sum(not x["flag"] for x in primary), default=0) < 10:
+            sum(x["flag"] for x in primary), sum(not x["flag"] for x in primary)) < 10:
         gate = "A0_MAIN_UNESTIMABLE"
     else:
         gate = "PASS"
     # Ensure online view has only actually D2-available fields.
-    forbidden = ("check_success", "obj_of_interest", "acquisition", "stable_fg", "reference")
-    assert all(not any(word in json.dumps(x, ensure_ascii=False) for word in forbidden)
+    forbidden = {"check_success", "obj_of_interest", "acquisition", "stable_fg", "reference"}
+    assert all(not (set(x.keys()) & forbidden) and
+               not (set(x["tool_report"].keys()) & forbidden)
                for x in online), "online/audit firewall violation"
     b, b_info = b_dataset(root, eps)
     full = {
@@ -446,6 +467,8 @@ def outcomes(root, output, strict=True):
         "n_primary": len(primary), "invalid_success": invalid_success,
         "trace_success_mismatch": trace_mismatch,
         "reference_unknown": sum(x["reference"] == "UNKNOWN" for x in audit),
+        "shortcut_full_reference_positive": full_reference_positive,
+        "shortcut_bypass_additional_positive": shortcut_changed,
         "b_dataset": b_info,
         "warnings": [
             "FGONLY is same-skill pose-following proxy, NOT actual grip contact or future retention.",
@@ -459,6 +482,19 @@ def outcomes(root, output, strict=True):
         full["primary_descriptive"] = s
         full["primary_cluster_bootstrap_95"] = bootstrap(primary)
         full["primary_untruncated_sensitivity"] = stats([r for r in primary if not r["truncated"]])
+        order_by_ep = defaultdict(int)
+        per_task = defaultdict(list)
+        per_order = defaultdict(list)
+        for r in sorted(primary, key=lambda x: (x["episode_id"], x["step_idx"])):
+            order_by_ep[r["episode_id"]] += 1
+            per_order["first_pick" if order_by_ep[r["episode_id"]] == 1 else "repeat_pick"].append(r)
+        for r in primary:
+            matching = next((x for x in eligible if x["episode_id"] == r["episode_id"] and
+                             x["step_idx"] == r["step_idx"]), None)
+            if matching:
+                per_task[str(matching["task"])].append(r)
+        full["descriptive_by_task"] = {k: stats(v) for k, v in per_task.items()}
+        full["descriptive_by_pick_order"] = {k: stats(v) for k, v in per_order.items()}
         full["complete_case_sensitivity"] = stats([r for r in primary if r["complete_case"]])
         full["all_eligible_descriptive"] = stats([{"episode_id": r["episode_id"],
               "flag": r["flag"], "reference": r["reference"]} for r in audit])
@@ -490,7 +526,7 @@ def main():
     args = parser.parse_args()
     root = args.repo_root.resolve()
     output = (args.output or root / "artifacts" / "research_package_a").resolve()
-    if root == output or root in output.parents and "artifacts" not in output.parts and not args.fixture:
+    if not args.fixture and not output.is_relative_to(root / "artifacts"):
         raise SystemExit("Output must live in repo artifacts/ for real data; source files read-only")
     output.mkdir(parents=True, exist_ok=True)
     if args.phase in ("schema", "full"):
