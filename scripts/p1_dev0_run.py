@@ -61,6 +61,9 @@ BASE_ENV = {
     "LIBERO_CONFIG_PATH": "/workspace/yjx/rpent_data/.libero",
     "HF_HUB_OFFLINE": "1",
     "MUJOCO_GL": "osmesa",          # 本容器 EGL 设备数 0,egl 会 worker 无声死亡
+    # env_server.py 会 setdefault PYOPENGL_PLATFORM=egl;必须显式压成 osmesa,
+    # 否则 mujoco.osmesa 导入时直接 ImportError(2026-10-09 实测事故)
+    "PYOPENGL_PLATFORM": "osmesa",
     "PLANNER_MODEL": "anthropic:glm-5.3-flash",
     "PLANNER_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
 }
@@ -286,6 +289,7 @@ def main() -> int:
     lock = threading.Lock()
     budget = {"episodes": 0, "gpu_s": 0.0}
     summaries: list[dict] = []
+    infra_storm = {"consecutive_no_events": 0, "abort": threading.Event()}
 
     # ---- 恢复状态判定(启动前一次性)----
     plan = []
@@ -348,12 +352,16 @@ def main() -> int:
             if not ok:
                 return {"episode_key": row["episode_key"], "arm": row["arm"],
                         "status": f"SKIPPED_{why}"}
+            if infra_storm["abort"].is_set():
+                return {"episode_key": row["episode_key"], "arm": row["arm"],
+                        "status": "SKIPPED_INFRA_ABORT"}
             budget["episodes"] += 1
         _log(fh, run_log_path, {"ev": "episode_start",
                                 "episode_key": row["episode_key"],
                                 "arm": row["arm"], "prior_state": state,
                                 "output_dir": str(ep_out)})
         t_ep = time.time()
+        ep_out.parent.mkdir(parents=True, exist_ok=True)
         try:
             proc = subprocess.run(
                 cmd, cwd=str(REPO), env=env,
@@ -374,6 +382,19 @@ def main() -> int:
         (out_root / "summaries" / f"{row['episode_key']}.json").write_text(
             json.dumps(summary, ensure_ascii=False, indent=2))
         summaries.append(summary)
+        # 连续启动级崩溃(env 未就绪/无事件文件)= 环境级 infra 故障:
+        # 连续 4 个即中止剩余 episode,防止 infra 风暴烧穿 manifest。
+        with lock:
+            if summary.get("status") == "NO_EVENTS_FILE":
+                infra_storm["consecutive_no_events"] += 1
+            else:
+                infra_storm["consecutive_no_events"] = 0
+            if (infra_storm["consecutive_no_events"] >= 4
+                    and not infra_storm["abort"].is_set()):
+                infra_storm["abort"].set()
+                _log(fh, run_log_path, {
+                    "ev": "infra_abort",
+                    "reason": "4 consecutive episodes died before env ready"})
         _log(fh, run_log_path, {"ev": "episode_done", **summary,
                                 "budget_now": dict(budget)})
         return summary

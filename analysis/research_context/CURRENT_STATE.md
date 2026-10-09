@@ -34,13 +34,14 @@
 | **P1 D2 preflight（真实服务器回传）** | `STRUCTURE_PASS_FOR_DESIGN`; 2/2 tests；206 非 terminal 非 truncation 合格 Pick，成功/失败各103；206/206 low-res RGB + proprio 结构有效；现存 hi-res 105/206；198/206 有自然后续命令；t3 fail=21/71、t5=30/77、t9=52/58 | 仅证明合法输入/现有目录结构，不能证明在线视觉验证准确率、因果恢复收益或物理标签有效性；详见 `P1_L2_STAGE_GATE.md` §3.1 |
 | **P1 v1.1** | **已修正 H-P1m 对“异质性 ⇒ 不可交换/Conformal 失效”的错误推断**；要求合法在线前缀定义风险组、完成声明覆盖/弃权约束、DEV 锁定最强基线。A0 与 C 的结果构念不同 | 研究设计仅为候选；真实闭环实验仍 HOLD(新预注册+授权+§36 局部解除) |
 | **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%；export QA 26/26 PASS | 用户服务器回传，独立的字段/数据行工程核验已跑；详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 |
+| **P1-DEV0 已执行** | 21/24 新 episode(3 个 SKIPPED_GPU_BUDGET)、6 触发全审计、0 hook_error/0 censor/0 infra;D1 遮蔽、特权键隔离、事件外置全部核验通过;判定 GO(工程)/HOLD(确认性) | 触发率 6/21 且 t9 集中(t5 0/8)、D2 臂 0 触发未生产暴露;详见 `P1_DEV0_EXECUTION_REPORT.md` |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
 
 1. **P0 / Research Package A 正式收官（内部数据层）**：3/3 synthetic tests OK、A0 结果 PASS、Export QA 26/26 PASS；不再重复 A0 统计、改动冻结结果或增加无新证据的审查轮次。
 2. **已取得的主要科学现象**：在主分析 206 picks 中，`flag=False` 的 103 次里有 56 次 **技内某时刻 FGONLY 代理满足**；工具成功侧仅 2/103 次代理不成立。这支持“工具失败后先验证/还是直接重试”的**研究动机**，不能等同返回时已经抓稳或未来真实持握。
-3. **P1-DEV0 阶段授权已记录，执行尚未启动**：按 task3/5/9 每任务 8 新 episode、D0/D1/D2/D3 每 task×arm=2 条、seeds 1001–1008、单事件资格、无触发纳入分母。已提交封存脚本和纯合法证据决策合同；需在服务器先完成单测及 manifest seal；D1 物理 probe 掩蔽、真实未来物理 horizon 与成本记账的 Runtime 接线仍需实施和验证。24 episode 仅可行性，不可宣称显著效应。
+3. **P1-DEV0 已执行完毕（2026-10-09，GO-工程/HOLD-确认性）**：manifest seal 复核通过、22/22 单测 + 集成 Gate 后执行 21/24 新 episode（wall 3.15h / GPU 6.17h，后者为在飞 episode 完成导致的 0.17h 越限，已如实记录）。四臂接线、D1 probe 遮蔽（结构同构 + 生产步号 delta=1 全 6/6）、固定 horizon audit-only（6/6 覆盖）、成本记账、事件外置隔离（0 泄漏）全部验证。触发率 6/21（t9 5/5、t3 1/8、t5 0/8），D2 臂 0/4 触发（t9 两格被预算跳过），全部决策 RETRY。**不得据此宣称任何臂间效应**。
 4. **P2**：证据治理的跨任务记忆/技能演化仍属长远研究问题，现无经验证的更新收益。
 
 ## 4. 当前明确禁止的推断
@@ -55,9 +56,9 @@
 
 ## 5. 当前待办
 
-1. 服务器先执行 `bash analysis/research_context/prepare_p1_dev0.sh`：仅纯合成单测+写入不可覆盖的 `artifacts/p1_dev0/manifest.jsonl` 和 `manifest.sha256.json`。**不启动仿真**，回传 status/哈希/测试结果。
-2. **同一已批准 L2 阶段内继续实现隔离的 P1 Runtime hook + pilot runner**：D0 与 D1 首次决策共用 blind policy；D1 的 probe 新数据不能进入首次决策，D2/D3 才允许消费；probe/重试费用单独记；用相同实际物理步 horizon 做未来 audit-only reference。必须通过无 GPU mock 测试和服务器逻辑烟测再允许新 rollout。
-3. 24 新 episode、最多 2 worker、8h wall/6GPU·hour 任一达到即 STOP；记录未触发 episode，审计真值在线隔离；Stage R §36 仅此 P1DEV0 局部例外，原 Stage R/S1 仍冻结。
+1. P1-DEV0 已收官（执行+分析+报告+提交，见 `P1_DEV0_EXECUTION_REPORT.md`）；原始事件/摘要数据在 `/workspace/yjx/rpent_data/p1_dev0/`（持久卷，不入 Git）。
+2. 若继续 P1 线：先解决触发率与任务集中（按任务分层定样本量；t5 类任务换触发定义或剔除），再写新预注册并申请新 L2 授权；runner 已知缺陷（SKIPPED 状态未逐条落 run log、launch-gate 在飞越限语义）在正式版修复。
+3. Stage R §36 局部例外随 P1-DEV0 收官而关闭；原 Stage R/S1 仍冻结，等待用户对下一阶段的指令。
 
 ## 6. 标准汇报格式
 

@@ -166,6 +166,16 @@
 - **局部例外边界**：Stage R §36 HARD STOP 仅针对**本 P1-DEV0 阶段的新仿真**作有界例外；原 Stage R/S1 不解冻。确认性 HELDOUT、训练、自进化和生产部署未批准。
 - **下一动作**：服务器执行一次无 GPU 的 `bash analysis/research_context/prepare_p1_dev0.sh`，返回测试/Gate/manifest SHA；随后按已获批阶段实现并运行隔离 Runtime DEV0，出现信息泄漏/无法保证盲态对照/越预算 STOP，而不是重定义指标挽救。
 
+## D-018 · P1-DEV0 执行收官：工程可行性 GO / 确认性 HOLD
+
+- **日期/来源**：2026-10-09。D-017 批准的有界 L2 阶段内完成全部执行：代码冻结 `62701a0` + runner 修复/分析器/报告本次提交；运行 attempt-2（attempt-1 启动级崩溃零数据，已归档）。
+- **状态**：`ENGINEERING_GO / CONFIRMATORY_HOLD / STAGE_CLOSED`。
+- **执行账目**：21/24 新 episode（3 个 SKIPPED_GPU_BUDGET：t9_s1006/s1007 D2、t9_s1008 D0）；wall 3.15h（<8h）；GPU 6.17h（>6.0h 名义，launch-gate 语义 + 在飞 episode 完成，越限 0.17h 如实记录）；2 worker；0 hook_error / 0 censored / 0 infra。
+- **证据（具体）**：6/21 触发（t9 5/5、t3 1/8、t5 0/8）全部完成 probe→decision→action→audit 事件链；6/6 audit（4 FIXED_HORIZON overshoot 3-23 步 + 2 EPISODE_END）；D1 遮蔽生产验证（retry_step_delta=1 6/6、transcript 零 probe 痕迹）；特权键泄漏 0；事件文件 21/21 在 output_dir 外；policy sha256 六次唯一；probe 5/5 未终结 episode；成本：probe 恒 10 env steps（1.6-1.7s），重试 pick 45-80 步。详见 `P1_DEV0_EXECUTION_REPORT.md`。
+- **对照/替代**：D0/D1/D2/D3 四臂中 D2 生产路径零执行（0/4 触发）；全部 6 次决策为 RETRY（5 次 probe 后夹爪仍开 = 物理未抓住，D3 判据不满足 → LEGAL_EVIDENCE_NOT_ENOUGH）。CONTINUE_CAUTION/ABSTAIN 分支仅单测覆盖。
+- **不能推出什么**：不能宣称 probe/验证策略对恢复或任务成功的任何效应（n≤3/臂、触发任务高度集中、D2 无数据）；不能引用 audit 交叉表作臂间比较；不能据 t5 0/8 触发断言该任务"不需要验证"（仅本批 seed）。
+- **重新开启条件**：正式 P1 新预注册 + 新 L2 授权，且设计须先按任务分层解决触发率/功效；修复 runner 两处已知缺陷（SKIPPED 未逐条落日志、预算 launch-gate 语义）。
+
 ## 新决策追加模板
 
 ```markdown
