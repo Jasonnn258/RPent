@@ -1,8 +1,10 @@
 # Persistence-Aware Evidence Governance — 方法规范(METHOD_SPEC)
 
-> 2026-10-09 | 版本 **v0.2** 方法设计 / 未实现、未测试、未定标。
-> v0.1 全文见 git 历史(commit `adf5d18`);本轮修订清单见 §0.1 与
-> `METHOD_V02_REVIEW.md`。
+> 2026-10-09 | 版本 **v0.2.1**(Method Consistency Finalization 轮)/ 未实现、未测试、未定标。
+> v0.1 见 git `adf5d18`;v0.2 见 git `cc7e0d3`(修订记录:§0.1 与
+> `METHOD_V02_REVIEW.md`);v0.2.1 按 `V02_INDEPENDENT_REVIEW.md`(commit
+> `431ddda`)的 B1-B4 与附加边界做最小修订,逐项映射见 §0.2 与
+> `METHOD_CONSISTENCY_REPORT.md`。
 > 本文件将 `RESEARCH_PROPOSAL.md` / `ARCHITECTURE_PROPOSAL.md` 的概念架构收敛为
 > 形式化方法:四个核心对象的形式定义、Persistence-Aware Attribution 算法机制、
 > 双门协同语义、三个代表性场景的机制推演。
@@ -28,6 +30,24 @@
 | 4 | 公理 A2 全局单调性("Evolution 门≥一切 Runtime 门")与自身授权矩阵矛盾(ARCHIVE 零门槛 < REPORT_FAILURE 高门槛) | 替换为**局部代价对齐公理 + 不可逆性约束**;授权矩阵补错误代价轴 | §0, §6.4, §8.2 |
 | 5 | claim 状态机允许未来事件改写已闭窗历史(CONTRADICTED 破坏"曾经确认"的终态) | 区分**闭窗(回看性)/开窗(前瞻性)** claim;闭窗终态不可被未来事件否定;只有前瞻授权可失效 | §4.1, §4.3, §4.4, §9.2 |
 | 6 | NOVELTY_REVIEW 称 Zetta"聚类必须产出候选、无归因克制"——与源码不符 | Zetta 源码级更正:unresolved group / inconclusive 诊断终态 / inconclusive gate / "confidence 非证据"注释;N1 相应收窄(见 NOVELTY_REVIEW v0.2) | NOVELTY_REVIEW.md §1, §7 |
+
+## 0.2 v0.2 → v0.2.1 变更日志(Method Consistency Finalization)
+
+按 `V02_INDEPENDENT_REVIEW.md`(独立复审,commit `431ddda`)的 B1-B4 与
+附加边界做**最小修订**;Stage R 冻结结论(E14/A1/P5/U4)原口径保留:
+
+| # | 复审问题 | v0.2.1 修复 | 位置 |
+|---|---|---|---|
+| B1 | E 与 A 判据重叠(v0.2 的 E=∃成功 可由 A 推出);κ_E 尝试数与成功数混用;DETERMINING 被当成第五个事后标签 | **事后标签回归 Stage R 冻结四类**(E/A/P/U 完整定义,互斥,适用于 8+8 完整双臂,含判定顺序);DETERMINING 重定位为**过程状态**(证据未观测齐全),非事后标签;撤销 v0.2 对 U4 重分类的暗示;κ 槽位语义改为"成功次数"与"臂覆盖数"两个独立量 | §5.3 |
+| B2 | "M0 被拒绝是确证事实"无正式检验;单次失败被写成"零信息";runs 被称为 M1 充分统计载体(应为 (n_s,n_f));队列选择条件未声明 | M0/M1/M2 全部改标**假设层**;观察迹象与已检验事实分离;在线档 NO_INFORMATION 改名 **INSUFFICIENT_FOR_DECISION**(决策资格等级,非信息量声明;单次失败贝叶斯下修非零信息);runs 语义修正((n_s,n_f) 才是 M1 充分统计,顺序信息只在 M2 有增量);新增队列选择条件与外推域声明 | §5.0, §5.5 |
+| B3 | causal_grade 默认 STRONG(未用重放≠因果强);群体 contrast≈0 被写成"排除动作特异性"(群体平均可掩盖事件级,有限次数不确定性大) | causal_grade 默认 **UNIDENTIFIED**;三轴分离(reconstruction_fidelity / execution_stochasticity / causal_identifiability);SAME/POLICY 差收缩为"已测条件下动作分布关联",事件级不能排除(r129 反例:SAME 0/8 而 POLICY 5/8 [D]) | §5.2, §7.3, §7.5 |
+| B4 | A2b"一切不可逆≥一切可逆"仍是全称排序(PROPOSE_REVIEW 实际可撤销;CONTINUE 可引发不可逆物理后果) | **删除 A2b 全称命题**;A2a 收缩为"错误后果与证据类型可明确排序的决策对上的局部约束";决策分三档分别建模(候选审查 / 正式部署 / 不可逆物理动作) | §6.4, §8.2 |
+| 边1 | 在线 episode 通常没有离线 8+8 重复/反事实样本 | 新增**证据可得性分层**:observed_execution_prefix / offline_replay_cohort / cross_episode_history;Runtime 门不得把离线特权标签读作在线输入 | §5.6 |
+| 边2 | 闭窗 CONFIRMED 后"任何未来事件不修改"未区分晚到的窗口内证据 | 区分**物理事件时间**与**证据到达时间**:晚到但时间戳在窗内的证据可生成 superseding 版本(append-only),t3 事件仍不能改变 t1-t2 事实 | §4.3 |
+| 边3 | retry 零 headroom ≠ skill 编辑零 headroom;ABSTAIN 可能锁死 P 型 | NO_LOCAL_HEADROOM_OBSERVED 改名 **NO_HEADROOM_IN_TESTED_RETRY_ACTIONS**,ABSTAIN 显式限定只对已测重试动作类候选生效 | §5.4, §6.3 |
+| 边5 | L2"两通道一致"未核对条件依赖 | 登记为证据可信性风险(同源派生通道不独立) | §4.2, §10.4 |
+
+(Zetta exact McNemar 更正与 N1 重新判断在 NOVELTY_REVIEW v0.2.1。)
 
 ---
 
@@ -55,13 +75,13 @@
 - **A1(证据分层)**:证据不是布尔量。工具报告、单通道代理、多通道一致、窗口持续
   是不同等级;等级决定可用性,不可越级使用。
 - **A2(代价对齐授权)**:一个决策所需的最低证据强度,随其**错误代价**(而非
-  门类标签)非递减——门槛只在错误代价可比的决策对之间构成偏序;此外保留一条
-  弱全局约束(不可逆性约束):影响不可逆且时间尺度长的决策,门槛不低于任何
-  可逆决策(形式化见 §6.4)。
-  *(v0.2 修订:原 v0.1 表述"Evolution 门所需证据强度严格不低于一切 Runtime 门"
-  是错误的全局命题——被本方法自己的授权矩阵违反:Evolution 门的 ARCHIVE 是
-  零门槛记录动作,而 Runtime 门的 REPORT_FAILURE 是高门槛判定动作。"门类决定
-  门槛"混淆了标签与代价。)*
+  门类标签)非递减——且该偏序**只在"错误后果与证据类型均可明确排序"的
+  决策对上成立(局部约束,非全局排序)**;决策按候选审查/正式部署/不可逆
+  物理动作三档分别建模,跨档比较须逐对论证,不是形式不变量(形式化见 §6.4)。
+  *(v0.2.1 修订:原 v0.1 全局单调性被自身授权矩阵违反(ARCHIVE 零门槛 <
+  REPORT_FAILURE 高门槛);v0.2 的 A2b"不可逆 ≥ 一切可逆"仍是过宽全称
+  ——PROPOSE_REVIEW 实际可撤销,CONTINUE 可引发不可逆物理后果——v0.2.1
+  删除 A2b,改三档建模,详见 §6.4。)*
 - **A3(归因克制)**:当证据不足以区分竞争性解释时,输出 UNKNOWN/ABSTAIN 而非
   最相似假设。克制输出是一等公民,不是失败状态。
   *(v0.2 注:该立场的**设计先例**已存在——Zetta 的 unresolved group /
@@ -226,6 +246,12 @@ claim c = ⟨ cid,
 依据:工具 success ≠ 物理成功(ARCHITECTURE_PROPOSAL 机制 1);视觉富、结构贫、
 成败单点的观测不对称 [S][D] 使 L2 需要跨通道合取才可达。
 
+**通道独立性风险(v0.2.1,边 5)**:L2 的"≥2 独立通道"须核对**条件
+依赖**——同一分割模型派生的特征(EEF 侧质心 vs 爪部 mask)可能共享
+误差源,通道数量多不等于独立证据多。等级定义保持"独立"为必要条件;
+条件依赖对 L2 可信性的影响登记为证据可信性风险(§10.4 局限 8),通道
+误差独立性的逐对审计属 H0 方向 1 范畴,未执行。
+
 ### 4.3 五态生命周期与转换规则
 
 ```text
@@ -253,6 +279,16 @@ claim c = ⟨ cid,
 | PROVISIONAL/CONFIRMED | valid_until 到期且无 L3 续期 | EXPIRED | 不再授权;不构成反证 |
 | 任意 | 判据可满足性破坏(缺口/混叠) | UNKNOWN | 一等公民:显式承认"不知道" |
 | (终态) | **任何未来事件**(闭窗 claim 已达 CONFIRMED/DISMISSED 类终态后) | **无转换** | **闭窗终态不可被未来事件否定**(v0.2 修正:未来事件只能作用于开窗 claim 或生成新 claim) |
+
+**迟到窗口内证据(v0.2.1 新增,边 2:物理事件时间 ≠ 证据到达时间)**:
+上表"未来事件不修改闭窗终态"中的"未来"指**物理事件发生在窗口之后**。
+另一类情形是:证据**到达**得晚,但其记录的**物理事件时间戳落在闭窗内**
+(低频审计管线晚到的分割结果、离线复核发现的窗口内反证)。此时旧声明
+保留(append-only),系统生成 **superseding 版本**修正此前基于不充分
+证据的判断——被修正的是"我们对 t1-t2 的认知",不是 t1-t2 的物理事实。
+两条边界同时成立:①晚到但窗口内时间戳的证据可以 supersede 旧声明
+(证据到达时序在后的修正权);②物理事件时间戳 > t2 的事件(t3 滑落)
+**永远不能**改变"t1-t2 期间发生过什么"。
 
 ### 4.4 时间语义(本方法对 C3 的落实)
 
@@ -294,30 +330,35 @@ v0.2 起显式区分:
 |---|---|---|
 | 时点 | 事件窗口结束后,基于完整 attempt 序列回看 | 执行中,基于已积累的部分证据 |
 | 输入 | PE(e) 的全部 n 次 attempt | PE(e) 的前 k 次(k 在增长中) |
-| 输出 | **分类**(五类,§5.3) | **证据等级**(三档,序数),不输出类别 |
+| 输出 | **分类**(四类,§5.3,Stage R 冻结口径) | **证据等级**(三档,序数),不输出类别 |
 | 用途 | Evolution 层统计、benchmark 标签 | Runtime 层"下一步证据是否支持失败将持续"的评估 |
 | 语义 | "这个事件(在观测完毕后)属于哪一类" | "到目前为止,证据对'失败会持续'的支持有多强" |
 
-**在线判断的三档**(序数,不是分类;数值边界是定标槽位,同 κ):
+**在线判断的三档**(v0.2.1 更名:这是**决策资格等级**,不是信息量声明;
+序数,数值边界是定标槽位,同 κ):
 
 ```text
-NO_INFORMATION   连败长度 k < κ_info:证据对持续性方向无分辨力
-                   (n=1 必然落此档——单次失败不构成任何方向的证据)
-SUPPORTS_PERSISTENCE 连败长度 ≥ κ_info 且后续 attempt 全败:
-                   失败持续的(异质性后验)支持度上升(§5.5 M1 层)
-SUPPORTS_EPHEMERALITY 序列中出现成功:
-                   失败不持续(下次尝试可能成功)的支持
+INSUFFICIENT_FOR_DECISION   已观测证据不足以支持任何持续性方向的决策授权。
+  (n=1 必然落此档。注:单次失败在贝叶斯意义上并非零信息——
+   对异质先验 q_e~F,一次失败使后验 p(q_e|y_1=0) 向低端移动;
+   该档说的是"移动量不足以支撑决策",不是"零信息"。)
+SUPPORTS_PERSISTENCE   连败长度 ≥ κ_info 且后续 attempt 全败:
+  失败持续的(异质性后验)支持度上升(§5.5 M1 层)
+SUPPORTS_EPHEMERALITY  序列中出现成功:
+  失败不持续(下次尝试可能成功)的支持
 ```
 
-**要点**:在线判断的默认档是 NO_INFORMATION,不是 E。v0.1 把"单次失败 →
-failure_class=E(保守方向)"当作保守设计,实则**把无证据当成了瞬态证据**——
-真正的保守是"证据未攒够就拒绝在持续性方向上下任何结论"。这与公理 A3 一致:
-克制不仅是"允许说不知道"(输出层),还包括"证据不足时不产生倾向"(证据层)。
+**要点**:在线判断的默认档是 INSUFFICIENT_FOR_DECISION,不是 E。v0.1 把
+"单次失败 → failure_class=E(保守方向)"当作保守设计,实则**把证据不足
+当成了瞬态证据**——正确的表述是"不足以授权"(决策语义),而非"无信息"
+(信息语义):单次失败携带少量方向性信息(后验下修),只是不足以支持
+本方法定义的任何决策授权。这与公理 A3 一致:克制是"证据未足时不授权",
+不是宣称"证据为零"。
 
-事后标签与在线判断的连接:事后五分类是在判断证据**积累完成后**的极限类别;
-在线判断给出的是通往该极限的证据路径上,每一步的方向与强度。二者使用同一个
-PE 对象,但规则不同(§5.3 的规则全部要求"序列已终/证据已足",不适用于
-中间步)。
+事后标签与在线判断的连接:事后四分类(§5.3,Stage R 冻结口径)是在证据
+**积累完成后**的回看类别;在线判断给出的是通往该类别的证据路径上,每一步
+的方向与强度。二者使用同一个 PE 对象,但规则不同(§5.3 的规则全部要求
+"双臂 8+8 已观测齐全",不适用于中间步)。
 
 ### 5.1 重复实验结构与采样条件
 
@@ -344,7 +385,11 @@ PE(e) = ( n,                        重复次数
 **实证锚点 [D]**(既有观测,说明为何 PE 需要这些分量):
 
 - 边际率几乎无臂差(q_same .302 / q_policy .323,配对差 +2.1pp 中位 0)→
-  contrast 是**排除**动作特异性的证据,不是改善来源;
+  **群体平均层面**未见动作特异性的平均效应。v0.2.1 收缩:这**不能排除
+  事件级动作影响**——r129(SAME 0/8 而 POLICY 5/8)是事件级动作关联的
+  实例 [D],且 24 事件的有限样本下 contrast 的逐事件不确定性大;
+  contrast 的合法读法 = "已测条件下动作分布与失败的平均关联弱",
+  不是排除性证据;
 - h(k) 低于边际率:连败 3 次后第 4 次成功 1/17、连败 7 次后 0/11,低于
   池化边际 ~.30 → **runs 分量携带失败概率的信息**。v0.2 语义修正:该偏离
   相对的是**同质 iid** 基线;它在"异质 iid"(事件间 q 有分布)下是选择效应的
@@ -353,67 +398,79 @@ PE(e) = ( n,                        重复次数
 - 吸收态存在:P 型事件双臂 16 试零成功(5/5),E 型 14/14 十六试内至少一次
   成功 → PE 分布呈现实证的" ephemeral / absorbing"双峰。
 
-### 5.3 事后五分类的形式判定规则
+### 5.3 事后四分类的形式判定规则(v0.2.1:回归 Stage R 冻结口径)
+
+**适用对象**:双臂 8+8(SAME/POLICY 各 8 次)已观测齐全的完整 PE(e)。
+这是**事后标签**(事件窗口结束后回看);与 §5.0 在线判断是不同对象,
+证据未齐时的中间态见本节末段(DETERMINING,过程状态)。
 
 ```text
-输入 PE(e)(序列已终/证据已足),阈值槽位(待定标):κ_E, κ_P(最小证据次数),
-δ(对比容忍),κ_info(在线判断信息门,§5.0)
+输入:PE(e) 完整双臂:s_SAME, s_POLICY = 各臂成功次数;
+                      n_SAME, n_POLICY = 各臂尝试数
+阈值槽位(待定标;两个独立量纲,v0.2.1 起不得混用):
+  s_E, s_A    每臂最小成功次数(Stage R 实例 = 2)
+  n_arm       每臂最小覆盖次数(Stage R 实例 = 8)
 
-DETERMINING(证据积累中): n < κ_min(任何类的最小证据量)
-                          [默认态。证据未攒够,不输出任何类别;
-                            在线判断 = NO_INFORMATION。]
-E (execution-ephemeral):  n ≥ κ_min ∧ ∃ y_i = 1(序列内出现过成功)
-                          [失败未持续——"失败后翻盘"是已观测事实,
-                            不是从缺证推出的默认]
-A (action-specific):      SAME 全 0 ∧ POLICY 存在 1 ∧ |contrast| ≥ δ
-                          [失败随动作选择消失 → 动作序列是原因]
-P (policy-persistent):    双臂全 0 ∧ n ≥ κ_P(κ_P > κ_min)
-                          [已测动作分布下的持续失败;"候选"= 仍需
-                            repairability 独立审查,且语义限于 §7.5]
-U (unresolved):           以上规则的不完备残余:证据矛盾、观测缺口使
-                          y 序列不可信、终态多义
-                          [注意:纯"n 太小"不再进 U——它进 DETERMINING;
-                            U 保留给"证据存在但互相冲突/不可信"的场合]
+判定(互斥;E 先于 A 先于 P,U 为显式补集):
+  E (execution-ephemeral):  s_SAME ≥ s_E
+                            (Stage R: same ≥ 2/8)
+                            [SAME 臂 ≥2 次成功:执行随机性下"失败可翻盘"
+                              是已观测事实,不是从缺证推出的默认]
+  A (action-specific):      s_SAME = 0 ∧ s_POLICY ≥ s_A
+                            (Stage R: same = 0 ∧ policy ≥ 2/8)
+                            [失败随动作重采样消失 → 已测分布内动作关联]
+  P (policy-persistent):    s_SAME = 0 ∧ s_POLICY = 0 ∧ n_SAME, n_POLICY ≥ n_arm
+                            (Stage R: 双臂 0/8 + 0/8)
+                            [已测动作分布下的持续失败;"候选"= 仍需
+                              repairability 独立审查,且语义限于 §7.5]
+  U (unresolved):           其余:s_SAME = 1,或 s_SAME = 0 ∧ s_POLICY = 1
+                            [恰 1 次成功的证据量边缘带;Stage R 预注册
+                              明文"禁据单次成功赋 latent type"]
 ```
 
-**v0.2 修订要点**:
+**互斥性与判定顺序(v0.2.1 修复 B1 重叠)**:v0.2 曾定义
+E = `n≥κ_min ∧ ∃y_i=1`(任一臂出现过成功)、A = `SAME 全 0 ∧ POLICY 存在 1`
+——**由 A 可推出 E**,类不互斥,且 `classify_persistence`(§7.3)无冲突
+优先级。v0.2.1 起上表以**臂内成功数**定义,条件两两互斥,判定顺序
+E → A → P → U。验收例(逐例可判):
+`SAME 0/8 ∧ POLICY 2/8` → **A** 且不属于 E;`SAME 1/8` → **U**,
+不得自动 E;`SAME 2/8` → **E**;`SAME 0/8 ∧ POLICY 1/8` → **U**;
+双臂 0/8+0/8 → **P**。(v0.1 的错误——"单次失败 → E"——由 E 需
+s_SAME≥s_E≥2 从规则层面排除:n=1 全 0 连分类资格都没有。)
 
-- v0.1 的错误:"E: ∃ y_i=1,单证据即可,最保守归类"——它在 n=1、全 0 的
-  场合被场景 A 的推演用成"单次失败 → E"。新规则里 **E 的必要条件是序列内
-  出现过成功**(`∃ y_i=1` 是存在量词,不是"没有反证");n=1 全 0 的事件
-  落入 **DETERMINING**,在线判断为 NO_INFORMATION。
-- 方向性设计重述(归因克制的落实):
-  - 判 E 需要正面证据(翻盘已发生),不因"不触发演化"而放松——**保守的是
-    决策后果,不是证据标准**;
-  - 判 P 需要证据量 n ≥ κ_P + 双臂覆盖,且只输出"已测动作分布下的持续性"
-    (语义收窄见 §7.5),不输出"技能缺陷";
-  - DETERMINING 与 U 都不触发演化动作,但记录不同:DETERMINING 记
-    "证据未足"(等待积累),U 记"证据冲突/不可信"(指向观测改进);
-  - Stage R 的 U 型 4 事件 [D] 属于新 U 语义(矛盾/缺口),不是 n 小。
+**DETERMINING 是过程状态,不是第五个事后标签(v0.2.1 重定位)**:双臂
+8+8(或达到 n_arm 覆盖)尚未观测齐全、或 y 序列可信度被观测缺口破坏时,
+输出 DETERMINING(§5.0 在线判断档同此),**不进入本表分类**。v0.2 曾把
+DETERMINING 列为五分类成员,混淆了"证据未齐"(过程)与"已齐后的类别"
+(事后);v0.2.1 起:事后标签集 = {E, A, P, U}(与 stageR_prereg §8 逐字
+一致),DETERMINING 只是 evidence state(过程状态),不是 label。
 
-**类集变更的对应关系与 Stage R 预注册口径对齐**:v0.1 的四分类 {E,A,P,U}
-→ v0.2 五分类 {DETERMINING, E, A, P, U}。与既有实证标签(E14/A1/P5/U4 [D])
-的映射注意两点:
+**κ 槽位的量纲分离(v0.2.1)**:v0.2 的 κ_E 语义摇摆于"尝试数 n≥2"与
+"成功数 same≥2"之间——Stage R 的 2 是**成功次数**(s_E),且臂覆盖数 8
+是另一个独立量(n_arm)。规范层拆为两个槽位族:**s_E/s_A(成功次数)**与
+**n_arm(臂覆盖数)**,定标时分别确定,不得以尝试数替代成功数;
+κ_info(§5.0 在线档)另属在线判断槽位,与二者亦不混用。
 
-1. **Stage R 预注册的 E 规则比 v0.2 语义下限更严**:预注册(stageR_prereg
-   §8)定义 E 为 `same ≥2/8 stable`(至少 2 次成功),U 为"其余"(same=1
-   或 same=0∧policy=1,即"恰 1 次成功"的边缘带),并明文"**禁据单次成功
-   赋 latent type**"——预注册已在执行层贯彻了 v0.2 §5.0 的区分(单次证据
-   不定性类)。v0.1 METHOD_SPEC 把 E 写成 `∃ y_i=1` 单证据即可,反而**比
-   预注册更宽松**,是其"单次失败→E"错误的另一来源。v0.2 规范层取
-   `∃ y_i=1 ∧ n ≥ κ_min` 为语义下限,κ_E=2(Stage R 实例)即合法定标;
-2. **Stage R 的 U 与 v0.2 的 U 语义不同**:前者是"1 次成功、不足 2 次"
-   的**证据量边缘带**,后者是"证据矛盾/不可信"。按 v0.2 语义,Stage R 的
-   U4 事件应落在 E-证据不足带(DETERMINING 与 E 之间的边缘),而非
-   "矛盾"类。该复核属未来数据分析,不在本文范围;本文引用 U4 [D] 时
-   按预注册口径(1 次成功边缘带)理解。
+**与 Stage R 冻结标签的关系**:上表即预注册口径,E14/A1/P5/U4 [D]
+原样保留,本规范不改判任何事件、不做重分析。v0.2 曾暗示"按 v0.2 语义
+Stage R 的 U4 应落在 E-证据不足带、属未来复核对象"——v0.2.1 **撤销该
+暗示**:U 的预注册语义(恰 1 次成功的证据量边缘带)自洽完备,任何
+重分类须另立批准的分析,本规范不预设其结论。本文引用 U4 [D] 一律按
+预注册口径理解。
+
+**方向性设计(保留自 v0.2,归因克制的落实)**:判 E 需要正面证据
+(SAME 臂 ≥2 次成功),不因"不触发演化"而放松——**保守的是决策后果,
+不是证据标准**;判 P 需要双臂覆盖且全 0,只输出"已测动作分布下的
+持续性"(语义收窄见 §7.5),不输出"技能缺陷";U 不触发演化动作,
+记录指向"证据量边缘带"(等待更多 attempt 的自然积累)。
 
 ### 5.4 与 repairability 的解耦(公理 A3 的最重应用)
 
 ```text
-repairability ∈ { UNKNOWN,                      默认
-                  EVIDENCE_FOR_CANDIDATE_REVIEW, 存在可修复缺口的正面证据
-                  NO_LOCAL_HEADROOM_OBSERVED }   重试/重采样/动作变化均无效的负面证据
+repairability ∈ { UNKNOWN,                             默认
+                  EVIDENCE_FOR_CANDIDATE_REVIEW,        存在可修复缺口的正面证据
+                  NO_HEADROOM_IN_TESTED_RETRY_ACTIONS } 已测重试动作类内零 headroom
+                  (v0.2.1 更名;原 NO_LOCAL_HEADROOM_OBSERVED)
 ```
 
 **P 与 repairability 是两个独立命题**:"失败会持续"≠"改技能能修好"。
@@ -421,6 +478,19 @@ Stage P 已证本栈 verifier 无 headroom(O@8−O@1=10pp < 15pp 门)[D]——
 这说明把"持续失败"直接翻译成"需要且值得技能更新"在物理上是站不住的推导,
 必须显式分离。repairability 回答的是"进一步审查的资格",不是更新成功概率
 (ARCHITECTURE_PROPOSAL 契约 3 的原语义保留)。
+
+**v0.2.1 语义限定(边 3:重试 headroom ≠ Skill 可修复性)**:负面档的
+证据来源只能是**已测重试动作类**(SAME 重放 / POLICY 重采样 / NATURAL
+自然重试)内的零翻盘。"重试无 headroom"与"技能编辑无 headroom"是
+**两个命题**——前者测不出后者:改参数/改提示/再训练一类候选修改的
+成功可能性不在重试臂的覆盖范围内。因此:
+
+1. 该档触发 ABSTAIN(§6.3)时,弃权范围**显式限定为重试类候选的提名**;
+2. 技能编辑类候选的审查通道**保持开放**(其 repairability 状态记
+   UNKNOWN,待独立证据);
+3. 禁止用该档把 P 型事件锁死为"不可研究":重试臂零 headroom 而编辑类
+   未测时,正确输出是"重试类弃权 + 编辑类 UNKNOWN",不是全局弃权——
+   P 型恰是候选审查最应评估的对象(§7.5 X2 的方向一致)。
 
 ### 5.5 连败记录的信息价值:三层解释框架(v0.2 新增)
 
@@ -430,7 +500,11 @@ Stage P 已证本栈 verifier 无 headroom(O@8−O@1=10pp < 15pp 门)[D]——
 
 **M0(同质 iid,零假设)**:全部 attempt 独立同分布,成功概率为常数 p。
 任何历史(包括连败史)对下一次尝试**无信息**:h(k) = p 恒定。
-"M0 被拒绝"是 Stage R h(k) 数据确证的事实 [D]。
+**(v0.2.1 修正)**h(k) 观察值低于池化边际是**观察性迹象,不是检验结论**:
+正式检验从未执行;且 h(k) 的分母随连败筛选事件(连败 ≥k 的事件-臂池,
+如 k=4 时的 17 个事件-臂 [D]),样本单位是 event-arm,不能把 pooled
+Bernoulli trials 当独立 N 做检验。M0/M1/M2 在本文全部是**假设层**;
+"拒绝/接受"的任何表述须待获批的离线检验(见本节末"如实登记")。
 
 **M1(异质 iid / 可交换性)**:attempt 独立,但成功概率在**事件之间**异质:
 事件 e 有自己的 p_e,p_e ~ F(总体分布),各 attempt 在给定 p_e 时独立。
@@ -460,9 +534,16 @@ H-OE2 正是该检验的预注册化 [S]。)
    E[p_e | 连败 k] 的后验下降(M1 给出),**不需要**时序依赖(M2)。
    方法的 Runtime 判断(§5.0)与 κ 门因此全部锚定在 M1 语义上;M2 是否
    成立是独立的科学问题(H-OE2),不影响授权语义。
-3. **PE 的 runs 分量的正确解释**:runs 记录是 M1 下后验更新的**充分统计
-   载体**(连败长度 k 是 E[p_e|history] 的单调函数的一部分),不是"时序
-   依赖的证明"。这修正了 v0.2 之前的 §5.2 表述。
+3. **PE 的 runs 分量的正确解释(v0.2.1 修正充分统计表述)**:固定事件
+   q_e、条件 iid(M1)下,后验 p(q_e | y_1..y_n) 的充分统计是
+   **(n_success, n_failure)** 计数对,不是游程排列——相同计数的两个
+   序列互为重排,后验完全相同,**不产生额外信息**。k 连败对"下一次
+   尝试"的预测力全部来自它蕴含的计数与选择效应,顺序本身在 M1 层无
+   增量。顺序信息的**增量**只可能在 M2(非可交换)层出现;部分序贯
+   决策(如"现在止损"消费当前连败长度)会使用顺序量,但"决策消费
+   顺序"与"顺序携带超出计数的后验信息"是两回事。runs 仍被 PE 记录
+   (决策接口与 M2/sham 检验需要),但 v0.2 称 runs 为"M1 充分统计
+   载体"的表述**错误**,予以更正。
 
 **对方法结构的直接影响**:
 
@@ -470,12 +551,50 @@ H-OE2 正是该检验的预注册化 [S]。)
   (E/P 双峰混合的显示),而非新机制的信号;
 - 在线判断 SUPPORTS_PERSISTENCE(§5.0)的语义 = M1 后验意义下的支持,
   表述为"该事件的失败概率后验偏高",不涉及时序因果;
-- κ_info / κ_P 的定标对象因此明确:**M1 下的后验阈值**(连败多长后
+- κ_info / n_arm 的定标对象因此明确:**M1 下的后验阈值**(连败多长后
   E[p_e|k] 足够低,使继续尝试的期望价值低于门槛)——这是 H-OE3
   (E/P 分流最小试数)的统计学内容 [S]。
 
-**如实登记**:M1 层的参数拟合(F 的形状)与 sham 对照(M2 检验)在现有
-数据上**尚未执行**;本节只建立解释框架与措辞纪律,不预设任何拟合结果。
+**队列选择条件(v0.2.1 显式化)**:Stage R 的 24 事件队列以**已观察到
+FALSE_GRASP**(原 episode 失败)为入选条件 [D]。因此 h(k)、q̂ 等统计量的
+样本是**条件于"该事件曾失败"的选择样本**:① 原初那次失败是**入选
+条件**,不是 PE 序列的成员,不得作为重复证据再计入一次;② 外推域 =
+同样以"已失败"为条件的未来事件——对任意新 episode 的**无条件**失败率
+或持续性,本框架不直接适用(须经选择修正,且该修正未做)。该条件在
+v0.2 及之前未显式声明,现补记。
+
+**如实登记(v0.2.1 强化)**:M0 的正式检验、M1 层的参数拟合(F 的形状)
+与 sham 对照(M2 检验)在现有数据上**均未执行**;本节只建立解释框架与
+措辞纪律,**不宣称 M0 已被拒绝,不预设任何层的检验或拟合结果**。现象
+(h(k) 观察值)、统计假设(M0/M1/M2)、是否完成检验(三者当前均为否)
+在本文中严格区分。
+
+### 5.6 证据可得性分层(v0.2.1 新增:在线/离线边界)
+
+Stage R 的 SAME/POLICY 8+8 重复与反事实臂,是**离线、在冻结初始状态上
+多次重建**才能获得的特权数据;在线普通 episode 只有本次执行已发生的
+观测前缀。双门(尤其 Runtime 门)的输入必须按可得性分层,防止把离线
+特权标签读作在线输入:
+
+| 层 | 内容 | 在线可得? | 合法消费者 |
+|---|---|---|---|
+| **observed_execution_prefix** | 本 episode 已发生的观测流 O(t) 与 claim 账本 | ✅ | Runtime 门(§6.2)的唯一合法输入 |
+| **offline_replay_cohort** | 同事件的 SAME/POLICY 重放/重采样臂(Stage R 8+8)、任意时刻 check_success、逐物体位姿 | ❌(离线特权) | 仅 Evolution 层离线统计(§6.3)与离线审计 |
+| **cross_episode_history** | 跨 episode 的历史 claim/PE 聚合(不含本事件的离线臂) | ✅(账本投影) | Evolution 门;Runtime 只读 |
+
+规则:
+
+1. **Runtime 门只读 observed_execution_prefix**(加上 cross_episode_
+   history 中已入账本的历史 claim 的只读投影);"本次失败是否会持续"
+   的在线判断(§5.0 三档)只能用前缀内证据。
+2. **offline_replay_cohort 是 Evolution 层的离线特权**:§5.3 事后四分类
+   以它为输入——因此**事后标签结构上不可能在线产出**;在线最多到达
+   INSUFFICIENT_FOR_DECISION / SUPPORTS_* 档。这从数据可得性层面再次
+   落实 §5.0 的两对象分离(在线判断不输出类别)。
+3. **与 Simulator Firewall 的衔接(§1/§10.2)**:offline 层内部再分
+   "可入 Evolution 统计的重复臂数据"与"仅审计用真值(visibility=
+   offline_evaluation_only:位姿、BDDL 真值、state_hash)"——后者连
+   Evolution 门也不得消费。防火墙在每一层内部持续有效。
 
 ---
 
@@ -526,23 +645,26 @@ RUNTIME_GATE(t, d, ledger):
 ```python
 EVOLUTION_GATE(e, PE, attribution, ledger):
     # 输入:事件、持续性证据、归因声明、历史声明账本
-    if attribution.failure_class ∉ {P, A}:        # DETERMINING/E/U 类
-        return ARCHIVE(仅归档)                     # 单次/积累中/瞬态/不可归因
+    if attribution.failure_class ∉ {P, A}:        # 证据未齐(DETERMINING)/E/U 类
+        return ARCHIVE(仅归档)                     # 单次/积累中/瞬态/边缘带
                                                    # 失败永不触发演化
     if attribution.evidence_mass < θ_EVO:          # 证据量槽位(待定标)
         return QUARANTINE                          # 证据不足,隔离待积累
-    if attribution.repairability == NO_LOCAL_HEADROOM_OBSERVED:
-        return ABSTAIN + 记录                      # 有持续失败但无修复空间证据
+    if attribution.repairability == NO_HEADROOM_IN_TESTED_RETRY_ACTIONS:
+        return ABSTAIN(仅对重试类候选) + 记录      # 已测重试动作内零 headroom;
+                                                   # 不锁死技能编辑类候选(§5.4)
     if attribution.causal_grade == DESCRIPTIVE:    # 重建保真降级到底(§7.2 R3)
         return QUARANTINE                          # 只能描述,不能提名
     return PROPOSE_REVIEW                          # 最高输出:提名候选审查
 ```
 
-**PROPOSE_REVIEW 是本方法的最高授权**。技能/配置的实际修改、验证、晋升、回滚
-属于 Zetta Loop3 / SkillOpt / RegenHarness 已建立的工程治理环 [S][P],本方法
-不重造,只负责给它们提供一个**证据面合格的输入**。
+**PROPOSE_REVIEW 是本方法的最高授权**(v0.2.1 注:它只**提名**候选、无
+自动晋升,且可撤销——审查可中止、提名可撤回;正式部署 PROMOTE-DEPLOY
+属 §6.4 三档中的第二档,不在本方法授权范围内)。技能/配置的实际修改、
+验证、晋升、回滚属于 Zetta Loop3 / SkillOpt / RegenHarness 已建立的工程
+治理环 [S][P],本方法不重造,只负责给它们提供一个**证据面合格的输入**。
 
-### 6.4 授权门槛的代价对齐(公理 A2 的形式化,v0.2 重写)
+### 6.4 授权门槛的代价对齐(公理 A2 的形式化,v0.2.1 重写)
 
 定义证据强度偏序(不变):
 
@@ -565,40 +687,47 @@ strength(attribution) = (causal_grade, evidence_mass) 上的积序
 因素,而真正的决定因素是**错误代价**——恰好一个门的**最高**输出
 (PROPOSE_REVIEW)代价大,不等于该门的**每个**输出代价都大。
 
-**v0.2 替换:两条公理**。
+**v0.2.1 替换:一条局部公理 + 决策三档建模**(B4:删除 A2b 全称命题)。
 
-**A2a(局部代价对齐)**:每个决策 d 伴随显式的错误代价刻画
-cost(d) = (reversibility, blast_radius, timescale);门槛只在代价可比的
-决策对上有序:
-
-```text
-cost(d) ≤ cost(d')  ⟹  MinStrength(d) ≤ MinStrength(d')
-(偏序:两者都定义为"错误后不可撤销的影响范围 × 时间尺度"的积序)
-```
-
-即:**代价更高的决策,证据门槛不低于代价更低的决策**。可比对举例:
-
-- REPORT_COMPLETION(假阳 → 上报了未完成的任务,episode 级、可被外验纠正)
-  < PROPOSE_REVIEW(假阳 → 执行噪声进入技能库审查流程,跨 episode、
-  部分不可逆)⟹ 前者门槛 ≤ 后者门槛;
-- ARCHIVE(假阳 → 多归档一条记录,零代价)是全体决策的代价下界 ⟹ 其
-  门槛为零合法,且**不违反任何单调性**——v0.1 命题的错误在反例中显形。
-
-**A2b(不可逆性约束,弱全局)**:
+**A2a(局部代价对齐,v0.2.1 收缩)**:仅当两个决策的**错误后果**与
+**可消费的证据类型**都能被明确排序时,才对这一决策对给出形式约束:
 
 ```text
-∀ d_irr ∈ 不可逆决策(影响跨 episode 且难以撤销,如 PROPOSE_REVIEW、
-                       以及任何未来的技能写入):
-    MinStrength(d_irr) ≥ MinStrength(d),∀ 可逆决策 d
+(错误后果可比 ∧ 证据类型可比)的决策对 (d, d'):
+  cost(d) ≤ cost(d')  ⟹  MinStrength(d) ≤ MinStrength(d')
 ```
 
-这是 v0.1 想要表达的直觉("演化误判比运行时误判更危险")的**正确形式**:
-不是"Evolution 门 ≥ Runtime 门"的门类比较,而是"不可逆 ≥ 可逆"的代价
-比较。Runtime 中若出现不可逆决策(如物理上不可恢复的动作),其门槛同样
-应不低于 Evolution 中的可逆决策——门类不是本质,代价才是。
+即:代价更高的决策,证据门槛不低于代价更低的决策——**该偏序只在上述
+可比对上成立,不是全局排序**。可比对举例:
 
-**与授权矩阵的一致性**:§8.2 矩阵逐行补错误代价轴后,每行门槛排列满足
-A2a/A2b(检验留给矩阵旁注);v0.1 的全称命题从规范中删除。
+- REPORT_COMPLETION(假阳 → 上报未完成任务,episode 级、可被外验纠正;
+  消费 claim 等级)vs PROPOSE_REVIEW(假阳 → 执行噪声进入候选审查流程;
+  消费 attribution 四层)——后果与证据类型均可比 ⟹ 前者门槛 ≤ 后者;
+- ARCHIVE(假阳 → 多归档一条记录,近零代价)是代价下界 ⟹ 门槛为零
+  合法,不违反任何单调性——v0.1 命题的错误在反例中显形。
+
+**决策三档(v0.2.1,取代 A2b)**:v0.2 的 A2b("一切不可逆决策门槛 ≥
+一切可逆决策")仍是过宽全称——PROPOSE_REVIEW 只提名候选、无自动晋升,
+**可撤销**(审查可中止、提名可撤回);CONTINUE 看似"可逆",其错误却
+可能引发**不可逆物理后果**(碰撞、损坏、物体掉落不可恢复位)。不可逆性
+不是决策的二元属性,而是随其物理后果分布的性质。改为按三档分别建模:
+
+| 档 | 决策 | 代价性质 | 证据门槛依据 |
+|---|---|---|---|
+| 候选审查 | PROPOSE_REVIEW / QUARANTINE / ARCHIVE | 审查流程成本,可撤销 | A2a 可对症内的局部偏序(§8.2) |
+| 正式部署 | PROMOTE-DEPLOY(技能写入生效) | 跨 episode 难逆、错误先验污染 | **超出本方法授权**:本方法最高输出是提名;部署/晋升/回滚属 Zetta Loop3 等工程治理环 [P][S-ext],其门槛由该环自理 |
+| 不可逆物理动作 | CONTINUE 等运行时决策的**物理后果** | 物理损害,不可撤销 | **与候选审查成本不同类,不进同一序**:物理损害风险单独建模(§8.2 代价轴只标方向),数值化属未来校准(§10.3) |
+
+**物理损害风险与候选审查成本分开建模**(B4 要求):前者是物理世界的
+不可逆性,后者是信息流程的机会成本——把两者压进单一 L0-L3 序数正是
+v0.1 全局单调性与 v0.2 A2b 的共同错误根源。规范层只承诺:① A2a 的
+局部偏序;② 三档各自的门槛**依据**显式声明;③ 任何**跨档**比较
+(如"部署门槛高于止损门槛")是具体分析结论而非形式不变量,须逐对
+论证并登记。
+
+**与授权矩阵的一致性**:§8.2 矩阵逐行补错误代价轴;矩阵内可检验的
+只有 A2a 可对症(旁注标出);v0.1 的全称命题与 v0.2 的 A2b 均从规范中
+删除。
 
 ---
 
@@ -618,20 +747,28 @@ A2a/A2b(检验留给矩阵旁注);v0.1 的全称命题从规范中删除。
     L1 association(统计关联,描述性):
         failure_pattern: 模式存在性与强度的描述
           (如"同类失败重复出现 n 次,集中于 chunk_class c")
-        failure_class ∈ {DETERMINING, E, A, P, U}   §5.3 事后五分类
+        failure_class ∈ {E, A, P, U}   §5.3 事后四类(Stage R 冻结口径);
+                          DETERMINING 为证据未齐/序列不可信的**过程状态**,
+                          非第五个事后标签(§5.3)
         evidence_mass ∈ {INSUFFICIENT, MARGINAL, SUFFICIENT}
     L2 persistence(失败持续性,预测性):
         persistence_call ∈ {PERSISTS_UNDER_TESTED_POLICY_SPACE,
                             DOES_NOT_PERSIST, UNDETERMINED}
         support: M1 后验意义下的支持强度(§5.5;序数,不输出概率数值)
-    L3 attribution(因果归因):
-        causal_grade ∈ {STRONG, MODERATE, DESCRIPTIVE}   因果声称封顶
+    L3 attribution(因果归因,v0.2.1 改默认档):
+        causal_grade ∈ {UNIDENTIFIED, DESCRIPTIVE, MODERATE, STRONG}
+            默认 **UNIDENTIFIED**(无有效对照/干预证据时不作任何因果声称);
+            提升至 MODERATE/STRONG 只能依赖独立列举的、满足有效性要求的
+            干预/对照证据(三轴分离见 §7.3 Layer 4)
+        causal_hypothesis ∈ {ENVIRONMENT, POLICY, EXECUTION_NOISE,
+                             UNKNOWN}  — 仅作研究假设输出,
+        不进入授权(§7.5 X4)
         causal_hypothesis ∈ {ENVIRONMENT, POLICY, EXECUTION_NOISE,
                              UNKNOWN}  — 仅作研究假设输出,
         不进入授权(§7.5 规则 3)
     L4 repairability(可修复性,独立轴,§5.4):
         repairability ∈ {UNKNOWN, EVIDENCE_FOR_CANDIDATE_REVIEW,
-                         NO_LOCAL_HEADROOM_OBSERVED}
+                         NO_HEADROOM_IN_TESTED_RETRY_ACTIONS}
     ---- 附加字段 ----
     unknown_clauses: List[缺口描述],     R4 的显式输出
     scope )                                 声明适用范围(任务族/栈/契约)
@@ -661,30 +798,36 @@ v0.1 的单字段 failure_class 把 L1/L2 混在一起(分类既是模式描述�
   演化层动作 = ARCHIVE。
   依据:E 型 14/14 在 16 试内出现成功 [D]——翻盘可观察、可分类。
 - **R1b 单次失败,无序列**(n=1, y_1=0):
-  事实:不存在序列,持续性方向**零证据**。
-  处理:→ failure_class = **DETERMINING**(不是 E——v0.1 错误正在于此:
-  把"无证据"标成"瞬态证据");在线判断 = NO_INFORMATION;L2 =
-  UNDETERMINED;L3 = DESCRIPTIVE 封顶 + causal_hypothesis=UNKNOWN;
-  evidence_mass = INSUFFICIENT;演化层动作 = ARCHIVE(与 E 相同的**动作**,
-  但记录的状态不同:DETERMINING 等积累,E 已定类)。
-  依据:q≈.30 的边际随机性 [D] 使单次失败对持续性两个方向都几乎没有
-  分辨力(§5.5 M1:一次观测对后验的移动有限);但"几乎无信息"≠"支持瞬态"。
+  事实:不存在序列,持续性方向的证据尚未积累。
+  处理:→ failure_class 槽输出 **DETERMINING**(过程状态:证据未齐,
+  §5.3;不是 E——v0.1 错误正在于此:把"无证据"标成"瞬态证据");
+  在线判断 = INSUFFICIENT_FOR_DECISION(§5.0:决策资格档,非零信息——
+  单次失败使后验下移,只是移动量不足以授权);L2 = UNDETERMINED;
+  L3 = causal_grade **UNIDENTIFIED**(默认,无对照/干预证据)+
+  causal_hypothesis=UNKNOWN;evidence_mass = INSUFFICIENT;演化层动作 =
+  ARCHIVE(与 E 相同的**动作**,但记录的状态不同:DETERMINING 等积累,
+  E 已定类)。
+  依据:q≈.30 的边际随机性 [D] 使单次失败对持续性两个方向几乎没有
+  分辨力(§5.5 M1:一次观测对后验的移动有限);"不足以授权"≠
+  "支持瞬态",也≠"零信息"。
 
 **R2 有限重复证据**(2 ≤ n,证据仍不足以分类)
 
-- 事实:n < κ_P 或 < κ_min(区间过宽,经验率的置信结构覆盖多个假设)。
+- 事实:双臂覆盖未达 n_arm 或成功数处于边缘带(经验率的置信结构
+  覆盖多个假设)。
 - 处理:→ failure_class = **DETERMINING**(v0.2:从 U 移入——n 不足不是
   "矛盾"是"未攒够");在线判断按连败长度给 SUPPORTS_PERSISTENCE 或
-  NO_INFORMATION(§5.0 三档);双门输出只能 HOLD(运行时)/ QUARANTINE
+  INSUFFICIENT_FOR_DECISION(§5.0 三档);双门输出只能 HOLD(运行时)/ QUARANTINE
   (演化),**既不允许 DENY 策略性结论,也不允许提名审查**;输出建议 =
   积累更多 attempt(在未来的自然执行中,不专门采集)。
 - 语义:证据量不足时,方法的责任是**拒绝下结论**,不是猜一个。
   (C_pol(4)=.708 已是 C_pol(8) 的 89% [D]——证据的边际价值随 n 衰减,
-  κ_P 的定标正是要找这个拐点,属未来校准。)
+  n_arm/s 类槽位的定标正是要找这个拐点,属未来校准。)
 
 **R3 状态重建不确定性**(结论依赖 restore/replay 机制)
 
-- 事实:归因推理使用了状态重建(如"同动作重放也失败 → 排除动作特异性")。
+- 事实:归因推理使用了状态重建(如"同动作重放也失败 → 该事件动作
+  关联弱"的对照式推理)。
 - 处理:检查重建一致性元数据 ρ;ρ < ρ*(槽位,待定标)时 causal_grade 降一档
   (STRONG→MODERATE→DESCRIPTIVE),全部跨 attempt 聚合声明标注 APPROXIMATE;
   Evolution 门对 APPROXIMATE 声明减权(§6.3 的 QUARANTINE 分支)。
@@ -696,15 +839,22 @@ v0.1 的单字段 failure_class 把 L1/L2 混在一起(分类既是模式描述�
 
 - 事实:FAIL_KIND 判为 UNEXPLAINED,或 y 序列的可信度被 gaps 破坏。
 - 处理:→ unknown_clauses 显式列出缺口(类型化:SENSOR_GAP / TEMPORAL_ALIASING /
-  PREDICATE_AMBIGUITY / PROXY_FAILURE);failure_class = U;causal_grade =
-  最低档;方法**显式 abstain**,不输出最相似假设。
+  PREDICATE_AMBIGUITY / PROXY_FAILURE);failure_class 槽输出
+  **DETERMINING**(v0.2.1:序列不可信 = 证据未有效观测的过程状态,
+  §5.3 事后四类只对可信且观测齐全的双臂定义——v0.2 在此写 U 与
+  预注册 U 语义冲突,已改);causal_grade = UNIDENTIFIED(默认);方法
+  **显式 abstain**,不输出最相似假设。
 - 语义(v0.2 修订):"允许且尊重分不出来"的**设计立场**不是本方法首创——
   Zetta 已有 unresolved group 与 inconclusive diagnosis 终态 [S-ext]
   (聚类视觉证据不支持共同机制时返回 unresolved 组而非 fallback 合并)。
   本方法的差异在**判据层**:Zetta 的 unresolved 由 LLM 定性判断给出
   (工程出口),本方法为"何时必须 abstain"提供统计学判据(证据量函数、
   §5.5 异质性后验、可证伪的充分性条件)—— abstain 从工程裁量变成
-  可定标、可审计的规范对象。U 型 4 事件 [D] 是该情形的实证存在性证明。
+  可定标、可审计的规范对象。(v0.2.1 更正:v0.2 曾以"U 型 4 事件 [D]
+  是该情形的实证存在性证明"收尾——按预注册口径 U4 = 恰 1 次成功的
+  证据量边缘带,**不是**观测缺口型 abstain 的实例;观测缺口型 abstain
+  在 Stage R 队列中无实例(24 事件双臂 8+8 均可信),其存在性来自 H0
+  审计的观测面清点 [S],非既有标签。)
 
 ### 7.3 算法伪代码
 
@@ -720,22 +870,31 @@ def PA_ATTR(e, attempts, meta):
     PE = build_PE(attempts, meta.contract)          # (n, runs, q̂s, contrast, gaps)
 
     # Layer 2 动作特异性:SAME vs POLICY 对比
-    #   contrast 显著 → A 的必要条件;近零 → 排除动作特异性
-    #   实证先验:配对差 +2.1pp 中位 0 [D] → 该层在本栈多为排除性证据
+    #   contrast 显著 → A 的必要条件;近零 → 仅"群体平均动作关联弱",
+    #   不排除事件级动作影响(r129:SAME 0/8 而 POLICY 5/8 [D];§5.2)
 
-    # Layer 3 持续性分类:应用 §5.3 规则(阈值槽位 κ_min/κ_P/δ 待定标)
-    failure_class = classify_persistence(PE)        # DETERMINING / E / A / P / U
+    # Layer 3 持续性分类:应用 §5.3 冻结四类规则(槽位 s_E/s_A/n_arm 待定标)
+    failure_class = classify_persistence(PE)   # E / A / P / U,互斥,判定
+    #   顺序 E→A→P→U;双臂未齐/序列不可信 → DETERMINING(过程状态,非标签)
     #   L1 层输出(统计关联/描述性)
 
     # Layer 3.5 持续性判断(L2 层,M1 后验语义,§5.0/§5.5)
     persistence_call = judge_persistence(PE)   # PERSISTS_UNDER_TESTED_POLICY_SPACE /
     #   DOES_NOT_PERSIST / UNDETERMINED(序数支持,不输出概率数值)
 
-    # Layer 4 保真降级:重建依赖检查(R3)——L3 因果层的封顶机制
-    causal_grade = STRONG if not uses_replay(e) else downgrade(meta.rho)
-    #   ρ ≥ ρ*: 可保持档但标 REPLAY_BASED;ρ < ρ*: 降一档 + APPROXIMATE
+    # Layer 4 因果层(v0.2.1 重写:三轴分离,默认 UNIDENTIFIED)
+    #   轴1 reconstruction_fidelity:ρ ≥ ρ*?(R3 重建一致性)
+    #   轴2 execution_stochasticity:执行随机性是否已在 M1 层建模(§5.5)
+    #   轴3 causal_identifiability:是否存在满足有效性要求的干预/对照证据
+    causal_grade = grade_causation(meta)    # 默认 UNIDENTIFIED;
+    #   无轴3 证据(有效对照/干预)时保持 UNIDENTIFIED,与是否用重放无关——
+    #   v0.2 的 "not uses_replay → STRONG" 是错误(未用重放 ≠ 因果强:
+    #   原生观测再清晰也可能完全不能识别根因),v0.2.1 废弃;
+    #   MODERATE/STRONG 只能由独立列举的有效对照/干预证据支撑;
+    #   ρ < ρ* 时对已达档位降一档 + APPROXIMATE 标注(R3 封顶机制保留)
     causal_hypothesis = hypothesize(kind, failure_class, PE.contrast, gaps)
-    #   ENVIRONMENT/POLICY/EXECUTION_NOISE/UNKNOWN;仅研究假设输出,不进授权(§7.5)
+    #   ENVIRONMENT/POLICY/EXECUTION_NOISE/UNKNOWN;causal_grade=UNIDENTIFIED
+    #   时强制 UNKNOWN;仅研究假设输出,不进授权(§7.5 X4)
 
     # Layer 5 证据量与缺口(R2 / R4)
     evidence_mass = assess_mass(PE.n, PE.runs)      # INSUFFICIENT/MARGINAL/SUFFICIENT
@@ -796,7 +955,10 @@ def PA_ATTR(e, attempts, meta):
          headroom 结论 [D] 正是"持续失败 ≠ 有修复空间"的实证]
   (X3) L1 ⟹ L3(重复模式 ⟹ 因果)
        [因果声称需要对照/反事实证据,重复本身只给关联;causal_grade
-         封顶是结构性约束,不是可积攒突破的阈值]
+         封顶是结构性约束,不是可积攒突破的阈值。v0.2.1 对齐:伪代码层
+         已同步——causal_grade 默认 UNIDENTIFIED、无有效对照/干预时
+         causal_hypothesis 强制 UNKNOWN(§7.3 Layer 4),L3 不存在绕过
+         白名单的独立出口]
   (X4) L3 causal_hypothesis 进入任何门的授权输入
        [因果假设是研究输出(供人审),不是决策依据;授权只消费
          L1/L2/L4 与 causal_grade(保真度标记)]
@@ -838,7 +1000,7 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 | REPORT_FAILURE | 过早放弃可翻盘任务 | 部分 | 本 episode |
 | ARCHIVE | 记录噪声 | **完全可逆**(可清理) | 无(纯记录) |
 | QUARANTINE | 无实质动作 | 完全可逆 | 无 |
-| PROPOSE_REVIEW | 执行噪声进入审查流 | **难逆**(审查成本+错误先验污染) | 跨 episode |
+| PROPOSE_REVIEW | 执行噪声进入审查流 | **可撤销**(审查成本;提名可撤回;错误先验污染主要在下游 PROMOTE-DEPLOY 执行时才兑现) | 跨 episode(提名层) |
 
 | 证据状态(行) | CONTINUE | REPORT_COMPLETION | HOLD_OBSERVE | REPORT_FAILURE | ARCHIVE | QUARANTINE | PROPOSE_REVIEW |
 |---|---|---|---|---|---|---|---|
@@ -846,8 +1008,8 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 | L0-only(仅工具报告) | ✅ | ❌ | 建议 | ❌ | ✅ | — | ❌ |
 | 声明降级(CONTRA/EXPIRED) | ❌ | ❌ | ✅(触发) | 视反证 | ✅ | — | — |
 | 单次失败(DETERMINING,R1b) | ✅ | ❌ | — | ❌(证据不足) | ✅ | — | ❌ |
-| 连败中 n<κ_P(DETERMINING/R2) | ✅ | ❌ | 建议 | ❌ | ✅ | ✅ | ❌ |
-| 双臂全败 n≥κ_P + 修复证据 | ⚠️ | ❌ | — | ✅(资格) | ✅ | — | ✅(最高) |
+| 连败中双臂未齐(DETERMINING/R2) | ✅ | ❌ | 建议 | ❌ | ✅ | ✅ | ❌ |
+| 双臂全败(0/8+0/8)+ 修复证据 | ⚠️ | ❌ | — | ✅(资格) | ✅ | — | ✅(最高) |
 | 重建保真不足(ρ<ρ*) | ✅ | — | — | ⚠️ | ✅ | ✅(减权) | ❌ |
 | 观测缺口(R4) | ✅ | ❌ | ✅(建议) | ❌ | ✅ | ✅ | ❌ |
 
@@ -857,12 +1019,14 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 第 1 列几乎全 ✅ 不是设计疏忽:CONTINUE 是零授权门槛的默认自由(公理 A3 的
 运行时体现——无反证不拦截),方法的约束力全部集中在**高影响授权**上。
 
-**代价对齐检验(v0.2,对照 §6.4 A2a/A2b)**:矩阵满足——
-ARCHIVE/QUARANTINE 零门槛 ↔ 其假阳代价近零;REPORT_COMPLETION 需 L2+ ↔
-其假阳是信用损耗;PROPOSE_REVIEW 需双臂+证据量+修复证据+保真度四重条件 ↔
-其假阳难逆且跨 episode。**注意该排列不再由"门类"解释**:ARCHIVE(Evolution
-门)门槛低于 REPORT_FAILURE(Runtime 门),正是 v0.1 全局单调性命题的
-反例,也是 v0.2 改为代价对齐的原因。
+**代价对齐检验(v0.2.1,对照 §6.4 A2a——仅可比对,无 A2b)**:矩阵满足
+——ARCHIVE/QUARANTINE 零门槛 ↔ 其假阳代价近零;REPORT_COMPLETION 需 L2+
+↔ 其假阳是信用损耗;PROPOSE_REVIEW 需双臂+证据量+修复证据+保真度四重
+条件 ↔ 其假阳是跨 episode 审查流污染(提名可撤销,但审查成本实质;
+下游 PROMOTE-DEPLOY 一旦执行才难逆——该层不在本方法授权内,§6.4 三档)。
+**注意该排列不再由"门类"解释**:ARCHIVE(Evolution 门)门槛低于
+REPORT_FAILURE(Runtime 门),正是 v0.1 全局单调性命题的反例,也是改为
+代价对齐的原因;物理损害类代价与候选审查成本**不进同一序**作形式比较。
 
 ### 8.3 门间一致性规则
 
@@ -896,11 +1060,12 @@ ARCHIVE/QUARANTINE 零门槛 ↔ 其假阳代价近零;REPORT_COMPLETION 需 L2+
 | t1 | 工具返回 success=false | `GraspContact` @ L0 PROVISIONAL(弱)|
 | t2 | 分割:物体质心未移动 + 夹爪空置视觉 | `GraspContact` → **CONTRADICTED**;`Lifted` 无法进入 PROVISIONAL |
 
-**PA-Attr(v0.2 修正)**:kind=GRASP_MISS;n=1(无序列)→ Layer 3 落入
-**DETERMINING**(证据积累中;v0.1 曾在此处标 E——错误:单次失败既不支持
-"瞬态"也不支持"持续",把无证据当瞬态证据违反 §5.0 的区分);在线判断 =
-NO_INFORMATION;evidence_mass = INSUFFICIENT;causal_grade=DESCRIPTIVE
-(单次封顶,R1b);unknown_clauses=[];repairability=UNKNOWN。
+**PA-Attr(v0.2.1 修正)**:kind=GRASP_MISS;n=1(无序列)→ Layer 3 落入
+**DETERMINING**(证据积累中,过程状态;v0.1 曾在此处标 E——错误:单次
+失败既不支持"瞬态"也不支持"持续",把无证据当瞬态证据违反 §5.0 的
+区分);在线判断 = INSUFFICIENT_FOR_DECISION;evidence_mass =
+INSUFFICIENT;causal_grade=UNIDENTIFIED(默认,无对照/干预,R1b);
+unknown_clauses=[];repairability=UNKNOWN。
 
 **双门判定**:Runtime——CONTINUE=ALLOW(重试自由);REPORT_COMPLETION=DENY;
 REPORT_FAILURE=DENY(单次失败不构成失败上报资格)。Evolution——ARCHIVE
@@ -958,7 +1123,7 @@ CONTINUE 自由放行。Evolution——TRANSIENT_SUCCESS 模式入档:它是"契
 
 - Layer 1:PE = (n=16, runs 全连败, q̂_SAME=0, q̂_POLICY=0, contrast=0);
 - Layer 2:contrast 近零 → **排除**动作特异性(A 的必要条件不满足);
-- Layer 3:双臂全 0 且 n≥κ_P → failure_class = **P(已测动作分布下的
+- Layer 3:双臂全 0/8+0/8(§5.3 P 规则)→ failure_class = **P(已测动作分布下的
   持续失败,候选)**,evidence_mass=SUFFICIENT;L2 =
   PERSISTS_UNDER_TESTED_POLICY_SPACE(注意 §7.5 X1:"候选吸收态"的旧称
   有超分布外推的味道,v0.2 起规范表述为 tested-policy-space 持续性;
@@ -968,14 +1133,15 @@ CONTINUE 自由放行。Evolution——TRANSIENT_SUCCESS 模式入档:它是"契
 - Layer 5:unknown_clauses 含 PREDICATE_AMBIGUITY(为何该任务族零头room的
   机制定位仍不可判——感知死/位置不可观测类的既有发现 [D]);
 - Layer 6:repairability —— 若重采样与动作变化均无效的记录成立 →
-  **NO_LOCAL_HEADROOM_OBSERVED**(注意:这与 PROPOSE_REVIEW 并不矛盾,
+  **NO_HEADROOM_IN_TESTED_RETRY_ACTIONS**(注意:这与 PROPOSE_REVIEW 并不矛盾,
   §8.2 矩阵外另有 abstain 通道;二者的张力处理见下)。
 
 **双门判定**:Runtime——REPORT_FAILURE=**ALLOW(资格)**:证据状态足以支持
 "止损/上报失败"的判定(连败结构 + 双臂零成功);但方法**不实现**自动止损
 控制器(§10.1——"支持判定"与"执行控制"的边界即 §36 边界)。
 Evolution——若 repairability 无负面证据:PROPOSE_REVIEW(最高授权:提名
-候选审查);若 NO_LOCAL_HEADROOM_OBSERVED:ABSTAIN + 完整记录(克制优先:
+候选审查);若 NO_HEADROOM_IN_TESTED_RETRY_ACTIONS:ABSTAIN(仅对重试类
+候选)+ 完整记录(克制优先:
 有持续失败、有证据量,但无"改了会好"的任何证据时,提名审查的期望价值
 无法辩护——Stage P 的 verifier 无 headroom 结论 [D] 正是该 abstain 的实证
 依据)。
@@ -985,7 +1151,7 @@ Evolution——若 repairability 无负面证据:PROPOSE_REVIEW(最高授权:提
 的体现:连败把该事件的后验失败概率筛向高端,足以支持止损判定(在 M1 层
 成立,无需时序依赖);是否还存在 M2(真时序)成分,由 H-OE2 的 sham
 检验判定 [S],不预设。C_pol(4)=.708≈C_pol(8) 的 89% [D]——第 4 次之后
-的重试几乎不增加翻盘概率。κ_P 的未来定标将把这些结构转成正式的
+的重试几乎不增加翻盘概率。n_arm/s 类槽位的未来定标将把这些结构转成正式的
 证据量门槛(本文只留槽位)。
 
 ---
@@ -1025,7 +1191,7 @@ verifier / Planner redesign / SFT / OPD / RL。本方法的位置:
 
 ### 10.4 已知局限(如实)
 
-1. **底物窄**:P 型证据全部来自 t9 单任务族 [D];五分类谱与 κ/τ 常数的
+1. **底物窄**:P 型证据全部来自 t9 单任务族 [D];四类谱(及在线三档)与 κ/τ 常数的
    适用范围 = FALSE_GRASP@Pi0.5@libero_spatial 族,不外推。
 2. **在线代理不完备**:"物体在爪中"在线不可直接观测 [S] → 场景 B 的
    CONTRADICTED 触发依赖视觉反证的及时性;temporal aliasing(低频图像漏掉
@@ -1042,9 +1208,14 @@ verifier / Planner redesign / SFT / OPD / RL。本方法的位置:
 6. **Zetta 对照的核验深度(v0.2 新增)**:v0.2 的 Zetta 更正基于其仓库
    main 分支源码级核验 [S-ext](evolution 模块),**未读其论文全文**;
    若论文含统计判据层面的表述(源码未体现),NOVELTY_REVIEW 的对照需再修订。
-7. **既有 U4 标签未复核**:v0.2 类集变更后(DETERMINING 拆出),Stage R
-   的 U 型 4 事件需按新语义逐一再分类(§5.3 末注);未复核前,本文引用
-   "U4"时按旧口径理解。
+7. **既有 U4 标签按预注册口径引用(v0.2.1 更新)**:v0.2.1 已回归 Stage R
+   冻结四类(§5.3),"按 v0.2 语义重分类 U4"的议题已随 A2b 式重分类
+   暗示一并撤销;本文引用"U4"一律按预注册口径(恰 1 次成功的证据量
+   边缘带)理解,任何重分类须另立批准的分析。
+8. **L2 通道条件依赖未审计(v0.2.1 新增,边 5)**:"≥2 独立通道"的
+   独立性目前是设计假设——同一分割模型派生的特征可能共享误差源,
+   未做误差源级核验;定标(H0 方向 1)完成前,L2_CONCORDANT 的可信度
+   按风险项对待(§4.2)。
 
 ---
 
@@ -1058,15 +1229,15 @@ verifier / Planner redesign / SFT / OPD / RL。本方法的位置:
 | L0-L3 | §4.2 | 工具报告 → 单代理 → 多通道一致 → 窗口持续 |
 | 事后标签 / 在线判断 | §5.0 | 分类(序列终了回看)/ 证据分级(执行中),两个不同对象 |
 | Failure Persistence | §5 | 跨 attempt 的失败重复性证据(PE 对象) |
-| DETERMINING/E/A/P/U | §5.3 | 证据积累中/瞬态/动作特异/已测分布持续(候选)/不可归因 |
-| M0/M1/M2 | §5.5 | 同质 iid / 异质 iid(选择效应)/ 真·时序依赖,连败信息的三层解释 |
+| E/A/P/U(+DETERMINING) | §5.3 | 事后四类(Stage R 冻结):瞬态/动作特异/已测分布持续(候选)/恰 1 次成功边缘带;DETERMINING=证据未齐的过程状态,非标签 |
+| M0/M1/M2 | §5.5 | 同质 iid / 异质 iid(选择效应)/ 真·时序依赖——假设层,均未检验 |
 | PA-Attr | §7 | 消费 claims+PE 输出四层 AttributionStatement 的确定性算法 |
 | 四层结论 | §7.1 | L1 关联 / L2 持续性 / L3 因果 / L4 可修复,层间推导白名单(§7.5) |
-| causal_grade | §7.1 | STRONG/MODERATE/DESCRIPTIVE 因果声称封顶 |
+| causal_grade | §7.1 | UNIDENTIFIED(默认)/DESCRIPTIVE/MODERATE/STRONG 因果声称封顶 |
 | evidence_mass | §7.1 | INSUFFICIENT/MARGINAL/SUFFICIENT 证据量(序数) |
-| repairability | §5.4 | 与 P 解耦的"进一步审查资格"三值 |
+| repairability | §5.4 | 与 P 解耦的"审查资格"三值;负面档仅覆盖已测重试动作类 |
 | Runtime/Evolution Gate | §6 | 立即行动 vs 长期候选的双资格门 |
-| 代价对齐授权(A2) | §6.4 | 门槛随错误代价非递减(局部偏序)+ 不可逆 ≥ 可逆(弱全局) |
+| 代价对齐授权(A2) | §6.4 | 门槛随错误代价非递减,仅限可比决策对的局部偏序;决策三档建模 |
 | 撤销不追溯 | §4.4 | CONTRADICTED 收未来授权、不抹历史证据价值 |
 
 ## 附录 B:引用数字出典

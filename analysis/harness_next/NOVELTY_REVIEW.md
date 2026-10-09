@@ -1,10 +1,14 @@
 # NOVELTY_REVIEW — 独创性审计与收缩判定
 
-> 2026-10-09 | 版本 **v0.2** | 配套 `METHOD_SPEC.md`(同日 v0.2)。
-> v0.1 全文见 git 历史(commit `adf5d18`);本轮变更:①Zetta 对照按其仓库
-> main 分支源码重新核验([S-ext],修订 v0.1 的两处错误判定);②N1 按核验
-> 结果再收缩;③N2 表述随 METHOD_SPEC 公理 A2 修订(全局单调性→代价对齐)
-> 同步更新。逐项变更见 §0.1。
+> 2026-10-09 | 版本 **v0.2.1**(Method Consistency Finalization 轮)| 配套
+> `METHOD_SPEC.md`(同日 v0.2.1)。
+> v0.1 见 git `adf5d18`;v0.2 见 git `cc7e0d3`(Zetta 源码重核 + N1 收缩,
+> 变更日志 §0.1);v0.2.1 按 `V02_INDEPENDENT_REVIEW.md`(commit `431ddda`)
+> 做两处更正:①Zetta 演化验证已有 exact McNemar 统计门(gating.py 源码级,
+> 修订 v0.2 的"工程门槛"表述)并明确其与 PAEG 的**统计对象差异**;②N1
+> 重构为 Reliability-Aware Persistence Evidence Qualification 框架,经典
+> 统计方法(Beta-Binomial、异质性建模、序贯停止)如实标注为**已有方法**,
+> 不得包装为首次提出的算法。变更日志 §0.2。
 > 任务:对照最接近的公开工作(重点 Zetta、EmbodiSkill、CheckVLA、RegenHarness;
 > 侧翼 SHAPER、SkillOpt、SafeManip、VASO、CommitFlow),判定 PAEG 各组件的
 > 不可替代性;**发现先例即主动收缩创新声明**(用户指令与提案 §4 收缩条款)。
@@ -34,6 +38,13 @@
 收窄为"物理执行随机性下的失败持续性证据学 + 决策分层授权语义的统计特化"。
 v0.2 追加:Zetta 源码重核推翻 v0.1 的"归因克制空白"判定,N1 再收缩一次
 ("允许 abstain"的立场让渡,"abstain 的统计学判据"保留为核心)。**
+**v0.2.1 追加:①Zetta gating.py 核验出 exact McNemar 配对门——"演化验证的
+正式统计检验"亦让渡,对照差异精确化为统计对象不同(候选改善验证 vs
+持续性证据资格,§1.3);②N1 重构为 Reliability-Aware Persistence
+Evidence Qualification:经典统计工具如实标注为已有,创新限定在
+"物理重建不确定性 + 双契约证据资格 + 已测分布限定 + 层间白名单"的
+机制组合;H0 方向 1 定标未做之前,支持的是研究问题与概念契约,
+不是已证明的算法。**
 
 1. **C2(Persistence-Aware Attribution)= 核心创新,保持(v0.2 再收缩表述)**。
    九个工作无一给出"随机物理执行下,有限重复失败证据对持续性与可修复性的
@@ -65,6 +76,16 @@ v0.2 追加:Zetta 源码重核推翻 v0.1 的"归因克制空白"判定,N1 再�
 | 3 | §1.3/§7 "PAEG 保持的差异:无 abstain、无证据量定标" | 前半句作废(Zetta 有克制出口);后半句加强:Zetta 源码自证"Confidence ranks hypotheses but is not evidence from a live intervention"(lifecycle.py:2577)且 `confidence_is_not_an_authorization_gate` 默认 0——**Zetta 自己承认其置信度不是证据、默认不作授权门**,这为"证据力的统计定标"空白提供了对方源码级的锚点 | [S-ext] |
 | 4 | §7 N1 "含连败时序结构的信息量" | 措辞收紧为"连败信息的分层解释(M0/M1/M2,异质性选择效应 vs 真时序)"——v0.1 的"h(k)<iid ⟹ 连败史携带超信息"是过度解读 | METHOD_SPEC §5.5 |
 | 5 | §7 N2 "授权单调偏序" | 改"代价对齐偏序 + 不可逆性约束"(v0.1 全局单调性被自身矩阵违反,已废弃) | METHOD_SPEC §6.4 |
+
+## 0.2 v0.2 → v0.2.1 变更日志(Method Consistency Finalization)
+
+按 `V02_INDEPENDENT_REVIEW.md`(commit `431ddda`)§3-4 更正:
+
+| # | v0.2 表述 | v0.2.1 更正 | 依据 |
+|---|---|---|---|
+| 1 | §1.2/§1.3 将 Zetta Loop3 held-out 门描述为"工程 k 轮对比",未提其统计检验 | **Zetta `zetta/evolution/gating.py` 已实现 `one_sided_exact_mcnemar`(精确配对二项检验,单侧 P[X≥wins])+ 增益/成功率/无安全回退复合门**,且为预注册两阶段测试;不得再称"Zetta 无统计判据/没有正式统计门"。真正的差异是**统计对象不同**:它检验"候选是否相对父代改善"(候选改善验证门),PAEG 建立的是"失败持续性证据何时足以支持分类/弃权/授权"(证据资格);两者互补而非空白对照 | [S-ext] gating.py:12(one_sided_exact_mcnemar)、:202(evaluate_paired_gate)、:320-350(heldout 复合门) |
+| 2 | §7 N1 表述为"失败持续性与弃权的统计学判据",未区分经典统计方法与新的应用对象 | 重构为 **Reliability-Aware Persistence Evidence Qualification**:经典方法(Beta-Binomial、异质性建模、序贯停止、稳健先验集)全部如实标注为已有工具,创新声明收窄到**新机制组合**(物理状态重建的不确定性 + 双契约 outcome 证据资格 + 已测动作分布限定 + 层间推导白名单),不宣称"首次 Beta-Binomial/首次序贯/首次双门/首次 inconclusive" | 复审 §4;经典文献三条(1971 序贯停止 / 异质 Beta-Binomial / robust sets-of-priors,见 §7) |
+| 3 | §7 N2 含"不可逆性约束(不可逆决策门槛≥一切可逆决策)" | METHOD_SPEC v0.2.1 已删除 A2b 全称命题(改为决策三档建模);N2 表述同步删除该引用 | METHOD_SPEC §6.4 |
 
 ---
 
@@ -112,19 +133,43 @@ memory)。LIBERO-Pro 90.8%(+56.3pt)。源码级确认:critic_runtime.py 的运�
 |---|---|---|
 | 证据等级 L0-L3 | 无(critic 输出=代码化条件是否触发;聚类证据分层为确定性 medoid 优先的定性预算) | 空白 ✓ |
 | Claim 时效/撤销 | 无(critic 是即时判断,无声明账本) | 空白 ✓ |
-| DETERMINING/E/A/P/U 持续性分类 | Loop2 的失败聚类(启发式,LLM 辅助)+ unresolved group | 概念近、机制异;**unresolved≈U 类的定性版(v0.2)** |
+| DETERMINING/E/A/P/U 持续性分类(v0.2.1:E/A/P/U 事后四类 + DETERMINING 过程状态,Stage R 冻结口径) | Loop2 的失败聚类(启发式,LLM 辅助)+ unresolved group | 概念近、机制异;**unresolved≈U 类的定性版(v0.2)** |
 | 归因克制/abstain 的**设计立场** | **有**:unresolved group / inconclusive 终态 / inconclusive gate(v0.1 误判"无") | **先例,让渡(v0.2 核心更正)** |
 | 归因克制的**统计学判据**(证据量函数/异质性后验/连败信息价值/κ 定标) | **无**:unresolved 由 LLM 视觉证据判断产生;源码自证 confidence 非证据且默认不作门 | **空白 ✓(N1 收缩后的核心)** |
 | 重建保真降级 | **部分有**:不完整 shadow replay → 保留为 inconclusive evidence(定性);无定量阈值 ρ*、无系统降档规则 | 部分让渡;定量语义保持 ◐ |
 | Runtime/Evolution 分层 | Loop1 vs Loop3(工程分离) | **结构先例,让渡** |
-| 验证门 | Loop3 held-out 门(工程 k 轮对比) | **先例,让渡** |
+| 验证门 | Loop3 held-out 门:**exact McNemar 配对检验 + 增益/成功率/无安全回退复合门**(v0.2.1 更正:非单纯"k 轮对比"的工程门槛) | **先例,让渡;且含正式统计检验** |
 | SAME 配对重放 | role1 的 paired same-seed [S] | **技术先例,让渡** |
 
-### 1.3 判定(v0.2 修订)
+### 1.3 判定(v0.2.1 修订)
 
 Zetta 回答"闭环 critic-recovery 演化**是否有效**"(90.8%);PAEG 回答"其依赖的
-outcome 证据**何时才可信**"。**必须让渡的声明(v0.2 扩充)**:
+outcome 证据**何时才可信**"。
+
+**v0.2.1 Zetta 统计门更正([S-ext],`zetta/evolution/gating.py`)**:v0.2 曾把
+Zetta 的 Loop3 held-out 门描述为"工程 k 轮对比"——**不准确**。源码核实:
+`one_sided_exact_mcnemar`(gating.py:12)实现精确配对二项检验
+(P[X ≥ candidate_wins],X~Binomial(discordant, 0.5));`evaluate_paired_gate`
+(gating.py:202)按 seed+bundle sha256 逐对绑定并断言 divergence/intervention
+一致;held-out 晋升门(gating.py:320-350)= p<α ∧ gain≥min ∧ success_rate≥min
+∧ 无安全回退,模块 docstring 自称 "preregistered two-stage test"。**因此不得
+声称"Zetta 无统计判据/没有正式统计门"**。正确的对照是**统计对象差异**:
+
+| | Zetta gating | PAEG 资格层 |
+|---|---|---|
+| 统计对象 | 候选 vs 父代的**改善验证**(配对成功率差,同 seed 配对) | 失败持续性**证据资格**(有限重复证据何时足以分类/弃权/授权) |
+| 零假设 | 候选不优于父代(单侧配对) | M0 同质 iid / M1 异质 iid(§5.5,均未检验) |
+| 输入数据 | 候选与父代的 rollout 对 | 同一失败事件的 SAME/POLICY 重试臂 + 观测前缀 |
+| 结论 | 晋升/不晋升(演化动作) | 分类/弃权/授权资格(不作演化动作) |
+
+即:Zetta 已占"**候选改善的统计验证门**"席位;PAEG 的空白在"**执行失败
+持续性证据的统计资格**"——后者在候选还不存在时(无候选可配对)就要判定
+"该失败是否值得进入候选流程"。两者互补,PAEG 不再以"对方无统计门"立论。
+
+**必须让渡的声明(v0.2 扩充,v0.2.1 追加统计门)**:
 - "双时间尺度分离"、"配对同 seed 重放对照技术"、"held-out 晋升门"(v0.1 已让渡);
+- **"演化验证的正式统计检验"(v0.2.1 追加让渡)**——exact McNemar 配对门
+  已实现且预注册(见上),PAEG 不得声称"给演化流程首次引入统计门";
 - **"允许分不出来/unresolved/inconclusive 的克制立场"(v0.2 新让渡)**——Zetta
   已把"允许 inconclusive"做成了工程语义(终态、门、campaign 出口);
 - "不完整重放不作对照"(v0.2 新让渡)——shadow replay 的 inconclusive 保留
@@ -155,7 +200,7 @@ ALFWorld/EmbodiedBench。
 
 | 维度 | EmbodiSkill | PAEG |
 |---|---|---|
-| 分类对象 | defect vs lapse 二分 | DETERMINING/E/A/P/U 五类 + repairability 独立轴 |
+| 分类对象 | defect vs lapse 二分 | E/A/P/U 四类(Stage R 冻结)+ DETERMINING 过程状态 + repairability 独立轴 |
 | 判据来源 | LLM 轨迹反思 | 预注册统计序列(重复实验证据) |
 | 所需证据量 | 未处理(一次反思即分流) | 一等对象(evidence_mass + κ 槽位;单次失败=DETERMINING 非瞬态) |
 | 无法归因时 | 必须分到两类之一 | U 类显式 abstain(实证:U 型 4/24 [D];注:克制立场本身 Zetta 亦有 [S-ext],PAEG 差异在判据) |
@@ -293,11 +338,11 @@ PAEG 拟议组件(收缩后编号)× 九工作。●=已占据 ◐=部分重叠 
 
 | 组件 | Zetta | EmbodiSkill | CheckVLA | RegenHarness | SHAPER | SkillOpt | SafeManip | VASO | CommitFlow |
 |---|---|---|---|---|---|---|---|---|---|
-| **C2-a** 持续性五分类 DETERMINING/E/A/P/U | ◐(unresolved group≈U 定性版,v0.2) | ◐(二分) | ○ | ○ | ○ | ◐(lapse 保护区) | ○ | ○ | ○ |
+| **C2-a** 持续性四分类 E/A/P/U(+DETERMINING 过程状态;v0.2.1 回归 Stage R 冻结口径) | ◐(unresolved group≈U 定性版,v0.2) | ◐(二分) | ○ | ○ | ○ | ◐(lapse 保护区) | ○ | ○ | ○ |
 | **C2-b** 有限重复证据量/abstain 的统计学判据 | ○(源码自证 confidence 非证据 [S-ext]) | ○ | ○ | ○ | ○ | ○ | ○ | ◐(论及 trace 证据不足) | ○ |
 | **C2-c** 重建保真定量降级(ρ* 阈值+降档规则) | ◐(inconclusive 保留,定性;v0.2) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | **C2-d** repairability 解耦 | ○ | ○ | ○ | ◐(bounded recovery 预算) | ○ | ○ | ○ | ○ | ○ |
-| **C1'** 分层授权语义(代价对齐+abstain) | ◐(工程双环+inconclusive gate) | ○ | ◐(单门校准) | ◐(commit 骨架) | ○ | ◐(晋升门) | ○ | ◐(形式门) | ◐(hold back) |
+| **C1'** 分层授权语义(代价对齐+abstain) | ◐(工程双环+inconclusive gate+exact McNemar 配对门,v0.2.1) | ○ | ◐(单门校准) | ◐(commit 骨架) | ○ | ◐(晋升门) | ○ | ◐(形式门) | ◐(hold back) |
 | **C3'** 物理时间有效性语义 | ○ | ○ | ○(keyframe 非授权) | ◐(版本化) | ○ | ○ | ◐(LTLf 时序) | ◐(时序规约) | ◐(maintain 条件) |
 | ~~已弃用~~ "校准决策门槛" | ○ | ○ | **●** | ○ | ○ | ○ | ○ | ○ | ○ |
 | ~~已弃用~~ "commit gate/版本化" | ◐ | ○ | ○ | **●** | ○ | ◐ | ○ | ○ | ○ |
@@ -313,42 +358,69 @@ C2-c 的 Zetta 列从 ○ 升为 ◐(克制立场与定性降级已被占),**核
 
 ---
 
-## 7. 收缩后的最终创新声明(v0.2 再收缩版,均待概念评审,非实测)
+## 7. 收缩后的最终创新声明(v0.2.1 重构版,均待概念评审,非实测)
 
-**N1(核心)= 失败持续性与弃权的统计学判据(C2,v0.2 收缩后)**
+**N1(核心)= Reliability-Aware Persistence Evidence Qualification
+(C2,v0.2.1 重构:可靠性感知的持续性证据资格)**
 
-> 在边际成功率随机、单次成败证据力弱的执行栈上,给出"何时必须弃权、何时
-> 证据足以分类"的**统计学判据**,以及分类后的层间推导纪律:
+> **研究对象**:在有限重复执行、条件异质性、状态重建不确定性并存的物理
+> 执行栈上,明确**什么证据足以支持**①"已测动作分布内的失败风险"判断、
+> ②弃权(abstain)、③哪类决策可以消费该证据。观测的预测可信度、因果
+> 归因、修改后可修复性是**三个独立命题**(层间白名单,§7.5)。
 >
-> 1. **证据量语义**(C2-b,核心):单次失败零分辨力(DETERMINING,非瞬态)、
->    分流所需最小证据量(κ 槽位 + evidence_mass 序数)、证据边际价值随 n
->    衰减(C_pol(4)=C_pol(8)×89% [D])——**这一层九工作均无**;Zetta 源码
->    自证其置信度"ranks hypotheses but is not evidence"[S-ext];
-> 2. **异质性与连败信息的分层解释**(C2-b):同质 iid / 异质 iid 选择效应 /
->    真时序(M0/M1/M2,METHOD_SPEC §5.5)——连败史何时携带超出边际率的
->    信息、何时只是可交换混合的选择效应、止损判定为何只需 M1 层。该分析
->    框架为 PAEG 独有表述;
-> 3. **双采样臂的动作特异性排除**(SAME/POLICY 对照 + contrast 语义);
-> 4. **重建保真的定量降级**(ρ* 阈值 + causal_grade 降档 + APPROXIMATE
->    标注;Zetta 只有定性的 inconclusive 保留 [S-ext]);
+> **与经典统计方法的关系(v0.2.1 显式化,不得回避)**:本框架用到的
+> 统计工具全部是已有的——
+> - 序贯停止/决策(Operations Research 19 类序贯检验传统,
+>   pubsonline.informs.org/doi/10.1287/opre.19.4.970,1971);
+> - 异质 Beta-Binomial / 可交换混合的后验与预测(pmc.ncbi.nlm.nih.gov/
+>   articles/PMC10962580);
+> - 稳健可靠性 / 先验集(arxiv.org/abs/1602.01650)。
+> **N1 不宣称"首次提出 Beta-Binomial 建模"、"首次序贯决策"、"首次
+> 定义 inconclusive"、"首次双门"、"首次统计检验演化候选"(后者 Zetta
+> exact McNemar 已占,§1.3)**。创新声明收窄到**这些工具未曾作为对象的
+> 新机制组合**:
+>
+> 1. **物理状态重建的不确定性作为证据资格的一等输入**(C2-c):离线
+>    重放/重采样是 RESTORE-SENSITIVE 动力学上的近似反事实(transition-class
+>    一致率 .769<.90 [D]),任何消费重试臂证据的统计结论必须携带重建
+>    保真降级(ρ* 阈值 + causal_grade 降档 + APPROXIMATE)——经典可靠性
+>    统计假设"同一单元的重复观测可比",物理重放打破该假设,这一断裂
+>    是 PAEG 的独立问题;
+> 2. **双契约 outcome 证据资格**(ACQ vs STABLE,gap ~35pp [D]):证据
+>    资格判定显式绑定"用什么判据判成功",契约选择进入统计对象而非
+>    工程细节——经典方法不处理"成功谓词本身有 35pp 摆动"的资格问题;
+> 3. **已测动作分布限定**(SAME/POLICY 双臂):所有持续性结论限定在
+>    已测动作分布内,跨策略族外推被白名单显式禁止(X1)——把"分布内
+>    资格"与"分布外声称"的类型分离作为形式对象;
+> 4. **证据量与弃权的可证伪判据**(C2-b,保留自 v0.2):单次失败分辨力
+>    不足以授权(INSUFFICIENT_FOR_DECISION——非零信息亦非瞬态)、分流
+>    所需最小证据量(槽位 + evidence_mass 序数)、证据边际价值随 n 衰减
+>    (C_pol(4)=C_pol(8)×89% [D]);Zetta 源码自证其置信度"ranks
+>    hypotheses but is not evidence" [S-ext];
 > 5. **层间推导白名单**(关联/持续性/因果/可修复四层,X1-X4 禁则——
 >    禁止由重复失败推出 Skill Defect)。
 >
-> **v0.2 让渡**(不得再声称):"允许 abstain/unresolved 的设计立场"
+> **v0.2 让渡(v0.2.1 全部保留)**:"允许 abstain/unresolved 的设计立场"
 > (Zetta unresolved group/inconclusive 终态 [S-ext]);"不完整重放不作
 > 对照"(Zetta shadow replay inconclusive 保留 [S-ext]);"执行偶发≠技能
-> 缺陷的思想"(EmbodiSkill [S])。
-> RPent 实证底物:E/P 完美分离、h(k) 低于同质 iid、双臂对照、restore 一致率 [D]。
+> 缺陷的思想"(EmbodiSkill [S]);**"演化验证的统计检验"**(Zetta exact
+> McNemar 配对门,v0.2.1 追加)。
+> RPent 实证底物:E/P 完美分离、h(k) 条件化观察值、双臂对照、restore
+> 一致率 [D]。**边界**:M0/M1/M2 均为假设层且未检验,κ/n_arm 槽位未定标
+> ——N1 是"研究问题 + 概念契约"的规范化,**不是已证明的算法**;其统计
+> 实质内容依赖 H0 方向 1 获批后的离线定标(未做,见 R4)。
 
 **N2(支撑)= 决策类型×证据强度的分层授权语义(C1 收缩后,v0.2 表述更新)**
 
 > 同一 append-only 证据面,对不同时间尺度的决策(立即判定 vs 长期更新候选)
-> 给出充分性判定,形式化为**代价对齐偏序**(门槛随错误代价非递减,局部可比
-> 对上成立;v0.2 取代 v0.1 的全局授权单调性——后者被自身授权矩阵违反,
-> METHOD_SPEC §6.4)+ 不可逆性约束(不可逆决策门槛≥一切可逆决策)+
+> 给出充分性判定,形式化为**代价对齐偏序**(门槛随错误代价非递减,仅在
+> "错误后果与证据类型均可比"的决策对上成立;v0.2 取代 v0.1 的全局授权
+> 单调性——后者被自身授权矩阵违反;v0.2.1 又删除 A2b"不可逆≥一切可逆"
+> 全称,改候选审查/正式部署/不可逆物理动作三档建模,METHOD_SPEC §6.4)+
 > abstain 一等公民。不以"存在两个门"、"门槛经过校准"、"允许 inconclusive
-> 门"(v0.2 新增,Zetta [S-ext])为创新;创新在门族门槛的**代价对齐形式
-> 关系**与**共享证据面的两视角读取**(撤销不追溯的运行时/演化不对称)。
+> 门"(v0.2,Zetta [S-ext])、"演化验证有统计门"(v0.2.1,Zetta exact
+> McNemar)为创新;创新在门族门槛的**代价对齐形式关系**与**共享证据面的
+> 两视角读取**(撤销不追溯的运行时/演化不对称)。
 
 **N3(底座)= 物理窗口有效性语义(C3 收缩后,不变)**
 
@@ -381,12 +453,18 @@ MQ1-MQ4 且每个子问题有对应形式对象与接口(§0 表)。可证伪性
   创新声明完全落在**判据的统计学内容**上——这使 N1 对"判据是否真有独立
   内容"更敏感:M1/M2 分层、κ 定标、白名单推导必须在未来工作中给出可检验
   的实质,否则 N1 退化为对 Zetta 工程出口的重新叙述;
+- **v0.2.1 边界(经典统计非创新)**:N1 的统计工具(Beta-Binomial、异质性
+  建模、序贯停止、稳健先验)均为已有方法——独立贡献的成立**不依赖**这些
+  工具本身,而依赖其应用对象的新机制组合(重建不确定性/双契约资格/分布
+  限定/白名单,§7 N1);据此,凡"未做的概率定标"(H0 方向 1 未批)之前,
+  N1 一律表述为"研究问题 + 概念契约",**不宣称已完成算法创新**;
 - **最脆弱点(更新)**:①RegenHarness 或 VASO 论文全文(仅摘要级)内含
-  统计化证据强度语义(R1,保留);②**新增**:Zetta 论文全文(源码已核、
-  论文未读)若把 unresolved 的判据数学化(R5),N1 需再收缩至"异质性
-  选择效应分析 + 双臂对照 + 层间白名单"。
+  统计化证据强度语义(R1,保留);②Zetta 论文全文(源码已核、论文未读)
+  若把 unresolved 的判据数学化(R5),N1 需再收缩至"重建不确定性 + 双臂
+  对照 + 层间白名单";③若"重建保真作为证据资格输入"在可靠性统计文献
+  中已有成熟处理(R6),N1 的第 1 项机制需再核。
 
-### 8.3 逻辑自洽的整体架构?——**基本自洽(v0.2 修复后,两处已知张力)**
+### 8.3 逻辑自洽的整体架构?——**基本自洽(v0.2+v0.2.1 修复后,两处已知张力)**
 
 接口闭环检查:Outcome State(物理)→ Evidence Claim(观测化)→ Persistence/
 Attribution(跨尝试)→ Eligibility(决策)——四层单向数据流 + 审计横向,
@@ -396,7 +474,12 @@ Attribution(跨尝试)→ Eligibility(决策)——四层单向数据流 + 审�
 **v0.2 自洽性修复**(用户指令 1-5 对应的内在错误已全部消除):单次失败
 误标 E(§5.0/§5.3)、h(k) 过度解读(§5.5)、PA-Attr 层次混杂(§7.1/§7.5)、
 全局单调性自相矛盾(§6.4)、闭窗 claim 被未来事件否定(§4.1/§4.4/§9.2)。
-修复后的规范层无已知内在矛盾。
+**v0.2.1 修复(独立复审 B1-B4)**:E/A 判据重叠与 DETERMINING 误作事后
+标签(§5.3 回归冻结四类)、"M0 已被拒绝"无检验支撑与 runs 充分统计误述
+(§5.0/§5.5)、causal_grade 默认 STRONG 与群体 contrast 排除式读法
+(§5.2/§7.3)、A2b 不可逆全称(§6.4 三档化)。修复后的规范层无已知内在
+矛盾(独立复审判定 REVISE 的四个必修项均已落地,验收见
+METHOD_CONSISTENCY_REPORT.md)。
 
 **张力 1(如实,保留)**:temporal aliasing 下 `Held` 类 claim 可能长期滞留
 PROVISIONAL/UNKNOWN(METHOD_SPEC §10.4-2)——运行时授权在低频观测栈上
@@ -408,10 +491,12 @@ REPORT_FAILURE=ALLOW 输出的是判定资格而非控制指令;若用户未来�
 
 ### 8.4 综合判定
 
-**方法具备明确研究问题(是)、有条件的独立创新(N1 核心成立,v0.2 收缩后
-内容集中在统计判据)、修复后自洽的架构(五处内在错误已消除,两处外部
-张力如实登记)。可以进入用户概念评审;任何实现/实验/定标仍需按 §36 与
-提案 §7 另行立项授权。**
+**方法具备明确研究问题(是)、有条件的独立创新(N1 核心成立,v0.2.1 收敛
+为 Reliability-Aware Persistence Evidence Qualification——支持的是研究问题
+与概念契约,不是已证明的算法;统计实质内容依赖未做的定标)、修复后自洽的
+架构(v0.2 五处 + v0.2.1 四处内在错误已消除,两处外部张力如实登记)。
+可以进入用户概念评审;任何实现/实验/定标仍需按 §36 与提案 §7 另行立项
+授权。**
 
 ---
 
@@ -423,13 +508,14 @@ REPORT_FAILURE=ALLOW 输出的是判定资格而非控制指令;若用户未来�
 | R2 | N1 的实证底物窄(P 型 5 事件全 t9、单模型单栈 [D]) | 方法文档已限定 scope=FALSE_GRASP@Pi0.5@libero_spatial 族;外推声明禁令写入 METHOD_SPEC §10.4 |
 | R3 | "统计分类规则 vs 学习式 classifier" 的 §36 边界判断存在解释空间 | 规则全部显式预注册、阈值显式槽位、零拟合;在线用途明示需另立授权(METHOD_SPEC §10.1) |
 | R4(v0.2) | N1 的统计学判据若未来无实质内容(定标工作未做、M1/M2 检验未执行),创新退化为对 Zetta 工程出口的重述 | H0 方向 1(H-OE2/H-OE3)获批后执行定标;在获得实质内容前,N1 声明保持"待概念评审,非实测"措辞 |
-| R5(v0.2) | Zetta 论文全文(未读)含 unresolved 判据的数学化表述 | 源码级结论标注 [S-ext] 并注明论文未读;若获论文再核;发生则 N1 收缩至异质性分析+双臂+白名单 |
+| R5(v0.2) | Zetta 论文全文(未读)含 unresolved 判据的数学化表述 | 源码级结论标注 [S-ext] 并注明论文未读;若获论文再核;发生则 N1 收缩至重建不确定性+双臂+白名单 |
+| R6(v0.2.1) | N1 被误读为"首次提出 Beta-Binomial/序贯/异质性算法"(经典方法包装风险);或可靠性统计文献已处理"测量系统不可靠时资格判定" | §7 v0.2.1 已显式标注三条经典文献并声明不宣称首次;机制组合(重建保真/双契约/分布限定/白名单)逐项可单独收缩,任何一项被占即降级该项表述 |
 
 ## 附录:本轮核验文献清单
 
 | 工作 | arXiv | 核验等级 | 本轮动作 |
 |---|---|---|---|
-| Zetta | 2608.16590 | [S]+[P]+[S-ext] | **v0.2:main 分支源码重核**(evolution 模块 unresolved/inconclusive 六项机制,行号级;见 §1.1);论文全文未读(R5) |
+| Zetta | 2608.16590 | [S]+[P]+[S-ext] | **v0.2:main 分支源码重核**(evolution 模块 unresolved/inconclusive 六项机制,行号级;见 §1.1);**v0.2.1:gating.py exact McNemar 配对门核验**(one_sided_exact_mcnemar@12/evaluate_paired_gate@202/heldout 复合门@320-350);论文全文未读(R5) |
 | EmbodiSkill | 2605.10332 | [S]+[P] | 引用 S0 既有结论 |
 | SkillOpt | 2605.23904 | [S] | 引用 S0 既有结论 |
 | SHAPER | 2608.11350 | [P] | 引用 H0 既有结论 |
