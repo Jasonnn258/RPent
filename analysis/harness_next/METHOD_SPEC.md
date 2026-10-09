@@ -1,6 +1,6 @@
 # Persistence-Aware Evidence Governance — 方法规范(METHOD_SPEC)
 
-> 2026-10-09 | 版本 **v0.2.1**(Method Consistency Finalization 轮)/ 未实现、未测试、未定标。
+> 2026-10-09 | 版本 **v0.2.2**(Post-MCF Evidence Authorization Interface Repair)/ 未实现、未测试、未定标。
 > v0.1 见 git `adf5d18`;v0.2 见 git `cc7e0d3`(修订记录:§0.1 与
 > `METHOD_V02_REVIEW.md`);v0.2.1 按 `V02_INDEPENDENT_REVIEW.md`(commit
 > `431ddda`)的 B1-B4 与附加边界做最小修订,逐项映射见 §0.2 与
@@ -48,6 +48,22 @@
 | 边5 | L2"两通道一致"未核对条件依赖 | 登记为证据可信性风险(同源派生通道不独立) | §4.2, §10.4 |
 
 (Zetta exact McNemar 更正与 N1 重新判断在 NOVELTY_REVIEW v0.2.1。)
+
+---
+
+## 0.3 v0.2.1 → v0.2.2 变更日志（接口证据资格修复）
+
+1. §5.6 将 `offline_replay_cohort` 容器和 `research_audit_truth` 字段权限
+   分开;仅研究 sim 真值不得经 ledger/Evolution Gate 获得授权。
+2. §6.2、§8.2、§9.3 将离线 SAME/POLICY 8+8 的事后 P 类与
+   运行时可得观测分离;不存在由离线 P 直接使 Runtime REPORT_FAILURE=ALLOW 的路径。
+3. §6.3 对 §7.5 D2 的正面条件逐项检查;默认 UNIDENTIFIED、
+   repairability=UNKNOWN 不得误进入 PROPOSE_REVIEW。
+4. §7.2 R1a、§9.1/9.2 取消“一次成功即 E”的旧句;
+   §9.3 不由有限零成功排除动作影响,也不凭重建结果自升 MODERATE。
+5. 配套 `analysis/harness_next/{POST_MCF_INTERFACE_AND_LITERATURE_AUDIT,
+   EVIDENCE_INTERFACE_REPAIR_REPORT}.md`;仅研究文档,任何定标/实验/控制
+   仍未授权,Stage R §36 Hard STOP 与 S1-DEV0 暂停继续。
 
 ---
 
