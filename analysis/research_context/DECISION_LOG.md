@@ -125,6 +125,17 @@
 - **下一步**：在已有 L1 授权中做**一次导出产物复核**（A/B 分文件、样本数、跨视图键、泄漏边界、8+8+4 重建分组），只记录脱敏 Gate；真正的新前瞻 C cohort 要单独 L2 批准。
 - **不能推出什么**：A0 描述性结果 ≠ 实际接触/长期持握的真值分类；EERD 内部文件已由脚本生成 ≠ 所有八道 QA 均已独立通过或公开数据集已经发布；不存在本次 ChatGPT 环境直接读服务器文件的事实。
 
+## D-014 · Package A 内部数据集与导出 QA 收官
+
+- **日期/来源**：2026-10-09；用户于服务器同步分支至 `741278a` 后执行 `python3 analysis/research_context/audit_package_a_exports.py --output artifacts/research_package_a`，并回传完整 Gate 摘要。
+- **状态**：`PACKAGE_A_CLOSED_INTERNAL_V01 / EXPORT_QA_26_OF_26_PASS / P1_L2_HOLD`。
+- **确认结果（用户服务器回传）**：`gate=PASS`、`checks_passed=26`、`checks_total=26`、`failures=[]`；A=235 Pick 行、PRIMARY=206、UNKNOWN=0；B=480 trials，24 父事件；标准矩阵 TP=101、FP=2、FN=56、TN=47。已在 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 追加完整脱敏 QA 回执；GitHub 只存报告和源代码，未上传私有 JSONL。
+- **决定**：Research Package A 的**离线基线审计、内部 EERD v0.1 物化及当前版本工程验收已完成**；不再重复 A0 数值分析，也不再用无新增科学问题的纯文档轮次延迟 P1。
+- **证据局限**：本次 26 项为结构、输出视图权限字段、join、预定条数、B 臂完整性及已报告统计的自洽检查；其中含硬编码预期计数，不能当作完全独立统计复制、特权信息零泄漏的数学证明、物理标签效度检验或跨任务外推。A0 FGONLY 是同技能存在性代理。
+- **研究意义**：主分析工具失败后技内 FGONLY 代理曾满足的条件率 56/103；这是 P1 “失败返回后追加验证还是直接重试”的**可验证研究动机**，不是已证实的物理持握成功或动作收益。
+- **权限边界**：已有 L1 阶段收官。P1 新 cohort/在线策略对照/恢复接线属于 L2，需新的完整阶段授权；Stage R §36 HARD STOP 与 S1-DEV0 ON_HOLD 仍有效。
+- **重开条件**：P1 新数据/新授权、独立的标签有效性证据或出现真正影响当前科学结论的实质缺陷。
+
 ## 新决策追加模板
 
 ```markdown
