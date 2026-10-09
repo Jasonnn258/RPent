@@ -20,6 +20,8 @@
 
 > **P1 视觉审阅板真实生成完成（2026-10-09，用户服务器回传）**：修复后双脚本合成单测 **6/6 OK（0.607s）**；`scripts/p1_dev0_visual_review.py` 报 `PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`、`n_boards=5`，已在私有 `artifacts/p1_dev0/visual_review/` 生成 5 张 Agentview 前后/差分、Wrist 前后纵向对齐/差分拼图。**真实图像内容尚未被本对话看到或评估，不可报告目标可见、抓持或标签效果**。为减少重复人工命令，已提交 `scripts/p1_dev0_visual_annotation.py` 与离线单测：生成不联网的本地 HTML 审阅表，允许五样本一次性进行可见性/遮挡/空间关系人工审查，并离线汇总。新审阅器**尚未在服务器测试/运行**；人工主观观察不等于物理真值标签。P1-DEV0 CLOSED、新仿真 L2 HOLD。
 
+> **最新视觉审阅工具测试反馈（2026-10-09）**：用户服务器运行 `test_p1_dev0_visual_annotation.py` 得到 **0/4 PASS、4/4 `FileExistsError`**，错误均在 `fixture(root)` 重复创建由 `TemporaryDirectory()` 已创建的目录；由于使用 `&&`，**HTML build 未执行**。已在测试夹具改为 `root.mkdir(parents=True, exist_ok=True)`，commit `ee7efbe`，**修复版尚未在服务器重新测试**。已有五张 RGB 对照图与 6/6 图像测试 PASS 不受影响。无需新增仿真；只需复跑四项单测，PASS 后 build 私有 HTML。
+
 ## 1. 总状态
 
 **`P1_DEV0_CLOSED / VISUAL_PAIR_ASSETS_PASS_5_OF_5 / VISUAL_TESTS_6_OF_6_SERVER_PASS / FIVE_PRIVATE_RGB_BOARDS_WRITTEN / LOCAL_OBSERVABILITY_REVIEW_TOOL_UNRUN / PHYSICAL_GRASP_UNVERIFIED / NEXT_L2_HOLD`**
