@@ -16,9 +16,11 @@
 
 > **最新 P1 诊断归档（2026-10-09；用户服务器增强版实测）**：4/4 tests OK，`policy_sha_match=true`，5/5 probe 的合法 `post_gap<0.06`、5/5 `ΔEEF_z` 有效但 **0/5 达到 0.03 m**，probe→policy `gripper_gap/eef_z` 不一致 0，缺 post_legal 0。影子 **D2=CONTINUE 5/5 vs D3=RETRY 5/5** 的原因是 D3 冻结规则的 EEF 高度门槛与定点夹紧 probe 不匹配；两者都未得到正确持握真值的验证。已在执行报告/独立审计中追加勘误，历史数据/策略保持冻结。进一步源码发现**pre wrist PNG 做纵向翻转、post probe wrist PNG 不翻转**。已提交独立只读的 pre/post 图像配对+SHA/尺寸核验及合成测试（尚未在服务器执行），下一 Gate 是图像证据是否实际可对齐/可用，不是再跑仿真。P1-DEV0 CLOSED；下一新 L2 未授权。
 
+> **视觉图像配对真实验收（2026-10-09，用户服务器回传）**：只读 `p1_dev0_visual_pair_preflight.py` 得到 `PAIRED_ASSETS_COMPLETE`；21 有事件/15 无触发/6 触发/其中5个物理 Probe，原始 agentview 与 wrist 前后 PNG 文件分别 **5/5 SHA256+头部尺寸合格**，均前后哈希不同；`failure_reasons={}`。这是**图像文件存在与溯源证据**，尚未完成像素语义、物体是否可见、真实持握或独立标签效度的验证。首次服务器运行的合成单测为 **2/3 PASS + 1 个 `KeyError: wrist_verified_pair`**：失败场景有效配对数=0 时 Counter 转字典省略零键，测试用下标读取。已在 `scripts/p1_dev0_visual_pair_preflight.py` 给固定统计键补零，**修正版尚未在服务器回归测试**；真实数据 PASS 可保留，不能声称整个质量门“测试全绿”。Pre wrist PNG 与 Post wrist PNG 的纵向翻转差异仍需在真正比较像素前显式校正。旧 DEV0 继续 CLOSED，不准补跑；下一阶段以离线合法视觉证据的语义可辨识性为问题，新 L2 仍 HOLD。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / V2_SERVER_DIAGNOSTIC_PASS_4_4 / GAP_LT_0P06_5_OF_5 / EEF_DZ_GE_0P03_0_OF_5 / POLICY_MAPPING_MISMATCH_0 / SHADOW_D2_CONTINUE_D3_RETRY_5_OF_5 / VISUAL_PAIR_PREFLIGHT_CODE_UNRUN / NEXT_L2_HOLD`**
+**`P1_DEV0_CLOSED / VISUAL_PAIR_DATA_GATE_PASS_5_5_BOTH_CAMERAS / VISUAL_UNIT_TEST_2_OF_3_ONE_ZERO_COUNTER_ERROR / FIX_COMMITTED_RERUN_PENDING / GRASP_SEMANTICS_UNVERIFIED / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -42,6 +44,7 @@
 | **A0 服务器真实结果** | 结构 PASS，outcome PASS；235/235 合格，206 PRIMARY，UNKNOWN=0；常规 TP=101、FP=2、FN=56、TN=47；`R_accept=1.94%`、`R_miss=54.37%`，一致率 71.84%；export QA 26/26 PASS | 用户服务器回传，独立的字段/数据行工程核验已跑；详见 `PACKAGE_A_A0_SERVER_RESULT_20261009.md` §6 |
 | **P1-DEV0 已执行** | 21/24 新 episode(3 个 SKIPPED_GPU_BUDGET)、6 触发全审计、0 hook_error/0 censor/0 infra;D1 遮蔽、特权键隔离、事件外置全部核验通过;判定 GO(工程)/HOLD(确认性) | 触发率 6/21 且 t9 集中(t5 0/8)、D2 臂 0 触发未生产暴露;详见 `P1_DEV0_EXECUTION_REPORT.md` |
 | **DEV0 增强版后验诊断（用户服务器回传）** | 4/4 tests OK，5/5 gap<0.06，0/5 EEF dz≥0.03，probe→policy 不一致0，D2/D3 影子分歧 5/5；未实际执行的 D2 结果仍未知 | 规则失配已确认，夹爪闭合≠真实持握；Pre wrist PNG 被纵向翻转而 Post wrist 原样写出；只读视觉文件配对 Gate 待跑 |
+| **DEV0 视觉证据配对（用户服务器回传）** | `PAIRED_ASSETS_COMPLETE`;5/5 probe 对 agentview 与 wrist 图像哈希/PNG 头尺寸合格，5/5 两相机前后哈希均不同；`failure_reasons={}` | 只验证静态文件与视图配对；合成测试 2/3（零字段 KeyError），归零输出已修待复跑；wrist 纵向方向不一致，尚无任何视觉持握识别结果 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -63,7 +66,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **增强版 posthoc 已完成且规则失配确证，不再反复运行**。下一步只读检查现存 pre/probe 图像证据对：先运行 `test_p1_dev0_visual_pair_preflight.py`，再运行 `scripts/p1_dev0_visual_pair_preflight.py --out-root /workspace/yjx/rpent_data/p1_dev0`；仅检查文件 SHA、PNG 头、相机匹配及 wrist 纵向朝向，不读取 audit truth、不启动仿真。
+1. **视觉文件数据验收已 PASS（5/5 两相机配对）**；原测试 2/3，零值统计键导致一例 KeyError，代码已修复。服务器仅需重新运行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_dev0_visual_pair_preflight.py' -v` 证明修复版测试通过；无需再次执行 GPU/仿真，也不必重复真数据配对扫描。
 2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
 3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
 
