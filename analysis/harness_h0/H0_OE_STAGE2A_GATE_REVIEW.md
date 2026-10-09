@@ -33,7 +33,7 @@
 | A-6 实验顺序、时间戳 | 源码 arm 顺序固定 SAME→RESAMPLE→NATURAL；`trial` 递增；`wall_s` 是单试次时长 | PASS 记录性质；真实物理时间漂移不可识别 |
 | A-7 snapshot/prefix 溯源 | cohort manifest method PREFIX，三 SHA16 格式齐；SAME/RESAMPLE recon 字段齐，NATURAL 自然无 recon_sha | PASS 仪器索引，不等于完美反事实 |
 | A-8 checkpoint JSONL 全文件 schema | 用户本地扫描 **484 条记录、12,641 个 cps**；顶层/测量点一级键一致，`malformed=0`、`empty_cps=0`，未发现命名含 `time/stamp` 的字段路径（搜索深度有限） | **FULL_SCHEMA_PASS / NO_INDEPENDENT_REFERENCE_IDENTIFIED** |
-| A-8b CSV ↔ checkpoint 逐试次键对账 | Stage R CSV 所含 SAME 192 + RESAMPLE 192 + NATURAL 96 = **480** 个逻辑 trial，checkpoint JSONL **484** 条；尚未做两侧 `(event_id,arm,trial)` Counter 差集 | **KEY_RECONCILIATION_PENDING**，必须排查 4 条数量差异的来源 |
+| A-8b CSV ↔ checkpoint 逐试次键对账 | 用户本地 Counter 对账：CSV **480** 唯一键全部在 checkpoint 恰好出现一次；checkpoint **484** 唯一键，额外四键 `r09/SAME/1,2,3` 和 `r12/SAME/1`，无缺失/重复；manifest 显示 r09/r12 均为 **R0_DEV** | **R1_COHORT_KEY_JOIN_PASS / EXTRA_DEV_ROWS_IDENTIFIED_4**，额外行的实际写入过程未证实 |
 | A-9 原始 trial outcome 的效果统计 | 未计算成功次数、区间、h(k)、性能差异或任何模型结果 | **NOT_RUN，符合本阶段限制** |
 | A-10 Stage R §36 + S1 边界 | 没有修改 Stage R 任何代码/原始/冻结 prereg；E14/A1/P5/U4 仍引用原终报 | PASS |
 
@@ -49,7 +49,7 @@
 推荐 **Stage 2B：正式预注册审阅与冻结准备**（仍不含统计执行）。该阶段的首要任务必须是：
 
 1. 审阅和确定只保留可识别的 **OE1a、OE2a、OE3a**；OE1b、M2 真实因果和“latent E/P 分类最小试数”保留 STOP/探索性降级；
-2. **用户已完成全文件只读 schema 检查**：484 条记录/12,641 个 checkpoint 字段集合一致、零解析错误，`meas/obs` 键名已扫描、未发现 `time/stamp` 命名字段；但 CSV 仅有 480 个已审计逻辑 trial。**当前的主要待办是在已有 Stage 2A 权限内做全文件 `(event_id,arm,trial)` 键对账，不运行结果统计**。不能把 FULL_SCHEMA_PASS 误作 FULL_KEY_JOIN_PASS；
+2. **Stage 2A 键级对账已完成**：服务器 484 条 checkpoint 中的 480 条与正式 R1 CSV 唯一键逐一对应，另外 4 条属 `r09/r12` 两个冻结 `R0_DEV` 事件；无 CSV 缺失键、无 checkpoint 重复键。未来获批准时必须以冻结 manifest `role=R1_COHORT` 筛选，不能把额外 DEV 记录带入正式研究。具体为何写入同一 JSONL 仍未证明（见 `FIELD_PROVENANCE_AUDIT.md §5.2`）；
 3. 明确事件整体切分、候选 k/m、主要评价量、M0/M1 基线、功效/不确定性、缺失和停止准则；审核已有结果披露导致的回顾性偏差；
 4. 创建单独正式冻结文件，并要求**另一次明确用户批准**后才可冻结。Stage 2A draft 永不作为冻结文件；
 5. 未来真实统计运行须第三次独立授权，任何 rollout/训练/Controller 仍在 Stage R §36 禁区。
@@ -65,4 +65,4 @@
 
 未变动先前 Stage 1 文件、冻结 Stage R prereg、原 trial CSV、脚本或模型。所有结构数量来自字段完整性/事件 join 检查，不是任何新效果统计。没有访问或修改服务器原始运行环境。
 
-**最终：Stage 2A 全文件 checkpoint 字段结构已核验，新增 484 vs 480 条记录的键级差异，故 `FULL_SCHEMA_PASS / KEY_RECONCILIATION_PENDING`。仅允继续 Stage 2A 的只读键对账；Stage 2B、正式冻结、统计/在线实施继续 HOLD。**
+**最终：Stage 2A 全文件 checkpoint schema 和 R1 cohort 逐键关联核查均完成：`FULL_SCHEMA_PASS / R1_COHORT_KEY_JOIN_PASS / EXTRA_DEV_ROWS_IDENTIFIED_4`；DEV 附加行确切生成历史仍 `NOT_VERIFIED`。** 本阶段研究资产结构 Gate 可以关闭；独立 reference/时序因果/Evolution 合法信号未获得证明。**Stage 2B、正式冻结、离线统计/在线实施继续 HOLD，需后续单独授权。**
