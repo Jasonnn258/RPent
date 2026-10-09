@@ -41,3 +41,6 @@ rpent-logs*.tar.zst
 /rpent/rpent/
 .claude/
 analysis/stageR_trial_checkpoints.jsonl
+
+# Local scheduled-sync scripts and credentials stay on the server.
+/.local/
