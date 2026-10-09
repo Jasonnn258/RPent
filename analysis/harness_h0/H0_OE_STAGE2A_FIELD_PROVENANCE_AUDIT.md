@@ -26,7 +26,7 @@
 | `analysis/stageR_failure_events.jsonl` | `event_id,task,seed,t0,role,episode_dir,prompt,target,n_prefix_actions,a_fail_sha16,pre_sha16,post_sha16` | 32 条与 manifest ID 和 task/seed/t0/role 均匹配；source 将 `target` 写为 `null`，运行时才由重建后的 sim `obj_of_interest` 取得 | **PASS 事件索引；target 并非合法在线观测证明** |
 | `analysis/stageR_event_probabilities.csv` | event 级 `q_same/q_policy/type` 等 28 列 | 24 条，事件 ID 与 manifest 24 个 R1_COHORT 对齐；本阶段**没有读取这些概率字段的取值作结果分析** | **索引对齐 PASS；派生结果不可当独立标签** |
 | `analysis/stageR_collect_ledger.csv` | `task,seed,episode_dir,rc,classify,wall_s,retries,fg_first,rps_first,t0,t0_skill,meas_points,stable_fg,included,note` | 有 187 条扫描 ledger 记录，选择后的 manifest 是独立冻结产物；ledger 无 `event_id` 列，event_id 由源代码按原 ledger 行号生成，**不能用纳入序号替代 ID** | **字段/来源 PASS** |
-| `analysis/stageR_trial_checkpoints.jsonl` | 生成代码定义每行 `event_id,arm,trial,cps`，`cps` 的测量来自 sim；在 `.gitignore` 被明确排除 | **GitHub 不存在受版本管理的该文件**；无法验证本地行级时间、point-level `check_success` 分量、观测独立性或时间窗口 | **NOT_VERIFIED_LOCAL_ONLY** |
+| `analysis/stageR_trial_checkpoints.jsonl` | 生成代码定义每行 `event_id,arm,trial,cps`；GitHub 被 `.gitignore` 排除 | **用户服务器确认存在**；抽查首条非空 JSONL：顶层 `arm,cps,event_id,trial`，首个 `cps` 对象含 `check_success,eef,grip,meas,obj,obs,pos,terminated`，首个 checkpoint **顶层无含 time/stamp 的键**；本次未查看值和其余记录 | **SAMPLED_SCHEMA_VERIFIED；完整性、其他记录/嵌套时间与独立参考未核实** |
 
 **结构结论**：cohort 24 个事件同 SAME/RESAMPLE/NATURAL 每臂键集均能一一对应 manifest；`task,seed,t0` 在试次行与 manifest 上一致，缺失/重复键均未检出。这里只证**行结构完整**，不能把它当成任何实验效果、统计显著性、随机独立性或在线可信度检验。
 
@@ -72,14 +72,32 @@
 - **Gate firewall**：此 R1 trial CSV 的 outcome 无独立合法来源证明；即使科学预测良好，也属于 `RESEARCH_ONLY_LABEL`，不能成为在线 Runtime 或 Evolution PROPOSE_REVIEW 的可消费真值。
 - **不得新造观察通道**：若 checkpoint 本地存在且只有 sim cps，也不等于独立合法 RGB/proprio 或分离的未来真值；字段存在性与证据独立性是不同 Gate。
 
-## 5. 未完成的服务器本地只读核验（只会进一步限制，不会自动解禁）
+## 5. 服务器本地只读 schema 反馈（用户已完成单条抽样）
 
-1. `analysis/stageR_trial_checkpoints.jsonl` 在服务器本地是否存在、是否完整：检查 schema `event_id/arm/trial/cps` 及每条 cps 的**键名、时间字段是否存在**，不要导出原始数据/结果/路径；
-2. `episode_dir` 引用的 `stageR_trace.jsonl` 与 snapshots 是否还在：只确认文件是否存在、命名/哈希来源是否可验证；**不打开或改写世界状态文件**；
-3. 是否存在真正**独立于 `stable/acquisition` 判定函数的决策时合法代理和延后真值**：若本地 checkpoint 依旧只有 `rt.measure`，OE1b 继续 NOT_IDENTIFIABLE；不得事后自己定义新 truth；
-4. CSV 没有绝对试次开始时间；本地日志若有额外时间源也不能不经明确设计就把实验次序当“连续物理尝试时间”。
+**用户终端原始输出（只展示字段名，不展示观测值）**：
 
-以上只读审查可以后续在服务器做，不能以“GitHub 未找到”推断服务器文件不存在。**本轮已完成远端数据结构与生成代码审计；local-only 时间/独立参考 Gate 仍 HOLD**。
+```text
+file_exists: True
+record_keys: ['arm', 'cps', 'event_id', 'trial']
+checkpoint_keys: ['check_success', 'eef', 'grip', 'meas', 'obj', 'obs', 'pos', 'terminated']
+time_like_keys: []
+```
+
+**证据强度与边界**：
+
+1. `file_exists: True` 证明报告时该路径在用户服务器上存在；GitHub 看不到不意味着文件不存在。
+2. `record_keys` 和 `checkpoint_keys` 来自**第一个非空 JSONL 记录的 `cps[0]`**；`time_like_keys: []` 只说明这**一个** checkpoint 对象的**一级键名**中没有包含 `time` 或 `stamp` 的键，不能据此宣称整份文件或 `meas/obs` 嵌套对象均没有时间字段。
+3. `check_success` 与 `pos/eef` 证实 checkpoint 第一例暴露仿真测量接口；联合已审计 `stageQ_rt.py` 与 `stageO_rt.py`，不支持把它当成独立的合法在线 success reference。即使未来找到时间字段，也**不自动**成为独立参考或 M2 因果证据。
+4. 此次**没有**进行全文件行数、唯一键/试次数、`cps` 长度、嵌套 `meas/obs` 的结构检查；未查看物理值、成功率或状态。此项报告的 local-only Gate 由 `NOT_VERIFIED` **提升为 `SAMPLED_SCHEMA_VERIFIED`，不能写成 `FULL_SCHEMA_PASS`**。
+5. 后续如仍在 Stage 2A 范围做补齐核验，可只读扫描全部行的**键名集合和缺失/异常记录数量**，不输出原始状态或任何 outcome 频次；不得运行统计/拟合。
+
+**尚未完成的本地审计**：
+
+- `analysis/stageR_trial_checkpoints.jsonl` 是否所有行结构一致、是否有嵌套时间/其他参考来源，仍未验证；
+- `episode_dir` 下的 `stageR_trace.jsonl` 与 snapshot 文件在本地是否存在、是否有可追溯的独立参考，仍未验证；
+- CSV 没有绝对试次开始时刻。若本地日志存有更多时间来源，也不意味着实验顺序已经随机化或 `S_post` 的时序因果可识别。
+
+**阶段许可不变**：本地只读 schema 补查属于已获批 Stage 2A；正式预注册冻结、数值估计/检验和 Stage 2B 新内容仍需单独授权。
 
 ## 6. 数据读回可复现性与审计纪律
 
