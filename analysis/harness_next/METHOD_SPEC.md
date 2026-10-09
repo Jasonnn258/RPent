@@ -569,32 +569,31 @@ v0.2 及之前未显式声明,现补记。
 (h(k) 观察值)、统计假设(M0/M1/M2)、是否完成检验(三者当前均为否)
 在本文中严格区分。
 
-### 5.6 证据可得性分层(v0.2.1 新增:在线/离线边界)
+### 5.6 证据可得性分层(v0.2.2:按字段权限区分研究证据与决策证据)
 
-Stage R 的 SAME/POLICY 8+8 重复与反事实臂,是**离线、在冻结初始状态上
-多次重建**才能获得的特权数据;在线普通 episode 只有本次执行已发生的
-观测前缀。双门(尤其 Runtime 门)的输入必须按可得性分层,防止把离线
-特权标签读作在线输入:
+Stage R 的 SAME/POLICY 双臂 8+8 是**冻结 S_pre 的离线重复**。某个文件保存了测量值
+不代表这些字段获得执行/演化授权。必须对每个字段记录 provenance、event_time、
+visibility 和 outcome_contract;任何聚合或 ledger 版本化不能洗掉原始权限。
 
-| 层 | 内容 | 在线可得? | 合法消费者 |
+| evidence_type | 内容 | Runtime | Evolution Gate |
 |---|---|---|---|
-| **observed_execution_prefix** | 本 episode 已发生的观测流 O(t) 与 claim 账本 | ✅ | Runtime 门(§6.2)的唯一合法输入 |
-| **offline_replay_cohort** | 同事件的 SAME/POLICY 重放/重采样臂(Stage R 8+8)、任意时刻 check_success、逐物体位姿 | ❌(离线特权) | 仅 Evolution 层离线统计(§6.3)与离线审计 |
-| **cross_episode_history** | 跨 episode 的历史 claim/PE 聚合(不含本事件的离线臂) | ✅(账本投影) | Evolution 门;Runtime 只读 |
+| observed_execution_prefix | 当前合法 RGB、proprio、tool 与其代理 claim | ✅ | ✅ 合法历史记录 |
+| cross_episode_history | 非特权历史 claim/已合法观察的 outcome 摘要 | ✅ 只读投影,不能替代当前窗口 | ✅ |
+| offline_replay_cohort | 冻结 S_pre 双臂的原始 attempt **容器** | ❌ | 逐字段鉴权后才可使用 |
+| research_audit_truth | sim_measurement、任意时刻 check_success、真实位姿、BDDL 真值、state_hash | ❌ | ❌,仅科学审计 |
+| reconstruction_metadata | 重建保真/仪器一致性元数据 | ❌ 在线本次决策 | ✅ 只允许降级合法证据,不生成 outcome |
 
-规则:
-
-1. **Runtime 门只读 observed_execution_prefix**(加上 cross_episode_
-   history 中已入账本的历史 claim 的只读投影);"本次失败是否会持续"
-   的在线判断(§5.0 三档)只能用前缀内证据。
-2. **offline_replay_cohort 是 Evolution 层的离线特权**:§5.3 事后四分类
-   以它为输入——因此**事后标签结构上不可能在线产出**;在线最多到达
-   INSUFFICIENT_FOR_DECISION / SUPPORTS_* 档。这从数据可得性层面再次
-   落实 §5.0 的两对象分离(在线判断不输出类别)。
-3. **与 Simulator Firewall 的衔接(§1/§10.2)**:offline 层内部再分
-   "可入 Evolution 统计的重复臂数据"与"仅审计用真值(visibility=
-   offline_evaluation_only:位姿、BDDL 真值、state_hash)"——后者连
-   Evolution 门也不得消费。防火墙在每一层内部持续有效。
+1. **Runtime** 仅消费合法已观测前缀及其历史投影。E/A/P/U 完整双臂标签
+   不可在线生成;仅可用于离线**研究性描述**。§8.2 的完整双臂行对 Runtime
+   为 `NOT_APPLICABLE_OFFLINE_ONLY`。不能据此授权 `REPORT_FAILURE`。
+2. **Evolution** 不能使用 `research_audit_truth`,即使这些字段和 attempt
+   共同保存在 `offline_replay_cohort` 内。若 attempt 结果只能依赖仿真真值生成,
+   其 E/A/P/U 标签必须标 `RESEARCH_ONLY_LABEL`,Evolution 的相应结果
+   为 `NOT_AVAILABLE`。只有独立来源、可溯源的**合法结果证据**才可作为
+   `evolution_eligible_outcome` 消费,且仍须 §7.5 D2 的正面授权条件。
+3. `reconstruction_metadata` 只能降低/限定证据可比性,不能提升真值权限。
+   以上定义是未来方法契约;**没有证据证明现有 Stage R 数据已含合法
+   evolution_eligible_outcome**。不满足即 QUARANTINE/UNRESOLVED。
 
 ---
 
@@ -625,9 +624,12 @@ RUNTIME_GATE(t, d, ledger):
     # 规则示例(完整规则以授权矩阵 §8.2 为准):
     if d == REPORT_COMPLETION:
         return ALLOW iff ∃c: c.pred == TaskSatisfied ∧ c.active(t) ∧ c.level ≥ L2
-        # L0 工具报告永远不够上报完成(公理 A1)
+        # episode_terminated 是单点/工具信号,不能自动提升到 L2;
+        # 当前合法通道不足则 UNRESOLVED,不伪称已完成。
     if d == REPORT_FAILURE:
-        需要 failure claim 处于 CONTRADICTED/UNEXPIRED 且失败种类可判
+        仅可消费当前合法观测前缀中的失败 evidence claim;
+        不得用离线双臂 0/8+0/8 的 Stage R 标签授权在线判定;
+        当前信号不足时返回 UNRESOLVED。
     if d == HOLD_AND_OBSERVE:
         触发 = 活动声明降级(CONTRADICTED/EXPIRED)或等级跌落(L2→L1)
     if d == CONTINUE:
@@ -640,29 +642,40 @@ RUNTIME_GATE(t, d, ledger):
 → 任务失败;多观察一步 → 时间成本),且该不对称在此只作为**定性排序**使用,
 数值化需要校准(§10.3)。
 
-### 6.3 Evolution Gate(长期更新候选的资格)
+### 6.3 Evolution Gate(长期更新候选的资格;v0.2.2 正向授权)
 
 ```python
 EVOLUTION_GATE(e, PE, attribution, ledger):
-    # 输入:事件、持续性证据、归因声明、历史声明账本
-    if attribution.failure_class ∉ {P, A}:        # 证据未齐(DETERMINING)/E/U 类
-        return ARCHIVE(仅归档)                     # 单次/积累中/瞬态/边缘带
-                                                   # 失败永不触发演化
-    if attribution.evidence_mass < θ_EVO:          # 证据量槽位(待定标)
-        return QUARANTINE                          # 证据不足,隔离待积累
+    if not has_evolution_eligible_outcome(e, PE, attribution):
+        return QUARANTINE(reason="NO_LEGAL_OUTCOME_EVIDENCE")
+    if attribution.failure_class in {E, U, DETERMINING}:
+        return ARCHIVE(仅归档)
+    if attribution.failure_class == A:
+        return QUARANTINE(reason="ACTION_SPECIFIC_REVIEW_RULE_UNSPECIFIED")
+        # 当前 §7.5 没有单独的 A 型 review 正面授权规则
+    if attribution.failure_class != P:
+        return QUARANTINE
+    if attribution.evidence_mass != SUFFICIENT:
+        return QUARANTINE
+    if attribution.persistence_call != PERSISTS_UNDER_TESTED_POLICY_SPACE:
+        return QUARANTINE
     if attribution.repairability == NO_HEADROOM_IN_TESTED_RETRY_ACTIONS:
-        return ABSTAIN(仅对重试类候选) + 记录      # 已测重试动作内零 headroom;
-                                                   # 不锁死技能编辑类候选(§5.4)
-    if attribution.causal_grade == DESCRIPTIVE:    # 重建保真降级到底(§7.2 R3)
-        return QUARANTINE                          # 只能描述,不能提名
-    return PROPOSE_REVIEW                          # 最高输出:提名候选审查
+        return ABSTAIN_FOR_TESTED_RETRY_PROPOSALS + ARCHIVE
+    if attribution.repairability != EVIDENCE_FOR_CANDIDATE_REVIEW:
+        return QUARANTINE
+    if attribution.causal_grade not in {MODERATE, STRONG}:
+        return QUARANTINE
+    return PROPOSE_REVIEW   # 恰好满足 §7.5 D2,提名候选≠部署
 ```
 
-**PROPOSE_REVIEW 是本方法的最高授权**(v0.2.1 注:它只**提名**候选、无
-自动晋升,且可撤销——审查可中止、提名可撤回;正式部署 PROMOTE-DEPLOY
-属 §6.4 三档中的第二档,不在本方法授权范围内)。技能/配置的实际修改、
-验证、晋升、回滚属于 Zetta Loop3 / SkillOpt / RegenHarness 已建立的工程
-治理环 [S][P],本方法不重造,只负责给它们提供一个**证据面合格的输入**。
+**v0.2.2 修复**：原 Gate 仅排除 `DESCRIPTIVE`,从而可能放行默认
+`UNIDENTIFIED`;同时 `repairability=UNKNOWN` 可以通过。
+现在严格要求合法来源、P、充分证据量、L2 持续性、L4 **正面**
+review 证据与 L3 至少 MODERATE。未写单独资格规则的 A 暂时只
+QUARANTINE,保留原始 Stage R 的 A 标签不变。此处没有新建技能
+编辑/部署权限;任何缺口不得自动补成正向资格。
+
+---
 
 ### 6.4 授权门槛的代价对齐(公理 A2 的形式化,v0.2.1 重写)
 
@@ -791,12 +804,12 @@ v0.1 的单字段 failure_class 把 L1/L2 混在一起(分类既是模式描述�
 
 **R1 随机物理失败**(v0.2 拆分为两个子情形,修正 v0.1 的单次失败误标)
 
-- **R1a 序列内出现过成功**(失败后翻盘是已观测事实):
-  事实:n ≥ 2 且 ∃ y_i = 1。
-  处理:→ failure_class = E(§5.3 新规则:存在量词满足);L2 持续性 =
-  DOES_NOT_PERSIST;L3 causal_grade 上限 DESCRIPTIVE;evidence_mass 按 n 定;
-  演化层动作 = ARCHIVE。
-  依据:E 型 14/14 在 16 试内出现成功 [D]——翻盘可观察、可分类。
+- **R1a 序列内出现过成功**:n≥2 且 ∃ y_i=1 仅能说明“已测试的执行
+  中至少一次成功”,**并不能**直接给出 Stage R E(§5.3 冻结规则需要
+  SAME≥2/8 且完整双臂)。不满足完整双臂要求时只保持 DETERMINING
+  过程状态;完整序列按 §5.3 互斥 E/A/P/U 规则评定,并受 §5.6
+  RESEARCH_ONLY_LABEL 限制。没有独立有效因果证据时
+  causal_grade=UNIDENTIFIED。不得以一次 POLICY 成功偷判 E。
 - **R1b 单次失败,无序列**(n=1, y_1=0):
   事实:不存在序列,持续性方向的证据尚未积累。
   处理:→ failure_class 槽输出 **DETERMINING**(过程状态:证据未齐,
@@ -829,7 +842,7 @@ v0.1 的单字段 failure_class 把 L1/L2 混在一起(分类既是模式描述�
 - 事实:归因推理使用了状态重建(如"同动作重放也失败 → 该事件动作
   关联弱"的对照式推理)。
 - 处理:检查重建一致性元数据 ρ;ρ < ρ*(槽位,待定标)时 causal_grade 降一档
-  (STRONG→MODERATE→DESCRIPTIVE),全部跨 attempt 聚合声明标注 APPROXIMATE;
+  (STRONG→MODERATE→DESCRIPTIVE;UNIDENTIFIED 仍是 UNIDENTIFIED),全部跨 attempt 聚合声明标注 APPROXIMATE;
   Evolution 门对 APPROXIMATE 声明减权(§6.3 的 QUARANTINE 分支)。
 - 依据:restore transition-class 一致率 10/14=.769 < .90 资格门 [D]——
   重放不是精确反事实 oracle;PREFIX 哈希级重建 32/32 [D] 只保证**仪器侧**
@@ -980,10 +993,11 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 
 两个门**共享同一个 append-only claim 账本**,但读取方式不同:
 
-- **Runtime 视角 = 当前窗口投影**:`ledger.active_set(t)`——只看现在有效的声明;
-  撤销(CONTRADICTED)立即改变运行时授权。
-- **Evolution 视角 = 全历史聚合**:`ledger` 的全部历史 + 跨 attempt 的 PE 与
-  attribution——历史 CONFIRMED 的证据价值不因后来撤销而消失(§4.4 撤销不追溯)。
+- **Runtime 视角 = 当前合法窗口投影**:`ledger.active_set(t)`,只看当前
+  合法观测声明,不接入完整离线重放/审计真值。
+- **Evolution 视角 = visibility 过滤后的历史聚合**:历史证据可保留
+  但不改变原始权限;privileged/audit-only 真值禁止输入演化授权。
+  已确认的历史事件价值不因后续滑落被抹去(§4.4)。
 
 **这是"撤销不追溯"语义存在的理由**:同一次滑落,对 Runtime 是"授权收回"
 (不得上报完成),对 Evolution 是"瞬态成功样本入档"(TRANSIENT_SUCCESS 的
@@ -1009,13 +1023,14 @@ the tested policy space**——SAME(动作重放)与 POLICY(该策略重采样)�
 | 声明降级(CONTRA/EXPIRED) | ❌ | ❌ | ✅(触发) | 视反证 | ✅ | — | — |
 | 单次失败(DETERMINING,R1b) | ✅ | ❌ | — | ❌(证据不足) | ✅ | — | ❌ |
 | 连败中双臂未齐(DETERMINING/R2) | ✅ | ❌ | 建议 | ❌ | ✅ | ✅ | ❌ |
-| 双臂全败(0/8+0/8)+ 修复证据 | ⚠️ | ❌ | — | ✅(资格) | ✅ | — | ✅(最高) |
+| 离线双臂0/8+0/8及审查证据 | N/A(offline only) | N/A | N/A | **N/A(非Runtime输入)** | ✅研究归档 | ✅(证据不合法时) | 条件性:合法Evolution结果且满足D2 |
 | 重建保真不足(ρ<ρ*) | ✅ | — | — | ⚠️ | ✅ | ✅(减权) | ❌ |
 | 观测缺口(R4) | ✅ | ❌ | ✅(建议) | ❌ | ✅ | ✅ | ❌ |
 
-读法举例:第 6 行——一个证据量足够的 P 型持续失败,**支持**"上报失败"的
-判定资格(Runtime 门允许 REPORT_FAILURE),且**支持**提名候选审查
-(Evolution 门最高输出),但依然**不允许**任何直接的技能修改(该列不存在)。
+读法举例:第 6 行描述**离线研究**中的持续失败,不等于在线 Runtime
+  上报失败资格;Evolution 也只能在字段权限合法且 D2 所有正面条件
+  成立时提名,否则 QUARANTINE/ABSTAIN。Stage R 的特权真值标签
+  不自动获得演化资格。
 第 1 列几乎全 ✅ 不是设计疏忽:CONTINUE 是零授权门槛的默认自由(公理 A3 的
 运行时体现——无反证不拦截),方法的约束力全部集中在**高影响授权**上。
 
@@ -1033,9 +1048,9 @@ REPORT_FAILURE(Runtime 门),正是 v0.1 全局单调性命题的反例,也是改
 1. **不矛盾规则**:Evolution DENY 不约束 Runtime(Runtime 可以继续重试一个
    已被判定"演化上无修复空间"的技能——因为运行时重试的代价结构不同);
    反之 Runtime HOLD 不自动产生 Evolution 动作。
-2. **升级单向性**:证据状态只能沿"Runtime 可用 → Evolution 可用"单向升级
-   (增加证据量/保真度),不允许反向降级 Evolution 判定来"救济"运行时授权
-   (防止用统计聚合掩盖当前窗口的反证)。
+2. **可见性不可升级**:统计样本增加或重建一致率改善,都不能将
+   research_audit_truth 提升成 Runtime/Evolution 授权输入,
+   也不能让 Evolution 的后验结果替代当前窗口的物理证据。
 3. **abstain 传播**:任何层的 UNRESOLVED/UNKNOWN 不被上层静默填充为最相似
    假设;传播路径上每一步保留 abstain 标记。
 
@@ -1122,29 +1137,30 @@ CONTINUE 自由放行。Evolution——TRANSIENT_SUCCESS 模式入档:它是"契
 **PA-Attr**:
 
 - Layer 1:PE = (n=16, runs 全连败, q̂_SAME=0, q̂_POLICY=0, contrast=0);
-- Layer 2:contrast 近零 → **排除**动作特异性(A 的必要条件不满足);
+- Layer 2:已测双臂均无成功,**没有观察到**动作分布差异,
+  但无法排除未测动作策略的效果或低功效下的事件级差异;
 - Layer 3:双臂全 0/8+0/8(§5.3 P 规则)→ failure_class = **P(已测动作分布下的
   持续失败,候选)**,evidence_mass=SUFFICIENT;L2 =
   PERSISTS_UNDER_TESTED_POLICY_SPACE(注意 §7.5 X1:"候选吸收态"的旧称
   有超分布外推的味道,v0.2 起规范表述为 tested-policy-space 持续性;
   "吸收"只是对已测分布内零翻盘的描述,不外推到未测策略族);
-- Layer 4:推理链使用了 SAME 重放作为对照 → 依赖重建;ρ<ρ* → causal_grade
-  降档至 MODERATE,标注 **APPROXIMATE**(R3:重放是机制证据,不是精确反事实);
+- Layer 4:重建依赖且ρ<ρ*时标注 APPROXIMATE;
+  未经有效对照/干预鉴别时 causal_grade=UNIDENTIFIED、
+  causal_hypothesis=UNKNOWN,不能把失真反事实直接升级为 MODERATE;
 - Layer 5:unknown_clauses 含 PREDICATE_AMBIGUITY(为何该任务族零头room的
   机制定位仍不可判——感知死/位置不可观测类的既有发现 [D]);
 - Layer 6:repairability —— 若重采样与动作变化均无效的记录成立 →
   **NO_HEADROOM_IN_TESTED_RETRY_ACTIONS**(注意:这与 PROPOSE_REVIEW 并不矛盾,
   §8.2 矩阵外另有 abstain 通道;二者的张力处理见下)。
 
-**双门判定**:Runtime——REPORT_FAILURE=**ALLOW(资格)**:证据状态足以支持
-"止损/上报失败"的判定(连败结构 + 双臂零成功);但方法**不实现**自动止损
-控制器(§10.1——"支持判定"与"执行控制"的边界即 §36 边界)。
-Evolution——若 repairability 无负面证据:PROPOSE_REVIEW(最高授权:提名
-候选审查);若 NO_HEADROOM_IN_TESTED_RETRY_ACTIONS:ABSTAIN(仅对重试类
-候选)+ 完整记录(克制优先:
-有持续失败、有证据量,但无"改了会好"的任何证据时,提名审查的期望价值
-无法辩护——Stage P 的 verifier 无 headroom 结论 [D] 正是该 abstain 的实证
-依据)。
+**双门判定(修订)**:Runtime——此场景的 SAME/POLICY 8+8 完整
+  重建是离线资料,`REPORT_FAILURE=NOT_APPLICABLE_OFFLINE_ONLY`;
+  在线只能按合法执行前缀作出资格判断,无足够证据时 UNRESOLVED。
+  Evolution——只有日志能提供 §5.6 规定的合法 outcome,并且
+  §7.5 D2 的 repairability 正面证据、合格因果等级与持续性均成立,
+  才能 PROPOSE_REVIEW;UNKNOWN/UNIDENTIFIED 时 QUARANTINE。
+  如果使用的成功标签来自仅审计仿真真值,只能研究归档,
+  不得直接输入 Evolution Gate。无局部重试空间不等于技能编辑无希望。
 
 **实证对照**:P 型 5/5 双臂 16 试零成功 [D];h(k) 连败 3 次后 1/17 ≪
 同质 iid .30 [D]——按 §5.5 的分层语义,这是 **M1(异质 iid)下选择效应**
