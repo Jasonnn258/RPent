@@ -543,8 +543,7 @@ def outcomes(root, output, strict=True):
         "- Not a confirmatory hypothesis test; Gate failure leaves primary blank.",
         "",
     ]
-    (output / "A0_REPORT.md").write_text("
-".join(md), encoding="utf-8")
+    (output / "A0_REPORT.md").write_text("\n".join(md), encoding="utf-8")
     if not (invalid_success or trace_mismatch):
         write_jsonl(output / "EERD_A_online_eligible.jsonl", online)
         write_jsonl(output / "EERD_A_audit_only.jsonl", audit)
@@ -580,8 +579,7 @@ def outcomes(root, output, strict=True):
               " must all be checked before any benchmark claim.",
             "",
         ]
-        (output / "EERD_DATA_CARD.md").write_text("
-".join(card), encoding="utf-8")
+        (output / "EERD_DATA_CARD.md").write_text("\n".join(card), encoding="utf-8")
     return full
 
 
