@@ -136,6 +136,17 @@
 - **权限边界**：已有 L1 阶段收官。P1 新 cohort/在线策略对照/恢复接线属于 L2，需新的完整阶段授权；Stage R §36 HARD STOP 与 S1-DEV0 ON_HOLD 仍有效。
 - **重开条件**：P1 新数据/新授权、独立的标签有效性证据或出现真正影响当前科学结论的实质缺陷。
 
+## D-015 · P1 从失败标签转向真实 D2 的“机械效应 × 信息价值”研究
+
+- **日期/来源**：2026-10-09；用户在 Research Package A 收官后要求“go on”；本轮核对 `robots/libero/toolkit.py:_step`、`robots/libero/tools.py:view_driver_state,set_gripper,dump_state` 与 EERD 字段 QA。
+- **状态**：`P1_OFFLINE_PREFLIGHT_READY / P1_L2_DESIGN_SCOPED / NEW_ROLLOUT_HOLD`。
+- **决定**：优先在已有 187 个 episode 上执行只读 D2 合法前缀可用性预检（`analysis/research_context/p1_d2_preflight.py`）。在新的 L2 真实验证试验里，必须区分再次读取同一帧、读取已有其他视角和推进物理环境产生新的观测。
+- **科学原因**：`view_driver_state` 读取历史数据，重复调用不创造未来物理状态；`set_gripper(gripper=+1,steps=N)` 会执行环境动作，也可能稳定夹持。单看 probe+policy 相比 blind retry 更好，不足以证明 Evidence Gate 的信息价值。
+- **必要对照**：no-probe、probe-then-blind（隔离物理干预）、probe-static（简单合法判据）、probe-evidence-policy（PAEG 候选），统一真实 D2 触发和预算；在独立后续固定 horizon 评价，屏蔽 `sim_measurement/check_success` 在线消费。
+- **阶段边界**：`P1_L2_STAGE_GATE.md` 建议的 DEV0 最多 24 新 episode / 8 小时墙钟 / 6 GPU·hour 仅是**下一次完整阶段授权的对象**；当前“go on”先推进离线可行性和研究方法准备，不解释为可以越过 §36 执行未知费用的仿真/Runtime 修改。
+- **不能推出什么**：原 A0 的 56/103 技内代理错位不等于 D2 真正持握，不提供新试验效应量；D2 档案图像缺失可能由后续清理造成，不能直接称历史时刻缺失。
+- **重开条件**：只读 D2 Gate 回传、用户授予明确有界 L2 DEV0 或有方法构念的实质新证据。历史 Stage R/S1 冻结保持。
+
 ## 新决策追加模板
 
 ```markdown
