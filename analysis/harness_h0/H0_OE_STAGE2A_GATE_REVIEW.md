@@ -66,3 +66,6 @@
 未变动先前 Stage 1 文件、冻结 Stage R prereg、原 trial CSV、脚本或模型。所有结构数量来自字段完整性/事件 join 检查，不是任何新效果统计。没有访问或修改服务器原始运行环境。
 
 **最终：Stage 2A 全文件 checkpoint schema 和 R1 cohort 逐键关联核查均完成：`FULL_SCHEMA_PASS / R1_COHORT_KEY_JOIN_PASS / EXTRA_DEV_ROWS_IDENTIFIED_4`；DEV 附加行确切生成历史仍 `NOT_VERIFIED`。** 本阶段研究资产结构 Gate 可以关闭；独立 reference/时序因果/Evolution 合法信号未获得证明。**Stage 2B、正式冻结、离线统计/在线实施继续 HOLD，需后续单独授权。**
+
+
+> **Stage 2B 源文档复读后的追溯修正（2026-10-09）**：此前的 `DEV_WRITE_ORIGIN_NOT_VERIFIED` 是 Stage 2A 检查时的历史结论。冻结 `analysis/STAGE_R_FINAL_REPORT.md §9`（deviation `dev-r1-fix`, 2026-10-08 05:59）明确记录 R1 首启队列切分错误使 8 个 DEV 事件误入 R1，05:01 停止时**已多跑 4 个 DEV trial**，修复队列后 R1 的 24 个 cohort 全部重新执行，**CPS 日志保留越轨 trial 作为审计**。这一已冻结记载与本地 checkpoint 额外的 `r09/SAME/1-3`、`r12/SAME/1` 四键及 manifest DEV 角色数量/身份吻合。**现在可将来源判为 `DEV_R1_STARTUP_DEVIATION_DOCUMENTED`（原始日志明确说明，非额外自行推断中断）**；但不声称已逐字节比对 04:58 启动日志或每条 CPS 生成时刻。原 Stage 2A 的“未验证”表述保留为复读前历史审计状态，由本附注覆盖。正式 R1 集合仍为 `role=R1_COHORT`，480/480 通过、零重复零缺失，禁止修改原始 CSV/JSONL。
