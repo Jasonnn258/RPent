@@ -90,6 +90,20 @@
 - **不能推出什么**:文档 ≠ 数据集已发布;P1 问题可证伪 ≠ 机制有效;分级不含任何执行授权。
 - **重新开启条件**:用户对 A0/C/收官三选一;§36 局部解除只能随 P1 预注册整体批准。
 
+## D-011 · 修复 P1 主假设的三项方法学阻断及 EERD QA 阶段冲突
+
+- **日期/来源**：2026-10-09；P1 v1 `analysis/research_context/P1_ACTIVE_VERIFICATION_RESEARCH_QUESTION.md`（新增于 `032e188`）；此前已冻结的 `analysis/harness_next/METHOD_SPEC.md` v0.2.2 §5.5；独立方法复审。
+- **状态**：**SUBSTANTIVE_CORRECTION_APPLIED / P1 DESIGN STILL ONLY / EXECUTION HOLD**。此项属于“文档轮次封顶”下明确允许的**实质缺陷修正**，不是新一轮无数据的理论扩展。
+- **决定**：
+  1. **M1 异质性≠M2 时序依赖/可交换性失效**：原 P1 H-P1m 把 Stage R 的 `h(k)` 下降直接解释为 conformal exchangeability 失效，**与仓库 METHOD_SPEC §5.5 已明确的异质 iid/可交换选择效应矛盾**。修订后把机制子群限定为**事先用合法 D2 观测前缀定义**的高不确定性子群；不可用离线 P/E/A/U 真值定义 TEST 分层，不能声称 CheckVLA 保证必然失败。
+  2. **错误完成率不能靠永远 ABSTAIN 降低**：保持主指标但新增完成声明覆盖率的非劣性门、弃权/超时上限、物理完成率和总预算共同门；报告选择性风险—覆盖曲线，过不了门就是未支持。
+  3. **禁止在 TEST 事后择优 C-1..C-5**：必须先在 DEV/CALIBRATION 锁定最强基线，再一次性独立 TEST；额外比较须预注册统计多重性处理。
+  4. **A0→C 不是被证明的信息最优或必要路径**：A0 的技内 FGONLY 与 P1 的 episode 级未来错误完成构念不同，不能直接把 A0 `R_accept` 当作 P1 的功效先验；可选择 A0 支持字段审查，但不能把其设为 C 必须的科学前置。
+  5. **EERD G-QA-3 原先同时要求 schema 阶段零 outcome 读取和 UNKNOWN 按 flag 分层，流程冲突**。已改成 schema-only 字段完整性账本先行，获 outcome 授权后才做标签分布/UNKNOWN 分层；防火墙与 G-QA-7 保持。
+- **证据**：`METHOD_SPEC.md` §5.5 M0/M1/M2 明确区分；`robots/libero/tools.py:223-272` 的真实 Pick flag；`analysis/research_context/P1_ACTIVE_VERIFICATION_RESEARCH_QUESTION.md` v1.1（commit `92384e5`）；`EERD_V01_FIELD_PROVENANCE_QA_SPEC.md`（commit `a040bfa`）。
+- **不能推出什么**：修订 ≠ P1 控制器实现/方法收益，也不证明任何 conformal 假设在新的 C cohort 中成立或失效；未运行实验、未读取 outcome。
+- **重新开启条件**：新 cohort 和数据审查获得单独明确授权；尚需独立预注册与规划，不自动解除 Stage R §36 HARD STOP。
+
 ## 新决策追加模板
 
 ```markdown
