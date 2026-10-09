@@ -32,7 +32,7 @@
 | A-5 物理 outcome 的权限 | sim `check_success` 与 sim `pos/eef` 在 `stageO_rt.measure` 读取；Stage R CSV 无时间点级 visibility | PASS 作为**权限限制**：不合法上游代理 |
 | A-6 实验顺序、时间戳 | 源码 arm 顺序固定 SAME→RESAMPLE→NATURAL；`trial` 递增；`wall_s` 是单试次时长 | PASS 记录性质；真实物理时间漂移不可识别 |
 | A-7 snapshot/prefix 溯源 | cohort manifest method PREFIX，三 SHA16 格式齐；SAME/RESAMPLE recon 字段齐，NATURAL 自然无 recon_sha | PASS 仪器索引，不等于完美反事实 |
-| A-8 逐 checkpoint 本地独立真值/时间 | `stageR_trial_checkpoints.jsonl` 在 `.gitignore` 且 GitHub 无文件，`episode_dir` 是本地路径 | **LOCAL_ONLY / NOT_VERIFIED** |
+| A-8 逐 checkpoint 本地独立真值/时间 | 用户在服务器证实 checkpoint JSONL **存在**，抽查第一条非空记录及首个 `cps` 的键名；`time_like_keys=[]` 只适用于该首个 checkpoint 的一级键。其余行/嵌套对象与独立 reference 仍未经核验 | **SAMPLED_SCHEMA_VERIFIED / REFERENCE_NOT_IDENTIFIED** |
 | A-9 原始 trial outcome 的效果统计 | 未计算成功次数、区间、h(k)、性能差异或任何模型结果 | **NOT_RUN，符合本阶段限制** |
 | A-10 Stage R §36 + S1 边界 | 没有修改 Stage R 任何代码/原始/冻结 prereg；E14/A1/P5/U4 仍引用原终报 | PASS |
 
@@ -48,7 +48,7 @@
 推荐 **Stage 2B：正式预注册审阅与冻结准备**（仍不含统计执行）。该阶段的首要任务必须是：
 
 1. 审阅和确定只保留可识别的 **OE1a、OE2a、OE3a**；OE1b、M2 真实因果和“latent E/P 分类最小试数”保留 STOP/探索性降级；
-2. **现有 Stage 2A 用户授权已覆盖本地 checkpoint 的只读 schema 补查**，不需要为该补查再次申请许可；当前 GitHub 连接无法读取服务器本地被忽略的 `stageR_trial_checkpoints.jsonl`，可以由用户在服务器执行只打印字段键名的命令再回填本审计。即使存在，也必须独立证明参考 outcome 的来源，不会自动升级证据权限；
+2. **用户已完成首条 checkpoint 的只读键名核验**：服务器证实文件存在，记录含 `arm/cps/event_id/trial`，首个 `cps` 包含 `check_success/eef/grip/meas/obj/obs/pos/terminated`，其一级键无 `time/stamp`。本轮仅核验一条，其他行及 `meas/obs` 嵌套时间仍待证；现有 Stage 2A 授权允许继续做只读 schema 核查。无须为此补查重复申请权限，不得把单条键名结果当作全数据审计通过；
 3. 明确事件整体切分、候选 k/m、主要评价量、M0/M1 基线、功效/不确定性、缺失和停止准则；审核已有结果披露导致的回顾性偏差；
 4. 创建单独正式冻结文件，并要求**另一次明确用户批准**后才可冻结。Stage 2A draft 永不作为冻结文件；
 5. 未来真实统计运行须第三次独立授权，任何 rollout/训练/Controller 仍在 Stage R §36 禁区。
@@ -64,4 +64,4 @@
 
 未变动先前 Stage 1 文件、冻结 Stage R prereg、原 trial CSV、脚本或模型。所有结构数量来自字段完整性/事件 join 检查，不是任何新效果统计。没有访问或修改服务器原始运行环境。
 
-**最终：Stage 2A 远端字段审计和草案交付完成；本地 checkpoint 可用性未确认。研究协议范围 GO_FOR_NARROW_PREREG_REVIEW_ONLY，冻结/统计/在线实施 HOLD。**
+**最终：Stage 2A 远端字段审计和草案交付完成；用户已确认本地 checkpoint 文件存在并完成首条键名抽查，但全量键名/嵌套结构及独立参考仍未确认。研究协议范围 GO_FOR_NARROW_PREREG_REVIEW_ONLY，冻结/统计/在线实施 HOLD。**
