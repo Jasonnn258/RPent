@@ -71,6 +71,8 @@ def choose(e: LegalEvidence) -> DecisionRecord:
         return DecisionRecord("RETRY", "STATIC_GRIP_OPEN",
                               ("state.robot0_gripper_qpos",))
     # D3: deliberately conservative, no object pose or check_success.
+    # visual_frame_available means a fresh frame exists; this pilot contract
+    # does NOT interpret its pixels or verify that an object is actually held.
     if e.age_env_steps is None or e.age_env_steps > MAX_EVIDENCE_AGE_STEPS:
         return DecisionRecord("ABSTAIN", "STALE_OR_UNTIMED_EVIDENCE",
                               ("observation_timestamp",))
@@ -79,7 +81,7 @@ def choose(e: LegalEvidence) -> DecisionRecord:
                               ("state.robot0_eef_pos", "wrist_rgb"))
     if e.post_gripper_gap < GRIP_THRESHOLD and \
             e.post_eef_z - e.pre_eef_z >= LIFT_THRESHOLD:
-        return DecisionRecord("CONTINUE_CAUTION", "LEGAL_MULTI_SOURCE_CLAIM",
+        return DecisionRecord("CONTINUE_CAUTION", "LEGAL_PROPRIO_PLUS_VISIBILITY_HEURISTIC",
                               ("tool_result.success", "state.robot0_gripper_qpos",
                                "state.robot0_eef_pos", "wrist_rgb"))
     return DecisionRecord("RETRY", "LEGAL_EVIDENCE_NOT_ENOUGH",
