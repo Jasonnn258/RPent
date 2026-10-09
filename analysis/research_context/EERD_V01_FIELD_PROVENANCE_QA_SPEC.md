@@ -83,14 +83,14 @@
 |---|---|---|
 | G-QA-1 join 完整性 | ledger 187↔目录 187↔双文件;186+1 pick 计数;states↔trace 步对齐 100%;B 侧 480 键唯一、4 DEV 排除在册 | FAIL → 物化停止,出差异清单 |
 | G-QA-2 对齐断言 | 每 pick 过 A1-A3(result↔states 终局旗一致 / join 完整 / \|Q\|=chunks_used+1);B 侧 checkpoint 数与冻结试次数一致 | 任一不符 → 该样本 OUT + 索引,超 5% → 停 |
-| G-QA-3 完整性账本 | 逐字段 presence/非有限率表**先于任何标签统计**发布;MISSING 与 NONFINITE 分列;UNKNOWN 率按 flag 分层 | 未发布不得进标签阶段 |
+| G-QA-3 完整性账本（双阶段） | **先**在零 outcome 读取阶段仅发布字段存在性、数值有限性与测量点可用率（MISSING/NONFINITE 分列）；**后**仅在明确批准标签读数的独立阶段发布 UNKNOWN 率、按 flag 分层及 2×2 表。前一阶段不得生成 UNKNOWN/按 flag 统计 | schema 账本未发布不得启动结果分析；未获 outcome 授权的第二阶段保持 HOLD |
 | G-QA-4 视图隔离 | online 视图黑名单扫描(特权字段名 + 物体坐标值抽样)+ 三视图物理分文件 | 泄漏 → 整批重导 |
 | G-QA-5 假名化 | 无绝对路径/主机名/时间戳指纹;假名映射仅存 reconstruction 私档 | 泄漏 → 重导 |
 | G-QA-6 源哈希钉死 | 导出 manifest 列 source→git blob SHA(或本地 SHA256)→行区间;输入只读 | 哈希不匹配 → 停 |
 | G-QA-7 schema 阶段零 outcome 读 | 验证代码白名单:只读键存在性/有限性/计数;禁读 success/check_success/stable/acquisition **取值**;阶段日志留痕 | 越界读 → 该次验证作废重来 |
 | G-QA-8 标签纪律 | 所有 outcome 字段默认 NOT_EVALUATED;任何衍生标签必须新版本号;冻结标签不可回写 | 违规 → 版本作废 |
 
-**通过以上八门后,EERD v0.1 才达到"可物化"状态;物化本身、对外发布、任何 benchmark 计算仍需用户独立授权(D-008 重新开启条件)。**
+**八门中的 schema-only 部分可在不读取 outcome 值的条件下设计和验收；任何涉及 UNKNOWN / 按 flag 分层 / 标签值的验收，须进入独立获批的 outcome 阶段。** 全套验收通过后才可称“可物化”；物化、对外发布和 benchmark 计算仍各自需用户授权(D-008)。
 
 ## 6. 与 Stage2J-v2 / P1 的接口
 
