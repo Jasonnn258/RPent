@@ -2,6 +2,7 @@
 
 > 2026-10-09 | **研究设计文档;零 outcome 读取;零统计/仿真/训练/Runtime 改动。**
 > 依据:`RESEARCH_MASTER.md`(P1 定义)、`analysis/harness_next/METHOD_SPEC.md` v0.2.2 与 `NOVELTY_REVIEW.md` v0.2.2、Stage Q/R 终报、Stage2G/2K 审查、`EERD_V01_DATA_CONTRACT_DRAFT.md` + `EERD_V01_FIELD_PROVENANCE_QA_SPEC.md`。
+> **v1.1 实质性方法勘误（2026-10-09）**：本轮复审发现 v1 的 H-P1m 将异质性误判为可交换性失效，主指标存在弃权套利、TEST 事后选基线和 A0→C 功效外推问题。按 `analysis/harness_next/METHOD_SPEC.md` §5.5 更正；理由记入 DECISION_LOG D-011，v1 可由 Git 历史追溯。
 > 约束:闭环实验 HOLD(§36 Hard STOP);本文只交付问题定义、机制区别、数据需求与对照设计,以及 §5 方向分级裁决。
 
 ## 0. 一句话问题
@@ -16,7 +17,7 @@
 
 固定低层 VLA、固定每 episode 总预算 B(动作 chunk + 验证动作 + 观测步统一计账),在真实 D2 决策边界上:
 
-> 以 online_eligible 证据为唯一输入、按 PAEG 证据资格规则(合法性分级 + 时效 + 持续性感知)选择验证时机的策略 **π_ev**,其**错误完成率**(策略接受"完成"而独立物理审计判定未达成的 episode 比例)显著低于等预算最强静态基线。
+> 以 online_eligible 证据为唯一输入、按 PAEG 证据资格规则(合法性分级 + 时效 + 持续性感知)选择验证时机的策略 **π_ev**,其**错误完成率**(策略接受"完成"而独立物理审计判定未达成的 episode 比例)在**完成声明覆盖率、真实任务成功率与弃权预算同时受约束**时低于预先固定的最强静态基线。
 
 对照基线(全部等预算计账):
 - C-1 无验证(直接接受工具返回);
@@ -25,26 +26,38 @@
 - C-4 静态阈值(grip/EEF 上升量单阈值;以及 **conformal 校准阈值**——CheckVLA 型,用标定集校准干预时机,为最强静态形态);
 - C-5 随机同时机验证(同验证预算、时机随机;剥离"时机信息"本身)。
 
-**主指标**:错误完成率差 π_ev − best(C-1..C-5),episode 聚类推断,预注册 margin。
-**非劣性门(必须同时过)**:真实完成率不降超过预设 ε;总成本不超 B;abstain 率单报告(不作门槛,PAEG 允许弃权是一等公民)。
+**主指标（须在新预注册中冻结）**：以随机分配 episode 为分母的错误完成声明率差（π_ev − **DEV/CALIBRATION 事先选定并锁定**的最强基线），episode 级区间与 margin。**不得在最终 TEST 事后选最好基线**；若要作多组确证比较，须预先校正多重比较。
 
-### H-P1m(机制定位子假设——判"机制成立"还是"数字好看")
+**同时必须满足的防套利门**：
+- 真实物理任务完成率非劣性（容忍度 ε），并报告物理完成、声明完成及两者交集；
+- **完成声明覆盖率**（具备评价资格的 episode 中有明确 ACCEPT/COMPLETE 声明者占比）不得低于预设阈值或基线容忍带 δ；**ABSTAIN/超时/停止率有独立上限 α**，并分别报告；
+- 总成本预算 B 统一定义（动作、验证与观测分别计账），同时报告“被接受决策中的错误完成率—完成声明覆盖率”关系。单靠扩大弃权导致绝对错误率下降，应判 `P1_NOT_SUPPORTED`；
+- C-2/C-4 阈值和最强基线选择只在 DEV/CALIBRATION 完成，独立 TEST 只评一次。ε/δ/α/B/margin 均在未见 TEST 结果前确定。
 
-PAEG 的可检验增量主张是:**收益集中在静态校准失配的子群**,即失败持续性异质处(Stage R 实测:连败 3 次后第 4 次成功率 1/17,远低于 iid 基线 ~.30 —— 恰是任何 exchangeability 假设失效的区域)。预注册分层:
+### H-P1m（机制定位子假设：纠正“异质性 = 不可交换”）
 
-- 若 π_ev 仅在**随机失败子群**与基线打平、且在**持续性失败子群**也打平 → 即使总错误率偶有改善,判 **MECHANISM_NOT_SUPPORTED**(收益不来自声称的机制);
-- 若 π_ev 在持续子群显著优于 C-4(conformal 静态阈值)而随机子群打平 → 机制主张的最强支持形态;
-- 若 π_ev ≈ C-4 全线 → 贡献塌缩为"CheckVLA 思想应用于抓取验证",**不具新颖性,如实降级**。
+研究问题：**在决策前由合法可见前缀定义的高不确定性/高风险子群内，PAEG 策略是否比冻结的 C-4 静态校准基线带来额外的验证价值？**
+
+已观察到 Stage R 的“连败 3 次后下次成功 1/17”只是条件失败队列内的描述。既有 `METHOD_SPEC.md` §5.5 已证明：M1 事件间异质、事件内条件 iid（因此可交换）的模型就能令 h(k) 随连败长度下降。例：`p_e~Beta(a,b)`，条件于 `p_e` 的试次 iid 时，k 次失败后的下一次成功均值 `a/(a+b+k)` 随 k 下降，但试次序列**仍可交换**。M2 的真正顺序依赖/校准—测试分布漂移须独立检验，现有数据**未证明** conformal 的交换性前提不成立。
+
+**新 C cohort 的机制检验设计：**
+1. 子群标签只能用**D2 决策当时合法可见**的历史工具反馈、证据过期/观测缺口等字段预定义；阈值/风险模型在 DEV/CALIBRATION 固定。禁止用 Stage R 事后 E/A/P/U、未来物理结局或 `check_success` 形成 TEST 策略特征或在线分组。
+2. 在事先定义的子群内报告相对 C-4 的错误完成、声明覆盖率和动作/观察成本差，以及 episode 级区间；不得后验挑选“持续失败子群”。
+3. 若真实 D2 前缀不足以辨识这些子群（缺合法重复历史、大量 UNKNOWN），判 `MECHANISM_NOT_IDENTIFIABLE`，不得把离线失败分类偷渡为在线信息。
+4. Conformal 的保证取决于**特定分数、目标事件、采样单位和校准—测试分布假设**；事件间异质性本身不会自动令其失效。技术上可比的 conformal 校准须用独立 CALIBRATION 做出，再由 TEST 检验。
+5. 无有效增量 → `INCREMENTAL_BENEFIT_UNESTABLISHED`；违反覆盖/预算门即使 raw false-completion 下降也判 `P1_NOT_SUPPORTED`。无法识别子群则只能评价总体收益，不能验证声称的“持续性机制”。
+
+这仍是研究假设；Stage R 的选择性重建样本不构成新 cohort 的机制证据。
 
 ### 证伪条件(预先写死)
 
-π_ev 在主指标上不优于 best(C-1..C-5)(预注册 margin 内)→ **P1 NOT SUPPORTED**,PAEG 决策资格层无实测收益,规范层降级为"负结果+工程护栏";不做事后子集挑选、不改 margin。
+π_ev 在独立 TEST 主指标上不优于 **DEV 已锁定的最强基线**（预注册 margin 内），或任何声明覆盖率/真实完成率/弃权率/预算门未过 → **P1 NOT SUPPORTED**；不做事后分组、改 margin 或改弃权定义。
 
 ## 2. 与已有工作的机制区别(逐条可证伪,非形容词)
 
 | 系统 | 其机制(核验来源) | 与 P1 的机制差异(=我们的可证伪主张所在) |
 |---|---|---|
-| **CheckVLA**(NOVELTY_REVIEW [P-abs]) | conformal 校准干预阈值:first-intervention 触发,**exchangeability 假设下的分布无关保证**;阈值静态、作用于一个监测分数 | P1 的时机决策受**证据合法边界**(什么能看/什么只是研究真值)、**物理验证动作成本**与**失败持续性异质**(h(k) 衰减区)同时约束,并决定验证后的接受/恢复分支。可检验差异:exchangeability 失效的持续子群上 C-4 应退化而 π_ev 不(§1 H-P1m)。若实测无差异,新颖性让渡 |
+| **CheckVLA**(NOVELTY_REVIEW 已审工作) | 具有受校准数据和目标事件约束的 conformal 干预机制；实际保证只覆盖论文明确规定的目标、窗口与前提 | P1 的研究对象是合法信息边界、额外物理验证成本和验证后的接受/恢复选择；**不预言异质失败会令 conformal 退化**，须使用技术上可比的 C-4 强基线和独立 TEST 建立增量，若无差异如实让渡 |
 | **Zetta**(源码级) | 闭环 critic-恢复 + 版本化技能;统计门(exact McNemar 两段式 heldout)作用于**技能候选改善验证**;critic 分数在线消费 | P1 不改技能、不进化;对象是**运行时证据资格与验证成本**的决策,审计真值按 PAEG I1/I4 禁止进入策略输入(Zetta 的 critic 可自由消费自有评分)。可检验差异:P1 在"critic 类证据不合法/不可得"的约束下仍要求改善——即只用工具返回+本体感知达成同时机决策 |
 | **RegenHarness**([P-abs]) | 版本化记忆 + commit gate + proposal/termination/completion 三分生命周期,作用于 **harness 自我修改** | P1 冻结 VLA 与 harness,零自我修改;经验/技能更新属 P2,且 P2 需 Evolution Gate 的合法 outcome 来源(现无)。可检验差异:P1 的收益不依赖任何记忆/版本机制(对照 C-5 与"π_ev 去记忆化"消融) |
 | (VASO/EmbodiSkill) | trace 证据不足信论证 / 缺陷-失效分流先例 | 已在 NOVELTY_REVIEW 让渡;不重复主张"允许弃权""缺陷分流"为创新 |
@@ -62,13 +75,13 @@ PAEG 的可检验增量主张是:**收益集中在静态校准失配的子群**,
 | `matched_initial_state`(配对)或组内随机化 | 现有采集无配对设计 |
 | heldout 任务 | 仅 3 任务且全部已用于历史分析 |
 
-采集形态(设计,未授权):前瞻 instrumented cohort——在真实 D2 边界注入策略对照,冻结 VLA/预算/评价 horizon,一次预注册。规模由功效分析定(依赖 P0/A0 普查给出的 R_accept 量级;S1 教训:15pp 差异需 25-56 cells,勿低估);**先 A0 后 C 的顺序是信息价值最优**(A0 一次授权同时供 EERD G-QA-3 首块与功效先验)。
+采集形态(设计,未授权):前瞻 instrumented cohort——在真实 D2 边界注入策略对照,冻结 VLA/预算/评价 horizon,一次预注册。规模根据 **C cohort 的 episode 级错误完成率、声明覆盖率及多组对照**开展独立先导/保守功效分析。A0 的 `R_accept` 测量**同技能 FGONLY 代理**，P1 的主结果是**后续 episode 级错误完成**，构念不同；A0 只能支持资格、类别可用性和可行性估计，**不能直接作 P1 效应量/功效先验**。A0 是可选工程步骤，**并非 C cohort 的强制前置或已证明的信息最优顺序**。
 
 ## 4. 评价与治理骨架(预注册要素清单)
 
 1. 单位与分组:episode 聚类;配对(孪生初始态,S1 可行性已证 spatial 孪生可得)或组内随机;split 按 `cross_dataset_provenance_group`(EERD QA 规范 §4)防 A/B 同源泄漏。
 2. 输入防火墙:策略只准吃 `online_eligible` 视图;审计真值只进评价(PAEG I1/I4,运行时抽查禁读)。
-3. 指标:主=错误完成率差;非劣性=真实完成率/预算;次=恢复收益、abstain 率、成本-收益前沿;一切区间 episode 聚类。
+3. 指标:主=错误完成率差;同时强制满足真实完成率、完成声明覆盖率/弃权上限、总预算;次=恢复收益、选择性错误率—覆盖率曲线与成本—收益前沿;TEST 之前锁定 DEV 选定基线及比较方法,所有评价按 episode 分组。
 4. STOP 规则:预注册 margin 不过即 NOT SUPPORTED;infra 错误指纹清单纪律(Stage C 事故账);中途禁改策略/指标。
 5. 授权路径:全新预注册 → 用户批准 → §36 在该协议范围内显式局部解除(仅此 cohort,不泛化)。
 
@@ -109,7 +122,7 @@ PAEG 的可检验增量主张是:**收益集中在静态校准失配的子群**,
 | 与 CheckVLA/Zetta/RegenHarness 机制区别 | 条件成立(差异点全部转为可检验对照;无差异则让渡) |
 | 现有数据支持 P1 闭环结论 | FAIL(必须 C cohort) |
 | P1 闭环实验执行 | **HOLD**(须全新预注册+授权+§36 局部解除) |
-| A0→C 顺序建议 | GO(信息价值最优路径,均待授权) |
+| A0→C 顺序建议 | **OPTIONAL**(A0 辅助资格/类别审计,不构成 C 的强制前置或 P1 功效估计) |
 | Stage R §36 / S1-DEV0 | HARD STOP / ON_HOLD 不变 |
 
-**最终:`P1_MINIMAL_FALSIFIABLE_QUESTION_DELIVERED / MECHANISM_DISTINCTIONS_TESTABLE / REQUIRES_NEW_C_COHORT / EXECUTION_HOLD / DOCUMENT_ROUNDS_CAPPED / STOP_LIST_ISSUED`**
+**最终:`P1_V1_1_METHODOLOGY_CORRECTED / HETEROGENEITY_NOT_EXCHANGEABILITY_FAILURE / COVERAGE_GATES_AND_HELDOUT_BASELINE_REQUIRED / C_COHORT_EXECUTION_HOLD / DOCUMENT_ROUNDS_CAPPED`**
