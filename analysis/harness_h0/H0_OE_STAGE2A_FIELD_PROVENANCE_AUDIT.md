@@ -184,3 +184,6 @@ duplicate_key_count: 0
 - 读取的是**截至基线提交**的 GitHub 已跟踪 CSV/脚本，不等于服务器当前磁盘字节；Github `blob sha`、本审计的结构检查与 Stage R 原报告可以互相交叉参照。
 - 没有写入任何执行代码、清理/覆盖原始文件、补齐缺失字段或更改 Stage R 四类 `E14/A1/P5/U4`。
 - **审核结论不是统计结果**。下一份预注册只应作为 DRAFT，并保持 Stage R §36 Hard STOP / S1-DEV0 ON_HOLD。
+
+
+> **Stage 2B 源文档复读后的追溯修正（2026-10-09）**：此前的 `DEV_WRITE_ORIGIN_NOT_VERIFIED` 是 Stage 2A 检查时的历史结论。冻结 `analysis/STAGE_R_FINAL_REPORT.md §9`（deviation `dev-r1-fix`, 2026-10-08 05:59）明确记录 R1 首启队列切分错误使 8 个 DEV 事件误入 R1，05:01 停止时**已多跑 4 个 DEV trial**，修复队列后 R1 的 24 个 cohort 全部重新执行，**CPS 日志保留越轨 trial 作为审计**。这一已冻结记载与本地 checkpoint 额外的 `r09/SAME/1-3`、`r12/SAME/1` 四键及 manifest DEV 角色数量/身份吻合。**现在可将来源判为 `DEV_R1_STARTUP_DEVIATION_DOCUMENTED`（原始日志明确说明，非额外自行推断中断）**；但不声称已逐字节比对 04:58 启动日志或每条 CPS 生成时刻。原 Stage 2A 的“未验证”表述保留为复读前历史审计状态，由本附注覆盖。正式 R1 集合仍为 `role=R1_COHORT`，480/480 通过、零重复零缺失，禁止修改原始 CSV/JSONL。
