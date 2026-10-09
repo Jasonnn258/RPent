@@ -4,6 +4,18 @@
 >
 > 事后审计辅助工具：`scripts/p1_dev0_posthoc_audit.py`（只读），合成测试：`analysis/research_context/test_p1_dev0_posthoc_audit.py`。任何后验 shadow 比较不得用于反向修改冻结指标或冒充新实验。
 
+## 2026-10-09 服务器事后审计回传：重大解释勘误（优先于本文旧推断）
+
+用户在原服务器上执行 `test_p1_dev0_posthoc_audit.py`：**4/4 synthetic tests OK**；然后运行 `scripts/p1_dev0_posthoc_audit.py`，回传 `science_gate=HOLD_NO_ARM_ACTION_CONTRAST`，`policy_sha_match=true`。数据级汇总：manifest 24、事件文件 21、触发 6、未触发 15、无事件 3（t9_s1006/s1007/s1008，Runner 报告为预算跳过；不能由 event 缺失本身推断原因）。六个真实动作均为 RETRY。4 次 FIXED_HORIZON overshoot [3,23,8,18]，2 次 EPISODE_END shortfall [120,70]；GPU 22215.374972105026 s，超过原 21600 s 硬额度 **615.3749721050262 s**，`hard_budget_pass=false`。
+
+**关键新结果：**5 个真实 probe 后合法输入的离线 shadow 在冻结策略下得出 `D2=CONTINUE_CAUTION` 5/5、`D3=RETRY` 5/5，**规则分歧=5/5**，但**没有执行 D2 counterfactual action**。本文下方旧文字引用原执行报告称“5 次 `post_gap>=0.06`”，**现已撤回该断言**：按冻结 `p1_dev0_policy.py`，D2 仅在 `post_gap<0.06` 时才 `CONTINUE_CAUTION`，且原报告已有一例 `post_gap=0.0025`。这些数据至多说明 grip-gap **代理达到静态阈值**，绝不意味着夹住物体；静态 D2 在空夹爪被主动闭合时存在“把机械闭合误认为成功”的方法风险。D3 额外要求 hold-gripper probe 的 `post_eef_z-pre_eef_z>=0.03`，可能因 **EEF 本来应保持位置**而机械性退回 RETRY。这是待用聚合合法观测确认的机制解释，不得用 outcome 事后调整阈值。
+
+已补充后验只读工具对 probe 事件 `post_legal` 与 `decision.policy_input` 的传值一致性、gripper-gap 阈值、EEF dz 数值有效性/阈值做**聚合审计**。此增强版尚未由用户运行；原 4/4 通过属于此前版本，不能前移宣称增强版通过。
+
+**研究判定仍为** `DEV0_ENGINEERING_PARTIAL_GO / POLICY_DISAGREEMENT_DIAGNOSTIC_POSITIVE / CAUSAL_OUTCOME_UNOBSERVED / FORMAL_P1_HOLD`。新方法应先保证合法证据可区分“真实持握 vs 单纯夹爪闭合”，然后在一个独立、预注册且预算硬停止的新 L2 阶段评估未来任务收益。
+
+---
+
 ## 一、收官级别：ENGINEERING_PARTIAL_GO / HYPOTHESIS_UNTESTED / NO_NEW_L2_EXECUTION
 
 **原报告的“ENGINEERING_GO”只能解释为：本 Pilot 部分实现了触发、5 次实物探测、6 次动作和 6 次审计的端到端运行。** 在科学方法意义上，尚未形成可检验 Evidence Gate 增益的决策对照：
