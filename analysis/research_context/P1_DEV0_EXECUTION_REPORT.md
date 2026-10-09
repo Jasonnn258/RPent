@@ -2,6 +2,8 @@
 
 > **后验勘误（2026-10-09，原始 DEV0 文件/策略冻结不变）**：随后由用户在私有服务器上运行 `scripts/p1_dev0_posthoc_audit.py`（4/4 synthetic tests OK，`policy_sha_match=true`），确认 5 个已实际执行 probe 的合法观测上，冻结策略的**离线影子决策** `D2=CONTINUE_CAUTION` **5/5**、`D3=RETRY` **5/5**；实际生产 6 次决定仍全部为 RETRY，D2 没有生产触发。故本文 §5.1 中“5 次 probe 后 `post_gap≥0.06`、物理上确实没抓住”的原断言**与冻结 D2 规则不相容，应撤回**；本文 §6 样例中 `post_gap=0.0025` 也直接与上述全称断言矛盾。按冻结 D2 规则，若 shadow 推演输入/路径一致，则五次 `D2=CONTINUE` 均要求 `post_gap<0.06`。**夹爪闭合代理不能证明物体被抓住**。此外，`D3=RETRY` 可能由 EEF z 增量未达规则阈值（或非有限数引起），旧版报告未提供逐样本合法观测值，需用新增只读聚合诊断确认，不能先宣称已经验证每条原始记录。更正只影响**解释**，不更改运行数据、冻结策略或正式 outcome。
 
+> **增强版诊断实际回传（2026-10-09）**：4/4 测试通过，冻结 Policy SHA 一致；5/5 `post_gap<0.06`，5/5 EEF dz 数值有效，**0/5 `ΔEEF_z>=0.03`**，probe→policy `gripper_gap/eef_z` 传值不一致 **0**。因此之前的 `post_gap>=0.06` 全称断言确已推翻，D2 静态规则在五个输入上选择 CONTINUE、D3 由于额外高度门槛选择 RETRY。**这既不证明物理抓住，也不证明哪种动作更有效。** 详见 `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md` 最新顶部回执。历史运行报告的原始表格不回写。
+
 协议:P1-DEV0-L2-24EP-4ARM-20261009 | 授权:D-017(`P1_DEV0_AUTHORIZATION_AND_LOCK.md`)
 代码:冻结于 commit `62701a0`(hook+接线+runner v1);本次提交补 runner 两处启动修复 + 分析器 + 本报告。
 数据:`/workspace/yjx/rpent_data/p1_dev0/`(run_20261009_095754;不入 Git)
