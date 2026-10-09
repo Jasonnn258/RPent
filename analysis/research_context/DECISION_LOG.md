@@ -199,6 +199,16 @@
 - **科研含义**：后续需要验证可区分“仅夹爪闭合 vs 真持握”的合法新证据，避免 D2 因主动夹紧形成系统性假继续，也避免 D3 用不相干的 EEF dz 条件形成系统性假重试。正式方法实验只能在独立新 L2 方案、硬预算与未来物理 outcome 下开展；当前 DEV0 CLOSED，不补跑 3 格、不调冻结阈值。
 - **验收状态**：`POSTHOC_V1_SERVER_PASS / PHYSICAL_EVIDENCE_INCONSISTENCY_IDENTIFIED / AGGREGATE_DIAGNOSTIC_V2_UNRUN / P1_NEW_L2_HOLD`。
 
+## D-021 · DEV0 5/5 规则分歧机制确证，转向合法视觉证据资格
+
+- **日期/来源**：2026-10-09，用户服务器执行增强版 `p1_dev0_posthoc_audit.py`（4/4 测试通过，冻结 policy 哈希匹配）；独立再查 `p1_dev0_policy.py`、`rpent/utils/p1_dev0.py` 与 `robots/libero/tools.py:dump_state`。
+- **状态**：`P1_DEV0_V2_POSTHOC_CONFIRMED / RULE_CONSTRUCT_MISMATCH / VISUAL_PAIR_FEASIBILITY_PENDING / NEXT_L2_HOLD`。
+- **直接事实**：五个真实 probe 对应的合法 `post_gripper_gap<0.06` 为 5/5，EEF Δz 数值有效 5/5 但 `Δz>=0.03` 为 0/5；probe→policy `gripper_gap/eef_z` 传值差异0、缺合法 post 记录0。冻结策略上 D2=CONTINUE 5/5、D3=RETRY 5/5，**没有执行 D2 反事实后续动作**。
+- **方法判定**：D2 直接从爪口闭合判断“可能继续”，但物理夹爪闭合可以在空夹爪发生；D3 则在维持 EEF 位姿的夹紧 probe 期间要求 EEF 上升3cm，其额外判据不代表目标物体真实抬升且与操作设计不相容。两种 shadow 决策仅说明存在决策分歧，**不证明哪种策略正确或效果更好**。旧报告“5次夹爪全开/确实没抓住”已正式勘误，历史运行数据/原 frozen policy 不动。
+- **新证据有效性问题**：历史触发低分辨图像 `policy_image_agentview_low`/ `image_wrist_low` 与新增 probe 图像 `probe_agentview`/`probe_wrist` 可形成候选视觉前后证据；但源码显示 **pre wrist 以 `raw_wrist[::-1]` 保存、post wrist 以未翻转 raw 保存**。未做纵向对齐的简单像素差分会人为引入大面积变化。已新增只读 `scripts/p1_dev0_visual_pair_preflight.py` 和合成测试，先检查完整5个 probe 的视图文件、记录 SHA 和 PNG 几何是否真的可追溯；**工具刚提交，尚未在服务器运行**。
+- **后续研究门槛**：只有图像合法性、时间新鲜性和可比相机约定可验证后，才能设计/测试“视觉目标-爪口相对位置或时序一致性”的**离线候选验证器**；需要独立 audit-only 真值评价，但绝不把该真值输入 Runtime/Evolution。视觉差分变化不等于持握。任何新仿真/在线 action 的 P1 阶段须新的有界 L2 预注册与授权。DEV0 因实际 GPU 超额继续 CLOSED，不补旧3格。
+- **原因/选项**：转向观察与标签的构念有效性、对齐和价值检验，暂停无监督阈值追调；不将 EEF dz 门槛偷偷改为更易触发条件去复写 DEV0。
+
 ## 新决策追加模板
 
 ```markdown
