@@ -212,6 +212,7 @@ def schema(root, output, strict=True):
     data = {
         "protocol": PROTOCOL, "phase": "SCHEMA_ONLY", "gate": gate,
         "source_sha256": provenance,
+        "analysis_script_sha256": sha256(Path(__file__).resolve()),
         "counters": dict(counters), "known_stage2i_counts_matched": consistency,
         "reference_field_errors": errors,
         "note": "No result.success/check_success value used in schema calculations. "
@@ -390,6 +391,8 @@ def outcomes(root, output, strict=True):
     provenance, eps, records, errors = collect(root)
     if provenance != report["source_sha256"] or errors:
         raise RuntimeError("Source changed since schema seal or eligibility error")
+    if report.get("analysis_script_sha256") != sha256(Path(__file__).resolve()):
+        raise RuntimeError("Analysis code changed since schema seal; rerun schema")
     eligible = [x for x in records if not x["problems"]]
     if len(eligible) < 100 and strict:
         raise RuntimeError("E1 eligible pick count < 100; stop")
@@ -507,6 +510,41 @@ def outcomes(root, output, strict=True):
     else:
         full["primary_descriptive"] = None
     write_json(output / "a0_result.json", full)
+    # Standalone human-readable result. No false claim of success if E gates fail.
+    ds = full.get("primary_descriptive") or {}
+    md = [
+        "# RPent Research Package A — A0 / EERD Internal Result",
+        "",
+        "- Protocol: `" + PROTOCOL + "`",
+        "- Status: **" + full["gate"] + "**",
+        "- Independent data level: episode (pick calls correlated within episode)",
+        "- Eligible picks: " + str(full["n_eligible_pick"]),
+        "- Primary picks (non-terminal): " + str(full["n_primary"]),
+        "- FGONLY reference UNKNOWN: " + str(full["reference_unknown"]),
+        "- Original check_success shortcut extra positives: " + str(shortcut_changed),
+        "- B frozen cohort: " + str(b_info["status"]),
+        "",
+        "## A0 primary descriptive statistics",
+        "",
+        "```json",
+        json.dumps(ds, ensure_ascii=False, indent=2, sort_keys=True),
+        "```",
+        "",
+        "## Evidence boundaries",
+        "",
+        "- Reference = within-pick pose-following FGONLY proxy; it does not establish",
+        "  physical contact, post-return retention, or independent task completion.",
+        "- 235 picks are correlated within original episodes; the original collection",
+        "  was quota-stopped and contains only three tasks.",
+        "- A0 cannot establish P1's episode-level false-completion effect size or",
+        "  prospective control benefit.",
+        "- Audit-only outputs contain privileged simulator measurements/labels and",
+        "  are prohibited from online Runtime/Evolution consumption.",
+        "- Not a confirmatory hypothesis test; Gate failure leaves primary blank.",
+        "",
+    ]
+    (output / "A0_REPORT.md").write_text("
+".join(md), encoding="utf-8")
     if not (invalid_success or trace_mismatch):
         write_jsonl(output / "EERD_A_online_eligible.jsonl", online)
         write_jsonl(output / "EERD_A_audit_only.jsonl", audit)
@@ -522,6 +560,28 @@ def outcomes(root, output, strict=True):
                 {k: v for k, v in r.items() if k != "research_audit_only"}
                 for r in b
             ])
+        card = [
+            "# EERD v0.1 · Internal Data Card",
+            "",
+            "- Version: `" + PROTOCOL + "`",
+            "- Provenance: see sealed `schema_qa.json` SHA256 manifest.",
+            "- Domain: RPent / LIBERO Spatial original vanilla collect + frozen Stage R.",
+            "- A: original episode/pick tool feedback and in-skill FGONLY audit.",
+            "- B: frozen S_pre/S_post reconstructed attempts; not natural sequential retries.",
+            "- C: active-verification intervention cohort DOES NOT EXIST in this dataset.",
+            "- Split groups: `episode_id` for A; `source_episode_id`/"
+              "`cross_dataset_provenance_group` linking B to A.",
+            "- Visibility: `online_eligible` is a physically separate allowlisted"
+              " D2 tool-return projection; `audit_only` must never be served"
+              " to the planner; `reconstruction_metadata` is for provenance.",
+            "- Measurement caveat: FGONLY is an audit proxy, not a physics oracle.",
+            "- Privacy: internal only; no public release or external API transmission.",
+            "- QA: stage1 schema ledger, stage2 outcome gate and B source verdict",
+              " must all be checked before any benchmark claim.",
+            "",
+        ]
+        (output / "EERD_DATA_CARD.md").write_text("
+".join(card), encoding="utf-8")
     return full
 
 
