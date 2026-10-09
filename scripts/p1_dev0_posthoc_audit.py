@@ -192,7 +192,8 @@ def audit(manifest, out_root, policy_path=POLICY):
             "not_started_or_unrecorded": len(missing),
             "not_started_keys": missing,
             "events_without_episode_end": interrupted,
-            "not_started_is_infra": False,
+            "missing_event_reason": "UNDETERMINED_FROM_EVENT_FILE_ALONE",
+            "do_not_infer_infra_from_missing": True,
         },
         "by_task_arm": {
             "allocated": group(allocated), "with_events": group(observed),
