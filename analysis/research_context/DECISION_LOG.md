@@ -227,6 +227,16 @@
 - **边界**：旧 DEV0 已 CLOSED，不补跑 3 个预算跳过 episode。图像、内嵌图片的本地 HTML 和标注留在 gitignored `artifacts/`，不自动上传 GitHub/外部服务。新仿真或 Runtime 对照仍需独立有界 L2 授权。
 - **当前 Gate**：`VISUAL_RGB_BOARD_SERVER_PASS / OBSERVABILITY_REVIEW_PENDING / PHYSICAL_LABEL_UNVALIDATED / L2_HOLD`。
 
+## D-024 · VE-v0.1 视觉证据离线研究完成：stall 三态信号成立，持握检出不可估，最小 L2 HOLD
+
+- **日期/来源**：2026-10-09/10 夜间自主阶段（用户一次性授权的只读离线研究，6-8h）；全部分析基于既有 5 个真实 probe 前后图像 + 21 集 DEV0 合法观测，未跑任何新仿真、未改冻结数据与 Runtime。产出：`P1_VE01_VISUAL_EVIDENCE_REPORT.md`、`analysis/research_context/p1_ve01_evidence.py`（19/19 单测）、`scripts/p1_ve01_legal_extract.py`、`scripts/p1_ve01_run.py`、`scripts/p1_ve01_arms.py`、`scripts/p1_ve01_adversarial.py`（10/10 PASS）。
+- **状态**：已确定（离线证据原语层 GO；最小修正 L2 HOLD 待新授权）。
+- **决定**：(1) 采纳 **probe 闭合结局三态**（CLOSED_TO_FLOOR / STALLED_ABOVE_FLOOR / AMBIGUOUS）作为接触存在性原语——以 69mm→2.67mm/10 步实测行程能力为对照，7.31→6.96 与 4.53→4.53 停住判为物理阻挡而非控制节奏；(2) 确认 **gap 静态阈值在重叠区原理不可分**（flag=T 1.8–17.6mm vs flag=F 2.2–79.3mm，薄沿持握 1.8mm T ≈ 空闭合 2.2mm F，planner 自述同歧义），D2 的 gap<0.06 在本 5 例输出 5/5 CONTINUE 且恰含 2 个受阻案例=系统性假继续坐实；(3) 视觉的合法增量定位为**图像有效性裁决**（视差/误对齐/过期/复用/缺失，t9_s1004 最大差分 45.8=纯深度视差零信息）+ **接触方位**（腕视世界图近场，t9_s1003 最近表面 0.5mm 落指间投影带中心），不是"看见夹住"；probe 无 lift → 任何模态不得断言持握；(4) 新臂 B1′/B3/B4 状态区分度 2/4/4 vs 冻结规则 1/1/1，且 ADV7 性质（无持握证据永不 CONTINUE）10/10 对抗通过。
+- **证据**：报告 Phase 1–5 全表格；`/workspace/yjx/rpent_data/p1_dev0/ve01/{legal_calibration,evidence_claims,arms_comparison,adversarial_results}.json`（私有 artifacts，不入 Git）。
+- **对照/替代**：考虑过裸差分幅值判据（t9_s1004 必假阳，弃）、重调 gap 阈值（重叠区原理不可分，弃）、MODEL_VISION 直出标签（不可复现且非真值，降级为外部主观参考字段）。
+- **不能推出什么**：持握检出率/准确率（5 例 0 正例、无 probe 时刻物理真值）；"修正 L2 可改善结局"（Hypothesis）；audit 真值是 retry 结局不构成 probe 状态标签；主观视觉与几何一致(n=5)不等于效度。
+- **重新开启条件**：用户授权最小修正 L2 新预注册——probe 改"闭合+受控提升 2-3cm"使 lift 判据可用、分层采样含真实持握正例（t9/t3/t5 配额）、hi-res 触发时刻覆盖验证、两分支可达的 pre-delivery 消费者接线；旧 D2/D3 冻结规则不得复活。
+
 ## 新决策追加模板
 
 ```markdown

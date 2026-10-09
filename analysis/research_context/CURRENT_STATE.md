@@ -20,11 +20,13 @@
 
 > **P1 视觉审阅板真实生成完成（2026-10-09，用户服务器回传）**：修复后双脚本合成单测 **6/6 OK（0.607s）**；`scripts/p1_dev0_visual_review.py` 报 `PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`、`n_boards=5`，已在私有 `artifacts/p1_dev0/visual_review/` 生成 5 张 Agentview 前后/差分、Wrist 前后纵向对齐/差分拼图。**真实图像内容尚未被本对话看到或评估，不可报告目标可见、抓持或标签效果**。为减少重复人工命令，已提交 `scripts/p1_dev0_visual_annotation.py` 与离线单测：生成不联网的本地 HTML 审阅表，允许五样本一次性进行可见性/遮挡/空间关系人工审查，并离线汇总。新审阅器**尚未在服务器测试/运行**；人工主观观察不等于物理真值标签。P1-DEV0 CLOSED、新仿真 L2 HOLD。
 
-> **最新视觉审阅工具测试反馈（2026-10-09）**：用户服务器运行 `test_p1_dev0_visual_annotation.py` 得到 **0/4 PASS、4/4 `FileExistsError`**，错误均在 `fixture(root)` 重复创建由 `TemporaryDirectory()` 已创建的目录；由于使用 `&&`，**HTML build 未执行**。已在测试夹具改为 `root.mkdir(parents=True, exist_ok=True)`，commit `ee7efbe`，**修复版尚未在服务器重新测试**。已有五张 RGB 对照图与 6/6 图像测试 PASS 不受影响。无需新增仿真；只需复跑四项单测，PASS 后 build 私有 HTML。
+> **最新视觉审阅工具测试反馈（2026-10-09）**：用户服务器运行 `test_p1_dev0_visual_annotation.py` 得到 **0/4 PASS、4/4 `FileExistsError`**，错误均在 `fixture(root)` 重复创建由 `TemporaryDirectory()` 已创建的目录；由于使用 `&&`，**HTML build 未执行**。已在测试夹具改为 `root.mkdir(parents=True, exist_ok=True)`，commit `ee7efbe`，**修复版尚未在服务器重新测试**（2026-10-10 本机复跑 4/4 OK，服务器复跑仍留作可选）。已有五张 RGB 对照图与 6/6 图像测试 PASS 不受影响。无需新增仿真；只需复跑四项单测，PASS 后 build 私有 HTML。
+
+> **VE-v0.1 视觉证据离线研究完成（2026-10-09/10，夜间自主阶段，全程只读离线）**：对 5 个真实 probe 前后图像完成可辨识性分析（MODEL_VISION 主观判读，非物理真值）+ 确定性 Evidence Claim 原型（`analysis/research_context/p1_ve01_evidence.py`，19/19 单测）+ 六臂对照（B0/B1=B2 冻结规则/B1′ stall 三态/B3 视觉护栏几何/B4 融合）+ 对抗测试 **10/10 PASS**。**核心新事实**：(1) probe 闭合结局三态成立——69mm→2.67mm/10步证明行程能力，t9_s1003(7.31→6.96mm)/t9_s1005(4.53→4.53mm)停住=物理阻挡，D2 的 gap<0.06 把其中 2 个接触案例一律误判 CONTINUE;(2) 薄沿持握(1.8mm flag=T)与空闭合(2.2mm flag=F)在 gap 轴原理不可分，probe 无 lift 时**任何模态都不能断言持握**;(3) 最大 wrist 差分(45.8,63.5% 像素)是纯深度视差(零信息)，护栏=整帧占比+SHA 新鲜度+翻转对齐;(4) 视觉真实增量=图像有效性裁决+接触方位(腕视世界图近场,t9_s1003 最近表面 0.5mm 落在指间投影带中心)，状态区分度 1/1/1→2/4/4。5 例无持握正例、无 probe 时刻真值 → 检出率不可估。详见 `P1_VE01_VISUAL_EVIDENCE_REPORT.md`。**判定：GO(离线证据原语)/ 最小修正 L2(lift-probe+正例+任务分层)HOLD 待用户授权**。
 
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VISUAL_PAIR_ASSETS_PASS_5_OF_5 / VISUAL_TESTS_6_OF_6_SERVER_PASS / FIVE_PRIVATE_RGB_BOARDS_WRITTEN / LOCAL_OBSERVABILITY_REVIEW_TOOL_UNRUN / PHYSICAL_GRASP_UNVERIFIED / NEXT_L2_HOLD`**
+**`P1_DEV0_CLOSED / VE01_OFFLINE_COMPLETE_5_CASES / PROTOTYPE_19_TESTS_10_ADVERSARIAL_PASS / STALL_SIGNAL_VERIFIED_3FLOOR_2OBSTRUCTED / GRASP_DETECTION_UNESTIMABLE_NO_POSITIVES / NEXT_MINIMAL_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -50,6 +52,7 @@
 | **DEV0 增强版后验诊断（用户服务器回传）** | 4/4 tests OK，5/5 gap<0.06，0/5 EEF dz≥0.03，probe→policy 不一致0，D2/D3 影子分歧 5/5；未实际执行的 D2 结果仍未知 | 规则失配已确认，夹爪闭合≠真实持握；Pre wrist PNG 被纵向翻转而 Post wrist 原样写出；只读视觉文件配对 Gate 待跑 |
 | **DEV0 视觉证据配对（用户服务器回传）** | `PAIRED_ASSETS_COMPLETE`;5/5 probe 对 agentview 与 wrist 图像哈希/PNG 头尺寸合格，5/5 两相机前后哈希均不同；`failure_reasons={}` | 只验证静态文件与视图配对；合成测试 2/3（零字段 KeyError），归零输出已修待复跑；wrist 纵向方向不一致，尚无任何视觉持握识别结果 |
 | **DEV0 RGB 本地对照（用户服务器回传）** | 修复后合成回归 6/6 OK；`PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`，5 张真实 Agentview/Wrist 对照图写入服务器本地 | 图片尚未被视觉审阅或物理真值评价；离线人工标注工具已提交未执行 |
+| **VE-v0.1 视觉证据离线研究（2026-10-09/10）** | 5 案例 MODEL_VISION 判读(2 CONFIDENT 空闭合/1 UNCERTAIN/1 UNKNOWN/1 纯视差)+ 确定性 Evidence Claim 原型 19/19 单测 + 六臂对照 + 对抗 10/10 PASS；probe 闭合结局 3 闭到底/2 停住=阻挡；stall×近场几何联合状态区分度 4 vs 冻结规则 1 | 无持握正例、无 probe 时刻物理真值 → 检出率/准确率不可估；主观视觉非真值；详见 `P1_VE01_VISUAL_EVIDENCE_REPORT.md` |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -71,9 +74,9 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **RGB 资产与图像对照 Gate 已完成**：服务器 6/6 tests OK 且 5 张对照图已真实写入私有目录；不再重复图片哈希/拼图。下一步运行 `test_p1_dev0_visual_annotation.py` 和 `scripts/p1_dev0_visual_annotation.py build`，在既有五张图上生成**不联网的离线 HTML 审阅表**，判断目标/夹爪可见性与遮挡。网页可在本地浏览器查看（通过可信远程文件传输/VS Code Remote），私有 PNG 及其内嵌 HTML 不得提交 Git。
-2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
-3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
+1. **VE-v0.1 已完成五阶段离线研究**（`P1_VE01_VISUAL_EVIDENCE_REPORT.md`）：五组图像可辨识性、确定性 Evidence Claim 原型、六臂对照、10/10 对抗测试全部落地；annotation 单测本机 4/4 复跑通过（服务器复跑可选）。不再重复图像分析轮次。
+2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
+3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
 ## 6. 标准汇报格式
 
