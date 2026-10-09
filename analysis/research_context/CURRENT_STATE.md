@@ -66,7 +66,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **视觉文件数据验收已 PASS（5/5 两相机配对）**；原测试 2/3，零值统计键导致一例 KeyError，代码已修复。服务器仅需重新运行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_dev0_visual_pair_preflight.py' -v` 证明修复版测试通过；无需再次执行 GPU/仿真，也不必重复真数据配对扫描。
+1. **视觉文件数据 Gate 已 PASS（5/5 双摄像头配对）**；原合成测试 2/3，一例零字段 `KeyError` 已修复。另已实现 `scripts/p1_dev0_visual_review.py`，只读取已存在且 SHA 验证过的 5 对 Agentview/Wrist PNG，修正 wrist 纵向存储方向，生成服务器本地 5 张 RGB 前后/绝对差分拼图与纯描述性像素统计，绝不推断物体已持握。配套 `test_p1_dev0_visual_review.py` **均尚未在服务器运行**。下一步一次性运行两个合成测试及本地拼图程序，输出放在 gitignored `artifacts/p1_dev0/visual_review/`；不启动仿真或训练。
 2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
 3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
 
