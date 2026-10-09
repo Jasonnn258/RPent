@@ -12,7 +12,8 @@ import p1_dev0_visual_annotation as a
 
 
 def fixture(root):
-    root.mkdir(parents=True)
+    # TemporaryDirectory() already creates this directory. Fixture must be idempotent.
+    root.mkdir(parents=True, exist_ok=True)
     cases = []
     for i in range(5):
         key = f"p1dev0_t3_s{1001+i}"
