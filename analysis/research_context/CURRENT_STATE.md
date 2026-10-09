@@ -8,9 +8,11 @@
 
 > **P1 已实际启动（2026-10-09，阶段：离线可行性核查）**：源码确认 `view_driver_state` 重读历史帧不产生新的物理观测；`set_gripper(+1, steps=N)` 会真实执行物理步、可能改变持握状态，必须设置 probe-then-blind 机械效应对照。已提交 `p1_d2_preflight.py`、合成回归测试及 `P1_L2_STAGE_GATE.md`（独立 DEV0 ≤24 新 episode、≤8h 墙钟/6 GPU·hour 的建议边界）。**真实服务器 D2 预检已回传：2/2 合成测试 OK、206 合格 D2、103 次工具失败、low-res + proprio 206/206；结构 Gate PASS**。高分辨图当前归档仅 105/206。新增任务分层约束见 `P1_L2_STAGE_GATE.md` §3.1；新仿真/Runtime L2 仍 HOLD，须明确整阶段许可与 Stage R §36 局部例外。
 
+> **P1-DEV0 有界 L2 阶段（2026-10-09）：**针对上一轮“是否批准完整 DEV0 阶段”提问，用户回复“go on”，已按该问题中限定的范围记录为 P1-DEV0 阶段级授权（`P1_DEV0_AUTHORIZATION_AND_LOCK.md`，≤24 新 episode/≤8h 墙钟/≤6 GPU·hour/≤2 worker）。**已经提交但服务器尚未执行**：任务分层冻结 manifest 生成器、四臂决策纯逻辑/特权字段禁读、合成单测和 `prepare_p1_dev0.sh`。下一 Gate 必须先完成实际服务器单测与 manifest 封存，然后补齐 D1 probe-blind Runtime 隔离、固定 future-horizon 审计和独立 pilot runner 才能开始新仿真。当前未获得任何 P1 DEV0 新物理实验结果；Stage R 历史冻结不变、S1-DEV0 ON_HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_PREFLIGHT_SERVER_STRUCTURE_PASS / P1_L2_DEV0_PROPOSED_NOT_AUTHORIZED / RUNTIME_HARD_STOP`**
+**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_PREFLIGHT_PASS / P1_DEV0_L2_SCOPED_APPROVAL / MANIFEST_POLICY_CODE_COMMITTED_TESTS_PENDING / NEW_SIM_NOT_STARTED`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -38,7 +40,7 @@
 
 1. **P0 / Research Package A 正式收官（内部数据层）**：3/3 synthetic tests OK、A0 结果 PASS、Export QA 26/26 PASS；不再重复 A0 统计、改动冻结结果或增加无新证据的审查轮次。
 2. **已取得的主要科学现象**：在主分析 206 picks 中，`flag=False` 的 103 次里有 56 次 **技内某时刻 FGONLY 代理满足**；工具成功侧仅 2/103 次代理不成立。这支持“工具失败后先验证/还是直接重试”的**研究动机**，不能等同返回时已经抓稳或未来真实持握。
-3. **P1 D2 结构 PASS，L2 未授权**：服务器回传 206/206 可读低分辨相机与本体感知；103 个工具失败边界。t3:21/71 失败，t5:30/77，t9:52/58；t9 占历史失败 Pick 的 52/103，DEV0 必须按 task 预先分层、记录无触发 episode。候选 DEV0 ≤24 新 episode、≤8h/6 GPU·hour，比较 D0(no probe)/D1(probe-blind)/D2(probe-static)/D3(probe-evidence)，仅作接口可行性，**不能确认效应**；尚未运行仿真。
+3. **P1-DEV0 阶段授权已记录，执行尚未启动**：按 task3/5/9 每任务 8 新 episode、D0/D1/D2/D3 每 task×arm=2 条、seeds 1001–1008、单事件资格、无触发纳入分母。已提交封存脚本和纯合法证据决策合同；需在服务器先完成单测及 manifest seal；D1 物理 probe 掩蔽、真实未来物理 horizon 与成本记账的 Runtime 接线仍需实施和验证。24 episode 仅可行性，不可宣称显著效应。
 4. **P2**：证据治理的跨任务记忆/技能演化仍属长远研究问题，现无经验证的更新收益。
 
 ## 4. 当前明确禁止的推断
@@ -53,9 +55,9 @@
 
 ## 5. 当前待办
 
-1. **D2 只读前置核查已完成**：服务器 2/2 tests OK，`STRUCTURE_PASS_FOR_DESIGN`，206 合格 Pick，103 failure，198/206 后续 Planner step；低分辨图像与 proprio 均 206/206，高分辨现存仅105/206；**无需再运行此预检**。
-2. **进入 P1-DEV0 单次阶段级授权 Gate**：参照 `P1_L2_STAGE_GATE.md`，先锁新任务/seed 分层、4 臂随机化、首个可触发 D2、未触发计数、固定未来 horizon/预算/停止条件。最多 24 新 episode、8h/6 GPU·hour。须用户明确批准 L2 局部例外后才能仿真/Runtime 接线，不能沿用 Package A 的 L1 授权。
-3. 新 DEV0 数据到来后，按真实物理后续收益与机械效应对照判断是否值得更大的独立 TEST；P2 仍 HOLD。
+1. 服务器先执行 `bash analysis/research_context/prepare_p1_dev0.sh`：仅纯合成单测+写入不可覆盖的 `artifacts/p1_dev0/manifest.jsonl` 和 `manifest.sha256.json`。**不启动仿真**，回传 status/哈希/测试结果。
+2. **同一已批准 L2 阶段内继续实现隔离的 P1 Runtime hook + pilot runner**：D0 与 D1 首次决策共用 blind policy；D1 的 probe 新数据不能进入首次决策，D2/D3 才允许消费；probe/重试费用单独记；用相同实际物理步 horizon 做未来 audit-only reference。必须通过无 GPU mock 测试和服务器逻辑烟测再允许新 rollout。
+3. 24 新 episode、最多 2 worker、8h wall/6GPU·hour 任一达到即 STOP；记录未触发 episode，审计真值在线隔离；Stage R §36 仅此 P1DEV0 局部例外，原 Stage R/S1 仍冻结。
 
 ## 6. 标准汇报格式
 
