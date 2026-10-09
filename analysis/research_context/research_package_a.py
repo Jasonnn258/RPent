@@ -512,7 +512,16 @@ def outcomes(root, output, strict=True):
         write_jsonl(output / "EERD_A_audit_only.jsonl", audit)
         write_jsonl(output / "EERD_A_reconstruction_metadata.jsonl", metadata)
         if b_info["status"] == "PASS":
-            write_jsonl(output / "EERD_B_audit_only.jsonl", b)
+            # The frozen B cohort is audit-only: NO online_eligible export.
+            write_jsonl(output / "EERD_B_audit_only.jsonl", [
+                {"event_id": r["event_id"], "arm": r["arm"], "trial": r["trial"],
+                 "research_audit_only": r["research_audit_only"]}
+                for r in b
+            ])
+            write_jsonl(output / "EERD_B_reconstruction_metadata.jsonl", [
+                {k: v for k, v in r.items() if k != "research_audit_only"}
+                for r in b
+            ])
     return full
 
 
