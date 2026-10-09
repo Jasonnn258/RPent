@@ -31,6 +31,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 POLICY = REPO / "analysis" / "research_context" / "p1_dev0_policy.py"
 EXPECTED_POLICY_SHA = "15d58071cea670039b00a264f1486ed7f8571b7d448b99af60035ce801a50630"
+EXPECTED_MANIFEST_SHA = "839bc0d1b392806553fd2e6a5338a4f8a6f9c47e6a77957ec95dbc29a21b9132"
 GPU_BUDGET_S = 6 * 3600
 ALLOWED_ARMS = ("D0", "D1", "D2", "D3")
 
@@ -40,6 +41,22 @@ def load_jsonl(path):
         return []
     with path.open(encoding="utf-8") as f:
         return [json.loads(x) for x in f if x.strip()]
+
+
+def verified_manifest(path, seal_path):
+    """Refuse all post-hoc tallies if the allocation is not the frozen 24-grid."""
+    if not path.is_file() or not seal_path.is_file():
+        raise FileNotFoundError("FROZEN_MANIFEST_OR_SEAL_MISSING")
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    rows = load_jsonl(path)
+    canonical = "".join(json.dumps(r, ensure_ascii=False, sort_keys=True,
+                                    separators=(",", ":")) + "\n" for r in rows).encode("utf-8")
+    value = hashlib.sha256(canonical).hexdigest()
+    if value != seal.get("sha256") or value != EXPECTED_MANIFEST_SHA:
+        raise ValueError("FROZEN_MANIFEST_SHA_MISMATCH")
+    if len(rows) != 24 or seal.get("episodes") != 24:
+        raise ValueError("FROZEN_MANIFEST_N_MISMATCH")
+    return rows
 
 
 def load_summary(out_root):
@@ -222,12 +239,14 @@ def main():
                    default=Path("/workspace/yjx/rpent_data/p1_dev0"))
     p.add_argument("--manifest", type=Path,
                    default=REPO / "artifacts" / "p1_dev0" / "manifest.jsonl")
+    p.add_argument("--seal", type=Path,
+                   default=REPO / "artifacts" / "p1_dev0" / "manifest.sha256.json")
     p.add_argument("--write", type=Path,
                    default=REPO / "artifacts" / "p1_dev0" / "posthoc_audit.json")
     args = p.parse_args()
     if not args.write.resolve().is_relative_to((REPO / "artifacts").resolve()):
         p.error("Only write to gitignored artifacts/; never output raw audit data")
-    data = audit(load_jsonl(args.manifest), args.out_root, POLICY)
+    data = audit(verified_manifest(args.manifest, args.seal), args.out_root, POLICY)
     args.write.parent.mkdir(parents=True, exist_ok=True)
     args.write.write_text(json.dumps(data, ensure_ascii=False, indent=2)
                           + "\n", encoding="utf-8")
