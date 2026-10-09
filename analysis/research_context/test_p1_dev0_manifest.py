@@ -58,9 +58,8 @@ class ManifestTest(unittest.TestCase):
 
     def test_invalid_allocation(self):
         r = m.manifest()
-        r[0] = {**r[0], "arm": r[1]["arm"]}
-        # If first and second coincidentally same arm, force a wrong one.
-        r[0]["arm"] = "D0" if r[0]["arm"] != "D0" else "D1"
+        original = r[0]["arm"]
+        r[0] = {**r[0], "arm": "D0" if original != "D0" else "D1"}
         with self.assertRaises(ValueError):
             m.check_manifest(r)
 
