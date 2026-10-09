@@ -8,11 +8,13 @@
 
 > **P1 已实际启动（2026-10-09，阶段：离线可行性核查）**：源码确认 `view_driver_state` 重读历史帧不产生新的物理观测；`set_gripper(+1, steps=N)` 会真实执行物理步、可能改变持握状态，必须设置 probe-then-blind 机械效应对照。已提交 `p1_d2_preflight.py`、合成回归测试及 `P1_L2_STAGE_GATE.md`（独立 DEV0 ≤24 新 episode、≤8h 墙钟/6 GPU·hour 的建议边界）。**真实服务器 D2 预检已回传：2/2 合成测试 OK、206 合格 D2、103 次工具失败、low-res + proprio 206/206；结构 Gate PASS**。高分辨图当前归档仅 105/206。新增任务分层约束见 `P1_L2_STAGE_GATE.md` §3.1；新仿真/Runtime L2 仍 HOLD，须明确整阶段许可与 Stage R §36 局部例外。
 
-> **P1-DEV0 有界 L2 阶段（2026-10-09）：**针对上一轮“是否批准完整 DEV0 阶段”提问，用户回复“go on”，已按该问题中限定的范围记录为 P1-DEV0 阶段级授权（`P1_DEV0_AUTHORIZATION_AND_LOCK.md`，≤24 新 episode/≤8h 墙钟/≤6 GPU·hour/≤2 worker）。**已经提交但服务器尚未执行**：任务分层冻结 manifest 生成器、四臂决策纯逻辑/特权字段禁读、合成单测和 `prepare_p1_dev0.sh`。下一 Gate 必须先完成实际服务器单测与 manifest 封存，然后补齐 D1 probe-blind Runtime 隔离、固定 future-horizon 审计和独立 pilot runner 才能开始新仿真。当前未获得任何 P1 DEV0 新物理实验结果；Stage R 历史冻结不变、S1-DEV0 ON_HOLD。
+> **P1-DEV0 L2 阶段收官（2026-10-09）：**用户此前有界 L2 阶段授权后，服务器已运行 21/24 新 episode；22/22 Hook 合成测试和 31/31 全套由执行报告记录，6 个 Pick 失败触发且有审计事件。D2 静态臂没有触发；全部 6 次实际决策均是 RETRY；GPU 6.17h 超过上限 6.0h，已记录偏差。实验状态 `STAGE_CLOSED`，严禁补跑剩余 3 个 skipped；历史 Stage R 和 S1 仍冻结。
+
+> **P1-DEV0 最新独立方法复审（2026-10-09）**：当前 GitHub HEAD 已含运行报告（21/24 episodes，6 triggers，0 D2 arm 触发，6/6 实际决策/动作均为 RETRY）。代码审查进一步确认 Hook 实际为**工具返回交付 Planner 之前的 Harness 拦截**；D3 只判断新图像文件存在+proprio 而未分析像素；所谓 6/6 审计只有 4 次在 H=200 后首技能边界取样，另外 2 次提前结束，固定窗口并未统一；6.17 GPU·hour 越过预算硬上限 0.17h。原 analyzer 的 `no_events_infra` 混合无事件与 3 个预算跳过项。已提交 `P1_DEV0_INDEPENDENT_METHOD_AUDIT.md`、`scripts/p1_dev0_posthoc_audit.py` 与合成测试，**新事后脚本还未在服务器执行，不能提前声称该脚本 PASS**。P1-DEV0 **阶段 CLOSED，禁止补跑剩余 3 格**；只允许继续已有数据只读复核；后续正式 P1 需新独立预注册/有界 L2 授权。
 
 ## 1. 总状态
 
-**`PACKAGE_A_L1_CLOSED / EERD_V01_QA_26_26_PASS / P1_D2_PREFLIGHT_PASS / P1_DEV0_L2_SCOPED_APPROVAL / MANIFEST_POLICY_CODE_COMMITTED_TESTS_PENDING / NEW_SIM_NOT_STARTED`**
+**`PACKAGE_A_CLOSED / P1_DEV0_21_OF_24_EXECUTED_STAGE_CLOSED / ENGINEERING_PARTIAL_GO / ZERO_ACTION_CONTRAST / GPU_HARD_BUDGET_OVER / POSTHOC_AUDIT_READY_UNRUN / FURTHER_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -54,11 +56,11 @@
 - 不在 UNKNOWN 参考上引用任何"一致率/可靠性"数字;不在多数类未披露时单独引用 raw concordance(Stage2J-v2 M0-M5 纪律)。
 - 不由 Stage R 连败 h(k) 下降推导 conformal 可交换性失效（PAEG M1 异质可交换足以解释）；不让 P1 无限弃权套利、不在 TEST 事后选最强对照。
 
-## 5. 当前待办
+## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. P1-DEV0 已收官（执行+分析+报告+提交，见 `P1_DEV0_EXECUTION_REPORT.md`）；原始事件/摘要数据在 `/workspace/yjx/rpent_data/p1_dev0/`（持久卷，不入 Git）。
-2. 若继续 P1 线：先解决触发率与任务集中（按任务分层定样本量；t5 类任务换触发定义或剔除），再写新预注册并申请新 L2 授权；runner 已知缺陷（SKIPPED 状态未逐条落 run log、launch-gate 在飞越限语义）在正式版修复。
-3. Stage R §36 局部例外随 P1-DEV0 收官而关闭；原 Stage R/S1 仍冻结，等待用户对下一阶段的指令。
+1. 服务器只读运行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_dev0_posthoc_audit.py' -v` 和 `python3 scripts/p1_dev0_posthoc_audit.py --out-root /workspace/yjx/rpent_data/p1_dev0`，查看归档分母、物理窗口差异、实际策略分支与有版本锁的离线 shadow 对照。**不调用仿真、不碰冻结 event 与 A0 outcome 文件。**
+2. 若后验检查与既有数据一致，DEV0 正式结束；不补跑 3 格、不因各臂样本不足更改本批预注册任务/seed/阈值。
+3. 下一研究若继续主动验证方法，首先明确 pre-delivery Harness 作为决策 consumer，找到能区分夹持状态的**真实合法新证据**（现有 D3 没有用图像像素且 EEF_z 变化判据不代表物体抬升），给出真正能让 RETRY/CONTINUE 两种决策均可达的新方案。必须另立有界 L2 预注册和严格硬预算才允许新仿真；P2 不启动。
 
 ## 6. 标准汇报格式
 
