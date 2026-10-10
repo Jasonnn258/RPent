@@ -360,7 +360,7 @@ def evaluate(rows):
             "threshold_sensitivity_grid": sensitivity_grid(rows),
             "limitations": [
                 "A0 frozen reference is within-skill FGONLY pose-following, not probe-time or future held object",
-                "No module selection, parameter fitting, new rollout, training or policy intervention",
+                "No threshold fitting, new rollout, neural training or policy intervention; leave-one-task-out selects a fixed module family from train proxy labels only",
                 "Accuracy and FP/FN measure agreement with FGONLY only; equal-time physical labels unavailable",
                 "Threshold grid is exploratory on the same cohort; no heldout causal generalization",
                 "Leave-one-task-out uses TRAIN audit proxy only to choose fixed module family and reports outcomes on separate tasks; no neural optimization",
