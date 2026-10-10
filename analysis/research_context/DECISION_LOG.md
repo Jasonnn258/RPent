@@ -282,6 +282,15 @@
 - **下一步可验证交付**：`test_p1_offline_module_lab.py` + 原 A0 私有 206 Pick 模块实验，源码硬核验 235×3 行视图 join 和 TP101/FP2/FN56/TN47，若失败立即 STOP；通过后按失败子群 56 个 proxy FN 看何种模块改善、又带来多少新增 proxy FP，保留最大一个可靠方向或明确归零。**当前 GitHub 代码提交已完成，但服务器测试和真实模块结果尚未运行**。
 - **阶段裁决**：`L1_EXPERIMENT_CODE_GO / FULL_OFFLINE_RESULT_PENDING / GRASP_TRUTH_HOLD / NEW_L2_HOLD`，停止再对五个无物理标签 Probe 堆启发式审计。
 
+## D-030 · 首轮模块消融全面负增益；研究收敛到原工具三道门槛与 Task9 错配
+
+- **服务器实证（用户日志，2026-10-10）**：`p1_offline_module_lab.py` 206 PRIMARY（175 episodes；任务3/5/9各71/77/58），7/7合成测试 OK，13种固定 arms balanced accuracy 均不优于原 Tool=0.801248。简化的 `Gap0.060 AND Lift0.050` proxy BAcc=0.769206、TP139/FP17/FN18/TN32，原 Tool TP101/FP2/FN56/TN47。原工具失败103条里“补救”38个 proxy FN、同时新增15个 proxy false accepts；**不能用 raw agreement 从71.84%升到83.01%宣布改进**。
+- **跨任务暴露**：Task9 的 Tool proxy TP6/FP0/FN30/TN22、BAcc=0.583333；Task3 TP50/FP0/FN9/TN12、BAcc=0.923729；Task5 TP45/FP2/FN17/TN13、BAcc=0.796237。Task9仅58/206样本却承担30/56=53.6%全部 FN；跨任务离线模块选择 pooled BAcc=0.722735 低于原Tool0.801248（三个任务的分层测试具有强局限）。
+- **查源码找到的潜在原因（待实验）**：`robots/libero/tools.py:pi0_pick` 的成功条件包含 `descent_done=(start_z-min_z>=0.10m)`、`ascended=(post_min_peak_z-min_z>=0.05m)` 和 **当前 grip<0.06m**。前轮 `A0_gap060_AND_lift050` **省略了下降门槛**，并把当前/final grip 改为了历史 min grip。因此错配可能来自删 D、换 G 位置或时序 early-exit，不能从现有总体计数区分哪一个因素。
+- **已交付的直接下一轮代码**：新增 `p1_pick_gate_lab.py`（固定11种 D/L/Gfinal 原门槛及删一门槛、Gmin 替换；返回 206 × tasks 的 FGONLY proxy 混淆阵、gate 布尔模式、terminal summary vs tool flag 的 mismatch；所有分组均脱敏）与 `test_p1_pick_gate_lab.py`。**本轮新代码尚未在服务器执行/验证**，若“D&L&Gfinal”不能重建 Tool flag 就应报告 chunk 时序失配，不准事后改标签凑指标。
+- **长期执行工作流修正**：用户要求以后由 **服务器内有终端权限的 Coding Agent** 接受一份完整 Prompt 自主 `git pull→tests→run→analyze→commit/push`；当前 ChatGPT 工具已能修改 GitHub 文件，但没有用户私有服务器可执行 shell/SSH，故不能把本聊天中的 GitHub 修改解释为已运行远端实验。长期任务无需人工逐项粘命令，权限和服务器运行时长由当地 Agent 控制。
+- **结论**：`MODULE_LAB_V1_NEGATIVE_EXPERIMENT_VERIFIED / TASK9_DIAGNOSTIC_PRIORITY / ORIGINAL_PICK_THREE_GATE_ABLATION_PENDING / NEW_L2_HOLD`。严格限定 FGONLY 是同技能位姿代理，非真实持握真值或前瞻恢复效果。
+
 ## 新决策追加模板
 
 ```markdown
