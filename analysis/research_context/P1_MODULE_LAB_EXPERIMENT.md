@@ -33,9 +33,10 @@
 **直接给出科学反馈的读数：**
 
 1. 所有 arms 输出 FGONLY proxy 2×2（TP, FP, FN, TN），balanced accuracy、proxy 误接受率、proxy 正例召回、abstention，以及相对原工具反馈的 ΔFP、ΔFN。
-2. 按 3 个 LIBERO task 分层展示，避免只靠总体数掩盖方向反转；按原 episode 聚类对固定模块与原 flag 的 Δbalanced accuracy 做 1000 次配对 bootstrap 描述区间。
+2. 按 3 个 LIBERO task 分层展示，避免只靠总体数掩盖方向反转；按原 episode 聚类对固定模块与原 flag 的 Δbalanced accuracy 做 1000 次配对 bootstrap 描述区间。另单列四种 flag×FGONLY 不一致/一致子群的 `min_gripper_opening/final_gripper_opening/peak_lift_m` 分位分布（只输聚合，无 episode ID），观察漏报为什么发生。
 3. **Leave-One-Task-Out 模块搜索**：每次仅用另外两个 task 的**代理标签**在上述固定模块族中挑一项（train 内 balanced accuracy 最大、proxy false acceptance 次小、缺失次小），在未参与挑选的第 3 个 task 上评分。三个 held-out task 输出和 pooled 评价都单独列示。这是纯离线选择、不训练模型参数、不允许写回 Runtime；三个任务也不足以声称广义泛化。
-4. 对缺失/NaN 信号显式 `ABSTAIN`，汇总分母时默认映射到 RETRY（False），避免用“有输出的部分”美化准确率。
+4. 对原工具返回 False 的 103 条，给每一组模块计算实际 `FGONLY+ 漏报中被补救` 与 `FGONLY− 原正确拒绝中新增误接受`，避免用提升“召回”隐藏风险损失。
+5. 对缺失/NaN 信号显式 `ABSTAIN`，汇总分母时默认映射到 RETRY（False），避免用“有输出的部分”美化准确率。
 
 **评测边界**：FGONLY 是**技内某时刻物体抬升+跟随代理**，与 Tool 的 `peak_lift` 在运动构念上可能有重叠；所以再好的一致性也可能来自可见运动的重复测量，不是独立物理接触证据。历史数据为配额停止的 observational collection，跨 task 的标签分布/参考同源，留任务测试亦非未来控制因果结果。
 
