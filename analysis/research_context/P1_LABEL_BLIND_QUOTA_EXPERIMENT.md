@@ -1,6 +1,6 @@
 # P1 · Label-blind Quota：独立可执行基线 vs 事后 matched control
 
-> 2026-10-10；L1 新代码已提交、真实服务器测试/103数据结果未运行。冻结 A0/Stage R 只读；旧 DEV0 CLOSED；新仿真、Runtime、训练/L2 仍然 HOLD。实现 `p1_label_blind_quota_lab.py`、测试 `test_p1_label_blind_quota_lab.py`。
+> 2026-10-10；**EXECUTED（同日只读离线实跑完成；测试修复一处浮点严格相等断言后 6/6 PASS）**。真实结果见 `P1_LABEL_BLIND_QUOTA_RESULT_20261010.md`：Top20 退出参考下 GATE_ONLY 13.26/0.632、TASK_EQUAL 13.78/0.656、TASK_PROP 13.70/0.653、LMG 17.00/0.810、RANDOM 5.30——任务配额仅 +0.02 边际且 Top40 反向；**matched 14.48 不可被任何标签盲分配器达成（最高 13.78）**；`task_id` 只在 metadata 视图且 instruction→task 不唯一 → TASK_* 判 `OFFLINE_BATCH_ONLY`。预登记分支 2+3 双触发：保留 GATE_ONLY 为唯一廉价合法候选，任务配额降级探索性基线，**本轮后停止在同 103 例搜索静态规则**。冻结 A0/Stage R 只读；旧 DEV0 CLOSED。执行后同日,用户委托的 D-040/D-041 已对 DEV1A(≤8 新 episode、≤3 GPU·h、≤4h 墙钟、G1–G4 预检门)作出有条件授权,本条目早先的"新 L2 HOLD"表述由 D-041 取代;因果臂 G3/真实机器人仍 HOLD。
 
 ## 研究上的关键纠正
 
@@ -33,4 +33,4 @@ LMG 全局命中 17/21=0.810，其中 matched composition 期望14.48，连续 s
 3. 如果均不优于 LMG，不要把 matched 14.48 当独立策略“反超”或“证明无需连续值”。过去控制分析仍有解释价值，但未产出足够可靠的无标签部署策略。
 4. **当前 L1 数据已经被多次用于方向选择**，本轮后除非出现实质性有效性漏洞，不再在同103条上搜索新公式、额外固定臂或调参。下一阶段只有在用户独立授权和真物理标签合同就绪后才进行 bounded L2。
 
-**当前阶段**：`LABEL_BLIND_QUOTA_L1_CODE_READY_SERVER_UNRUN / PREVIOUS_MATCHED_0P69_NOT_EXECUTABLE_POLICY / NEW_L2_HOLD`。
+**当前阶段**：`LABEL_BLIND_QUOTA_L1_6_OF_6_SERVER_PASS_GATE_ONLY_RETAINED / PREVIOUS_MATCHED_0P69_EMPIRICALLY_UNREACHABLE / STATIC_RULE_SEARCH_ON_103_CLOSED / D041_DEV1A_CONDITIONAL_GO_G1_G4_PENDING / G3_CAUSAL_HOLD`。

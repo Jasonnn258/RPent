@@ -406,8 +406,21 @@
 - **费用与停止**：≤3 GPU·h / ≤4h wall 双帽，旧DEV0曾超615s；必须在启动每集之前预留最坏在飞资源，受限API/资源归属无法保证则STOP。8集不足以做真实臂间统计/泛化；只有各≥2独立 retain/not-retain，时间/字段/预算全过，才可转 DEV1B 方案审查，**不自动获放大预算**。
 - **与 D-040 的关系**：D-040 是此前已经存在的较宽的12 episode FEAS 预授权；当前 D-041 更严格且同场景，为避免歧义**采取资源上限的交集、以后追加的 D-041 为准**。D-040、早期 `P1_L2_INDEPENDENT_AUTHORIZATION_REVIEW_20261010.md` 留作历史决策证据，不据旧 ceiling 补满12。无需用户再执行每个中间命令，服务器 Coding Agent 可在所有G1–G4 PASS后依据该8集授权自动完成本轮；下一阶段新增资源须基于结果另行审查。
 - **实测状态**：本聊天仅成功在 GitHub 提交方案与授权，不能访问服务器环境，G1–G4 尚未有真实证据、未启动仿真；任何结果需要服务器Agent正式报告后才能升级。
+## D-042 · Label-blind Quota 实跑：任务配额降级、GATE_ONLY 唯一保留、103 例静态搜索关闭
 
-## 新决策追加模板
+- **日期/来源**：2026-10-10，本机只读离线自主执行（用户单 Prompt 授权）：pull 至 `4bc1f9f`（执行时 D-040/D-041 尚未推到远端，撞号后本条由 D-040 改号为 D-042），`test_p1_label_blind_quota_lab.py` 修复一处浮点严格相等断言（103 个 21/103 权重的浮点和 vs `assertEqual`；改 `assertAlmostEqual(places=9)` 与 lab `|sum−k|≤1e-8` 合同对齐，实验代码未动）后 **6/6 PASS**；标签翻转不改任何方法选择权重（逐位验证）。实跑 `p1_label_blind_quota_lab.py`。报告 `P1_LABEL_BLIND_QUOTA_RESULT_20261010.md`；私有产物 `artifacts/p1_return_time_triage_lab/label_blind_quota_v1.json`（不入 Git）。
+- **状态**：已确定（离线证据层，弱代理参考）；**同 103 例静态规则搜索关闭**。同刻观测 L2 已由用户委托的 D-040/D-041 条件授权（DEV1A ≤8 新 episode，G1–G4 预检门全过才自动 GO，尚未验证）。
+- **决定与证据**：
+  1. **资格门全过**：103/79/26/56、task 21/30/52 复现，零 STOP。
+  2. **真实对照（Top20=21 席，退出参考，基率 0.2524）**：RANDOM 5.30/0.252、GATE_ONLY **13.26/0.632（2.50×）**、TASK_EQUAL_GATE 13.78/0.656、TASK_PROP_GATE 13.70/0.653、LMG_FROZEN 17.00/0.810。**Top40（42 席）任务配额双双劣于 GATE_ONLY**（EQUAL 21.34 vs 24.12、PROP 23.70 vs 24.12）；any-time 参考 Top20 TASK_EQUAL 17.42 < GATE_ONLY 18.24 反向——方法次序对两种参考时间一致（RANDOM ≪ GATE_ONLY ≈ TASK_* < LMG）。
+  3. **任务配额不是主要机制（预登记分支 2 触发）**：最好任务配额仅 +0.52 命中（+0.024 precision）、预算敏感（Top40 反向）、参考敏感（any-time 反向）→ **撤回"按任务预算是主要算法机制"表述；TASK_EQUAL/TASK_PROP 降级为探索性基线**。
+  4. **matched 14.48 实证不可达（预登记分支 3 触发）**：任何标签盲分配器最高 13.78（且用了在线不合法的 task 元数据），全部低于 D-039 指认的事后 matched 14.48——**14.48 只能来自 LMG 事后配额，不是任何无标签策略结果**；可执行零拟合对应物是 GATE_ONLY 0.632。
+  5. **Task ID 在线合法性（源数据级）**：`task_id` 仅存在于 `EERD_A_reconstruction_metadata.jsonl`；`EERD_A_online_eligible.jsonl` 无 task 字段；合法 `tool_report.instruction` → task **不唯一**（"pick up the black bowl" 横跨 t3/t5/t9，"pick up the patterned bowl" 横跨 t3/t9）；批量待复核队列存在性未验证 → **TASK_* 判 `OFFLINE_BATCH_ONLY`，禁止接线 Runtime**。
+  6. **保留**：GATE_ONLY（D-only 风险分层，只用决策可见 D/L/Gfinal 布尔，零拟合零标签在线合法）为 L1 唯一廉价合法分诊基线；LMG 连续分数维持第四轮裁决（匹配后增量 +0.120，需独立 cohort + 持握真值）。
+- **关闭条款**：按预登记与用户指令，**本轮后不再在这 103 例上搜索任何新静态规则/固定臂/参数**（t9 子池静态阈值维持第四轮 STOP）。除非出现实质有效性漏洞，同数据静态面研究终结。
+- **不能推出什么**：FGONLY 弱代理非持握真值；103 例已被五轮复用，任何数字不是泛化证明；GATE_ONLY/LMG 的全部数值是复核优先级，非 CONTINUE/动作收益；无新仿真/训练/Runtime/L2。
+- **与 L2 授权的衔接**：本轮即 D-041 §待办(a) 的收官件；(b) DEV1A G1–G4 预检门与 ≤8 集 pilot 按 D-041 上限执行（probe 一次 ≤2cm 受控提升，比本条目早先写的 2-3cm 更严，以 D-041 为准；GATE_ONLY 0.632 作为其中免费分诊基线臂）。Stage R §36 / S1 / 冻结 A0/DEV0 不动。
+决策追加模板
 
 ```markdown
 ## D-XXX · 标题

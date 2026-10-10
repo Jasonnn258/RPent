@@ -74,7 +74,9 @@ class LabelBlindQuotaTests(unittest.TestCase):
                  for t in ("3","5","9")}
             for task,n in expected.items():
                 self.assertAlmostEqual(mix[task],n)
-        self.assertEqual(sum(weights_for(xs,"RANDOM",.2)),21)
+        # 103 个 21/103 权重的浮点和有 ~1e-14 舍入,与上面 fixed_total_mass
+        # 一致用容差断言(lab 的合同是 |sum-k|<=1e-8,不逐位相等)。
+        self.assertAlmostEqual(sum(weights_for(xs,"RANDOM",.2)),21,places=9)
 
     def test_synthetic_report_frozen_denominators_and_aggregate_only(self):
         x=evaluate(rows103())
