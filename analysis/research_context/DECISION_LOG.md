@@ -256,6 +256,15 @@
 - **方法下一步**：真实目标持握评估的合同必须包含“probe 结束同物理时刻、目标实例标识、机器人自身隔离、物体与爪指接触/相对刚性运动、后续固定窗”，且在线证据路径与独立 audit 不能相互混用。只有来源核实和新受限预注册实验经授权后才可构建 confirmatory outcome；不补跑旧 DEV0、无新仿真授权。
 - **裁决**：`VE011_SERVER_PASS / OFFLINE_EVIDENCE_VALIDATED_NOT_PHYSICAL_CONTACT / LABEL_TIME_AUDIT_UNRUN / NEXT_L2_HOLD`。
 
+## D-027 · Label-time 服务器 3/3 PASS；收缩零标签结论并修复固定零计数漏洞
+
+- **来源**：2026-10-10 用户服务器对 `p1_ve01_label_contract_audit.py` 首版执行 3/3 单测 OK，24 manifest/21 事件/6 trigger/5 probe；5/5 audit 严格晚于 probe、未来任务成功审核6/6（H 后边界4，提前终局2）；数据内时序完整性问题0。
+- **复审发现**：首版 `with_probe_time_contact_reference=0` / `with_probe_time_held_reference=0` 由**常量赋值**产生，并未主动排查真实 Probe JSONL 的新增字段或其他历史来源；该 Gate 最多从源代码预测可能缺标签，**不能用其作为所有潜在物理标签不存在的实证证明**。
+- **修正代码**：`scripts/p1_ve01_label_contract_audit.py` 加入 `probe_schema_unexpected_paths`：从真实 5 个 Probe 事件仅读取字段名，对照已有 Runtime `_run_probe` 的顶层 + `probe_args/result/post_legal/post_frames` 嵌套白名单；遇陌生 contact/held 类字段、结构变化或不能识别的新字段，记录异常数量并转 `HOLD_EVENT_INTEGRITY_OR_PROBE_MISSING`，不输出字段值或图像内容。通过时新版 Gate 改为 `NO_EXPLICIT_PROBE_LABEL_IN_RECOGNIZED_EVENT_SCHEMA`，保留 scope：**只覆盖这组事件 JSONL，不覆盖其他私有仓储数据或 simulator runtime**。
+- **新增对抗性测试**：向 Probe 顶层注入 `contact_at_probe`、向 `post_legal` 注入 `object_contact`，新审计应拒绝无标签 Gate；使用 Runtime 接近的完整 Probe fixture 防止合成空壳通过。代码已提交，**新版本服务器单测及真实字段扫描尚未运行**。
+- **科研边界**：五个已有 Probe 只有 RGB+合法 proprio 的事实仍与 Runtime 源码一致；此事件合同中后续 `check_success` 无法变成 probe-time target-contact/held 标签。下一正式 L2 如需正例必须获得新独立授权与可验证的物理标签采集合同，不补跑旧 DEV0。
+- **判定**：`LABEL_TIME_V1_REPORTED_PASS / NO_LABEL_SCOPE_DOWNGRADED / V2_PROBE_SCHEMA_SCAN_UNRUN / NO_NEW_L2`。
+
 ## 新决策追加模板
 
 ```markdown
