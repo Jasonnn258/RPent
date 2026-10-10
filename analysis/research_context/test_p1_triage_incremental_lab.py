@@ -26,7 +26,9 @@ def frozen_like():
     for task,n,npos in (("3",21,5),("5",30,9),("9",52,12)):
         for i in range(n):
             gate="011" if task=="9" and i<19 else "001"
-            positive=i<npos
+            # Task9 011 has 11 exit-positive among 19, plus one
+            # exit-positive in a non-011 case (12/52 task-wide).
+            positive=(i<11 or i==19) if task=="9" else i<npos
             r=fake(task,gate,score=(.9-i*.01),positive=positive)
             r["episode_id"]=f"e{len(rows)%79:03d}"
             rows.append(r)
