@@ -397,6 +397,16 @@
 - **实事求是**：ChatGPT 能更新 GitHub，但没有用户服务器 shell；委托审批不等于已执行，需由服务器内Coding Agent自主 pull→校验→若PASS执行→报告/提交。任何超预算风险直接停止，不用完配额亦可。
 - **状态**：`P1_L2_METHOD_GO / G1_GO / G2_PREAUTH_CONDITIONAL_AUTO_GO / G3_HOLD`。
 
+## D-041 · 相关工作复核后收紧 D-040：DEV1A 有条件批准最多8集，同刻标签为先
+
+- **审查来源**：2026-10-10，用户明确委托助手自行立项/授权审查。独立复核 RPent 原记忆研究、A0/DEV0/L1 实证、D-039 勘误及 SAFE、ActFovea、FLARE、FRAMES、TemporalFlow-VLA、FailureSpot、ReCoVERR、Selective Classification、POMDP 等工作。完整论证与可执行阶段合同在 `P1_L2_DEV1A_RESEARCH_REVIEW_AND_AUTHORIZATION_20261010.md`。
+- **科学判断**：主动监控、时空一致性、恢复框架和按成本补证已有研究。RPent 的可证伪独立增量应落在**主动探测改变真实物理状态时，严格区分机械效应/证据价值/预算化行动价值**。此前 Task×Gate matched 14.48 是事后标准化而非已实际实现的分配器；不能把 static LMG/FgOnly 代理当成持握独立真值。历史 Stage R §36、S1、DEV0 仍冻结。
+- **本次独立立项决策**：`METHODOLOGY_GO / G1_CODE_AND_MOCK_GO / G2_DEV1A_SIM_CONDITIONAL_GO / G3_POLICY_EFFECT_HOLD`。**本 D-041 采用更严格的8集 DEV1A 单期试点上限，取代 D-040 的12集 ceiling；真实生效上限为 ≤8 新episode、≤3 GPU·hour、≤4h wall、单 worker、每集≤1500 env steps、每集至多一次 probe**，固定 t9×4/t3×2/t5×2 新 seeds。先做好 G1–G4：Sim目标ID与左右指独立contact、支撑、目标EEF相对运动API；统一t_trigger/t_close_end/t_lift_end的env_step与图像 orientation；audit-only强隔离；最坏在飞成本预留/失败路径限时停止；任一失败 **0 新episode**。
+- **物理动作授权**：仅现有模拟环境（绝不包括真实机器人），固定关闭≤10 env steps、受控垂直提升≤2cm（严格避障/碰撞/步数限制、仅一次），失败与缺证据必须UNKNOWN。DEV1A 所有 online continuation blind、不得据新信息实际改变CONTINUE/RETRY；shadow analysis 可做但不能声称动作收益。独立同刻 `contact_{L,R}`、support与短窗 held 定义必须在 frozen manifest 预注册，真实确认仍是 simulator-operational 标签。
+- **费用与停止**：≤3 GPU·h / ≤4h wall 双帽，旧DEV0曾超615s；必须在启动每集之前预留最坏在飞资源，受限API/资源归属无法保证则STOP。8集不足以做真实臂间统计/泛化；只有各≥2独立 retain/not-retain，时间/字段/预算全过，才可转 DEV1B 方案审查，**不自动获放大预算**。
+- **与 D-040 的关系**：D-040 是此前已经存在的较宽的12 episode FEAS 预授权；当前 D-041 更严格且同场景，为避免歧义**采取资源上限的交集、以后追加的 D-041 为准**。D-040、早期 `P1_L2_INDEPENDENT_AUTHORIZATION_REVIEW_20261010.md` 留作历史决策证据，不据旧 ceiling 补满12。无需用户再执行每个中间命令，服务器 Coding Agent 可在所有G1–G4 PASS后依据该8集授权自动完成本轮；下一阶段新增资源须基于结果另行审查。
+- **实测状态**：本聊天仅成功在 GitHub 提交方案与授权，不能访问服务器环境，G1–G4 尚未有真实证据、未启动仿真；任何结果需要服务器Agent正式报告后才能升级。
+
 ## 新决策追加模板
 
 ```markdown
