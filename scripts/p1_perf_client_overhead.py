@@ -40,7 +40,8 @@ OUT = REPO / "artifacts" / "p1_perf"
 REPEATS = 3
 
 
-async def _drive(n_turns: int, img_bytes: int, thinking_chars: int) -> float:
+async def _drive(n_turns: int, img_bytes: int, thinking_chars: int,
+                 tool_result_chars: int = 0) -> float:
     """跑一个 agent.iter;返回模型请求节点累计墙钟(纯客户端路径)。
 
     计时口径与 ApiLatencyProbe 相同:yield(ModelRequestNode) →
@@ -48,6 +49,7 @@ async def _drive(n_turns: int, img_bytes: int, thinking_chars: int) -> float:
     +图推进;工具执行在 CallToolsNode 内,不计入。
     图片注入:echo 工具返回 BinaryContent(模拟 read_image),让
     _prune_history_images 在后续请求构造时走真实 4MB 预算剪枝路径。
+    tool_result_chars:每轮工具结果文本大小(长上下文轴)。
     """
     counter = [0]
 
@@ -67,6 +69,8 @@ async def _drive(n_turns: int, img_bytes: int, thinking_chars: int) -> float:
         )
 
     def echo(v: str = "x"):
+        if tool_result_chars:
+            return "r" * tool_result_chars
         if img_bytes:
             from pydantic_ai import ToolReturn
 
@@ -108,12 +112,14 @@ async def _drive(n_turns: int, img_bytes: int, thinking_chars: int) -> float:
     return t_model_nodes
 
 
-def _run_case(n_turns: int, img_bytes: int, thinking_chars: int) -> dict:
+def _run_case(n_turns: int, img_bytes: int, thinking_chars: int,
+              tool_result_chars: int = 0) -> dict:
     walls = []
     total_walls = []
     for _ in range(REPEATS):
         t0 = time.perf_counter()
-        w = asyncio.run(_drive(n_turns, img_bytes, thinking_chars))
+        w = asyncio.run(_drive(n_turns, img_bytes, thinking_chars,
+                               tool_result_chars))
         total_walls.append(time.perf_counter() - t0)
         walls.append(w)
     per_turn_ms = [w / n_turns * 1000 for w in walls]
@@ -121,6 +127,7 @@ def _run_case(n_turns: int, img_bytes: int, thinking_chars: int) -> dict:
         "n_turns": n_turns,
         "img_bytes_per_turn": img_bytes,
         "thinking_chars": thinking_chars,
+        "tool_result_chars_per_turn": tool_result_chars,
         "model_node_client_wall_ms_per_turn": {
             "median": round(statistics.median(per_turn_ms), 2),
             "min": round(min(per_turn_ms), 2),
@@ -141,6 +148,10 @@ def main() -> int:
         cases.append(_run_case(16, img, 0))
     # thinking 轴:16 轮 × 4KB
     cases.append(_run_case(16, 0, 4096))
+    # 长上下文轴:16 轮,每轮工具结果文本 4KB / 64KB(真实 dump_state
+    # 类结果量级),历史无限累积(文本不剪枝)—— 序列化随历史增长的曲线
+    for chars in (4 * 1024, 64 * 1024):
+        cases.append(_run_case(16, 0, 0, chars))
     result = {
         "protocol": "RPENT_P1_CLIENT_OVERHEAD_V1",
         "method": (
