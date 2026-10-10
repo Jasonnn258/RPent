@@ -247,6 +247,15 @@
 - **决策**：将“已确认两个阻挡”“t9_s1003 已有目标接触”“系统性假继续已坐实”等 VE-v0.1 报告主张降级为探索性风险，原报告保留可追溯且以 `P1_VE01_INDEPENDENT_REVIEW.md` 为解释性勘误。只有有独立 mask/持握真值/时间点对齐且不泄漏的方法，才能恢复相关强主张；新 L2 无授权，所有在线实验保持 HOLD。
 - **下一动作**：服务器只读运行 `test_p1_ve01_safe_arms.py`，再对已有 `evidence_claims.json` 执行 `p1_ve01_safe_arms.py`（新输出单独在私有 VE01 数据目录），检查数据兼容与五案例保守输出；若有矛盾 STOP 并定位，绝不修改旧冻结结果。
 
+## D-026 · VE01.1 服务器10/10通过；物理标签改由探测时点独立对齐审查
+
+- **日期/来源**：2026-10-10；用户服务器在研究分支执行 `python -m unittest discover -p test_p1_ve01_safe_arms.py` 与 `python scripts/p1_ve01_safe_arms.py`。测试真实回传 10/10 OK，既有五个 probe 的离线结果 `eligible=5`，`RETRY=3`、`RETRY+ESCALATE=2`。
+- **三类证据边界**：`NEAR_MIN_GAP_OBJECT_PRESENCE_UNKNOWN=3`、`GAP_PLATEAU_CAUSE_UNKNOWN=2`；4 个最近表面距离属于通常范围、1 个接近 EEF 但表面身份未知。 `claim_holding_positive=0`、`independently_verified_object_contact=0`、`audit_truth_used=false` **不是五个已证物理失败，亦非零假阳率**；只是持握/接触没有得到独立证据。
+- **关键源码检查**：`rpent/utils/p1_dev0.py:_run_probe` 在夹爪10步结束后只读白名单 proprio + RGB，**没有在 probe 时间点记录目标归属/接触物理真值**；`_take_audit` 在触发后的 H=200 首个技能边界或提前终局记录 `check_success` 与 `sim_measurement`，其时点**晚于 probe**且后续可能已重试。旧 DEV0 的四个 H 后边界+两个提前结束之间也不同时间窗，不能合并成 probe-time held labels。
+- **动作**：新增 `scripts/p1_ve01_label_contract_audit.py` 与独立合成测试，只读检查已封版 manifest 24 个分配项、21 个事件文件、6 个触发、5 个 probe 中合法事件时间、后续 H 任务结果的原始可得性。其输出中只允许 **probe_time_held/contact=UNLABELLED**，显示未来任务成功字段是否存在，但不回显其数值、物体坐标或私有轨迹；不会替现有实验生成伪真值。**新脚本本轮已提交，服务器未实测**。
+- **方法下一步**：真实目标持握评估的合同必须包含“probe 结束同物理时刻、目标实例标识、机器人自身隔离、物体与爪指接触/相对刚性运动、后续固定窗”，且在线证据路径与独立 audit 不能相互混用。只有来源核实和新受限预注册实验经授权后才可构建 confirmatory outcome；不补跑旧 DEV0、无新仿真授权。
+- **裁决**：`VE011_SERVER_PASS / OFFLINE_EVIDENCE_VALIDATED_NOT_PHYSICAL_CONTACT / LABEL_TIME_AUDIT_UNRUN / NEXT_L2_HOLD`。
+
 ## 新决策追加模板
 
 ```markdown
