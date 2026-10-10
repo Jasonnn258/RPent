@@ -13,7 +13,7 @@ from typing import Any
 from robots.libero import tools as libero_tools
 from rpent.dashboard.events import DashboardEventSink, ToolResultEvent
 from rpent.tools.toolkit import ToolCancelled, Toolkit
-from rpent.utils import p1_dev0, rtrace
+from rpent.utils import p1_dev0, p1_dev1a, rtrace
 from rpent.utils.logging import get_logger, get_output_dir
 
 
@@ -113,6 +113,12 @@ class LiberoToolkit(Toolkit):
                 self, name, kwargs, result_dict, step_idx, elapsed)
             if hooked is not None:
                 return hooked
+        # P1-DEV1A 实验路径(默认关闭,RPENT_P1_DEV1A=1):首个合格
+        # false-pick 的一次性 audit probe(闭合+受控提升+同刻接触快照)。
+        # 永远返回 None(Planner 全程盲),真值只写隔离 audit 文件。
+        if p1_dev1a.enabled():
+            p1_dev1a.maybe_probe(
+                self, name, kwargs, result_dict, step_idx, elapsed)
         out = libero_tools.view_driver_state(step_idx)
         out["agent_elapsed_s"] = elapsed
         if result_dict.get("interrupted"):
@@ -162,6 +168,9 @@ class LiberoToolkit(Toolkit):
         # episode 未到固定 horizon 时在此取样 audit-only outcome)。
         if p1_dev0.enabled():
             p1_dev0.finalize(self)
+        # P1-DEV1A(默认关闭):episode_end 事件(步数/标签摘要)
+        if p1_dev1a.enabled():
+            p1_dev1a.finalize(self)
         if self._video_path is None:
             return
         try:

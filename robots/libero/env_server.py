@@ -141,6 +141,8 @@ class LiberoEnvFacade(RpcFacade):
         self._env = env
         self._env_idx = 0
         self._done = False
+        # P1-DEV1A 只读审计:reset 后累计的 env step 数(G2 零步进证明用)
+        self._step_count = 0
         # Identifies what task/seed this server was launched with — the
         # client compares against its own expected values at construction
         # and refuses to talk to a stale or mis-configured server.
@@ -194,11 +196,13 @@ class LiberoEnvFacade(RpcFacade):
         obs, info = self._env.reset()
         obs = self._strip_obs(_to_numpy_tree(obs))
         self._done = False
+        self._step_count = 0
         return obs, _to_numpy_tree(info)
 
     def step(self, action):
         assert not self._done, "step called after episode done"
         obs, rew, term, trunc, info = self._env.step(self._expand_action(action))
+        self._step_count += 1
         obs = self._strip_obs(_to_numpy_tree(obs))
         term = self._strip(_to_numpy_tree(term))
         trunc = self._strip(_to_numpy_tree(trunc))
@@ -227,6 +231,7 @@ class LiberoEnvFacade(RpcFacade):
         obs_list, rew, term, trunc, info = self._env.chunk_step(
             self._expand_chunk(actions)
         )
+        self._step_count += len(actions)
         obs_list = [self._strip_obs(_to_numpy_tree(o)) for o in obs_list]
         term = self._strip(_to_numpy_tree(term))
         trunc = self._strip(_to_numpy_tree(trunc))
@@ -302,6 +307,109 @@ class LiberoEnvFacade(RpcFacade):
     def get_env_meta(self) -> dict:
         """Return the meta info this server was launched with. """
         return dict(self._meta)
+
+    # ---- P1-DEV1A(D-041):audit-only 只读接触快照 ------------------------
+
+    def contact_snapshot(self, spec: dict) -> dict:
+        """DEV1A 同刻接触快照:零 env step,只读真实 MuJoCo contact pairs。
+
+        证据链:worker 单线程串行处理本 RPC 序列,期间不存在 step 命令,
+        因此 sim 状态不可变 —— 以 query 前后两次 ``get_sim_state`` 的
+        sha256 相等(``same_tick``)与 ``server_step_count`` 不变作证。
+        接触真值只来自 ``robosuite check_contact``(内部扫描
+        ``sim.data.contact``,geom 名匹配);**绝不**用 gap/最近表面距离/
+        目标距离伪造接触标签。分组布尔先粗查,真实对再用单×单细分
+        (分治剪枝),返回的 ``pairs`` 每一对都对应 sim.data.contact 中
+        至少一条真实接触记录。未知/解析失败一律留给上游判 UNKNOWN。
+        """
+        import hashlib
+        import time as _time
+
+        t0 = _time.monotonic()
+        w = self._worker()
+        step_mark = self._step_count
+        queries = 0
+
+        def cc(g1, g2=None):
+            nonlocal queries
+            queries += 1
+            args = [list(g1)] if g2 is None else [list(g1), list(g2)]
+            return bool(w.env_call("check_contact", args=args,
+                                   target="robosuite"))
+
+        state_pre = np.asarray(w.get_sim_state())
+
+        # 低维观测(与 sim_measurement 同通道;不含图像,减小载荷)
+        obs_full = _to_numpy_tree(
+            w.env_call("_get_observations", target="robosuite"))
+        target = spec["target"]
+        keep_keys = ("robot0_eef_pos", "robot0_eef_quat",
+                     "robot0_gripper_qpos", f"{target}_pos")
+        obs = {k: [float(x) for x in np.atleast_1d(obs_full[k])]
+               for k in keep_keys if k in obs_full}
+
+        tgt = list(spec["target_geoms"])
+        lf = list(spec["left_finger_geoms"])
+        rf = list(spec["right_finger_geoms"])
+        sup = list(spec["support_geoms"])
+        rself = list(spec["robot_self_geoms"])
+
+        flags = {
+            "left_x_target": cc(lf, tgt),
+            "right_x_target": cc(rf, tgt),
+            "target_x_support": cc(tgt, sup),
+            "left_x_robotself": cc(lf, rself),
+            "right_x_robotself": cc(rf, rself),
+            "left_x_any": cc(lf),
+            "right_x_any": cc(rf),
+            "target_x_any": cc(tgt),
+        }
+
+        def refine(a: list, b: list) -> list:
+            """分治细化真实接触 geom 名对(每次递归先粗查剪枝)。"""
+            if not a or not b or not cc(a, b):
+                return []
+            if len(a) == 1 and len(b) == 1:
+                return [(a[0], b[0])]
+            if len(a) >= len(b):
+                mid = len(a) // 2
+                return refine(a[:mid], b) + refine(a[mid:], b)
+            mid = len(b) // 2
+            return refine(a, b[:mid]) + refine(a, b[mid:])
+
+        pairs: list = []
+        if flags["left_x_target"]:
+            pairs += refine(lf, tgt)
+        if flags["right_x_target"]:
+            pairs += refine(rf, tgt)
+        if flags["target_x_support"]:
+            pairs += refine(tgt, sup)
+        if flags["left_x_robotself"]:
+            pairs += refine(lf, rself)
+        if flags["right_x_robotself"]:
+            pairs += refine(rf, rself)
+        # 去重(同一 geom 对可能被多组重复发现)
+        pairs = sorted(set(tuple(sorted(p)) for p in pairs))
+        truncated = len(pairs) > 512
+        if truncated:
+            pairs = pairs[:512]
+
+        state_post = np.asarray(w.get_sim_state())
+        sha = lambda a: hashlib.sha256(np.asarray(a).tobytes()).hexdigest()
+        return {
+            "target": target,
+            "obs": obs,
+            "flags": flags,
+            "pairs": [list(p) for p in pairs],
+            "pairs_truncated": truncated,
+            "server_step_count": int(self._step_count),
+            "step_mark_unchanged": int(self._step_count) == int(step_mark),
+            "state_sha256": sha(state_pre),
+            "same_tick": bool(
+                np.array_equal(state_pre, state_post)),
+            "wall_ms": round((_time.monotonic() - t0) * 1000.0, 2),
+            "queries": queries,
+        }
 
     def render_camera(
         self,

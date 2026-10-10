@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from rpent.utils import p1_dev0, rtrace
+from rpent.utils import p1_dev0, p1_dev1a, rtrace
 from rpent.utils.rpc import RpcClient
 
 
@@ -74,6 +74,9 @@ class LiberoEnvClient:
         # P1-DEV0 仪器(默认关闭):物理 env-step 计数(固定 horizon 审计用)
         if p1_dev0.enabled():
             p1_dev0.count_env_steps(1)
+        # P1-DEV1A 仪器(默认关闭):同上,DEV1A 的步数预算/同刻审计用
+        if p1_dev1a.enabled():
+            p1_dev1a.count_env_steps(1)
         return ret
 
     def chunk_step(self, actions, *, return_all_frames: bool | None = None) -> tuple[Any, Any, Any, Any, Any]:
@@ -104,6 +107,9 @@ class LiberoEnvClient:
         # P1-DEV0 仪器(默认关闭):chunk 的物理 env-step 计数
         if p1_dev0.enabled():
             p1_dev0.count_env_steps(len(actions))
+        # P1-DEV1A 仪器(默认关闭):同上
+        if p1_dev1a.enabled():
+            p1_dev1a.count_env_steps(len(actions))
         return ret
 
     def raw_obs(self) -> dict:
@@ -137,6 +143,18 @@ class LiberoEnvClient:
         低维状态观测(含 object-state)+ 任务关注对象名。"""
         return self._client.call(
             "env.sim_measurement", timeout_s=_TIMEOUT_S["default"]
+        )
+
+    def contact_snapshot(self, spec: dict) -> dict:
+        """P1-DEV1A audit-only 同刻接触快照(只读、零 env step)。
+
+        ``spec`` 来自冻结 geom 表(target/左右指/支撑/robot-self 的 geom
+        名单);返回真实 MuJoCo contact pairs(名字)+ 同刻/零步进证据。
+        绝不进入任何 Planner 可见返回,只落隔离 audit 容器。
+        """
+        return self._client.call(
+            "env.contact_snapshot", args=(spec,),
+            timeout_s=_TIMEOUT_S["default"],
         )
 
     def render_camera(

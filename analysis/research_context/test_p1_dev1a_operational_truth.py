@@ -81,6 +81,30 @@ class ContractTests(unittest.TestCase):
         x["target_geom_ids"]=[201]
         self.assertFalse(validate_snapshot(x))
 
+    def test_unresolved_geom_name_maps_to_unknown_not_fabricated(self):
+        # 真实链路反例:冻结 geom 表查不到的接触对(名字未解析)必须让
+        # 快照失效 → UNKNOWN;绝不能把名字硬映射成猜测的 int id
+        x=snap()
+        x["target_geom_ids"]=[100,None]      # 某 geom 名未在冻结表中解析
+        self.assertFalse(validate_snapshot(x))
+        self.assertEqual(contact_state(x)["contact"],"UNKNOWN")
+        y=snap()
+        y["left_finger_geom_ids"]=None
+        self.assertEqual(contact_state(y)["contact"],"UNKNOWN")
+
+    def test_real_rehearsal_slip_pattern_labels_not_retained(self):
+        # 真实彩排观测到的形态:BILATERAL 保持、支撑已离、但物体净升
+        # <0.010m(滑移)→ NOT_RETAINED(不是 UNKNOWN、更不是 RETAINED)
+        slip=[snap(101,.106,.257),snap(102,.108,.263),snap(103,.109,.268)]
+        r=retention_state(snap(),slip)
+        self.assertEqual(r["retained"],"NOT_RETAINED")
+        self.assertEqual(r["reason"],"NO_GRASP_CONTACT_OR_LIFT")
+
+    def test_lift_sample_drift_breaks_relative_translation_guard(self):
+        # 相对漂移超限:接触仍在、物体在升,但相对 EEF 平移 >0.010m → UNKNOWN
+        drift=[snap(101,.107,.257),snap(102,.113,.270),snap(103,.118,.286)]
+        self.assertEqual(retention_state(snap(),drift)["retained"],"UNKNOWN")
+
     def test_audit_truth_never_allowed_in_legal_envelope(self):
         sha="b"*64
         valid={"env_step":100,"rgb_sha256":sha,"wrist_sha256":sha,

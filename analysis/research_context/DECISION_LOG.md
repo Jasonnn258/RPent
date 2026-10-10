@@ -429,6 +429,16 @@
 - **剩余阻塞**：缺 live G1 MuJoCo 接触 API 验收、live G2 图像/接触同 env tick 无步进核对、live G3 audit-only 污染对抗、live G4 durable ledger 与进程组中断安全/GPU数量计费；因此 DEV1A **0新episode**，不得自动运行。服务器 Agent 完成全部真实前置门方可依据 D-041 条件批准执行，任一失败STOP=0。
 - **状态**：`L1_D042_CLOSED / G1_MISSING_CONTACT_RPC / G4_MOCK_RESERVATION_COMMITTED / LIVE_GATES_UNVERIFIED / DEV1A_0_EP / DEV1B_HOLD`。
 
+## D-044 · DEV1A G1–G4 真实 PASS + D-041 8 集 pilot 执行完毕：同步物理标签可用且便宜，FEASIBILITY CONFIRMED
+
+- **日期/来源**：2026-10-10，本开发机真仿真（osmesa）+ 生产 worker 路径；协议 D-041（严格 ceiling：≤8 集、t9×4/t3×2/t5×2、≤3 GPU·h、≤4h 墙钟、单 worker、≤1500 步/集、≤1 probe/集、受控提升 ≤2cm、TERMINATE_AFTER_PROBE、任一 Gate 失败 STOP=0）。
+- **决定**：G1–G4 全部以真实运行证据判定 PASS 后按冻结 manifest 执行 pilot；完成后 DEV1A 收口为 FEASIBILITY CONFIRMED，DEV1B（把标签交给 Planner 的因果实验）维持 HOLD 待新授权。
+- **证据**：gate_evidence.json=GO_PILOT（三任务 g1/g2/rehearsal + g3 + g4 全真；彩排 t3 真实提起 14.9mm、t9 滑移 6.4mm 双形态）；21/21 单测 + hook 冒烟 PASS；pilot 8/8 集结账（6 触发：t9×4+t5×2；2 无触发：t3×2；BILATERAL 4/NONE 2/UNKNOWN 0；RETAINED 4/NOT_RETAINED 2/UNKNOWN 0；same_tick 36/36；快照 ~12.2ms；probe 19-32 步；提升 16.1-16.6mm；墙钟 5386s/GPU 5190s/单卡单 worker；每集 153-329 步）。脱敏报告 `P1_DEV1A_PILOT_RESULT_20261010.md`。
+- **对照/替代**：与 Gate-Lab（t9 漏报主因=绝对 D 门槛×柜顶几何）、时间持续性（D-only 72.7% 退出仍正）、Return-Time Triage（t9 子池需同刻观测）三方线索互证：pi0_pick 报失败瞬间 4/6 物理在握=假阴性。拒绝路线：gap/近表面/目标距离伪标签（G1 明令禁止）；DEV0 900s 预留机制（G4 明令不复用）。
+- **工程勘误（如实登记，不隐藏）**：(1) ep1 runner 在 probe_done 后 killpg 先于 finalize → episode_end 缺失 → 按预注册 fail-close STOP 在 1 集；修复=probe 后每物理步落 `steps` 事件、测量回退 events_max；ep1 以真实观测值回补结账（`scripts/p1_dev1a_reconcile.py`），NO_RERUN 由 runner skip-done + 终止性事件保证。(2) lift 步在 env_client 钩子与 hook 手动 +1 双重计数（s2001 成本 32，真实 21），已修，s2002 起成本=真实物理步。(3) 冒烟"严格递增"断言过严（dz 停止时末采样与 t_lift_end 同刻合法），改为整体非递减+阶段边界严格。
+- **不能推出什么**：标签可用≠把标签给 Planner 有收益（DEV1B 因果问题，未运行）；6 触发样本量小，4/6 假阴性比例不能外推为总体基率；RETAINED/NOT_RETAINED 是仿真操作性接触真值，非真实机器人持握；audit 标签从未进入 Planner 视图（G3 + 8 集盲态返回 None）。
+- **状态**：`DEV1A_G1_G2_G3_G4_LIVE_PASS / PILOT_8EP_COMPLETED_ALL_BUDGETS_WITHIN / FEASIBILITY_CONFIRMED / DEV1B_HOLD_PENDING_AUTH / A0_STAGE_R_DEV0_UNTOUCHED`。
+
 决策追加模板
 
 ```markdown

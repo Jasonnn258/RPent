@@ -1,11 +1,23 @@
 """No simulator: D-041 8EP / 3 GPUh / 4 wallh reservation gates."""
 from __future__ import annotations
+import importlib.util
+import json
 import tempfile
 import unittest
 import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from p1_dev1a_budget_gate import BudgetLedger,static_repo_gate
+
+_REPO=Path(__file__).resolve().parents[2]
+def _durable_cls():
+    """按路径加载 runner 的 DurableBudgetLedger(免 scripts 包导入)。"""
+    spec=importlib.util.spec_from_file_location(
+        "p1_dev1a_run_mod",_REPO/"scripts"/"p1_dev1a_run.py")
+    mod=importlib.util.module_from_spec(spec)
+    sys.modules[spec.name]=mod
+    spec.loader.exec_module(mod)
+    return mod.DurableBudgetLedger
 
 class BudgetGateTests(unittest.TestCase):
     def test_full_worst_case_not_legacy_900s_reservation(self):
@@ -98,5 +110,58 @@ class BudgetGateTests(unittest.TestCase):
             self.assertTrue(r["G4_isolated_dev1a_runner_present"])
             self.assertEqual(r["G1_live_geom_ids_and_bilateral_contact"],"UNVERIFIED")
             self.assertEqual(r["gate"],"HOLD_ZERO_NEW_EPISODES")
+
+class DurableLedgerTests(unittest.TestCase):
+    """文件持久化账本:crash 在飞预留保留 / 禁 resume / 原子重载。"""
+
+    def setUp(self):
+        self._tmp=tempfile.TemporaryDirectory(dir="/workspace/yjx/tmp")
+        self.path=Path(self._tmp.name)/"ledger.json"
+        self.Durable=_durable_cls()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_crash_keeps_inflight_reservation_and_refuses_new(self):
+        d=self.Durable(self.path)
+        d.reserve("ep1","9",2400.0,1)
+        # 模拟 crash:不 charge,直接用新句柄重开同一文件
+        d2=self.Durable(self.path)
+        raw=d2.raw()
+        self.assertEqual(raw["inflight_key"],"ep1")
+        self.assertEqual(raw["begun"],1)
+        self.assertEqual(raw["task_started"],{"9":1})
+        with self.assertRaisesRegex(ValueError,"ONE_WORKER"):
+            d2.reserve("ep2","9",2400.0,1)
+
+    def test_resume_forbidden_and_overrun_retains_reservation(self):
+        d=self.Durable(self.path)
+        d.reserve("ep1","3",1000.0,1)
+        with self.assertRaisesRegex(ValueError,"NO_DEV1A_EPISODE_RERUN"):
+            d.forbid_resume("ep1")
+        with self.assertRaisesRegex(ValueError,"OVERRUN"):
+            d.charge_and_close("ep1",1200.0,1200.0,900)
+        # 超预留后预留仍在(取证),新 episode 仍被单 worker 拒绝
+        self.assertEqual(d.raw()["inflight_key"],"ep1")
+        with self.assertRaisesRegex(ValueError,"ONE_WORKER"):
+            d.reserve("ep2","5",1000.0,1)
+
+    def test_charge_close_persists_and_reloads_atomically(self):
+        d=self.Durable(self.path)
+        d.reserve("ep1","5",2000.0,1)
+        d.charge_and_close("ep1",900.0,900.0,800)
+        d2=self.Durable(self.path)
+        raw=d2.raw()
+        self.assertEqual(raw["completed"],1)
+        self.assertEqual(raw["inflight_key"],None)
+        self.assertEqual(raw["elapsed_wall_s"],900.0)
+        self.assertFalse((Path(self._tmp.name)/"ledger.tmp").exists())
+
+    def test_ledger_file_is_valid_json_after_every_write(self):
+        d=self.Durable(self.path)
+        for i in range(3):
+            d.reserve(f"ep{i}","9",600.0,1)
+            d.charge_and_close(f"ep{i}",100.0,100.0,100)
+            json.loads(self.path.read_text(encoding="utf-8"))  # 永不半写
 
 if __name__=="__main__":unittest.main()
