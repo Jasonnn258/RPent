@@ -26,6 +26,22 @@ DEFAULT_OUT = Path("/workspace/yjx/rpent_data/p1_dev0/ve01/safe_arms_v011.json")
 def _finite_number(value):
     return type(value) in (float, int) and math.isfinite(value)
 
+FORBIDDEN_FIELDS = {
+    "check_success", "sim_measurement", "sim_measurement_obs",
+    "audit_only", "research_audit_truth", "reference",
+    "reference_state", "object_world_pos", "target_pos",
+    "reconstruction_metadata", "stable_fg", "acquisition",
+    "obj_of_interest",
+}
+
+def _contains_privileged_keys(value):
+    if isinstance(value, dict):
+        return any(k in FORBIDDEN_FIELDS or _contains_privileged_keys(v)
+                   for k, v in value.items())
+    if isinstance(value, (list, tuple)):
+        return any(_contains_privileged_keys(v) for v in value)
+    return False
+
 def _refuse(reason):
     return {
         "eligible": False,
@@ -47,6 +63,8 @@ def assess(claim: dict) -> dict:
     """
     if not isinstance(claim, dict):
         return _refuse("MALFORMED_CLAIM")
+    if _contains_privileged_keys(claim):
+        return _refuse("PRIVILEGED_FIELD_IN_CLAIM")
     if claim.get("validity") != "VALID":
         return _refuse("INVALID_SOURCE_OR_PROVENANCE")
     if str(claim.get("freshness") or "").startswith("STALE"):
