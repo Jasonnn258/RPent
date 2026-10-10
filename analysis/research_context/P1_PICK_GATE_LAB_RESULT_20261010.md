@@ -124,3 +124,17 @@ D_rel = descent ≥ min(0.10, start_z − h_obj估计) 或按合法在线观测�
 3. **下一轮唯一最值得的实验:几何相对下降门槛 D_rel 的预注册新采集对照**
    (冻结三门槛为基线,t9 主层,FP 上限预登记);本轮判定
    `GATE_LAB_EXECUTED_6_6_TESTS / TERMINAL_GATES_EXACTLY_RECONSTRUCT_FLAG / DESCENT_GATE_DOMINANT_FN_SOURCE_TASK9_GEOMETRY / MIN_VS_FINAL_ARTIFACT_0.086 / RELATIVE_DESCENT_GATE_PREREG_NEXT / NEW_L2_HOLD`。
+
+
+## 7 · 新的可执行 L1 实验：FGONLY 技内持续性（2026-10-10，代码已提交、真实结果未运行）
+
+**新疑问**：本报告 56 个 Tool flag=False / FGONLY POSITIVE 的参考，是同一技能中**任意一个时刻**满足代理。原 Tool flag 则在**技能退出时刻**返回。即使 D 门槛确实造成 40 个“相对任意时刻 FGONLY 的漏报”，仍需先排除运动代理只是一过性的可能性，才值得决定采用何种 D_rel 模块。这个新实验允许用已封版 Stage R 原始 trace 的 audit-only 物体/EEF 坐标**做离线判定**，不进入合法策略特征。
+
+已交付 `analysis/research_context/p1_temporal_proxy_lab.py`、`test_p1_temporal_proxy_lab.py`。数据资格：读取冻结 `EERD_A_*.jsonl`，重用 `research_package_a.collect/fg_only` 对 187 episode 原始 trace 逐点重建；要求 frozen source SHA 与 `schema_qa.json` 一致、206 PRIMARY 与旧 A0 reference / tool flag 逐例一致、175 原 episode 不变，否则 STOP。输出到独立 gitignored `artifacts/p1_temporal_proxy_lab/temporal_proxy_v1.json`，仅保留聚合计数。
+
+**需同时报告：**
+- 206 全样本与 56 原 proxy FN 的 `EVER_POS_TERMINAL_POS`、`EVER_POS_TERMINAL_NEG`、`EVER_POS_TERMINAL_UNKNOWN` 数量，另算最后 3 个观测连续 proxy-positive 的数量。
+- Task3/5/9 内的代理漏报，尤其 **Task9 的 19 个 D-only 缺失(011)** 的 terminal-positive / transient / unknown 组成。
+- 如果 Task9 011 中多数为 transient，优先研究 **返回时状态的证据有效性与时间一致性**；若多数仍 terminal-positive，几何适应性 D 门槛的研究动机更强，但依然不能据此确认 held-grasp；若混杂，强调同刻观测和风险分组。**这只是研究分流判断，不按该比例后验选出可部署阈值或宣称真实收益**。
+
+**实验前提**：`final_meas` 作为技内结束时的**代理观测**，不是未来 held-grasp 真实标签；比“any skill time”更接近 Tool 返回点，但仍与原始运动参考同源；无接触力/独立目标持握真值。新实验只读，没新仿真/训练/Runtime；新版合成测试与真实206结果**等待服务器 Coding Agent 运行**。
