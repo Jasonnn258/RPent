@@ -34,9 +34,11 @@
 
 > **2026-10-10 实验驱动转向：P1 Module Lab v1（代码完成，私有服务器结果待跑）**。根据“先在复现好的 baseline 上做模块增删/位置互换，再从失败与阈值敏感性中提炼 Idea”的方法，已提交 `analysis/research_context/p1_offline_module_lab.py`、`test_p1_offline_module_lab.py`、`P1_MODULE_LAB_EXPERIMENT.md`。对已封版 EERD **206 个 A0 PRIMARY Pick** 的同技能 FGONLY 代理做**13 固定 arms + 48 不选优阈值扰动**；拆分 min/final gap、peak lift、AND/OR、flag rescue 模块；输出原工具失败的 56/103 proxy 不一致切片、补救回来的 proxy 正例数量与新增 proxy false accepts、按 task 分层、1000 次 episode 聚类配对 bootstrap，以及 3 折 leave-one-task-out 家族选择（两个 task 选择，第3 task 评价）。**不训练神经模型；audit 标签仅用于离线评分与训练任务里的模块选择，不作为任何 arm 的输入，不进 Runtime**。按冻结 A0 混淆阵 TP101/FP2/FN56/TN47 自守卫；`peak_lift` 与 FGONLY 都是运动学相关代理，只能报 proxy agreement，不能报真实持握准确率/因果收益。**提交不等于真实实验完成；新代码合成测试、206 私有 Pick 模块评测均尚未在用户服务器运行**。允许 L1 离线实验，P1 新 L2 仍 HOLD。下一步跑一条合成单测+真实离线模块表的命令，基于正/负收益决定保留哪一模块；不再重复 Probe JSONL QA。
 
+> **2026-10-10 实验驱动第一轮真实回传（模块搜索的负结果）**：用户服务器 pull 至 `889cc3e`，`test_p1_offline_module_lab.py` **7/7 PASS**，实际206 A0 PRIMARY /175 episodes，任务3/5/9 =71/77/58。全部13固定arms对 FGONLY **balanced accuracy 均未超过**原 Tool flag 的0.801248（TP101/FP2/FN56/TN47）。其中 `min_gap0.060 AND peak_lift0.050` 虽然 raw agreement=0.830097，高于 Tool 0.718447，**BAcc仅0.769206**、proxy FP=17 vs Tool2；工具失败103例中它“补救”38个代理 FN，同时新增15个代理错误接受。原 flag 在 Task3/5/9 的 BAcc=0.923729/0.796237/**0.583333**，Task9 alone 占30/56代理漏报（53.6%）；LOTO 模块选择 test pooled BAcc=0.722735，低于 Tool0.801248。**实证 STOP 简单 gap/lift OR/AND 作为“持握改进”**。源码新发现：原 `pi0_pick` success 还要求**先下降0.10m**，且成功检查的是当前/final grip，不等于旧实验中的 min grip；先前 A0 gap AND lift 缺少下降 gate、替换了开度位置。已提交下一轮 **三门槛组件消融** `p1_pick_gate_lab.py` / `test_p1_pick_gate_lab.py`，检查工具三门阈值与真实 proxy 错误分解、各任务布尔格模式，不臆断单个 gate 因果，**新脚本尚未在用户服务器跑**。数值来源、限制与后续假设见 `P1_MODULE_LAB_SERVER_RESULT_20261010.md`。原 A0/DEV0 不改，新 L2 HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / LABEL_TIME_V2_SERVER_5_OF_5_PASS / P1_MODULE_LAB_206_L1_CODE_READY_UNRUN / NEW_L2_HOLD / PHYSICAL_GRASP_ACCURACY_UNIDENTIFIED`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / MODULE_LAB_V1_SERVER_7_OF_7_PASS_ALL_13_FIXED_ARMS_BELOW_TOOL_BACC / TASK9_PROXY_FN_30_OF_56 / THREE_GATE_ABLATION_CODE_READY_UNRUN / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -85,7 +87,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **实质下一步：跑 P1 Module Lab**。执行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_offline_module_lab.py' -v && python3 analysis/research_context/p1_offline_module_lab.py`，在已封版的 206 个 A0 样本上比较13种固定模块和48个阈值扰动；实际取舍用 proxy balanced accuracy + ΔFP/ΔFN、留一 task 稳定性及按 FGONLY 代理漏报群分布，而非仅原 raw accuracy。实验读数未回传前不能宣称模块有效；若所有合法信号无增益就明确 STOP 此分支。
+1. **已得到 Module Lab v1 的真实负结果**：7/7单测与206数据齐，13固定arms BAcc 全低于 Tool；不再重跑同一配置/追逐48格后验最高分。下一步直接让服务器内有终端权限的 Coding Agent 在一个 Prompt 里完成 `git pull`、`test_p1_pick_gate_lab.py`、`p1_pick_gate_lab.py`、下钻 Task9 的三门槛缺口及异常样本聚合、科学报告、Git commit/push。已提交三门槛实验源码/单测，尚未在服务器执行。L1允许，绝不推断实际 grasp 保持或自动启动新 L2。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
