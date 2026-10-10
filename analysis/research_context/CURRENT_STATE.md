@@ -54,9 +54,11 @@
 
 > **2026-10-10 L1 最后一项标签盲基线核验已编码，服务器待跑**：独立复审 D-038 的 `task×gate matched random=14.48/21≈0.69` 发现它来自**原 LMG 分数选中样本的事后 task×gate 配额**与同批 audit-only FGONLY 单元格正例率，属于描述性组成分解，**不是可执行的“零拟合 task+gate 预算算法”性能**；早先相应强表述已在 `P1_TASK9_CONDITIONAL_RESULT_20261010.md` 追加解释性勘误。现新增 `p1_label_blind_quota_lab.py` + 合成测试和 `P1_LABEL_BLIND_QUOTA_EXPERIMENT.md`：固定103失败/21或42复核席位，在未知 audit 标签情况下分别使用 Global Random、GATE_ONLY、任务均分门槛优先、任务规模比例门槛优先、旧 LMG 排序生成选中权重，再统一离线评分；结果务必与可观测 GATE_ONLY 原基线13.26/21进行对照。**TASK_* 只表示离线批量分配假设**，task ID在在线可见性以及完整队列条件未验证，不得据此部署。新代码**尚未在服务器运行**；不再在同103条上继续搜索新静态公式。下一 L2 继续 HOLD。
 
+> **2026-10-10 用户委托独立审核授权 D-040（与先前 L2 HOLD 的范围区别）**：研究方向 `Time-Aligned Evidence Acquisition + Budgeted Selective Verification` 获**方法论GO**。新 `P1_L2_INDEPENDENT_AUTHORIZATION_REVIEW_20261010.md` 将 **G1 只读/代码/mock合成测试立即批准**；新独立 `P1-L2-FEAS` G2 feasibility simulator pilot **预授权 AUTO-GO**（最多12新独立episode、GPU≤3 GPU·hour、wall≤4h、最多12 triggers），服务器Agent须从0 episode完成资源控制权、在飞成本预算预留+安全终止、零修改Stage R/原DEV0、同刻目标ID+左右指尖接触+支承/抬起参考及两通道证据隔离的全部硬 Gate；任一失败必须 **STOP=0 episode**，绝不能偷用旧DEV0额度。通过则用户已委托本次技术许可，无须再次逐项人工授权。**G3 多臂动作收益/训练/真实机器人仍 HOLD**。本聊天没有服务器shell/无法确认实际Gate是否pass，因此本状态是PREAUTH，不等于已执行新sim。旧 label-blind quota L1 可由Agent同轮收官。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / T9_CONDITIONAL_AND_MATCHED_12_OF_12_SERVER_PASS / MATCHED_0P69_RETROSPECTIVE_NOT_IMPLEMENTED_POLICY / LABEL_BLIND_QUOTA_L1_CODE_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / MATCHED_0P69_RETROSPECTIVE_ONLY / LABEL_BLIND_QUOTA_L1_UNRUN / P1_L2_FEAS_12EP_3GPUH_4H_PREAUTH_AFTER_HARD_GATES / G3_CAUSAL_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
