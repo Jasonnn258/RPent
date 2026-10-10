@@ -328,6 +328,14 @@
 - **不能推出什么**：退出时点 FGONLY 与 any-time 是同一运动学弱代理的两个时点，共享全部构念缺陷（EEF 同源、无接触力、无独立真值）；"退出仍正"≠真握着、"瞬时"≠没握过；final_meas 是技内最后归档测量点非工具返回后独立验证；bootstrap 描述性；t9 子组 n=19 小样本；本轮零收益宣称、零阈值选择。
 - **重新开启条件**：用户授权返回时点证据一致性的研究设计/最小 L2（含合法非特权返回时观测的预注册）；或新的独立持握真值证据出现。Stage R §36 / S1 ON_HOLD / 冻结 A0/DEV0 均不动。
 
+## D-034 · 面向返回时刻的有预算选择性验证：先检验合法末端证据是否有信息增量
+
+- **依据**：2026-10-10 远端实验 `bd5048e` / D-033：FGONLY（任意时刻）导致的56次原工具代理“漏报”在同一技能退出时分裂为26持续/30瞬时；去 D 的 BAcc 改善从 +0.0541 降到 +0.0059，退出时新增14次 proxy FP；t9 只缺 D 的旧代理正例 19中11持续/8瞬时。后验阈值/几何不能可靠区分同一t9两组，所以不能直接扩大 CONTINUE。
+- **核心问题**：若按旧开度/几何静态触发，容易把瞬时 FGONLY 误当持续。下一实验只读现有 A0/Stage R，在 103 个工具失败案例中，评价**仅合法 Tool Return 字段**是否可把退出时仍满足 FGONLY 的26例，排到固定复核预算 Top20%/40%。这只决定“优先复核谁”，**不授权把分数当 held-grasp**。
+- **可执行代码与固定基线**：提交 `analysis/research_context/p1_return_time_triage_lab.py` + `test_p1_return_time_triage_lab.py`，协议 `P1_RETURN_TIME_TRIAGE_EXPERIMENT.md`。六臂 `UNTARGETED`、`D_ONLY_PATTERN`、`PEAK_LIFT`、`FINAL_GAP`、`LIFT_MINUS_GAP`、`D_ONLY_THEN_LIFT`；不拟合参数、不选择阈值、不训练模型。固定预算每组 Top20%/40%；并列采用分数组内均分预期，不允许通过 episode/task ID打破并列；报告proxy precision/recall、额外误复核、跨 task 和 t9 D-only 剖面。
+- **反事实时间对照**：排序和合法特征完全固定，仅评价标签从 `any` FGONLY 换成 `final_meas` FGONLY，检验排序是否也受参考时点偏差影响。audit-only 目标坐标只进入离线标签构建与评分，绝不喂给排序器/Runtime。原 Stage R 必须只读，`schema_qa.json` hash + A0逐例 reference/206 primary + 103/26/56 分母不匹配直接 STOP。输出仅 gitignored 聚合。
+- **科研判据**：如果固定预算选择性增益与任务分层方向一致，下一方向是 budgeted selective verification，而非修改 success gate；若 Task9 D-only 内仍高度混杂且合法特征缺乏区分力，说明需要新同刻视觉/时序观测，不能通过更复杂的开度阈值补救。两者都不等于实际持握或动作收益。**代码已提交，实验服务器尚未运行**；旧DEV0 CLOSED，新 L2 HOLD。
+
 ## 新决策追加模板
 
 ```markdown
