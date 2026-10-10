@@ -304,6 +304,15 @@
 - **不能推出什么**:BAcc 提升不等于持握判对率(FGONLY 与 EEF 运动学同源);bootstrap 是样本不确定性描述;LOTO 三折非独立;206 上任何 D_rel 具体形式的选择都是后验,本轮零收益宣称;不构成新仿真/Runtime 授权。
 - **重新开启条件**:用户授权有界新采集 L2,预注册 D_rel(冻结原三门槛为基线、t9 主层、FP 上限预登记);若 t9 FN 不降或 t3/t5 劣化则假设证伪即 STOP。
 
+## D-032 · 从“下降阈值过严”转向 FGONLY 的技内时间持续性实证核验
+
+- **时间/触发**：2026-10-10，基于实验服务器提交 `bb7c664` 的 D-031/三门槛206例实证与冻结 `research_package_a.py` 源码；用户要求继续实质研究、不要重复 QA。
+- **现有正证据**：原 `pi0_pick` 的 D∧L∧Gfinal 在历史206例逐项重建 flag；Task9 30个 flag=False/FGONLY+ 中24个缺 D，19个仅缺 D；删 D 的 L∧Gfinal 整体 proxy BAcc +0.054，但Task3 -0.116、LOTO pooled -0.006，不能全局应用；这仍是同技能 FGONLY 运动代理而非抓持真值。
+- **新的关键替代解释**：A0 `label_reference(points, statuses)` 用 `any(fg_only(p,base,target))`，只需技能**中途任何一帧**满足代理就记正；工具 flag 是退出时决策。过去称“D=任务9 proxy FN主因”准确地说是**代理定义不一致的门槛原因**，并未证明这些对象在技能退出时仍然跟随 EEF。单看 start_z 的任务差也不足以独立证明柜顶高度造成的因果物理机制。
+- **新实证代码（本轮提交、服务器未跑）**：`p1_temporal_proxy_lab.py` 与 `test_p1_temporal_proxy_lab.py`；对已冻结的187 Stage R episodes 原始 `stageR_trace.jsonl` audit-only measurement 逐点重建 FGONLY `any`、`final_meas`、末尾三帧连续代理正，严格对齐206 EERD PRIMARY/175 episodes 的 original flag/reference 与 `schema_qa.json` source hashes。只输出分组计数，特别针对Task9 19个“只缺D”(011) proxy FN分解 `EVER_POS_TERMINAL_POS/NEG/UNKNOWN`。不改旧 A0，不读新仿真。
+- **研究分流**：如果Task9 011多数技能结束仍proxy-positive，则“任务几何相对下降门槛”作为下一候选动机增强，**仍需独立同步held标签和新L2确认**；如果多数仅中途瞬时positive，则优先验证时间一致性和返回时证据，不应将工具过严作为既成事实；如两类都有则分层。禁止在这206条上选择最优组合后宣称未来部署性能。
+- **边界**：终点 FGONLY 仍使用原目标世界坐标，属于 audit-only 新参考；不能输送在线策略、更不能作为真实物理接触/持握。原DEV0、新L2均无新授权，所有 Runtime/GPU操作仍 HOLD。
+
 ## 新决策追加模板
 
 ```markdown
