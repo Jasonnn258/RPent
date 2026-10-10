@@ -58,15 +58,14 @@
 
 > **2026-10-10 用户委托 L2 研究立项与授权复审（D-041 为当前有效的严格 ceiling）**：已核实 D-040 的早期 G2 ≤12episode/≤3GPUh/≤4h preauth，但进一步结合相关工作与 DEV0 预算溢出，**D-041 收紧为本次独立 DEV1A ≤8新episode，t9×4/t3×2/t5×2、≤3 GPU·h、≤4h wall、单worker、每集≤1500环境步、最多一次不超2cm受控lift**。用户已委托研究授权，**G1 代码+mock 测试 GO；G2 仅在模拟sim目标物体ID/双指接触/支撑/同刻帧/隔离/硬预算预留 G1–G4 全部真实PASS后才自动 GO；任一 Gate 失败=0新episode STOP**。DEV1A 只检验同刻独立（仿真操作性）物理标签可得性和成本，生产继续/重试统一blind，不做因果策略效益对照；L3真实机器人与后续 DEV1B 因果随机化、训练、生产部署仍 HOLD。完整研究对照、文献差异、终点与停止条件见 `P1_L2_DEV1A_RESEARCH_REVIEW_AND_AUTHORIZATION_20261010.md`。D-040 的12集旧 ceiling 已由D-041显式 supersede。**这只是 GitHub 审批和方案提交，私有服务器条件未验收，尚未启动新sim**。
 
+> **2026-10-10 DEV1A 独立源码审查 + G1/G4 实际代码推进（尚未服务器测试）**：本轮确认远端 `b287be5` 为**第五轮 L1 Label-blind Quota 实测完成**，D-042；**尚无 DEV1A G1–G4 真实PASS或任何新Episode**。当前 `robots/libero/env_client.py` 只暴露 `check_success/sim_measurement`（低维位置等），`env_server.py:sim_measurement` 从 worker 读取 object-state 和关注目标名，**未提供左右指/目标 geom 接触双方的 contact snapshot API**，D-041 的 G1 不能由已有接口满足。旧 DEV0 runner 用900秒启动预留而 episode hard timeout=5400秒，这正是6h预算越限风险的结构缺陷，不能复用。已提交 `p1_dev1a_operational_truth.py`（同tick target/双指/support与受控2cm提升后 Operational Retained 的纯函数合同）、`p1_dev1a_budget_gate.py`（单worker完整最坏GPU/wall成本预留、8集/任务配额/1500step边界、静态代码检查永不擅自GO）及各自合成测试，全部**未在服务器运行**。下步应由服务器Agent完成 contact RPC/worker geom 实测、不推进env step的真实G1/G2，以及进程级G4 budget/kill证据；任一失败DEV1A保持0集，不能仅凭纯函数测试启动sim。文档合并修复历史重复的 `## 1. 总状态` 与旧 `NEW_L2_HOLD` 状态，以 D-041 严格8集授权为唯一依据。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / LABEL_BLIND_QUOTA_L1_6_OF_6_SERVER_PASS_GATE_ONLY_RETAINED_TASK_QUOTA_DEMOTED / STATIC_RULE_SEARCH_ON_103_CLOSED / D042_MATCHED_0P69_CONFIRMED_UNREACHABLE_LABEL_BLIND / D041_G1_DEV1A_CODE_GO / G2_SIM_CONDITIONAL_MAX8EP_3GPUH_4WALLH_NO_GATES_VERIFIED / G3_CAUSAL_HOLD / REAL_ROBOT_STOP`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / L1_LABEL_BLIND_6_OF_6_PASS_GATE_ONLY_RETAINED / D040_D041_D042_RESOLVED / DEV1A_G1_MOCK_CONTRACT_CODE_UNRUN / DEV1A_G4_FULL_COST_RESERVATION_CODE_UNRUN / CONTACT_RPC_MISSING / LIVE_GATES_UNVERIFIED / G2_0_NEW_EP / G3_HOLD`**
 
 > **2026-10-10 第五轮 Label-blind Quota 真实执行完毕（本机只读离线）**：测试修复一处浮点严格相等断言（103 个 21/103 浮点和 vs assertEqual，改容差与 lab 合同对齐）后 **6/6 PASS**，标签翻转不改任何选择权重逐位验证。资格门全过。**Top20%（21 席，退出参考）**：RANDOM 5.30/0.252、GATE_ONLY **13.26/0.632（2.50×）**、TASK_EQUAL_GATE 13.78/0.656、TASK_PROP_GATE 13.70/0.653、LMG_FROZEN 17.00/0.810；**Top40% 任务配额双双重于 GATE_ONLY**（EQUAL 21.34 vs 24.12、PROP 23.70），any-time 下 EQUAL 反向（17.42<18.24）——次序对两种参考时间一致。**(1) 任务配额仅 +0.02 边际且不稳 → 撤回"按任务预算是主要算法机制"，两种配额降级探索性基线；(2) matched 14.48 不可被任何标签盲分配器达成（最高 13.78，还用了在线不合法元数据），D-039 纠错被实证坐实；(3) 源数据级核查：`task_id` 仅在 reconstruction_metadata 视图，合法 `instruction`→task 不唯一（"pick up the black bowl" 横跨 t3/t5/t9），批量队列存在性未验证 → TASK_* 判 `OFFLINE_BATCH_ONLY`；(4) GATE_ONLY 为 L1 唯一廉价合法候选保留，LMG 仍为需独立 cohort 的参考上界。**本轮后按预登记停止在同 103 例搜索任何新静态规则/固定臂/参数**；t9 静态阈值 STOP 维持。报告 `P1_LABEL_BLIND_QUOTA_RESULT_20261010.md`、**D-042**（与 D-040 撞号后改号；本条即 D-041 待办(a) 的收官件）；私有产物 `artifacts/p1_return_time_triage_lab/label_blind_quota_v1.json`。L2 按 D-040/D-041 条件授权进入 DEV1A 预检阶段。**
 
-## 1. 总状态
-
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / T9_CONDITIONAL_AND_MATCHED_12_OF_12_SERVER_PASS / MATCHED_0P69_RETROSPECTIVE_NOT_IMPLEMENTED_POLICY / LABEL_BLIND_QUOTA_L1_6_OF_6_SERVER_PASS_GATE_ONLY_RETAINED_TASK_QUOTA_DEMOTED / STATIC_RULE_SEARCH_ON_103_CLOSED / NEW_L2_HOLD`**
 线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
 - 硬边界:Stage R §36 HARD STOP、S1-DEV0 ON_HOLD,任何实验/训练/控制接线须独立授权。
