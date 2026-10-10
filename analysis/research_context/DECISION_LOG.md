@@ -380,6 +380,14 @@
 - **不能推出什么**：置换 p 是后验识别子池的探索性诊断（exchangeability 仅在已选子群内）；匹配随机的格内正例率来自同批 audit-only 标签，只用于离线标准化、不得流入在线排序或当任务先验；FGONLY 弱代理非持握真值；一切数值是复核优先级非 CONTINUE/动作收益；零训练、零阈值选择、零 Runtime 改动。
 - **重新开启条件**：用户授权同刻观测最小 L2（分层含真实持握正例、probe 改闭合+受控提升 2-3cm、任务内排名分配复核预算、组成分层作免费基线臂同场对照）。Stage R §36 / S1 / 冻结 A0/DEV0 不动。
 
+## D-039 · 事后分层期望不是可执行策略：标签盲配额基线最后核验
+
+- **日期与来源**：2026-10-10，独立阅读服务器第四轮实测 `P1_TASK9_CONDITIONAL_RESULT_20261010.md` 与 `p1_triage_incremental_lab.py:decompose/select_weights`：先由 LMG 连续得分选中21例，再固定这些例子的 task×gate 配额并用全组 audit-only FGONLY 代理正例率计算匹配期望 **14.48/21≈0.69**。这准确刻画了已实现 LMG 排序的组成解释份额，但**没有提供一个能在无标签条件下先决定这些配额的独立任务预算策略**。
+- **纠错**：D-038 中“廉价task+gate组成分层零拟合即0.69”应降级为**同队列事后标准化的匹配随机期望**；不可当成真实独立离线策略、部署的证据，尤其任务ID来自 reconstruction metadata，pre-delivery时是否合法可见以及批量待复核池存在性未核验。真正已编码、可执行的独立全局 `D_ONLY_PATTERN` 基线 Top20% 在 FGONLY 代理下为13.26/21=0.632（也非真实grasp）。
+- **唯一补充L1实证**：已提交 `p1_label_blind_quota_lab.py` + `test_p1_label_blind_quota_lab.py` + `P1_LABEL_BLIND_QUOTA_EXPERIMENT.md`。在已封版103个原Tool False、21/42固定名额下，不用任何物理/代理参考标签或 LMG 原排序名额，就能独立产生 global随机、global D-only优先、任务均分+门槛优先、任务规模比例+门槛优先的选择权重；对原 LMG 做同期只读参考对照。任务配额仅是**批量离线算法假设**，在线资格仍未知。评价标签只进入下游 scoring，必须可对抗验证翻转标签不改变任意方法选择权重。**新代码已提交但真实服务器测试和数据尚未执行**。
+- **停止规则**：若 label-blind quota 无增益，则撤回“任务预算是主要算法机制”的表述；保留静态 gate-only 风险分组作为L1便宜对照，Task9同类静态阈值STOP。即使 quota有增益仍不得以同103条样本声称泛化或held接触收益；结束后不再在同数据上挑更多公式。下一真物理同刻观测与恢复动作需重新审批bounded L2。
+- **科学状态**：`REAL_4TH_ROUND_VERIFIED / RETROSPECTIVE_MATCHED_STAT_CORRECTED / LABEL_BLIND_BATCH_PROTOTYPE_SERVER_UNRUN / NEW_L2_HOLD`。
+
 ## 新决策追加模板
 
 ```markdown
