@@ -66,6 +66,14 @@ class TestVE01SafeReinterpretation(unittest.TestCase):
         self.assertEqual(assess(c)["decision"], "RETRY+ABSTAIN")
         self.assertEqual(assess({})["decision"], "RETRY+ABSTAIN")
 
+    def test_nested_audit_truth_field_is_denied_even_when_marked_valid(self):
+        c = case()
+        c["model_vision_external"] = {"metadata": {"target_pos": [0, 0, 1]}}
+        r = assess(c)
+        self.assertFalse(r["eligible"])
+        self.assertEqual(r["reason"], "PRIVILEGED_FIELD_IN_CLAIM")
+        self.assertEqual(r["decision"], "RETRY+ABSTAIN")
+
     def test_flagged_whole_frame_change_is_not_proof_of_parallax(self):
         c = case()
         c["visual_camera_motion"]["camera_motion_flag"] = True
