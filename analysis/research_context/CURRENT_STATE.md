@@ -32,9 +32,11 @@
 
 > **2026-10-10 Label-time v2 真实服务器验收完成，离线准确率 Gate 正式 HOLD**：用户回传 `test_p1_ve01_label_contract_audit.py` **5/5 OK**；5 个 Probe JSONL 的顶层及合法子字段均符合既有 Runtime schema，未经审核新字段0；`NO_EXPLICIT_PROBE_LABEL_IN_RECOGNIZED_EVENT_SCHEMA`，24 allocated/21 events/6 triggers/5 probes，后续审计5/5严格晚于 probe；其中固定 H 后4、提前终局2。**限定含义：仅这五个事件包没有明示同步目标接触/持握参考，不证明其他历史资产无可用标签。** 源码追加核对发现 `dump_state` 的 `world_wrist`、hi-res、`segment` 均以 Toolkit `step_idx` 存储，`segment` 仅保存 source_step、box、mask_shape、overlay/世界位置，不保存原始二值 mask；旧 `_run_probe` 直接执行物理步，仅额外存 post RGB 和 proprio。故旧几何/segment 不能自动代表 probe 后目标接触。已提交设计稿 `P1_NEXT_L2_LABEL_AND_CONTRAST_GATE.md`（精确时间同步、独立目标/双指接触 audit、blind 机械效应对照、lift 单独分层、硬预算停止），**DESIGN_ONLY，未授权新 L2、未运行新实验**。在新增标签/批准前，不再对这五例声称持握准确率或方法收益。
 
+> **2026-10-10 实验驱动转向：P1 Module Lab v1（代码完成，私有服务器结果待跑）**。根据“先在复现好的 baseline 上做模块增删/位置互换，再从失败与阈值敏感性中提炼 Idea”的方法，已提交 `analysis/research_context/p1_offline_module_lab.py`、`test_p1_offline_module_lab.py`、`P1_MODULE_LAB_EXPERIMENT.md`。对已封版 EERD **206 个 A0 PRIMARY Pick** 的同技能 FGONLY 代理做**13 固定 arms + 48 不选优阈值扰动**；拆分 min/final gap、peak lift、AND/OR、flag rescue 模块；输出原工具失败的 56/103 proxy 不一致切片、补救回来的 proxy 正例数量与新增 proxy false accepts、按 task 分层、1000 次 episode 聚类配对 bootstrap，以及 3 折 leave-one-task-out 家族选择（两个 task 选择，第3 task 评价）。**不训练神经模型；audit 标签仅用于离线评分与训练任务里的模块选择，不作为任何 arm 的输入，不进 Runtime**。按冻结 A0 混淆阵 TP101/FP2/FN56/TN47 自守卫；`peak_lift` 与 FGONLY 都是运动学相关代理，只能报 proxy agreement，不能报真实持握准确率/因果收益。**提交不等于真实实验完成；新代码合成测试、206 私有 Pick 模块评测均尚未在用户服务器运行**。允许 L1 离线实验，P1 新 L2 仍 HOLD。下一步跑一条合成单测+真实离线模块表的命令，基于正/负收益决定保留哪一模块；不再重复 Probe JSONL QA。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VE011_SERVER_10_OF_10_PASS / LABEL_TIME_V2_SERVER_5_OF_5_PASS / RECOGNIZED_PROBE_SCHEMA_5_OF_5_NO_UNREVIEWED_FIELDS / NO_EXPLICIT_PROBE_HELD_OR_CONTACT_LABELS / NEXT_L2_DESIGN_ONLY_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / LABEL_TIME_V2_SERVER_5_OF_5_PASS / P1_MODULE_LAB_206_L1_CODE_READY_UNRUN / NEW_L2_HOLD / PHYSICAL_GRASP_ACCURACY_UNIDENTIFIED`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -83,7 +85,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **Label-time v2 已在服务器通过 5/5，且真实 5 个 Probe schema 全部匹配**。无须再重复事件形状/哈希审计。当前冻结 P1 的 probe-time held/contact 准确率和 policy-effect 均**不能合法估计**；下一步仅以 `P1_NEXT_L2_LABEL_AND_CONTRAST_GATE.md` 为设计候选讨论同步 audit-only 目标物体接触/持握参考、探测机械效应对照、可达双分支、分层触发率与精确 H 时点。所有新仿真、Runtime、训练仍需独立明确的 bounded L2 授权。
+1. **实质下一步：跑 P1 Module Lab**。执行 `python3 -m unittest discover -s analysis/research_context -p 'test_p1_offline_module_lab.py' -v && python3 analysis/research_context/p1_offline_module_lab.py`，在已封版的 206 个 A0 样本上比较13种固定模块和48个阈值扰动；实际取舍用 proxy balanced accuracy + ΔFP/ΔFN、留一 task 稳定性及按 FGONLY 代理漏报群分布，而非仅原 raw accuracy。实验读数未回传前不能宣称模块有效；若所有合法信号无增益就明确 STOP 此分支。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
