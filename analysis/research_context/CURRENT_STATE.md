@@ -28,9 +28,11 @@
 
 > **2026-10-10 用户服务器 VE01.1 安全门实际回传**：`test_p1_ve01_safe_arms.py` **10/10 OK**、`scripts/p1_ve01_safe_arms.py` 对既有5个 probe 输出 `eligible=5`，RETRY 3/5 + RETRY+ESCALATE 2/5；`NEAR_MIN_GAP_OBJECT_PRESENCE_UNKNOWN=3`、`GAP_PLATEAU_CAUSE_UNKNOWN=2`；几何最近表面 4 常规/1 近 EEF 但**身份未知**。 `claim_holding_positive=0`、`independently_verified_object_contact=0`、`audit_truth_used=false`：这是**没有生成物理正例真值**，不能宣称五次实际接触失败或零误报。下一步针对已有 P1-DEV0 事件设计了**只读时间点与标签来源审计** `scripts/p1_ve01_label_contract_audit.py`，检查 probe 时间与 audit-only 后续任务结果是否可合法配对并区分，不能以 H 后的 `check_success` 充当 probe 结束瞬间的物体接触/持握。新增合成单测 `test_p1_ve01_label_contract_audit.py`；**新脚本尚未在服务器测试**。DEV0 仍 CLOSED，新在线 L2 HOLD。
 
+> **2026-10-10 服务器 label-time 审计实测与方法修正**：用户对旧版 `test_p1_ve01_label_contract_audit.py` 得到 **3/3 PASS**，21/24 有事件、6 trigger、5 probe；5/5 后续 audit 时间晚于 probe，4 fixed boundary、2 early episode end，0 integrity anomaly。回传旧 Gate=`NO_PROBE_TIME_PHYSICAL_LABELS_IN_EVENT_CONTRACT`。进一步源码独立复审发现旧 `with_probe_time_*_reference=0` 是**直接写入的常量**，尚未扫描真实 probe JSONL 的 schema，原 Gate 强度偏高。现已改为逐个检查 5 个实际 Probe 的顶层/嵌套字段是否符合原 `_run_probe` 合法白名单；发现未知字段、潜在 oracle 字段或形状异常则 **HOLD**，不打印敏感字段值；如果通过，只能报告 `NO_EXPLICIT_PROBE_LABEL_IN_RECOGNIZED_EVENT_SCHEMA`，**不能扩张为其他历史资产皆无真值**。配套合成测试新增未知字段/嵌套接触标签反例；**新版本尚未在服务器验证**。旧 DEV0 继续 CLOSED，下一 L2 需要单独授权。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VE011_SERVER_TESTS_10_OF_10_PASS / EVIDENCE_INPUT_ELIGIBLE_5_OF_5 / PROPRIO_FLOOR_RANGE_3_PLATEAU_2 / CONTACT_AND_HELD_GROUND_TRUTH_UNAVAILABLE / LABEL_TIME_AUDIT_CODE_UNRUN / NEXT_L2_HOLD`**
+**`P1_DEV0_CLOSED / VE011_SERVER_10_OF_10_PASS / LABEL_TIME_V1_SERVER_3_OF_3_PASS / PROBE_AUDIT_TIMES_MISMATCH_5_OF_5 / V1_NO_LABEL_GATE_OVERSPECIFIED_FIXED_IN_V2_UNRUN / PROBE_SCHEMA_INVENTORY_PENDING / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -79,7 +81,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **VE01.1 已经在真实服务器通过（10/10）**，不再反复运行合法性门。下一步仅针对原 P1-DEV0 manifest/事件文件，执行 `test_p1_ve01_label_contract_audit.py` 与 `scripts/p1_ve01_label_contract_audit.py`，判断是否存在**与 probe 结束物理时间点一致的独立目标接触/持握标签**；后续 H 审计任务成功只能单列，不准映射到 probe-time held。新脚本代码已提交，尚未实测。若当前源无标签，研究进入 `PHYSICAL_LABELS_UNAVAILABLE` 状态，准备另一个正式 L2 预注册（必须经新授权）。
+1. **Label-time v1 已在服务器通过 3/3、5/5 probe 晚于 audit 标签时间**；但 v1 的“标签数=0”有常量式审计漏洞，已在 **v2 只读版本**加入真实 Probe JSONL 字段结构及嵌套白名单核验，未知字段即 HOLD。只需服务器复跑 `test_p1_ve01_label_contract_audit.py` 与 `scripts/p1_ve01_label_contract_audit.py` 验收新 Gate；不得将扫描单个事件合同当成排除其他私有历史来源的证明，也不重复跑 GPU/仿真。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
