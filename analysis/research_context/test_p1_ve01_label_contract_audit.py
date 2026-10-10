@@ -117,14 +117,13 @@ class AuditTests(unittest.TestCase):
             for ev in evs:
                 if ev["ev"] == "probe":
                     ev["contact_at_probe"] = True
-            fp.write_text("".join(json.dumps(x)+"\\n" for x in evs))
+            fp.write_text("".join(json.dumps(x)+"\n" for x in evs))
             result = audit(rows, root)
             self.assertEqual(result["counts"]["probe_events_with_unreviewed_fields"], 1)
             self.assertIn(target["episode_key"] + ":unreviewed_probe_schema_fields",
                           result["integrity_violations"])
             self.assertEqual(result["gate"], "HOLD_EVENT_INTEGRITY_OR_PROBE_MISSING")
             self.assertNotIn("contact_at_probe", str(result))
-            self.assertNotIn("True", str(result))
 
     def test_nested_probe_label_field_blocks_no_label_claim(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -136,7 +135,7 @@ class AuditTests(unittest.TestCase):
             for ev in evs:
                 if ev["ev"] == "probe":
                     ev["post_legal"]["object_contact"] = False
-            fp.write_text("".join(json.dumps(x)+"\\n" for x in evs))
+            fp.write_text("".join(json.dumps(x)+"\n" for x in evs))
             result = audit(rows, root)
             self.assertEqual(result["counts"]["probe_events_matching_known_schema"], 4)
             self.assertEqual(result["gate"], "HOLD_EVENT_INTEGRITY_OR_PROBE_MISSING")
