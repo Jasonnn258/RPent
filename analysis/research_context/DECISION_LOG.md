@@ -439,6 +439,16 @@
 - **不能推出什么**：标签可用≠把标签给 Planner 有收益（DEV1B 因果问题，未运行）；6 触发样本量小，4/6 假阴性比例不能外推为总体基率；RETAINED/NOT_RETAINED 是仿真操作性接触真值，非真实机器人持握；audit 标签从未进入 Planner 视图（G3 + 8 集盲态返回 None）。
 - **状态**：`DEV1A_G1_G2_G3_G4_LIVE_PASS / PILOT_8EP_COMPLETED_ALL_BUDGETS_WITHIN / FEASIBILITY_CONFIRMED / DEV1B_HOLD_PENDING_AUTH / A0_STAGE_R_DEV0_UNTOUCHED`。
 
+## D-045 · 性能轮(日志拆解+隔离验证):Planner API 76% 冻结不动,常驻 VLA/kill 宽限两项 opt-in 落地,渲染/落盘非瓶颈
+
+- **日期/来源**:2026-10-10,用户委托"仿真性能分析与安全加速";零新 episode、零 D-041 额度(D-041 已 8/8 结清),全部只读日志 + 隔离工程测量。
+- **状态**:已确定(工程优化,默认全关,冻结行为零变化)。
+- **决定**:(1) 8 集墙钟 5386s 拆解:Planner API 76.1%(冻结不动)、init 13.5%(其中 Pi0.5 每集重复加载 63.8-69.8s=9.8% 主项)、工具执行 6.8%(内含 1024 渲染+落盘 <1%)、teardown 3.5%(6 被杀集 SIGTERM 30s 宽限全额消耗)。(2) 实施 `--vla-endpoint`/`--persistent-vla`(runner 整批共用 vla_server,预计省 ~65s/集)与 `P1_KILL_GRACE_S`(默认 30 不变,未来可设 5);(3) 1024 渲染/PNG 写盘/EGL 全部不动(<1%/结构不可用)。
+- **证据**:`artifacts/p1_perf/perf_breakdown.json`(秒级时间戳拆解)、`microbench.json`(osmesa step 162ms/1024 渲染 79ms/PNG 156ms)、`vla_persist_check.json`(常驻验证 **PASS**:22/35 维 Welch z>3 任务隔离、漂移 0.153≤包络 0.458、加载 78s 仅一次);runner 等价性:selftest G4 PASS、dry-run manifest sha 仍 b57ce6c9、无旗标时 agent cmd 逐字节不变。脱敏报告 `P1_PERF_ANALYSIS_20261010.md`。
+- **对照/替代**:拒绝 1024 按需渲染(<1% 收益 vs hi-res sha 进入同刻证据链的风险);拒绝 PNG 优化;判据设计两次修正如实记录(单对 10×/max-dim 2× 均被非确定包络淹没→逐维 Welch z 计数)。
+- **不能推出什么**:~65s/集节省是日志推算+隔离验证,未跑整批端到端对照(需新 episode,违反本轮约束);kill 宽限 5s 实际节省未实测;常驻下集间空转显存不计入 gpu_s 账户(与现口径一致,DEV1B manifest 需明示)。
+- **状态串**:`PERF_ROUND_DONE / PLANNER_API_76PCT_FROZEN / PERSISTENT_VLA_OPTIN_VALIDATED / KILL_GRACE_ENV_KNOB / RENDER_DUMP_KEPT_ASIS`。
+
 决策追加模板
 
 ```markdown

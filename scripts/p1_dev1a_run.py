@@ -65,7 +65,10 @@ MANIFEST_ROWS = [
 ]
 TURNS = 100
 PLANNER_TIMEOUT_S = 2400
-SIGTERM_GRACE_S = 30.0
+# kill 宽限(秒):默认 30 与 D-041 冻结口径一致;可经 P1_KILL_GRACE_S
+# 覆盖(性能轮结论:宽限被组内 daemons 全额消耗,审计已在 probe 后
+# 逐步 fsync,缩短不损失证据;默认不变,未来批次可设 5)
+SIGTERM_GRACE_S = float(os.environ.get("P1_KILL_GRACE_S", "30"))
 GPU_SAMPLE_S = 5.0
 
 # 环境(镜像 run_rpent.sh / DEV0;GL 按本容器铁律 osmesa)
@@ -182,7 +185,7 @@ def _spec_path(task: int) -> Path:
     return p
 
 
-def _episode_cmd(row: dict, ts: str):
+def _episode_cmd(row: dict, ts: str, vla_endpoint: str | None = None):
     key = f"p1dev1a_t{row['task']}_s{row['seed']}"
     ep_out = OUT_ROOT / "runs" / f"{key}_{ts}"
     audit_out = OUT_ROOT / "runs" / key       # 审计目录在 episode output_dir 之外
@@ -207,7 +210,60 @@ def _episode_cmd(row: dict, ts: str):
         "--max-turns", str(TURNS),
         "--output-dir", str(ep_out),
     ]
+    if vla_endpoint:
+        # 性能轮(2026-10-10):常驻 vla_server 模式,agent 直连外部服务,
+        # 免去每集 ~65s 的 Pi0.5 重复加载(占总墙钟 9.8%);默认不启用
+        cmd += ["--vla-endpoint", vla_endpoint]
     return cmd, env, ep_out, audit_out, key
+
+
+def _start_persistent_vla(log_fh) -> tuple[subprocess.Popen, str]:
+    """性能轮新增(默认不启用):整批共用一个 vla_server。
+
+    由 --vla-endpoint/--persistent-vla 显式开启;起服务 → 等 healthz
+    (Pi0.5 加载 ~65-76s)→ 返回 (proc, endpoint)。整批仅此一次加载,
+    每集省一次 model load。隔离性见 artifacts/p1_perf/vla_persist_check.json
+    (服务端每请求新建 obs、无跨请求状态;任务隔离/无漂移已验证)。
+    """
+    import socket
+
+    from rpent.utils.http_rpc import HttpRpcClient
+
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    env = {k: v for k, v in os.environ.items() if k not in UNSET_ENV}
+    env.update(BASE_ENV)
+    log_path = OUT_ROOT / "vla_persistent.log"
+    t0 = time.time()
+    proc = subprocess.Popen(
+        [sys.executable, str(REPO / "robots" / "libero" / "vla_server.py"),
+         "--transport", "http", "--host", "127.0.0.1",
+         "--port", str(port)],
+        env=env, stdout=open(log_path, "w"),
+        stderr=subprocess.STDOUT, start_new_session=True)
+    endpoint = f"http://127.0.0.1:{port}"
+    cli = HttpRpcClient(endpoint)
+    ready = False
+    err = ""
+    for _ in range(120):                      # 模型加载 ~65-76s,给 240s
+        if proc.poll() is not None:
+            sys.exit(f"FATAL: persistent vla_server died; see {log_path}")
+        try:
+            cli.healthz(timeout_s=2)
+            ready = True
+            break
+        except Exception as e:
+            err = str(e)[:120]
+            time.sleep(2.0)
+    if not ready:
+        _kill_pg(proc.pid, 5.0)
+        sys.exit(f"FATAL: persistent vla_server not ready ({err}); see {log_path}")
+    load_s = round(time.time() - t0, 1)
+    _log(log_fh, {"ev": "persistent_vla_up", "endpoint": endpoint,
+                  "load_s": load_s, "log": str(log_path)})
+    return proc, endpoint
 
 
 def _kill_pg(pgid: int, grace_s: float = SIGTERM_GRACE_S) -> str:
@@ -398,7 +454,15 @@ def main() -> None:
     p.add_argument("--selftest", action="store_true",
                    help="G4 自检(不跑任何真实 episode)")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--vla-endpoint", default=None,
+                   help="外部常驻 vla_server URL(如 http://127.0.0.1:18730);"
+                        "默认 None=每集自 spawn(冻结行为)")
+    p.add_argument("--persistent-vla", action="store_true",
+                   help="runner 自起一个整批共用的 vla_server 并在结束时回收"
+                        "(性能轮 opt-in;省每集 ~65s 重复加载;默认关)")
     args = p.parse_args()
+    if args.persistent_vla and args.vla_endpoint:
+        sys.exit("FATAL: --persistent-vla 与 --vla-endpoint 二选一")
 
     if args.selftest:
         print(json.dumps(selftest(), ensure_ascii=False))
@@ -463,115 +527,131 @@ def main() -> None:
 
     _log(log_fh, {"ev": "run_start", "manifest_sha256": manifest_sha,
                   "gate": "GO_PILOT",
-                  "initial_worst_wall_s": worst_wall})
+                  "initial_worst_wall_s": worst_wall,
+                  "vla_endpoint": args.vla_endpoint,
+                  "persistent_vla": args.persistent_vla})
 
-    for row in MANIFEST_ROWS:
-        if stop_all.is_set():
-            _log(log_fh, {"ev": "stop", "reason": "SIGTERM"})
-            break
-        task = str(row["task"])
-        key = f"p1dev1a_t{task}_s{row['seed']}"
-        # 禁重跑:该 key 已有终止性事件(probe_done/episode_end)→ 跳过,
-        # 不 reserve、不重复执行(D-041 NO_DEV1A_EPISODE_RERUN)
-        done_f = OUT_ROOT / "runs" / key / "p1_dev1a_events.jsonl"
-        if done_f.is_file():
-            try:
-                terms = [json.loads(x).get("ev") for x in
-                         done_f.read_text(encoding="utf-8").splitlines()
-                         if x.strip()]
-            except OSError:
-                terms = []
-            if "probe_done" in terms or "episode_end" in terms:
-                _log(log_fh, {"ev": "episode_skip_done", "key": key,
-                              "note": "already terminal (no rerun)"})
-                continue
-        # 整集最坏预留(动态最坏 × 边际;双硬帽不满足即停)
-        if observations:
-            worst_wall = max(INITIAL_WORST_WALL_S,
-                             WORST_MARGIN * max(
-                                 o["wall_s"] for o in observations))
-        try:
-            res = ledger.reserve(key, task, worst_wall, 1)
-        except ValueError as exc:
-            _log(log_fh, {"ev": "reserve_refused", "key": key,
-                          "reason": str(exc), "worst_wall_s": worst_wall})
-            break
-        _log(log_fh, {"ev": "episode_reserve", "key": key,
-                      "reserved_wall_s": worst_wall,
-                      "hard_env_step_cap": res["hard_env_step_cap"]})
+    persistent_proc = None
+    endpoint = args.vla_endpoint
+    try:
+        if args.persistent_vla:
+            persistent_proc, endpoint = _start_persistent_vla(log_fh)
 
-        cmd, env, ep_out, audit_out, _ = _episode_cmd(row, ts=manifest_sha[:8])
-        ep_out.parent.mkdir(parents=True, exist_ok=True)
-        t0 = time.monotonic()
-        proc = subprocess.Popen(cmd, env=env, start_new_session=True,
-                                stdout=open(ep_out.with_suffix(".out"), "w"),
-                                stderr=subprocess.STDOUT)
-        pgid = proc.pid
-        stop_gpu = threading.Event()
-        gpu_acc = {"gpu_s": 0.0, "max_gpu_count": 0, "samples": 0,
-                   "last_n": 0}
-        gpu_thread = threading.Thread(
-            target=lambda: gpu_acc.update(
-                _gpu_sampler(pgid, stop_gpu)), daemon=True)
-        gpu_thread.start()
-
-        terminated_by = "natural_exit"
-        while True:
-            if proc.poll() is not None:
-                break
+        for row in MANIFEST_ROWS:
             if stop_all.is_set():
-                terminated_by = "runner_sigterm"
+                _log(log_fh, {"ev": "stop", "reason": "SIGTERM"})
                 break
-            if time.monotonic() - t0 > worst_wall:
-                terminated_by = "hard_timeout(reserved)"
+            task = str(row["task"])
+            key = f"p1dev1a_t{task}_s{row['seed']}"
+            # 禁重跑:该 key 已有终止性事件(probe_done/episode_end)→ 跳过,
+            # 不 reserve、不重复执行(D-041 NO_DEV1A_EPISODE_RERUN)
+            done_f = OUT_ROOT / "runs" / key / "p1_dev1a_events.jsonl"
+            if done_f.is_file():
+                try:
+                    terms = [json.loads(x).get("ev") for x in
+                             done_f.read_text(encoding="utf-8").splitlines()
+                             if x.strip()]
+                except OSError:
+                    terms = []
+                if "probe_done" in terms or "episode_end" in terms:
+                    _log(log_fh, {"ev": "episode_skip_done", "key": key,
+                                  "note": "already terminal (no rerun)"})
+                    continue
+            # 整集最坏预留(动态最坏 × 边际;双硬帽不满足即停)
+            if observations:
+                worst_wall = max(INITIAL_WORST_WALL_S,
+                                 WORST_MARGIN * max(
+                                     o["wall_s"] for o in observations))
+            try:
+                res = ledger.reserve(key, task, worst_wall, 1)
+            except ValueError as exc:
+                _log(log_fh, {"ev": "reserve_refused", "key": key,
+                              "reason": str(exc),
+                              "worst_wall_s": worst_wall})
                 break
-            if _wait_probe_done(audit_out, proc,
-                                time.monotonic() + 5.0):
-                terminated_by = "probe_done(terminate_after_probe)"
-                break
-        if terminated_by != "natural_exit":
-            how = _kill_pg(pgid)
-            _log(log_fh, {"ev": "episode_killed", "key": key,
-                          "reason": terminated_by, "how": how})
-        try:
-            proc.wait(timeout=SIGTERM_GRACE_S + 15)
-        except subprocess.TimeoutExpired:
-            _kill_pg(pgid, 0.5)
-            proc.wait(timeout=30)
-        stop_gpu.set()
-        gpu_thread.join(timeout=GPU_SAMPLE_S * 2)
+            _log(log_fh, {"ev": "episode_reserve", "key": key,
+                          "reserved_wall_s": worst_wall,
+                          "hard_env_step_cap": res["hard_env_step_cap"]})
 
-        wall_s = time.monotonic() - t0
-        gpu_s = gpu_acc["gpu_s"]
-        steps, steps_src = _episode_steps(audit_out)
-        _log(log_fh, {"ev": "episode_measure", "key": key,
-                      "wall_s": round(wall_s, 1),
-                      "gpu_s": round(gpu_s, 1),
-                      "gpu_max_count": gpu_acc["max_gpu_count"],
-                      "env_steps": steps,
-                      "steps_source": steps_src,
-                      "terminated_by": terminated_by,
-                      "subprocess_rc": proc.returncode})
-        if steps is None or steps > EPISODE_STEP_CAP:
-            # 不可计量/越限:保留预留做取证,立即 STOP(不 resume、不重跑)
-            _log(log_fh, {"ev": "stop", "key": key,
-                          "reason": "UNMEASURED_OR_OVERCAP_STEPS",
-                          "steps": steps})
-            _write_summary()
-            sys.exit(1)
-        try:
-            ledger.charge_and_close(key, wall_s, gpu_s, steps)
-        except ValueError as exc:
-            _log(log_fh, {"ev": "charge_refused", "key": key,
-                          "reason": str(exc)})
-            _write_summary()
-            sys.exit(1)
-        observations.append({"key": key, "wall_s": wall_s,
-                             "gpu_s": gpu_s, "steps": steps})
+            cmd, env, ep_out, audit_out, _ = _episode_cmd(
+                row, ts=manifest_sha[:8], vla_endpoint=endpoint)
+            ep_out.parent.mkdir(parents=True, exist_ok=True)
+            t0 = time.monotonic()
+            proc = subprocess.Popen(cmd, env=env, start_new_session=True,
+                                    stdout=open(ep_out.with_suffix(".out"),
+                                                "w"),
+                                    stderr=subprocess.STDOUT)
+            pgid = proc.pid
+            stop_gpu = threading.Event()
+            gpu_acc = {"gpu_s": 0.0, "max_gpu_count": 0, "samples": 0,
+                       "last_n": 0}
+            gpu_thread = threading.Thread(
+                target=lambda: gpu_acc.update(
+                    _gpu_sampler(pgid, stop_gpu)), daemon=True)
+            gpu_thread.start()
 
-    _log(log_fh, {"ev": "run_end", "budget": ledger.raw(),
-                  "episodes": len(observations)})
-    _write_summary()
+            terminated_by = "natural_exit"
+            while True:
+                if proc.poll() is not None:
+                    break
+                if stop_all.is_set():
+                    terminated_by = "runner_sigterm"
+                    break
+                if time.monotonic() - t0 > worst_wall:
+                    terminated_by = "hard_timeout(reserved)"
+                    break
+                if _wait_probe_done(audit_out, proc,
+                                    time.monotonic() + 5.0):
+                    terminated_by = "probe_done(terminate_after_probe)"
+                    break
+            if terminated_by != "natural_exit":
+                how = _kill_pg(pgid)
+                _log(log_fh, {"ev": "episode_killed", "key": key,
+                              "reason": terminated_by, "how": how})
+            try:
+                proc.wait(timeout=SIGTERM_GRACE_S + 15)
+            except subprocess.TimeoutExpired:
+                _kill_pg(pgid, 0.5)
+                proc.wait(timeout=30)
+            stop_gpu.set()
+            gpu_thread.join(timeout=GPU_SAMPLE_S * 2)
+
+            wall_s = time.monotonic() - t0
+            gpu_s = gpu_acc["gpu_s"]
+            steps, steps_src = _episode_steps(audit_out)
+            _log(log_fh, {"ev": "episode_measure", "key": key,
+                          "wall_s": round(wall_s, 1),
+                          "gpu_s": round(gpu_s, 1),
+                          "gpu_max_count": gpu_acc["max_gpu_count"],
+                          "env_steps": steps,
+                          "steps_source": steps_src,
+                          "terminated_by": terminated_by,
+                          "subprocess_rc": proc.returncode})
+            if steps is None or steps > EPISODE_STEP_CAP:
+                # 不可计量/越限:保留预留做取证,立即 STOP(不 resume、不重跑)
+                _log(log_fh, {"ev": "stop", "key": key,
+                              "reason": "UNMEASURED_OR_OVERCAP_STEPS",
+                              "steps": steps})
+                _write_summary()
+                sys.exit(1)
+            try:
+                ledger.charge_and_close(key, wall_s, gpu_s, steps)
+            except ValueError as exc:
+                _log(log_fh, {"ev": "charge_refused", "key": key,
+                              "reason": str(exc)})
+                _write_summary()
+                sys.exit(1)
+            observations.append({"key": key, "wall_s": wall_s,
+                                 "gpu_s": gpu_s, "steps": steps})
+
+        _log(log_fh, {"ev": "run_end", "budget": ledger.raw(),
+                      "episodes": len(observations)})
+        _write_summary()
+    finally:
+        # 常驻服务回收(仅 --persistent-vla 路径;SIGKILL 前不再等待模型卸载)
+        if persistent_proc is not None:
+            _kill_pg(persistent_proc.pid, 5.0)
+            _log(log_fh, {"ev": "persistent_vla_down"})
 
 
 def _write_summary():

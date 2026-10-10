@@ -64,7 +64,9 @@
 
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / L1_LABEL_BLIND_6_OF_6_PASS_GATE_ONLY_RETAINED / D040_D041_D042_RESOLVED / DEV1A_G1_G2_G3_G4_LIVE_PASS / DEV1A_PILOT_8EP_FEASIBILITY_CONFIRMED / 6TRIG_RETAINED4_NOT_RETAINED2_UNKNOWN0 / DEV1B_CAUSAL_HOLD_PENDING_AUTH / L3_REAL_ROBOT_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / L1_LABEL_BLIND_6_OF_6_PASS_GATE_ONLY_RETAINED / D040_D041_D042_RESOLVED / DEV1A_G1_G2_G3_G4_LIVE_PASS / DEV1A_PILOT_8EP_FEASIBILITY_CONFIRMED / 6TRIG_RETAINED4_NOT_RETAINED2_UNKNOWN0 / PERF_ROUND_LOGONLY_OPTIN_DONE / DEV1B_CAUSAL_HOLD_PENDING_AUTH / L3_REAL_ROBOT_HOLD`**
+
+> **2026-10-10 性能轮(安全加速)完结(零新 episode、零 D-041 额度)**:8 集墙钟拆解=Planner API 76.1%(冻结)/init 13.5%(Pi0.5 每集重复加载 9.8% 主项)/工具 6.8%(1024 渲染+落盘 <1%,非瓶颈)/teardown 3.5%(SIGTERM 30s 宽限全额消耗)。实施两项 **默认关** 优化:`--vla-endpoint`/`--persistent-vla`(整批共用 vla_server,省 ~65s/集;隔离验证 PASS:22/35 维 Welch z>3 任务隔离、无漂移)+`P1_KILL_GRACE_S`(默认 30 不变);1024 按需渲染/PNG/EGL 全部不动(hi-res sha 在同刻证据链、/dev/dri 缺失)。等价性:selftest G4 PASS、dry-run manifest sha 不变、无旗标 agent cmd 逐字节不变。TERMINATE_AFTER_PROBE 核查=6 触发集均取证即停,无浪费。报告 `P1_PERF_ANALYSIS_20261010.md`、D-045;整批端到端节省属推算未实测(如实标注)。
 
 > **2026-10-10 第五轮 Label-blind Quota 真实执行完毕（本机只读离线）**：测试修复一处浮点严格相等断言（103 个 21/103 浮点和 vs assertEqual，改容差与 lab 合同对齐）后 **6/6 PASS**，标签翻转不改任何选择权重逐位验证。资格门全过。**Top20%（21 席，退出参考）**：RANDOM 5.30/0.252、GATE_ONLY **13.26/0.632（2.50×）**、TASK_EQUAL_GATE 13.78/0.656、TASK_PROP_GATE 13.70/0.653、LMG_FROZEN 17.00/0.810；**Top40% 任务配额双双重于 GATE_ONLY**（EQUAL 21.34 vs 24.12、PROP 23.70），any-time 下 EQUAL 反向（17.42<18.24）——次序对两种参考时间一致。**(1) 任务配额仅 +0.02 边际且不稳 → 撤回"按任务预算是主要算法机制"，两种配额降级探索性基线；(2) matched 14.48 不可被任何标签盲分配器达成（最高 13.78，还用了在线不合法元数据），D-039 纠错被实证坐实；(3) 源数据级核查：`task_id` 仅在 reconstruction_metadata 视图，合法 `instruction`→task 不唯一（"pick up the black bowl" 横跨 t3/t5/t9），批量队列存在性未验证 → TASK_* 判 `OFFLINE_BATCH_ONLY`；(4) GATE_ONLY 为 L1 唯一廉价合法候选保留，LMG 仍为需独立 cohort 的参考上界。**本轮后按预登记停止在同 103 例搜索任何新静态规则/固定臂/参数**；t9 静态阈值 STOP 维持。报告 `P1_LABEL_BLIND_QUOTA_RESULT_20261010.md`、**D-042**（与 D-040 撞号后改号；本条即 D-041 待办(a) 的收官件）；私有产物 `artifacts/p1_return_time_triage_lab/label_blind_quota_v1.json`。L2 按 D-040/D-041 条件授权进入 DEV1A 预检阶段。**
 
