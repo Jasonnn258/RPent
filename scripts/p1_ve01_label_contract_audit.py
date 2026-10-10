@@ -30,6 +30,52 @@ def _events(path):
     with path.open(encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
+# Reconcile the *recorded event schema* rather than manufacturing a zero
+# label count. The audit is scoped to probe event envelopes only; it cannot
+# establish absence from unrelated historical outputs or raw simulator state.
+PROBE_FIELDS = {
+    "ev", "arm", "probe_args", "result", "env_steps_start", "env_steps_end",
+    "env_steps_cost", "wall_s", "post_legal", "post_frames",
+    "visible_to_planner", "t",
+}
+PROBE_ARG_FIELDS = {"gripper", "steps"}
+PROBE_RESULT_FIELDS = {"name", "gripper", "steps", "libero_terminated"}
+PROBE_LEGAL_FIELDS = {
+    "robot0_eef_pos", "robot0_eef_quat", "robot0_gripper_qpos",
+    "gripper_gap", "eef_z",
+}
+PROBE_FRAME_FIELDS = {"name", "path", "bytes", "sha256", "err"}
+
+
+def probe_schema_unexpected_paths(probe):
+    """Inspect nested KEY NAMES only; return schema paths, never sensor values."""
+    unknown = []
+    if not isinstance(probe, dict):
+        return ["probe:not_dict"]
+    unknown += ["probe." + k for k in probe if k not in PROBE_FIELDS]
+    for field, allowed in (
+        ("probe_args", PROBE_ARG_FIELDS),
+        ("result", PROBE_RESULT_FIELDS),
+        ("post_legal", PROBE_LEGAL_FIELDS),
+    ):
+        payload = probe.get(field)
+        if not isinstance(payload, dict):
+            unknown.append(field + ":missing_or_not_dict")
+        else:
+            unknown += [field + "." + k for k in payload if k not in allowed]
+    frames = probe.get("post_frames")
+    if not isinstance(frames, list):
+        unknown.append("post_frames:not_list")
+    else:
+        for frame in frames:
+            if not isinstance(frame, dict):
+                unknown.append("post_frames:not_dict")
+            else:
+                unknown += ["post_frames." + k
+                            for k in frame if k not in PROBE_FRAME_FIELDS]
+    return sorted(set(unknown))
+
+
 def audit(manifest, root):
     if len(manifest) != 24 or len({row["episode_key"] for row in manifest}) != 24:
         raise ValueError("require the full preregistered 24-cell DEV0 manifest")
@@ -83,6 +129,15 @@ def audit(manifest, root):
         if probes:
             counter["probed"] += 1
             probe = probes[0]
+            counter["probe_event_schemas_inspected"] += 1
+            unexpected = probe_schema_unexpected_paths(probe)
+            if unexpected:
+                counter["probe_events_with_unreviewed_fields"] += 1
+                # Aggregate only; no field names/values or private paths in
+                # output. Unknown keys may encode time-aligned outcome truth.
+                violations.append(f"{key}:unreviewed_probe_schema_fields")
+            else:
+                counter["probe_events_matching_known_schema"] += 1
             probe_end = probe.get("env_steps_end")
             followup_step = ar.get("env_steps_at_audit")
             if (type(probe_end) is int and type(followup_step) is int and
@@ -96,8 +151,9 @@ def audit(manifest, root):
             # future skill boundary/early end. Even equality of steps does
             # NOT yield a contact/grasp oracle without an explicit contract.
             aligned_probe = False
-            counter["probe_time_contact_independent_labels"] += 0
-            counter["probe_time_held_independent_labels"] += 0
+            # There is no verified independently measured held/contact oracle
+            # in this *known* event schema. A new/unreviewed field blocks PASS
+            # instead of being silently counted as an absent label.
 
         overshoot = ar.get("overshoot_env_steps")
         if typ == "FIXED_HORIZON":
@@ -126,18 +182,25 @@ def audit(manifest, root):
 
     # Do not hide the pilot's other 18 or 19 episodes in a 5-only denominator.
     counter["allocated"] = len(manifest)
+    # These are verified *in-schema reference counts*, not statements about
+    # every possible saved simulator file or yet-uninspected data source.
     counter["with_probe_time_held_reference"] = 0
     counter["with_probe_time_contact_reference"] = 0
+    counter.setdefault("probe_events_with_unreviewed_fields", 0)
+    counter.setdefault("probe_events_matching_known_schema", 0)
     expected_cohort = (
         counter["started_with_events"] == 21
         and counter["started_not_triggered"] == 15
         and counter["triggered"] == 6
         and counter["probed"] == 5
+        and counter["probe_event_schemas_inspected"] == 5
+        and counter["probe_events_matching_known_schema"] == 5
+        and counter["probe_events_with_unreviewed_fields"] == 0
         and counter["no_event_file"] == 3
         and counter["later_task_success_observed"] == 6
         and counter["trigger_without_followup_audit"] == 0
     )
-    gate = ("NO_PROBE_TIME_PHYSICAL_LABELS_IN_EVENT_CONTRACT"
+    gate = ("NO_EXPLICIT_PROBE_LABEL_IN_RECOGNIZED_EVENT_SCHEMA"
             if expected_cohort and not violations
             else "HOLD_EVENT_INTEGRITY_OR_PROBE_MISSING")
     return {
@@ -148,8 +211,9 @@ def audit(manifest, root):
         "integrity_violations": violations,
         "records": records,
         "scientific_contract": {
-            "probe_time_contact": "UNKNOWN: no target-specific contact/force label captured when probe ended",
-            "probe_time_held": "UNKNOWN: no target-specific post-probe held-object label",
+            "probe_time_contact": "UNLABELLED_IN_RECOGNIZED_PROBE_EVENT_SCHEMA; raw sim and other sidecar sources not exhaustively inspected",
+            "probe_time_held": "UNLABELLED_IN_RECOGNIZED_PROBE_EVENT_SCHEMA; raw sim and other sidecar sources not exhaustively inspected",
+            "scope": "Fields of existing P1-DEV0 probe JSONL records only. Unexpected fields force HOLD pending schema review; do not infer universal absence of historical physical labels.",
             "later_task_success": "Only the future audit-only env.check_success (when present), at first skill boundary >= H or at early episode end",
             "geometric_world_map": "Nearest visible 3D surface has no object-instance/self segmentation or target-identity guarantee",
             "offline_reference_limit": "Future-task flag, tool flag and Planner think text cannot substitute for probe-time contact/held ground truth",
