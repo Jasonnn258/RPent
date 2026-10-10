@@ -291,6 +291,19 @@
 - **长期执行工作流修正**：用户要求以后由 **服务器内有终端权限的 Coding Agent** 接受一份完整 Prompt 自主 `git pull→tests→run→analyze→commit/push`；当前 ChatGPT 工具已能修改 GitHub 文件，但没有用户私有服务器可执行 shell/SSH，故不能把本聊天中的 GitHub 修改解释为已运行远端实验。长期任务无需人工逐项粘命令，权限和服务器运行时长由当地 Agent 控制。
 - **结论**：`MODULE_LAB_V1_NEGATIVE_EXPERIMENT_VERIFIED / TASK9_DIAGNOSTIC_PRIORITY / ORIGINAL_PICK_THREE_GATE_ABLATION_PENDING / NEW_L2_HOLD`。严格限定 FGONLY 是同技能位姿代理，非真实持握真值或前瞻恢复效果。
 
+## D-031 · 三门槛消融实跑:末端门槛完全重建 flag,min/final 伪影订正上轮负结果,D 门槛=Task9 漏报主因(几何机制),相对下降门槛为下一预注册方向
+
+- **日期/来源**:2026-10-10,实验服务器 Coding Agent 自主执行(用户单 Prompt 授权):pull 至 `ca18751`,`test_p1_pick_gate_lab.py` 6/6 PASS → `p1_pick_gate_lab.py` 实跑 206 PRIMARY → 新增 `p1_pick_gate_followup.py`(合成 6/6 PASS)实跑。报告 `P1_PICK_GATE_LAB_RESULT_20261010.md`;私有产物 `artifacts/p1_pick_gate_lab/{gate_lab_v1,followup_v1}.json`(不入 Git)。
+- **状态**:已确定(离线证据层);新采集 L2 HOLD。
+- **决定与证据**:
+  1. **末端三门槛逐例完全重建原 Tool flag**:`terminal_gate_and_tool_flag_disagree=0/206`(flag=T 103/103 全 D∧L∧G_final,flag=F 103/103 全非);零 terminated 捷径成功、全部 FN 均预算耗尽退出。逐 chunk 提前退出与末端摘要的时间差异在本队列**不存在**(机制:D/L 单调累积,`closed` 检查当前 grip=末帧 grip)。**不得再宣称工具 flag 含有末端诊断之外的隐藏信息**。
+  2. **订正 D-030 的负结果解读**:上轮最优挑战臂与正确同构臂之间 **0.086 BAcc 是 min↔final 开度错用伪影**(22 行全部"中途闭合末端重开",L∧G 臂 FP 7→17);修正后 **L∧G_final(去 D)=0.8553 vs Tool 0.8012**(+0.0541;TP134/FP7/FN23/TN42;episode 聚类配对 bootstrap 中位 +0.055,96.4% ≥0,区间 [−0.004,+0.105])。"13 模块全面弱于 Tool"应弱化为"在 min-gap 实现下弱于"。
+  3. **D(绝对下降≥0.10m)是代理漏报主导源**:56 FN 中 40 缺 D;t9 30 FN 中 24 缺 D(19 例"只缺 D"且 lift 中位 0.092、末端开度中位 0.0048 齐备);机制=**t9 柜顶物体起点高(start_eef_z 中位 1.20 vs t3 1.01,高 15-20cm)×绝对阈值的几何交互**;t5 是刀刃型(descent 中位 0.099 贴阈值),t9 是结构型(中位 0.070)。descent 敏感性 0.10→0 平滑单调(BAcc 0.801→0.855,FP 2→7),无悬崖。
+  4. **去 D 不可全局部署**:t3 上 L∧G_final −0.116 有害;11 臂修正族 LOTO 合并 Δ=−0.006(留 t3 训练选 L∧G_final → t3 −0.116;留 t9 训练选 flag 本身)——**收益是 t9 几何特异,跨任务选择学不出**。
+- **对照/替代**:全局去 D(否,t3 有害)、继续调 gap/lift 阈值(D-030 已 STOP,本轮无新证据翻案)、几何相对下降门槛 D_rel(采纳为下一方向,本轮不选形)。
+- **不能推出什么**:BAcc 提升不等于持握判对率(FGONLY 与 EEF 运动学同源);bootstrap 是样本不确定性描述;LOTO 三折非独立;206 上任何 D_rel 具体形式的选择都是后验,本轮零收益宣称;不构成新仿真/Runtime 授权。
+- **重新开启条件**:用户授权有界新采集 L2,预注册 D_rel(冻结原三门槛为基线、t9 主层、FP 上限预登记);若 t9 FN 不降或 t3/t5 劣化则假设证伪即 STOP。
+
 ## 新决策追加模板
 
 ```markdown

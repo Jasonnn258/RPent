@@ -36,9 +36,11 @@
 
 > **2026-10-10 实验驱动第一轮真实回传（模块搜索的负结果）**：用户服务器 pull 至 `889cc3e`，`test_p1_offline_module_lab.py` **7/7 PASS**，实际206 A0 PRIMARY /175 episodes，任务3/5/9 =71/77/58。全部13固定arms对 FGONLY **balanced accuracy 均未超过**原 Tool flag 的0.801248（TP101/FP2/FN56/TN47）。其中 `min_gap0.060 AND peak_lift0.050` 虽然 raw agreement=0.830097，高于 Tool 0.718447，**BAcc仅0.769206**、proxy FP=17 vs Tool2；工具失败103例中它“补救”38个代理 FN，同时新增15个代理错误接受。原 flag 在 Task3/5/9 的 BAcc=0.923729/0.796237/**0.583333**，Task9 alone 占30/56代理漏报（53.6%）；LOTO 模块选择 test pooled BAcc=0.722735，低于 Tool0.801248。**实证 STOP 简单 gap/lift OR/AND 作为“持握改进”**。源码新发现：原 `pi0_pick` success 还要求**先下降0.10m**，且成功检查的是当前/final grip，不等于旧实验中的 min grip；先前 A0 gap AND lift 缺少下降 gate、替换了开度位置。已提交下一轮 **三门槛组件消融** `p1_pick_gate_lab.py` / `test_p1_pick_gate_lab.py`，检查工具三门阈值与真实 proxy 错误分解、各任务布尔格模式，不臆断单个 gate 因果，**新脚本尚未在用户服务器跑**。数值来源、限制与后续假设见 `P1_MODULE_LAB_SERVER_RESULT_20261010.md`。原 A0/DEV0 不改，新 L2 HOLD。
 
+> **2026-10-10 三门槛消融真实执行完毕(本轮实验服务器自主运行,全程离线只读)**:`test_p1_pick_gate_lab.py` **6/6 PASS** 后对 206 PRIMARY 实跑,追加 `p1_pick_gate_followup.py`(合成 6/6 PASS 后实跑)。**(1) 末端 D∧L∧G_final 逐例完全重建原 Tool flag(0/206 分歧,103/103 对应,零 terminated 捷径成功)**——"逐 chunk 提前退出 vs 末端摘要"的时间差异在本队列不存在(D/L 单调累积+`closed` 查当前 grip=末帧 grip);**(2) 上一轮"13 模块全面弱于 Tool"的最优挑战臂差距中 0.086 BAcc 是 min↔final 开度错用伪影**(22 行全是"中途闭合末端重开",L∧G 臂 FP 7→17);修正后 **L∧G_final(去 D)=0.8553 vs Tool 0.8012(+0.054,episode 聚类 bootstrap 96.4%≥0,区间 [−0.004,+0.105])**,但 t3 −0.116 有害;**(3) D(绝对下降≥0.10m)是漏报主导源**:56 代理 FN 中 40 缺 D;t9 的 30 FN 中 24 缺 D(19 个"只缺 D",lift 中位 0.092/末端开度 0.0048 齐备),机制=**柜顶高起点几何(start_z 中位 1.20 vs t3 1.01,高 15-20cm)×绝对阈值的交互**,全部 FN 均预算耗尽退出;**(4) LOTO 修正族合并 Δ=−0.006(留 t3 选 L∧G_final 则 t3 测试 −0.116;留 t9 时训练选 flag)**——去 D 收益跨任务学不出,不可全局部署。**下一轮唯一最值得实验:几何相对下降门槛 D_rel 的预注册新采集对照(冻结三门槛为基线,t9 主层,FP 上限预登记),本轮不宣称收益,新 L2 HOLD。**详见 `P1_PICK_GATE_LAB_RESULT_20261010.md`;私有产物在 `artifacts/p1_pick_gate_lab/`。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / MODULE_LAB_V1_SERVER_7_OF_7_PASS_ALL_13_FIXED_ARMS_BELOW_TOOL_BACC / TASK9_PROXY_FN_30_OF_56 / THREE_GATE_ABLATION_CODE_READY_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / GATE_LAB_EXECUTED_6_6_TESTS / TERMINAL_GATES_EXACTLY_RECONSTRUCT_FLAG / MIN_VS_FINAL_ARTIFACT_0.086 / DESCENT_GATE_DOMINANT_FN_SOURCE_TASK9_GEOMETRY / RELATIVE_DESCENT_GATE_PREREG_NEXT / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -66,6 +68,8 @@
 | **DEV0 RGB 本地对照（用户服务器回传）** | 修复后合成回归 6/6 OK；`PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`，5 张真实 Agentview/Wrist 对照图写入服务器本地 | 图片尚未被视觉审阅或物理真值评价；离线人工标注工具已提交未执行 |
 | **VE-v0.1 离线研究（仓库夜间报告）** | 报告称5例图像判读、Evidence Claim 原型 19/19、对抗 10/10；post-gap 3近地板/2高于地板停住，B3/B4 有额外状态分类 | **独立复审降级**：停住不证明物理接触，近 EEF 表面不证明目标接触；B3 含 EEF proprio；ADV7 零 CONTINUE 属代码约束，持握检出/因果收益仍不可估。参见 `P1_VE01_INDEPENDENT_REVIEW.md` |
 | **VE01.1 服务器实际验证** | 10/10 tests OK；5/5 合法输入，3 near-min gap / 2 plateau，1 最近表面临近 EEF 但目标身份未知，0 held/contact 独立正例 | 只是保守的离线证据资格和未知状态，不能当作真实物理接触/持握性能；后续目标改为时间同步独立标签可得性 |
+| **Module Lab v1(用户服务器)** | 7/7 tests;13 固定臂 BAcc 全部低于 Tool 0.8012;LOTO 合并 −0.078;t9 占 30/56 代理 FN | 挑战臂缺 D 且误用 min 开度;结论需按 gate-lab 修正重读;详见 `P1_MODULE_LAB_SERVER_RESULT_20261010.md` |
+| **三门槛消融 Gate Lab(2026-10-10 实跑)** | 6/6+6/6 tests;末端 D∧L∧G_final **逐例=flag**(0/206 分歧);L∧G_final 0.8553(+0.054,96.4% bootstrap≥0)但 t3 −0.116;min↔final 伪影 0.086 BAcc/22 行;t9 30 FN 中 24 缺 D,机制=柜顶高起点(start_z 1.20 vs 1.01)×绝对 0.10m 阈值;LOTO 合并 −0.006 | FGONLY 弱代理同源;描述性敏感性;去 D 收益 t9 特异不可全局部署;下一轮=几何相对 D_rel 预注册新采集,本轮不宣称收益;详见 `P1_PICK_GATE_LAB_RESULT_20261010.md` |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
