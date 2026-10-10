@@ -52,9 +52,11 @@
 
 > **2026-10-10 第四轮两项互补 L1 实验真实执行完毕（本机只读离线，12/12 测试零改动）**：pull 至 `49cd3bd`，资格门全过（103/26/56、t9∧011 子池 19/11、池内 19 个单例 episode）。**(A) Task9 D-only 条件可辨识（D-036）**：Top4 三连续臂完全同分 3/4=0.750（lift 1.30），1万次标签置换 p=0.427/0.434/0.418；Top8 最好 6/8=0.750（p=0.213）；留一集区间 [0.750,1.000] 不低于全量但 n=19 高基率下是弱证据；D_ONLY_THEN_LIFT 池内退化 0.643（lift 截断在池内制造并列，冻结设计缺陷如实登记）→ **停止门触发：淘汰继续精炼静态末端阈值区分 t9 退出持续/瞬中的路线**（与 D-033 几何不可分、D-024/D-025 gap 重叠区三方独立一致）。**(B) 103 例匹配增量分解（D-037）**：LMG Top20 观测 17 正，Global 随机 5.30 → Gate 匹配 13.26（精确等于 D_ONLY 臂观测，内部自洽）→ Task×Gate 匹配 **14.48**；**组成效应解释 3.21× 富集的 78%，连续分数组内增量仅 +0.120**（episode bootstrap 中位 +0.111，95% [−0.022,+0.256]，96.4%>0；any-time +0.080、Top40% +0.062 同向）；三臂增量 PEAK_LIFT +0.091 / FINAL_GAP +0.120 / LMG +0.120——**融合相对单一轴无额外优势**；任务内增量 t3 +0.300 / t5 +0.111 / t9 +0.148 全正。**(C) 统一裁决**：主杠杆 = 廉价"门槛风险分层+分任务预算"（零拟合即 14.5/21=0.69，2.72× 随机）；连续分数降级为需独立 cohort+持握标签确认的次要候选；全局 3.21× 今后必须按"0.69 组成 + 0.12 增量"分解引用，不得再当排序器信息量。唯一下一步 = **同刻观测最小 L2 合同**（分层含真实持握正例、probe 改闭合+受控提升 2-3cm、任务内排名分预算，组成分层作免费基线臂）。报告 `P1_TASK9_CONDITIONAL_RESULT_20261010.md`、D-038；私有产物 `artifacts/p1_return_time_triage_lab/{task9_conditional_v1,incremental_v1}.json`。L2 仍 HOLD。
 
+> **2026-10-10 L1 最后一项标签盲基线核验已编码，服务器待跑**：独立复审 D-038 的 `task×gate matched random=14.48/21≈0.69` 发现它来自**原 LMG 分数选中样本的事后 task×gate 配额**与同批 audit-only FGONLY 单元格正例率，属于描述性组成分解，**不是可执行的“零拟合 task+gate 预算算法”性能**；早先相应强表述已在 `P1_TASK9_CONDITIONAL_RESULT_20261010.md` 追加解释性勘误。现新增 `p1_label_blind_quota_lab.py` + 合成测试和 `P1_LABEL_BLIND_QUOTA_EXPERIMENT.md`：固定103失败/21或42复核席位，在未知 audit 标签情况下分别使用 Global Random、GATE_ONLY、任务均分门槛优先、任务规模比例门槛优先、旧 LMG 排序生成选中权重，再统一离线评分；结果务必与可观测 GATE_ONLY 原基线13.26/21进行对照。**TASK_* 只表示离线批量分配假设**，task ID在在线可见性以及完整队列条件未验证，不得据此部署。新代码**尚未在服务器运行**；不再在同103条上继续搜索新静态公式。下一 L2 继续 HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / TRIAGE_103_SERVER_6_OF_6_PLUS_8_OF_8_PASS / GLOBAL_TOP20_LMG_17_OF_21_PROXY_POS / T9_CONDITIONAL_CODE_UNRUN / TASK_GATE_MATCHED_INCREMENTAL_CODE_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / T9_CONDITIONAL_AND_MATCHED_12_OF_12_SERVER_PASS / MATCHED_0P69_RETROSPECTIVE_NOT_IMPLEMENTED_POLICY / LABEL_BLIND_QUOTA_L1_CODE_UNRUN / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -106,7 +108,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **第四轮两项互补 L1 实验已执行完毕（2026-10-10）**：Task9 D-only 子池置换 p 0.21–0.43 判静态阈值路线 **STOP**；103 例匹配分解判组成效应解释 78% 富集、连续增量 +0.120（区间跨 0）。唯一保留主候选 = 廉价门槛+任务组成分层（0.69/Top20% 零拟合）；连续分数为次要候选需独立 cohort。唯一下一步 = 同刻观测最小 L2 合同（等用户授权），不启动新仿真或 L2。
+1. **第四轮 D-036/D-037 已在服务器完成12/12与真实103/19数据，静态 Task9 阈值路线 STOP。** 进入 bounded L2 之前，必须先验收这次已编码的 **label-blind batch allocator**：服务器 Coding Agent 单 Prompt 执行 `test_p1_label_blind_quota_lab.py` + `p1_label_blind_quota_lab.py`，在同21个名额下报告独立 GATE_ONLY、任务配额门槛优先和旧 LMG 的实际弱代理命中；明确匹配14.48不是可执行预算器。此为**最后一次针对已反复探索的103条数据做独立合法基线比较**，结果不允许用于在旧数据上后验继续调参。TASK_* 方法涉及任务ID来源及完整队列，未经额外可见性检查不能宣称在线合法。新 L2 仍未授权。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
