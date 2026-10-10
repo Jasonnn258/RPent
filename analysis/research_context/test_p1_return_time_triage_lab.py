@@ -30,6 +30,7 @@ def row(label,task="9",D_only=True,i=0):
         "task":task,
         "legal":legal_view(r),
         "exit_proxy_positive":label,
+        "ever_proxy_positive":label,
     }
 
 def frozen_like():
@@ -46,6 +47,13 @@ def frozen_like():
             positive=(i<npos)
             d_only=(i<n_d) if n_d else (i%4==0)
             data.append(row(positive,task,d_only,i))
+    # Add 30 mid-skill transient positives without changing terminal labels.
+    transient=0
+    for r in data:
+        if not r["exit_proxy_positive"] and transient<30:
+            r["ever_proxy_positive"]=True
+            transient+=1
+    assert transient==30
     return data
 
 class ReturnTimeTriageTests(unittest.TestCase):
@@ -101,6 +109,12 @@ class ReturnTimeTriageTests(unittest.TestCase):
         self.assertEqual(sum(r["exit_proxy_positive"] for r in data),26)
         result=summarize(data)
         self.assertEqual(result["n_failures"],103)
+        self.assertEqual(result["n_ever_proxy_positive"],56)
+        self.assertEqual(
+            result["reference_horizon_control"]["global_any_time"][
+                "UNTARGETED"]["budget_20pct"]["n_proxy_positive"],56)
+        self.assertEqual(
+            result["global"]["UNTARGETED"]["budget_20pct"]["n_proxy_positive"],26)
         self.assertEqual(result["task_n"],{"3":21,"5":30,"9":52})
         self.assertEqual(result["task9_D_only_subgroup"]["n"],19)
         self.assertEqual(result["task9_D_only_subgroup"]["terminal_pos"],11)
@@ -122,6 +136,12 @@ class ReturnTimeTriageTests(unittest.TestCase):
                 topk_expected(data,"D_ONLY_PATTERN",ratio)
         with self.assertRaisesRegex(ValueError,"Unknown triage"):
             priority("fake",data[0]["legal"])
+        with self.assertRaisesRegex(ValueError,"Unapproved audit"):
+            topk_expected(data,"UNTARGETED",.2,label_key="reference")
+        broken=frozen_like()
+        broken[0]["ever_proxy_positive"]=False
+        with self.assertRaisesRegex(ValueError,"reference mismatch"):
+            summarize(broken)
 
 if __name__=="__main__":
     unittest.main()
