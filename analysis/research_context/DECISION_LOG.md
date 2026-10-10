@@ -273,6 +273,15 @@
 - **交付**：`P1_NEXT_L2_LABEL_AND_CONTRAST_GATE.md`，对下一阶段提出明确 probe-end 同物理步号独立双指/目标身份与支撑物审计，区分接触 vs lift 后持续持握，保留 UNKNOWN；采用相同物理 Probe 的 blind/proprio/visual 信息对照、单独评估 lift 机械效果、精确 H 评价及在飞工作预算预留。**设计草案不是资源或 Runtime 授权，不是对未来收益的已验证论断。**
 - **STOP/GO**：合法 RGB/proprio 证据原型与 schema/时序分析层 GO；继续用这五例给出 held/contact precision、已证物理接触位置、证据收益等结论 **STOP**（缺独立标签与执行分支效果）；新 L2 物理实验 **HOLD**，需要新有界授权与预注册封版。停止继续重复同类 QA。
 
+## D-029 · 从五例证据审计转向 206 Pick 的有对照模块搜索（L1）
+
+- **日期/授权**：2026-10-10；用户明确要求按“先复现 baseline，再添加/删除/替换模块、做实验看反馈、聚合失败例再决定 Idea”的研究方法推进。仅在已批准的 L1 既有数据范围内执行离线分析，不新建 sim/Runtime/模型训练；历史 A0/DEV0/R Stage 封版结果只读。
+- **实际新增方法**：`analysis/research_context/p1_offline_module_lab.py`，在隔离的 `EERD_A_online_eligible.jsonl` 上配置 13 个固定弱模块（原工具 flag、两常数、min/final gap、peak EEF lift、AND/OR、flag+rescue 不同位置）；48 个事先定义的 gap/lift 阈值扰动做敏感性地图；每个模块对同技能 **FGONLY audit-only 代理**计 TP/FP/FN/TN、balanced accuracy、默认重试后 coverage、FN proxy rescue/新增误接受、分 task 表、episode cluster bootstrap；3 折 Leave-One-Task-Out **仅 train 任务 audit 标签选择模块家族**，在另外一个独立 task 报告结果。所有预测函数只接收独立的合法 `tool_report` 字段，不接收审计 reference/对象坐标。
+- **可直接复用的基线事实（已有服务器 A0）**：206 PRIMARY 的 TP=101、FP=2、FN=56、TN=47，对 FGONLY proxy balanced accuracy ≈0.80125，raw agreement ≈0.71845。Always-True raw agreement ≈0.76214，但 balanced accuracy 仅0.5。以 balanced accuracy、proxy 错误接受和漏报权衡为主要反馈，避免 majority-class 漂亮数字。
+- **避免研究失效**：FGONLY reference 是 in-skill 某时刻目标运动代理，与 peak EEF lift 有近缘运动构念；其吻合度改进绝不能改写成返回时实际持握/后续任务恢复收益。同一数据的48格 sweep 只用于脆弱性分析、不能事后据最佳格称泛化；LOTO 仅三 task，仍不是真实未来轨迹实验。没有 hold/contact 同步标签，且 P1 新 L2 无授权。
+- **下一步可验证交付**：`test_p1_offline_module_lab.py` + 原 A0 私有 206 Pick 模块实验，源码硬核验 235×3 行视图 join 和 TP101/FP2/FN56/TN47，若失败立即 STOP；通过后按失败子群 56 个 proxy FN 看何种模块改善、又带来多少新增 proxy FP，保留最大一个可靠方向或明确归零。**当前 GitHub 代码提交已完成，但服务器测试和真实模块结果尚未运行**。
+- **阶段裁决**：`L1_EXPERIMENT_CODE_GO / FULL_OFFLINE_RESULT_PENDING / GRASP_TRUTH_HOLD / NEW_L2_HOLD`，停止再对五个无物理标签 Probe 堆启发式审计。
+
 ## 新决策追加模板
 
 ```markdown
