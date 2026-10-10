@@ -38,9 +38,11 @@
 
 > **2026-10-10 三门槛消融真实执行完毕(本轮实验服务器自主运行,全程离线只读)**:`test_p1_pick_gate_lab.py` **6/6 PASS** 后对 206 PRIMARY 实跑,追加 `p1_pick_gate_followup.py`(合成 6/6 PASS 后实跑)。**(1) 末端 D∧L∧G_final 逐例完全重建原 Tool flag(0/206 分歧,103/103 对应,零 terminated 捷径成功)**——"逐 chunk 提前退出 vs 末端摘要"的时间差异在本队列不存在(D/L 单调累积+`closed` 查当前 grip=末帧 grip);**(2) 上一轮"13 模块全面弱于 Tool"的最优挑战臂差距中 0.086 BAcc 是 min↔final 开度错用伪影**(22 行全是"中途闭合末端重开",L∧G 臂 FP 7→17);修正后 **L∧G_final(去 D)=0.8553 vs Tool 0.8012(+0.054,episode 聚类 bootstrap 96.4%≥0,区间 [−0.004,+0.105])**,但 t3 −0.116 有害;**(3) D(绝对下降≥0.10m)是漏报主导源**:56 代理 FN 中 40 缺 D;t9 的 30 FN 中 24 缺 D(19 个"只缺 D",lift 中位 0.092/末端开度 0.0048 齐备),机制=**柜顶高起点几何(start_z 中位 1.20 vs t3 1.01,高 15-20cm)×绝对阈值的交互**,全部 FN 均预算耗尽退出;**(4) LOTO 修正族合并 Δ=−0.006(留 t3 选 L∧G_final 则 t3 测试 −0.116;留 t9 时训练选 flag)**——去 D 收益跨任务学不出,不可全局部署。**下一轮唯一最值得实验:几何相对下降门槛 D_rel 的预注册新采集对照(冻结三门槛为基线,t9 主层,FP 上限预登记),本轮不宣称收益,新 L2 HOLD。**详见 `P1_PICK_GATE_LAB_RESULT_20261010.md`;私有产物在 `artifacts/p1_pick_gate_lab/`。
 
+> **2026-10-10 远端自主三门槛实验已完成；新时间持续性实验待跑**：GitHub `bb7c664` 记录实验服务器 Agent 完成三门槛消融（合成6/6 + 追加分析6/6、真实206），完整报告 `P1_PICK_GATE_LAB_RESULT_20261010.md`、D-031。D∧L∧Gfinal **206/206 逐例重建**原 flag；先前 L∧Gmin 的错用变量造成相对 L∧Gfinal **0.086 BAcc 实现伪影**。纠正后 L∧Gfinal BAcc 0.8553 vs Tool0.8012，但 Task3 下降0.116，3 task LOTO pooled差-0.006；56代理FN中40缺下降D、Task9 30 FN中24缺D（19只缺D），**未证明物理持握或因果恢复效果**。下一步查冻结 `research_package_a.py:label_reference`，发现 FGONLY 采用**整个技能任何一刻为正**，与退出时 Tool flag 的时间构念不同。已新增 `p1_temporal_proxy_lab.py` 与合成测试，做 **56 FN 与 Task9 19 D-only 的末尾/短暂 proxy positivity 对照**，必须复核源 SHA 与原A0逐例reference。**新脚本尚未在服务器跑测试与真数据**；结果分流到几何相对D或时间一致性研究。新 L2 仍 HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / GATE_LAB_EXECUTED_6_6_TESTS / TERMINAL_GATES_EXACTLY_RECONSTRUCT_FLAG / MIN_VS_FINAL_ARTIFACT_0.086 / DESCENT_GATE_DOMINANT_FN_SOURCE_TASK9_GEOMETRY / RELATIVE_DESCENT_GATE_PREREG_NEXT / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / GATE_LAB_REAL_206_6_OF_6_PLUS_6_OF_6 / TERMINAL_TOOL_GATE_206_OF_206 / TASK9_D_MISSING_24_OF_30_PROXY_FN / FGONLY_TERMINAL_PERSISTENCE_L1_CODE_UNRUN / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -91,7 +93,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **已得到 Module Lab v1 的真实负结果**：7/7单测与206数据齐，13固定arms BAcc 全低于 Tool；不再重跑同一配置/追逐48格后验最高分。下一步直接让服务器内有终端权限的 Coding Agent 在一个 Prompt 里完成 `git pull`、`test_p1_pick_gate_lab.py`、`p1_pick_gate_lab.py`、下钻 Task9 的三门槛缺口及异常样本聚合、科学报告、Git commit/push。已提交三门槛实验源码/单测，尚未在服务器执行。L1允许，绝不推断实际 grasp 保持或自动启动新 L2。
+1. **完整三门槛服务器实验已完成**，不再复跑或后验扫描 D 阈值。下一项实验是 `test_p1_temporal_proxy_lab.py` + `p1_temporal_proxy_lab.py` 的独立206样本技内 FGONLY 时间持续性分析，尤其 Task9 19 个只缺D、flag=False/FGONLY+ 样本在 final_meas 是否仍为proxy-positive。Stage R只读、冻结 SHA 必须匹配 Package A `schema_qa.json`，mismatch直接 STOP；由服务器 Coding Agent 单 Prompt 自主 pull→test→run→分析→commit/push。新脚本 **服务器待跑**，terminal FGONLY 仍非物理抓取真值。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
