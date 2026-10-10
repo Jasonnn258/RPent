@@ -336,6 +336,21 @@
 - **反事实时间对照**：排序和合法特征完全固定，仅评价标签从 `any` FGONLY 换成 `final_meas` FGONLY，检验排序是否也受参考时点偏差影响。audit-only 目标坐标只进入离线标签构建与评分，绝不喂给排序器/Runtime。原 Stage R 必须只读，`schema_qa.json` hash + A0逐例 reference/206 primary + 103/26/56 分母不匹配直接 STOP。输出仅 gitignored 聚合。
 - **科研判据**：如果固定预算选择性增益与任务分层方向一致，下一方向是 budgeted selective verification，而非修改 success gate；若 Task9 D-only 内仍高度混杂且合法特征缺乏区分力，说明需要新同刻视觉/时序观测，不能通过更复杂的开度阈值补救。两者都不等于实际持握或动作收益。**代码已提交，实验服务器尚未运行**；旧DEV0 CLOSED，新 L2 HOLD。
 
+## D-035 · Return-Time Triage 实跑：合法末端证据全局选择性成立、t9 D-only 子池不足，双分支同触发
+
+- **日期/来源**：2026-10-10，本机只读离线自主执行（用户单 Prompt 授权）：`test_p1_return_time_triage_lab.py` 6/6 PASS 后主实验代码零改动实跑；补充鲁棒性 `p1_return_time_triage_robustness.py`（合成 8/8 PASS 后实跑，期间修复其 jackknife min/max LOO 组合公式 bug——`base±delta` 形式仅对称 fixture 碰巧正确，改为直接取 LOO 值并加索引级剔除）。报告 `P1_RETURN_TIME_TRIAGE_RESULT_20261010.md`；私有产物 `artifacts/p1_return_time_triage_lab/{triage_v1,robustness_v1}.json`（不入 Git）。
+- **状态**：已确定（离线证据层，弱代理参考）；新 cohort L2 HOLD。
+- **决定与证据**：
+  1. **资格门全过零 STOP**：source SHA 与 schema_qa 逐项一致；206 逐例 flag/reference 与冻结 A0 一致；分母复现 Tool False 103（79 episodes，t3/t5/t9=21/30/52）、退出正 26、any-time 正 56、UNKNOWN=0。
+  2. **全局选择性成立**（退出参考，基率 0.2524）：Top20% precision——LIFT_MINUS_GAP **0.810**（17正/4误，lift 3.21）> D_ONLY_THEN_LIFT 0.750 > PEAK_LIFT 0.714 > D_ONLY 0.632 > FINAL_GAP 0.524 > 基准 0.252；Top40% LIFT_MINUS_GAP precision 0.595、recall **25/26**。除数为原工具冻结阈值（0.05/0.06），零调参。
+  3. **参考时点对照**：any-time 参考下三臂 Top20% 全 21/21=1.000，排序次序不变——结论方向对参考定义鲁棒；LMG 的 4 个退出参考 Top20% 误选全部是"中途曾正/退出已放下"边界例（即需要新观测裁决的对象）。
+  4. **t9 D-only 子池（n=19，池内基率 0.579）lift 仅 1.30**（PEAK_LIFT/LMG Top20% precision 0.750）：合法 Tool Return 字段在该子池**不足以**区分退出持续 vs 中途瞬时——与 D-033 几何不可分、D-024 gap 重叠区原理不可分三方一致。预登记分支二触发：需要**同刻**物理/视觉观测（受控 lift probe 或腕视目标在场/跟随），静态末端阈值原理性不足。
+  5. **鲁棒性**：episode 聚类 bootstrap（1000 次，seed 20261013）LMG 2.5 分位 **0.619 > 基准臂 97.5 分位 0.354**（区间不重叠，最差重采样 0.476 仍近基线中位 2 倍）；单 episode jackknife 最大影响 |Δ|=0.048（全距 [0.800,0.857]）；Top20% 构成 t3:2/t5:8/t9:11 非单任务，全部 pattern-011。
+  6. **诚实局限**：跨任务分数水平非平稳（各任务内正/负分数中位全拉开：t3 1.70/0.45、t5 2.44/0.13、t9 2.26/−0.07，但 t3 抬升天然小 → 全局混排仅给 t3 2 席、抓 1/5 正例）；部署应用任务内排名/配额，本轮零归一化。
+- **机制结论（双分支）**：(A) LIFT_MINUS_GAP 有预算选择性验证 = 最小可证伪机制，新 cohort 预测 **Top20% precision ≥2× 池内基率、各任务 lift ≥2、bootstrap 下界高于基线上界**，任一不成立即证伪；(B) t9 D-only 需最小同刻观测。两者收敛为同一个最小 L2（分层含真实持握正例 + probe 改闭合+受控提升 2-3cm + 任务内排名分诊）。
+- **不能推出什么**：退出时 FGONLY 与 any-time 是同一运动学弱代理的两个时点（EEF 同源、无接触力、无独立真值）；"排序高"只代表优先复核，≠ CONTINUE/持握/动作收益；回顾性 103 例不能证明跨 cohort 泛化或因果；bootstrap/jackknife 仅样本不确定性描述；本轮零阈值选择、零训练、零 Runtime 改动。
+- **重新开启条件**：用户授权机制 (A)+(B) 的新 cohort 最小 L2 预注册（含同刻观测合同与任务分层配额）。Stage R §36 / S1 / 冻结 A0/DEV0 不动。
+
 ## 新决策追加模板
 
 ```markdown

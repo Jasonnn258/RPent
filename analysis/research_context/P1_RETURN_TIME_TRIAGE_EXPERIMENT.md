@@ -1,6 +1,6 @@
 # P1 Return-Time Triage · 已实现的 L1 离线实验（2026-10-10）
 
-> **状态**：CODE_READY / SERVER_EXECUTION_PENDING / NEW_L2_HOLD。本实验依赖冻结 A0 EERD + Stage R trace，仅用原 Tool 的合法返回字段为失败案例分配**复核优先级**，不向 Planner、在线 Runtime 或其他动作消费者写入决策。新源码 `p1_return_time_triage_lab.py` 与合成测试 `test_p1_return_time_triage_lab.py` 已提交；**本轮未连接实验服务器执行真实103条结果**。
+> **状态**：EXECUTED（2026-10-10 本机只读离线实跑完成；资格门全过，零 STOP）。真实数值结果见 `P1_RETURN_TIME_TRIAGE_RESULT_20261010.md`（LIFT_MINUS_GAP Top20% precision 0.810 / lift 3.21，Top40% recall 25/26；t9 D-only 子池 lift 仅 1.30 → 预登记分支二同触发：合法末端证据在子池不足）。主实验代码未改一行（6/6 测试通过后实跑）；补充鲁棒性脚本 `p1_return_time_triage_robustness.py`（8/8 测试）随结果轮新增。NEW_L2_HOLD 不变。本实验依赖冻结 A0 EERD + Stage R trace，仅用原 Tool 的合法返回字段为失败案例分配**复核优先级**，不向 Planner、在线 Runtime 或其他动作消费者写入决策。
 
 ## 由真实实证导出的下一问题
 
