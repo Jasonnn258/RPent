@@ -48,9 +48,11 @@
 
 > **2026-10-10 Return-Time Triage 第三轮真实运行 + Task9 条件实验准备**：远端 Agent commit `db9d2b5` 已实跑103失败/79 episodes 的6组固定排序，6/6主单测、8/8鲁棒性测试。全局 LIFT_MINUS_GAP Top20% 命中17/21，precision=0.810 vs 随机0.252，任务内Top20%精度 t3/t5/t9=0.800/1.000/0.727；但全局21个席位仅2给t3，存在任务分布失衡。**Task9 D-only 已知困难子池(n19,退出FGONLY正11/负8) Top4精度0.750，仅相对该池基率1.30×**。因此新增固定 `p1_task9_conditional_lab.py` + 合成测试 + `P1_TASK9_CONDITIONAL_EXPERIMENT.md`，只在这19例内比较旧合法得分 Top4/8、1万次标签置换及留一episode，检验全局分诊杠杆能否在固定失败类别内成立；**新代码服务器尚未测试/实跑**。如果不成立，停止纯静态末端阈值精炼，考虑同刻观测协议（须另外授权新 L2）。本轮无新sim/GPU/Runtime。
 
+> **2026-10-10 追加增量信息消融（L1代码已提交，服务器未跑）**：在第三轮真实103 Tool False结果中，LMG 全局Top20% 17/21 正例相对全局随机5.30/21呈3.21倍富集，但该21席 **全部gate=011，t3/t5/t9占2/8/11**，因此不能将全局富集直接归于 LMG 连续分数；存在门槛组成、任务配额的混合因素。除现有 `p1_task9_conditional_lab.py`（Task9 n19池内固定Top4/8，1万次置换，待跑）外，本轮新增互补实验 `p1_triage_incremental_lab.py` + `test_p1_triage_incremental_lab.py` + `P1_TRIAGE_INCREMENTAL_EXPERIMENT.md`：保持固定分数和预算，计算 **Global/Gate/Task/Task×Gate匹配随机** 的同等席位预期命中，估计连续分数在子群内的净增量，episode聚类bootstrap仅做描述性不确定性。**新增代码尚未在用户服务器运行**；若匹配后 Δ≈0，则停止将复杂排序包装为主创新，只保留风险分层/预算分配候选。所有参考是FGONLY末端运动学弱代理，不是held/contact真值；新L2仍 HOLD。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / RETURN_TIME_TRIAGE_103_SERVER_6_OF_6_PLUS_8_OF_8_PASS / GLOBAL_TOP20_LMG_PRECISION_0P810 / T9_DONLY_PRECISION_0P750_VS_BASE_0P579 / T9_CONDITIONAL_L1_CODE_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / TRIAGE_103_SERVER_6_OF_6_PLUS_8_OF_8_PASS / GLOBAL_TOP20_LMG_17_OF_21_PROXY_POS / T9_CONDITIONAL_CODE_UNRUN / TASK_GATE_MATCHED_INCREMENTAL_CODE_UNRUN / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -102,7 +104,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **第三轮已实跑，当前下一步是更窄的实际对照，而非更多设计**：`p1_task9_conditional_lab.py` 对 Task9 D-only(n=19,末端FGONLY+11)作已有合法分数条件区分检验：固定Top4/8、1万次置换、留一Episode，使用原A0/Stage R只读数据，验证其是否优于池内随机和是否被单个Episode驱动。新代码已提交尚未在服务器运行；允许实验服务器Coding Agent自主 pull→test→run→数值报告→commit/push。若效果弱，STOP静态末端证据细调、继续下一阶段同刻视觉/物理观测设计。
+1. **下一步交给服务器 Coding Agent 一次完成两项互补L1实验**：已有的 `p1_task9_conditional_lab.py`（Task9 D-only 19例 Top4/8、探索性置换/留一集）+ 本轮 `p1_triage_incremental_lab.py`（固定LMG排序，在全部103例分离门槛、任务和连续分数的净增量）。两项都只读冻结 A0+Stage R、不得换阈值或标签；需对实际结果给出独立效用解释与STOP/GO，修复代码问题后commit/push脱敏汇总。**两项实验真实结果均待跑**，不启动新仿真或L2。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
