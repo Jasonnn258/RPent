@@ -46,9 +46,11 @@
 
 > **2026-10-10 第三轮 Return-Time Triage 实验真实执行完毕（本机只读离线）**：`test_p1_return_time_triage_lab.py` **6/6 PASS 后主代码零改动实跑**，资格门全过（source SHA/逐例 flag/reference 一致；103/26/56 分母复现，79 episodes）。**(1) 全局退出时参考**（26正/77负，基率 0.2524）：Top20% 下 LIFT_MINUS_GAP（`lift/0.05 − final_gap/0.06`，除数均为原工具冻结阈值）precision **0.810**（17正/4误选，lift **3.21**），PEAK_LIFT 0.714、D_ONLY_THEN_LIFT 0.750、D_ONLY 0.632、FINAL_GAP 0.524、基准 0.252；Top40% LIFT_MINUS_GAP recall **25/26**。**(2) 参考时点对照**：any-time 参考下三臂 Top20% 全 21/21=1.000——排序次序对参考时点鲁棒，仅量级变松；LMG 的 4 个 Top20% 误选全部是"中途曾正、退出已放下"的边界例。**(3) 任务分层**：t3/t5/t9 自身 Top20% lift 3.36/3.33/3.15 方向一致；**t9 D-only 子池（n=19，池内基率 0.579）lift 仅 1.30**——预登记分支二触发：合法 Tool Return 字段在该子池**不足以**区分退出持续 vs 瞬时，需要同刻物理/视觉观测（受控 lift probe / 腕视目标在场），静态末端阈值原理性不足。**(4) 鲁棒性**（新增 `p1_return_time_triage_robustness.py`，8/8 测试；顺带修复其 jackknife min/max LOO 组合公式 bug）：episode 聚类 bootstrap 下 LIFT_MINUS_GAP 2.5 分位 **0.619 > 基准臂 97.5 分位 0.354**（区间不重叠）；单 episode jackknife 最大影响 |Δ|=0.048；Top20% 构成 t3:2/t5:8/t9:11 非单任务。**诚实局限**：跨任务分数水平非平稳（t3 抬升天然小 → 全局混排只给 t3 2 席），部署应按任务内排名/配额，本轮零调参。**(5) 机制结论**：分支一成立——LIFT_MINUS_GAP 有预算选择性验证为新 cohort 可证伪机制（预测 Top20% precision ≥2×基率、各任务 lift ≥2）；分支二成立——t9 子池需最小同刻观测。报告 `P1_RETURN_TIME_TRIAGE_RESULT_20261010.md`、D-035；私有产物 `artifacts/p1_return_time_triage_lab/{triage_v1,robustness_v1}.json`。L2 仍 HOLD。
 
+> **2026-10-10 Return-Time Triage 第三轮真实运行 + Task9 条件实验准备**：远端 Agent commit `db9d2b5` 已实跑103失败/79 episodes 的6组固定排序，6/6主单测、8/8鲁棒性测试。全局 LIFT_MINUS_GAP Top20% 命中17/21，precision=0.810 vs 随机0.252，任务内Top20%精度 t3/t5/t9=0.800/1.000/0.727；但全局21个席位仅2给t3，存在任务分布失衡。**Task9 D-only 已知困难子池(n19,退出FGONLY正11/负8) Top4精度0.750，仅相对该池基率1.30×**。因此新增固定 `p1_task9_conditional_lab.py` + 合成测试 + `P1_TASK9_CONDITIONAL_EXPERIMENT.md`，只在这19例内比较旧合法得分 Top4/8、1万次标签置换及留一episode，检验全局分诊杠杆能否在固定失败类别内成立；**新代码服务器尚未测试/实跑**。如果不成立，停止纯静态末端阈值精炼，考虑同刻观测协议（须另外授权新 L2）。本轮无新sim/GPU/Runtime。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / TEMPORAL_PROXY_LAB_REAL_206_7_OF_7_PLUS_8_OF_8 / FN56_SPLIT_26_EXIT_30_TRANSIENT / RETURN_TIME_TRIAGE_103_L1_CODE_READY_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / RETURN_TIME_TRIAGE_103_SERVER_6_OF_6_PLUS_8_OF_8_PASS / GLOBAL_TOP20_LMG_PRECISION_0P810 / T9_DONLY_PRECISION_0P750_VS_BASE_0P579 / T9_CONDITIONAL_L1_CODE_UNRUN / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -100,7 +102,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **第三轮 Return-Time Triage 实验已执行完毕（2026-10-10）**：LIFT_MINUS_GAP 在 103 Tool False 上 Top20% precision 0.810（lift 3.21）、Top40% recall 25/26；episode 聚类 bootstrap 与基准臂区间不重叠、jackknife 单集影响 ≤0.048；t9 D-only 子池 lift 仅 1.30 判定合法末端证据不足（需同刻观测）。唯一下一步 = **机制 (A) 新 cohort 预注册验证 + 机制 (B) 最小同刻观测设计**（同一最小 L2：分层含真实持握正例、probe 改闭合+受控提升 2-3cm、全局分诊按任务内排名）；任何在线接线/新仿真需用户独立授权，L2 仍未授权。
+1. **第三轮已实跑，当前下一步是更窄的实际对照，而非更多设计**：`p1_task9_conditional_lab.py` 对 Task9 D-only(n=19,末端FGONLY+11)作已有合法分数条件区分检验：固定Top4/8、1万次置换、留一Episode，使用原A0/Stage R只读数据，验证其是否优于池内随机和是否被单个Episode驱动。新代码已提交尚未在服务器运行；允许实验服务器Coding Agent自主 pull→test→run→数值报告→commit/push。若效果弱，STOP静态末端证据细调、继续下一阶段同刻视觉/物理观测设计。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
