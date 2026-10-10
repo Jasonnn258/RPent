@@ -135,3 +135,20 @@
   `python scripts/p1_dev1a_run.py --persistent-vla`(runner 全托管)或
   自起服务后 `--vla-endpoint http://127.0.0.1:<port>`;
   `P1_KILL_GRACE_S=5 python scripts/p1_dev1a_run.py --persistent-vla`。
+
+## 八、Planner API 精细测量（2026-10-10 后续补充，未新跑 Episode）
+
+**核心修正**：上一轮按总耗时减去已记录工具执行时间得到的 `Planner API≈76.1%` 是**残差估计**，并非逐次模型请求的精确 API 服务端延迟；其中可能含 Python Agent 图运行、工具事件记录、网络往返、远端排队和生成。不能以这个残差直接宣称 GLM 服务端推理占 76%。
+
+已独立提交 **默认关闭、opt-in** 的私有性能记录器：
+
+- `rpent/utils/api_latency_probe.py`：使用 monotonic 时钟，仅记录模型请求图节点持续时间、响应类型、图运行累计请求数/输入与输出 token；从不保存原始 Prompt、模型响应、API Key、图片、工具参数或任务明细。
+- `rpent/planner/api_loop.py`：在 Pydantic-AI `ModelRequestNode → CallToolsNode/End` 的既有流程旁路测量，只有环境变量 `RPENT_API_LATENCY_LOG` 明确指向仓库 `artifacts/` 下的 .jsonl 文件才生效。未配置时默认工具/模型请求语义不变；测量出错只禁用 profiler，不中断模型与机器人物理动作。
+- `analysis/research_context/test_p1_api_latency_probe.py`：纯合成测试覆盖无环境变量、非法路径拒绝、原始载荷不落盘、连续请求计时、请求未开始、重复开始和异常耗时。
+- **本次未连接私有实验服务器执行这些测试，也没有以本 profiler 运行新的模型 API 请求或仿真 Episode**。需要服务器 Agent 后续 `unittest` 和现有日志核验后才能判定具体耗时。
+
+待获得真实逐请求计时后，应先按 model request 数量、各请求 p50/p90/max、累计 model-node 等待占比、输入/输出 token 规模和 timeout/error 频率归因。客户端图节点总时间仍**无法**单独分出网络时延 / 模型服务端排队 / 首 token 延迟，若提供方有相应指标才能进一步拆分。任何 Prompt 压缩、换模型/推理档位、截短 Planner 轮次或工具集合均可能改变物理行动轨迹；必须在 DEV1B 新 cohort 单独预注册、同预算对照，不能静默修改 D-041 已封版 DEV1A。
+
+**额外预算风险**：上一轮报告提到持久 VLA 在 Episode 间的常驻 GPU 占用未包含在旧 `gpu_s` 口径里；因此 `--persistent-vla` 不能仅以旧 Episode 窗口 GPU 账本宣称遵守全生命周期预算。未来启用之前应按 GPU 资源占用时间的实际计费合同，明确持久服务冷启动、空闲和共享 GPU 是否计入，实施不重复也不漏算的资源时间核算，重新进行 G4 验收。
+
+**状态**：`API_NODE_PROFILER_CODE_COMMITTED_DEFAULT_OFF / SYNTHETIC_TEST_SERVER_UNRUN / NO_NEW_EPISODE / DEV1B_STILL_HOLD`。
