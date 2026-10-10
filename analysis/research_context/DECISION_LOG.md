@@ -449,6 +449,16 @@
 - **不能推出什么**:~65s/集节省是日志推算+隔离验证,未跑整批端到端对照(需新 episode,违反本轮约束);kill 宽限 5s 实际节省未实测;常驻下集间空转显存不计入 gpu_s 账户(与现口径一致,DEV1B manifest 需明示)。
 - **状态串**:`PERF_ROUND_DONE / PLANNER_API_76PCT_FROZEN / PERSISTENT_VLA_OPTIN_VALIDATED / KILL_GRACE_ENV_KNOB / RENDER_DUMP_KEPT_ASIS`。
 
+## D-046 · 性能优化轮(请求级归因+修复三 bug+离线基准):Planner 76% 残差坐实为模型请求墙钟 75.0%,客户端开销 ~1ms 排除,[usage] 冻结/persistent-vla 致命/崩溃泄漏三 bug 修复,默认全关
+
+- **日期/来源**:2026-10-10,用户委托"隔夜自主性能研究"(Phase A-E);零新 episode、零新付费 API、零训练,全部既有日志离线解析 + FunctionModel/MockHTTP/合成子进程/真实 vla_server 隔离启动(80s,GPU0,用后归零)。
+- **状态**:已确定(工程修复+基准,默认全关/opt-in,冻结行为零变化;历史 token 统计需勘误)。
+- **决定**:(1) **请求级归因**:DEV1A run.log 秒级时间戳重建 model-node wall(口径=ApiLatencyProbe)= 276 请求/4040s,占 8 集总墙钟 **75.0%**(残差估计 76.1% 坐实);p50=8s/p90=33s/p95=56s/max=141s;隐藏重试 0;request-2 cache_read=14336≈输入 98.9%(GLM 端点真实缓存回报)。(2) **客户端开销排除**(B4):FunctionModel sleep=0 上界法 ~1.1-1.3ms/请求,对轮次 4-48/每轮图片 0-1MB/thinking 4KB/工具结果 64KB 全平坦 → 客户端图+序列化+ProcessHistory 占真实 p50 的 ~0.016%,≥99.98% 请求墙钟在网络+服务端,B4 关闭。(3) **修复三 bug**:① `[usage]`/stats 从第 2 请求起冻结(observe_response 存 RunUsage 活引用,delta(自己,自己)≡0;copy.copy 快照修复;**影响所有历史 api-planner 运行的 token 统计=低估勘误**;ovpm_exp 调度指标读 structured_metrics.json 不受影响);② `--persistent-vla` 从未能启动(cli.healthz AttributeError 被 except Exception 吞成恒未就绪→240s FATAL;改 call("healthz");真实端到端验证 PASS:78.3s 就绪+SIGKILL 故障即时检出+清扫无残留);③ 子进程 rc≠0 崩溃时组内孤儿 daemon 泄漏(`_sweep_if_crashed`;旧逻辑 poll≠None 一律 natural_exit 跳过 killpg)。(4) **新增**:常驻集间探活守卫(死亡即 stop 止损,不再白烧 worst_wall)、probe 接入 dashboard 路径、`p1_perf_benchmark.py` 离线基准(mock API 延迟模式 p50/p90/p95+token 不重复累计守卫/kill 宽限扫描 grace=wall/GPU 采样器 pgid 过滤+异常容错 3/3)。
+- **证据**:`artifacts/p1_perf/{planner_requests,client_overhead,benchmark,vla_persist_startup_check}.json`(私有);测试新增 9 个全过(test_api_usage_accounting 3/test_api_dashboard_probe 1/test_p1_runner_lifecycle 5 含 mock HTTP 探活回归/SIGTERM 忽略 SIGKILL 升级/崩溃孤儿清扫);selftest PASS;dry-run manifest sha b57ce6c9 不变;脱敏报告 `P1_PERFORMANCE_OPTIMIZATION_REPORT.md`。
+- **对照/替代**:客户端序列化优化(否决,测量排除);1024 渲染/PNG/EGL(维持 D-045 不动);Probe 计时边界经 pydantic-ai 节点语义验证(node yield 先于执行,probe 恰覆盖请求墙)。
+- **不能推出什么**:稳态 prompt-cache 命中率与第 3 请求起逐请求 token(冻结,UNMEASURABLE_FROM_EXISTING_LOGS);TTFT/服务端排队/生成分解(需服务端指标);~65s/集整批节省仍为推算+隔离验证(未跑新 episode 对照);性能改善≠任务成功率改善。
+- **重新开启条件**:DEV1B 新 cohort 预注册时启用常驻+短宽限,须先定义 GPU·hour 全生命周期核算口径(常驻集间空闲计入与否);减少 Planner 无效请求属研究问题,须独立预注册,不得静默接入冻结路径。
+
 决策追加模板
 
 ```markdown

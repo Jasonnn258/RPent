@@ -69,6 +69,10 @@
   `except Exception` 吞成"恒未就绪" → 启动必然 240s 超时 FATAL。
   该 opt-in 特性(上轮交付)从未真实可用;修正为 `call("healthz")`。
   mock HTTP server 回归测试锁定(tests/test_p1_runner_lifecycle.py)。
+- **真实端到端验证(GPU0,~80s,零 episode)**:
+  `p1_perf_vla_persist_startup_check.py` → 启动 78.3s healthz 就绪、
+  探活 True、SIGKILL 故障注入后集间守卫**立即**检出 False、清扫无残留、
+  GPU 归零 → `artifacts/p1_perf/vla_persist_startup_check.json` PASS。
 
 ### 2.3 [B2] 常驻 vla_server 集间探活守卫
 
@@ -142,10 +146,12 @@ env 步 1678,证据集(6 触发集全部取得 t_lift_end 证据)。
 - 测试:本轮新增 9 个(test_api_usage_accounting 3 + test_api_dashboard_probe 1
   + test_p1_runner_lifecycle 5)全过;目标批 15/15;runner --selftest
   PASS;--dry-run manifest sha b57ce6c9 与 D-041 封版一致。
-- 基准:`artifacts/p1_perf/{planner_requests,breakdown,client_overhead,
-  benchmark}.json`(私有,不提交)。
-- 代码:rpent/planner/api_loop.py、scripts/p1_dev1a_run.py、
-  scripts/p1_perf_*.py、tests/*(见 git log)。
+- 基准(mock API 面示例读数:常 50ms 延迟 → probe p50=0.051s/client share
+  0.001s;长尾 30ms+300ms+500ms → p50=0.031/p90=0.302/p95=0.502,probe
+  忠实复现;GPU 采样审计 3/3):`artifacts/p1_perf/{planner_requests,
+  breakdown,client_overhead,benchmark,vla_persist_startup_check}.json`
+  (私有,不提交)。
+- 真实服务验证:常驻启动+故障注入 PASS(§2.2),GPU0 用后归零。
 
 ## 六、GO-HOLD-STOP
 
