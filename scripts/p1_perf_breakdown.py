@@ -48,6 +48,7 @@ def parse_runlog(runlog: Path) -> dict:
     tools = []                     # (name, seconds)
     usage = {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0,
              "requests": 0, "lines": 0}
+    last_usage = dict(usage)
     turns = 0
     last = None
     for line in runlog.read_text(encoding="utf-8", errors="replace") \
@@ -78,10 +79,13 @@ def parse_runlog(runlog: Path) -> dict:
                     tools.append((name, (ts - t0).total_seconds()))
             mu = _USAGE.search(line)
             if mu:
-                usage["lines"] += 1
+                # [usage] 行是单 run 累计快照:取末行才是该集终值,
+                # 逐行求和会把累计值重复叠加(旧实现的口径错误)
+                last_usage["lines"] += 1
                 for k, v in zip(("in", "out", "cache_read", "cache_write",
                                  "requests"), mu.groups()):
-                    usage[k] += int(v)
+                    last_usage[k] = int(v)
+    usage.update(last_usage)
     return {"t_cmd": t_cmd, "t_prompt": t_prompt, "daemons": daemons,
             "last": last, "turns": turns, "tools": tools, "usage": usage}
 
@@ -179,6 +183,8 @@ def main() -> int:
                   "时间戳秒级分辨率;planner_api=主循环−工具时长(含少量日志间隙)",
                   "pi0_pick 时长 = 推理+chunk步进+渲染+落盘 之和,内部拆分见微基准",
                   "teardown(被杀集)含 ~30s SIGTERM 宽限(runner 计入墙钟)",
+                  "planner_usage=末行累计快照:历史日志受 [usage] 冻结 bug 影响,"
+                  "只覆盖每集前 2 个请求(真实总量更大,UNMEASURABLE_FROM_EXISTING_LOGS)",
               ]}
     out = OUT / "perf_breakdown.json"
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",

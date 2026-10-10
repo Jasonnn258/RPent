@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import contextlib
+import copy
 import dataclasses
 import hashlib
 import json
@@ -916,13 +917,16 @@ class _ApiRunObserver:
             # cumulative total (== this turn's usage in the one-turn-per-run
             # dual-route flow).
             self._usage_run_id = run_id
-            self._usage_in_run = usage
-            incr = usage
+            # 快照而不是引用:run.usage 是图状态里的同一个活对象,库会原地
+            # 递增;存引用会让下一轮 delta(自己,自己) 恒为 0,累计从第
+            # 2 个观测点起冻结(2026-10-10 性能轮定位的生产 [usage] 冻结)
+            self._usage_in_run = copy.copy(usage)
+            incr = copy.copy(usage)
         else:
             # Later turn within the same run: the run's usage is cumulative,
             # so only the delta since the previous observation is new.
             incr = _usage_delta(usage, self._usage_in_run)
-            self._usage_in_run = usage
+            self._usage_in_run = copy.copy(usage)
         self._usage_accum = (
             incr if self._usage_accum is None else self._usage_accum + incr
         )
