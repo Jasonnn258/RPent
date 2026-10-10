@@ -56,9 +56,11 @@
 
 > **2026-10-10 用户委托独立审核授权 D-040（与先前 L2 HOLD 的范围区别）**：研究方向 `Time-Aligned Evidence Acquisition + Budgeted Selective Verification` 获**方法论GO**。新 `P1_L2_INDEPENDENT_AUTHORIZATION_REVIEW_20261010.md` 将 **G1 只读/代码/mock合成测试立即批准**；新独立 `P1-L2-FEAS` G2 feasibility simulator pilot **预授权 AUTO-GO**（最多12新独立episode、GPU≤3 GPU·hour、wall≤4h、最多12 triggers），服务器Agent须从0 episode完成资源控制权、在飞成本预算预留+安全终止、零修改Stage R/原DEV0、同刻目标ID+左右指尖接触+支承/抬起参考及两通道证据隔离的全部硬 Gate；任一失败必须 **STOP=0 episode**，绝不能偷用旧DEV0额度。通过则用户已委托本次技术许可，无须再次逐项人工授权。**G3 多臂动作收益/训练/真实机器人仍 HOLD**。本聊天没有服务器shell/无法确认实际Gate是否pass，因此本状态是PREAUTH，不等于已执行新sim。旧 label-blind quota L1 可由Agent同轮收官。
 
+> **2026-10-10 用户委托 L2 研究立项与授权复审（D-041 为当前有效的严格 ceiling）**：已核实 D-040 的早期 G2 ≤12episode/≤3GPUh/≤4h preauth，但进一步结合相关工作与 DEV0 预算溢出，**D-041 收紧为本次独立 DEV1A ≤8新episode，t9×4/t3×2/t5×2、≤3 GPU·h、≤4h wall、单worker、每集≤1500环境步、最多一次不超2cm受控lift**。用户已委托研究授权，**G1 代码+mock 测试 GO；G2 仅在模拟sim目标物体ID/双指接触/支撑/同刻帧/隔离/硬预算预留 G1–G4 全部真实PASS后才自动 GO；任一 Gate 失败=0新episode STOP**。DEV1A 只检验同刻独立（仿真操作性）物理标签可得性和成本，生产继续/重试统一blind，不做因果策略效益对照；L3真实机器人与后续 DEV1B 因果随机化、训练、生产部署仍 HOLD。完整研究对照、文献差异、终点与停止条件见 `P1_L2_DEV1A_RESEARCH_REVIEW_AND_AUTHORIZATION_20261010.md`。D-040 的12集旧 ceiling 已由D-041显式 supersede。**这只是 GitHub 审批和方案提交，私有服务器条件未验收，尚未启动新sim**。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / MATCHED_0P69_RETROSPECTIVE_ONLY / LABEL_BLIND_QUOTA_L1_UNRUN / P1_L2_FEAS_12EP_3GPUH_4H_PREAUTH_AFTER_HARD_GATES / G3_CAUSAL_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / D039_L1_LABEL_BLIND_QUOTA_SERVER_UNRUN / D041_G1_DEV1A_CODE_GO / G2_SIM_CONDITIONAL_MAX8EP_3GPUH_4WALLH_NO_GATES_VERIFIED / G3_CAUSAL_HOLD / REAL_ROBOT_STOP`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -110,7 +112,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **第四轮 D-036/D-037 已在服务器完成12/12与真实103/19数据，静态 Task9 阈值路线 STOP。** 进入 bounded L2 之前，必须先验收这次已编码的 **label-blind batch allocator**：服务器 Coding Agent 单 Prompt 执行 `test_p1_label_blind_quota_lab.py` + `p1_label_blind_quota_lab.py`，在同21个名额下报告独立 GATE_ONLY、任务配额门槛优先和旧 LMG 的实际弱代理命中；明确匹配14.48不是可执行预算器。此为**最后一次针对已反复探索的103条数据做独立合法基线比较**，结果不允许用于在旧数据上后验继续调参。TASK_* 方法涉及任务ID来源及完整队列，未经额外可见性检查不能宣称在线合法。新 L2 仍未授权。
+1. **按 D-041 一次性进入 DEV1A**：服务器 Coding Agent 自主确认工作树与最新分支并完成（a）未运行的 L1 标签盲 quota 最终baseline测试+真实回顾性结果，（b）DEV1A G1–G4 mock/schema/仿真 contact API与硬预算安全门；不允许改 StageR/DEV0。若所有 prelaunch gate 都留下可靠证据，才依据本次委托有界授权自动启动 **最多8新 episode（≤3GPUh/≤4h墙钟）**，只做同步观测、双指目标接触/支撑/短窗 retained 标签可行性，并盲化下游策略；任何预算/标签/隔离门失败立即STOP、0新episodes、提交诊断报告。若8集触发不够，报告“样本不可估”而非补跑；DEV1B因果试验仍须新的结果驱动审查。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
