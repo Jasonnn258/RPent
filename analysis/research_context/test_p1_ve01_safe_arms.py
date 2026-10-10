@@ -11,13 +11,15 @@ from p1_ve01_safe_arms import assess, summarize
 
 
 def case(i=1, closure="STALLED_ABOVE_FLOOR", dist=.0005):
+    post_gap = (.0027 if closure == "CLOSED_TO_FLOOR"
+                else .0039 if closure == "AMBIGUOUS" else .00696)
     return {
         "case": f"synthetic_case{i}",
         "validity": "VALID",
         "inter_finger_content": {"claim": "ABSTAIN"},
         "proprio_closure": {
             "pre_gap_m": .00731,
-            "post_gap_m": .00696,
+            "post_gap_m": post_gap,
             "closure_class": closure,
         },
         "visual_camera_motion": {
@@ -40,7 +42,7 @@ class TestVE01SafeReinterpretation(unittest.TestCase):
         self.assertEqual(a["state"], "GAP_PLATEAU_CAUSE_UNKNOWN")
         self.assertEqual(a["object_contact"], "UNKNOWN")
         self.assertEqual(a["held_grasp"], "UNKNOWN")
-        self.assertIn("servo", a["inference_limit"] if "servo" in a["inference_limit"] else "servo alternative")
+        self.assertIn("not independent physical contact labels", a["inference_limit"])
 
     def test_fully_closed_can_still_hide_thin_object(self):
         c = case(closure="CLOSED_TO_FLOOR", dist=.020)
@@ -79,6 +81,13 @@ class TestVE01SafeReinterpretation(unittest.TestCase):
         target_surface = copy.deepcopy(robot_self_surface)
         self.assertEqual(assess(robot_self_surface), assess(target_surface))
         self.assertEqual(assess(robot_self_surface)["held_grasp"], "UNKNOWN")
+
+    def test_claim_class_must_match_gap_not_just_label(self):
+        c = case(closure="CLOSED_TO_FLOOR")
+        c["proprio_closure"]["post_gap_m"] = .00696
+        ans = assess(c)
+        self.assertFalse(ans["eligible"])
+        self.assertEqual(ans["reason"], "GAP_AND_REPORTED_CLOSURE_DISAGREE")
 
     def test_unknown_or_incomplete_fields_fail_closed(self):
         c = case()
