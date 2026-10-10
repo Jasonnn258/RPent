@@ -39,22 +39,23 @@ class LatencyProbeTests(unittest.TestCase):
             probe=ApiLatencyProbe(p,clock=lambda:next(stamps))
             probe.begin_request()
             probe.finish_request(
-                usage=SimpleNamespace(input_tokens=121,output_tokens=17,requests=1),
+                usage=SimpleNamespace(input_tokens=121,output_tokens=17,cache_read_tokens=45,cache_write_tokens=0),
                 outcome="tool_node")
             probe.begin_request()
             probe.finish_request(
-                usage=SimpleNamespace(input_tokens=322,output_tokens=44,requests=2),
+                usage=SimpleNamespace(input_tokens=201,output_tokens=27,cache_read_tokens=120,cache_write_tokens=0),
                 outcome="end_node")
             data=[json.loads(s) for s in p.read_text().splitlines()]
             self.assertEqual(len(data),2)
             self.assertEqual([x["model_node_elapsed_s"] for x in data],[1.25,.5])
-            self.assertEqual([x["graph_usage_input_tokens_cumulative"] for x in data],[121,322])
+            self.assertEqual([x["request_input_tokens"] for x in data],[121,201])
+            self.assertEqual(
+                [x["request_cache_read_tokens"] for x in data],[45,120])
             for row in data:
                 self.assertEqual(set(row),{
                     "protocol","request_idx","model_node_elapsed_s",
-                    "graph_usage_input_tokens_cumulative",
-                    "graph_usage_output_tokens_cumulative",
-                    "graph_usage_requests_cumulative","outcome"})
+                    "request_input_tokens", "request_output_tokens",
+                    "request_cache_read_tokens", "request_cache_write_tokens","outcome"})
             self.assertNotIn("password",p.read_text())
             self.assertNotIn("prompt",p.read_text())
             self.assertNotIn("tool",json.dumps(data[1]))
@@ -82,7 +83,7 @@ class LatencyProbeTests(unittest.TestCase):
                 probe.begin_request()
             rec=probe.finish_if_pending(outcome="error")
             self.assertEqual(rec["outcome"],"error")
-            self.assertIsNone(rec["graph_usage_output_tokens_cumulative"])
+            self.assertIsNone(rec["request_output_tokens"])
             self.assertIsNone(probe.finish_if_pending())
             self.assertEqual(probe.sequence,1)
 
