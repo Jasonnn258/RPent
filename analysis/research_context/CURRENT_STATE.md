@@ -24,9 +24,11 @@
 
 > **VE-v0.1 视觉证据离线研究完成（2026-10-09/10，夜间自主阶段，全程只读离线）**：对 5 个真实 probe 前后图像完成可辨识性分析（MODEL_VISION 主观判读，非物理真值）+ 确定性 Evidence Claim 原型（`analysis/research_context/p1_ve01_evidence.py`，19/19 单测）+ 六臂对照（B0/B1=B2 冻结规则/B1′ stall 三态/B3 视觉护栏几何/B4 融合）+ 对抗测试 **10/10 PASS**。**核心新事实**：(1) probe 闭合结局三态成立——69mm→2.67mm/10步证明行程能力，t9_s1003(7.31→6.96mm)/t9_s1005(4.53→4.53mm)停住=物理阻挡，D2 的 gap<0.06 把其中 2 个接触案例一律误判 CONTINUE;(2) 薄沿持握(1.8mm flag=T)与空闭合(2.2mm flag=F)在 gap 轴原理不可分，probe 无 lift 时**任何模态都不能断言持握**;(3) 最大 wrist 差分(45.8,63.5% 像素)是纯深度视差(零信息)，护栏=整帧占比+SHA 新鲜度+翻转对齐;(4) 视觉真实增量=图像有效性裁决+接触方位(腕视世界图近场,t9_s1003 最近表面 0.5mm 落在指间投影带中心)，状态区分度 1/1/1→2/4/4。5 例无持握正例、无 probe 时刻真值 → 检出率不可估。详见 `P1_VE01_VISUAL_EVIDENCE_REPORT.md`。**判定：GO(离线证据原语)/ 最小修正 L2(lift-probe+正例+任务分层)HOLD 待用户授权**。
 
+> **2026-10-10 独立复审 VE-v0.1（GitHub 源码层，不等于私有数据复测）**：最新夜间实验 commit `32af61b`，原型 19/19 + 对抗 10/10 为**仓库报告**。审查发现“gap plateau 必然=物理接触”“world_wrist 最近表面=目标接触”“B3 为纯视觉”“ADV7 零继续证明可靠性”“Planner think 的 flag=持握真值”等推断缺少可辨识性或独立对照。保留模型产生有效分箱与近场特征的探索性价值，收窄为 `GAP_PLATEAU_CAUSE_UNKNOWN`、`SURFACE_NEAR_EEF_IDENTITY_UNKNOWN`，不能称已确证的接触。另发现旧 B3/B4 没有输入 `validity` 先行保护。已新增离线、**不改旧冻结实验结果**的 `scripts/p1_ve01_safe_arms.py`（v0.1.1）与合成单测，检查 invalid/stale/字段冲突及物理归因歧义；独立方法审查见 `P1_VE01_INDEPENDENT_REVIEW.md`。**本轮新代码尚未在用户服务器测试/运行**。优先执行只读 v0.1.1 安全复审；不启动新仿真/训练/Runtime，L2 HOLD。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VE01_OFFLINE_COMPLETE_5_CASES / PROTOTYPE_19_TESTS_10_ADVERSARIAL_PASS / STALL_SIGNAL_VERIFIED_3FLOOR_2OBSTRUCTED / GRASP_DETECTION_UNESTIMABLE_NO_POSITIVES / NEXT_MINIMAL_L2_HOLD`**
+**`P1_DEV0_CLOSED / VE01_OFFLINE_REPORTED_5_CASES_19_TESTS_10_ADVERSARIAL / VE01_CONTACT_INFERENCE_DOWNGRADED / VE011_SAFE_GATE_CODE_COMMITTED_TESTS_UNRUN / HELD_GRASP_ACCURACY_UNESTIMABLE / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
