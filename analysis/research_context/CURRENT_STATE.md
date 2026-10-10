@@ -26,9 +26,11 @@
 
 > **2026-10-10 独立复审 VE-v0.1（GitHub 源码层，不等于私有数据复测）**：最新夜间实验 commit `32af61b`，原型 19/19 + 对抗 10/10 为**仓库报告**。审查发现“gap plateau 必然=物理接触”“world_wrist 最近表面=目标接触”“B3 为纯视觉”“ADV7 零继续证明可靠性”“Planner think 的 flag=持握真值”等推断缺少可辨识性或独立对照。保留模型产生有效分箱与近场特征的探索性价值，收窄为 `GAP_PLATEAU_CAUSE_UNKNOWN`、`SURFACE_NEAR_EEF_IDENTITY_UNKNOWN`，不能称已确证的接触。另发现旧 B3/B4 没有输入 `validity` 先行保护。已新增离线、**不改旧冻结实验结果**的 `scripts/p1_ve01_safe_arms.py`（v0.1.1）与合成单测，检查 invalid/stale/字段冲突及物理归因歧义；独立方法审查见 `P1_VE01_INDEPENDENT_REVIEW.md`。**本轮新代码尚未在用户服务器测试/运行**。优先执行只读 v0.1.1 安全复审；不启动新仿真/训练/Runtime，L2 HOLD。
 
+> **2026-10-10 用户服务器 VE01.1 安全门实际回传**：`test_p1_ve01_safe_arms.py` **10/10 OK**、`scripts/p1_ve01_safe_arms.py` 对既有5个 probe 输出 `eligible=5`，RETRY 3/5 + RETRY+ESCALATE 2/5；`NEAR_MIN_GAP_OBJECT_PRESENCE_UNKNOWN=3`、`GAP_PLATEAU_CAUSE_UNKNOWN=2`；几何最近表面 4 常规/1 近 EEF 但**身份未知**。 `claim_holding_positive=0`、`independently_verified_object_contact=0`、`audit_truth_used=false`：这是**没有生成物理正例真值**，不能宣称五次实际接触失败或零误报。下一步针对已有 P1-DEV0 事件设计了**只读时间点与标签来源审计** `scripts/p1_ve01_label_contract_audit.py`，检查 probe 时间与 audit-only 后续任务结果是否可合法配对并区分，不能以 H 后的 `check_success` 充当 probe 结束瞬间的物体接触/持握。新增合成单测 `test_p1_ve01_label_contract_audit.py`；**新脚本尚未在服务器测试**。DEV0 仍 CLOSED，新在线 L2 HOLD。
+
 ## 1. 总状态
 
-**`P1_DEV0_CLOSED / VE01_OFFLINE_REPORTED_5_CASES_19_TESTS_10_ADVERSARIAL / VE01_CONTACT_INFERENCE_DOWNGRADED / VE011_SAFE_GATE_CODE_COMMITTED_TESTS_UNRUN / HELD_GRASP_ACCURACY_UNESTIMABLE / NEXT_L2_HOLD`**
+**`P1_DEV0_CLOSED / VE011_SERVER_TESTS_10_OF_10_PASS / EVIDENCE_INPUT_ELIGIBLE_5_OF_5 / PROPRIO_FLOOR_RANGE_3_PLATEAU_2 / CONTACT_AND_HELD_GROUND_TRUTH_UNAVAILABLE / LABEL_TIME_AUDIT_CODE_UNRUN / NEXT_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -55,6 +57,7 @@
 | **DEV0 视觉证据配对（用户服务器回传）** | `PAIRED_ASSETS_COMPLETE`;5/5 probe 对 agentview 与 wrist 图像哈希/PNG 头尺寸合格，5/5 两相机前后哈希均不同；`failure_reasons={}` | 只验证静态文件与视图配对；合成测试 2/3（零字段 KeyError），归零输出已修待复跑；wrist 纵向方向不一致，尚无任何视觉持握识别结果 |
 | **DEV0 RGB 本地对照（用户服务器回传）** | 修复后合成回归 6/6 OK；`PRIVATE_BOARDS_WRITTEN_NOT_VISUAL_VERIFIER`，5 张真实 Agentview/Wrist 对照图写入服务器本地 | 图片尚未被视觉审阅或物理真值评价；离线人工标注工具已提交未执行 |
 | **VE-v0.1 离线研究（仓库夜间报告）** | 报告称5例图像判读、Evidence Claim 原型 19/19、对抗 10/10；post-gap 3近地板/2高于地板停住，B3/B4 有额外状态分类 | **独立复审降级**：停住不证明物理接触，近 EEF 表面不证明目标接触；B3 含 EEF proprio；ADV7 零 CONTINUE 属代码约束，持握检出/因果收益仍不可估。参见 `P1_VE01_INDEPENDENT_REVIEW.md` |
+| **VE01.1 服务器实际验证** | 10/10 tests OK；5/5 合法输入，3 near-min gap / 2 plateau，1 最近表面临近 EEF 但目标身份未知，0 held/contact 独立正例 | 只是保守的离线证据资格和未知状态，不能当作真实物理接触/持握性能；后续目标改为时间同步独立标签可得性 |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -76,7 +79,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **先验收独立复审 v0.1.1 的真实运行**：新 `scripts/p1_ve01_safe_arms.py` 仅对已存在的五个 `evidence_claims.json` 做合法性、过期、嵌套 audit-only key、数值与类别一致性、几何表面来源不可辨识审计；对应 `test_p1_ve01_safe_arms.py` 合成单测**尚未在服务器执行**。实验输出写到私有 `/workspace/yjx/rpent_data/p1_dev0/ve01/safe_arms_v011.json`，不重写 VE01 旧结果。若门槛异常，STOP 并回报输入结构，不为追求结果调阈值。
+1. **VE01.1 已经在真实服务器通过（10/10）**，不再反复运行合法性门。下一步仅针对原 P1-DEV0 manifest/事件文件，执行 `test_p1_ve01_label_contract_audit.py` 与 `scripts/p1_ve01_label_contract_audit.py`，判断是否存在**与 probe 结束物理时间点一致的独立目标接触/持握标签**；后续 H 审计任务成功只能单列，不准映射到 probe-time held。新脚本代码已提交，尚未实测。若当前源无标签，研究进入 `PHYSICAL_LABELS_UNAVAILABLE` 状态，准备另一个正式 L2 预注册（必须经新授权）。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
