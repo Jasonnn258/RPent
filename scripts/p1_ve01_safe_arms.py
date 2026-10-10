@@ -62,9 +62,17 @@ def assess(claim: dict) -> dict:
     if not _finite_number(pre) or not _finite_number(post) or pre < 0 or post < 0:
         return _refuse("MISSING_OR_NONFINITE_GRIPPER_GAP")
     closure = prop.get("closure_class")
-    if closure not in ("CLOSED_TO_FLOOR", "STALLED_ABOVE_FLOOR",
-                       "AMBIGUOUS", "UNKNOWN"):
-        return _refuse("UNKNOWN_CLOSURE_CLASS")
+    # Recalculate the historic VE01 *discretization*, only to verify input
+    # consistency. These cutoffs are fit to the same five cases and are
+    # not calibrated mechanical ground truth.
+    if post <= .0035:
+        expected_closure = "CLOSED_TO_FLOOR"
+    elif post <= .0043:
+        expected_closure = "AMBIGUOUS"
+    else:
+        expected_closure = "STALLED_ABOVE_FLOOR"
+    if closure != expected_closure:
+        return _refuse("GAP_AND_REPORTED_CLOSURE_DISAGREE")
 
     camera = claim.get("visual_camera_motion")
     if not isinstance(camera, dict) or type(camera.get("camera_motion_flag")) is not bool:
