@@ -1,6 +1,6 @@
 # P1 L1 · 分离排序增益与数据组成效应：Matched Triage Information Experiment
 
-> **日期/状态**：2026-10-10；研究分支已提交可执行代码 `p1_triage_incremental_lab.py` 和合成单测 `test_p1_triage_incremental_lab.py`；**真实冻结数据新实验尚未在服务器运行**。不允许修改原排序、阈值、封版来源、Runtime，也不运行 L2/新 sim。
+> **日期/状态**：2026-10-10；**EXECUTED（同日只读离线实跑完成，12/12 测试零改动通过）**。真实结果见 `P1_TASK9_CONDITIONAL_RESULT_20261010.md`：LMG Top20 观测 17 正 → Task×Gate 匹配随机 14.48，组内增量仅 **+0.120**（episode bootstrap 中位 +0.111，95% [−0.022,+0.256]，96.4%>0）；组成效应解释 3.21× 富集的 **78%**；FINAL_GAP/PEAK_LIFT 增量 +0.120/+0.091（融合无额外优势）→ 主杠杆判为"廉价门槛+任务组成分层"，连续分数降级为需独立 cohort 确认的次要候选。不允许修改原排序、阈值、封版来源、Runtime，也不运行 L2/新 sim。
 >
 > **来源**：最新真实 `P1_RETURN_TIME_TRIAGE_RESULT_20261010.md`，103次 Tool False（79 episodes），26退出时代理正、77代理负。固定 Lift−Gap 全局Top20%=**17正/4负**，Random=5.30正，D-only门槛优先=**13.26正**；Top20 全部来自 `011` 模式，Task3/5/9 分别获得 **2/8/11** 个复核席位。t9 D-only 子池 Top4=3个代理正，池内正例11/19。以上是**已经执行的实证**，不是本新实验结果。
 

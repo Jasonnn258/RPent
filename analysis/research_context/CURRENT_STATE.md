@@ -50,6 +50,8 @@
 
 > **2026-10-10 追加增量信息消融（L1代码已提交，服务器未跑）**：在第三轮真实103 Tool False结果中，LMG 全局Top20% 17/21 正例相对全局随机5.30/21呈3.21倍富集，但该21席 **全部gate=011，t3/t5/t9占2/8/11**，因此不能将全局富集直接归于 LMG 连续分数；存在门槛组成、任务配额的混合因素。除现有 `p1_task9_conditional_lab.py`（Task9 n19池内固定Top4/8，1万次置换，待跑）外，本轮新增互补实验 `p1_triage_incremental_lab.py` + `test_p1_triage_incremental_lab.py` + `P1_TRIAGE_INCREMENTAL_EXPERIMENT.md`：保持固定分数和预算，计算 **Global/Gate/Task/Task×Gate匹配随机** 的同等席位预期命中，估计连续分数在子群内的净增量，episode聚类bootstrap仅做描述性不确定性。**新增代码尚未在用户服务器运行**；若匹配后 Δ≈0，则停止将复杂排序包装为主创新，只保留风险分层/预算分配候选。所有参考是FGONLY末端运动学弱代理，不是held/contact真值；新L2仍 HOLD。
 
+> **2026-10-10 第四轮两项互补 L1 实验真实执行完毕（本机只读离线，12/12 测试零改动）**：pull 至 `49cd3bd`，资格门全过（103/26/56、t9∧011 子池 19/11、池内 19 个单例 episode）。**(A) Task9 D-only 条件可辨识（D-036）**：Top4 三连续臂完全同分 3/4=0.750（lift 1.30），1万次标签置换 p=0.427/0.434/0.418；Top8 最好 6/8=0.750（p=0.213）；留一集区间 [0.750,1.000] 不低于全量但 n=19 高基率下是弱证据；D_ONLY_THEN_LIFT 池内退化 0.643（lift 截断在池内制造并列，冻结设计缺陷如实登记）→ **停止门触发：淘汰继续精炼静态末端阈值区分 t9 退出持续/瞬中的路线**（与 D-033 几何不可分、D-024/D-025 gap 重叠区三方独立一致）。**(B) 103 例匹配增量分解（D-037）**：LMG Top20 观测 17 正，Global 随机 5.30 → Gate 匹配 13.26（精确等于 D_ONLY 臂观测，内部自洽）→ Task×Gate 匹配 **14.48**；**组成效应解释 3.21× 富集的 78%，连续分数组内增量仅 +0.120**（episode bootstrap 中位 +0.111，95% [−0.022,+0.256]，96.4%>0；any-time +0.080、Top40% +0.062 同向）；三臂增量 PEAK_LIFT +0.091 / FINAL_GAP +0.120 / LMG +0.120——**融合相对单一轴无额外优势**；任务内增量 t3 +0.300 / t5 +0.111 / t9 +0.148 全正。**(C) 统一裁决**：主杠杆 = 廉价"门槛风险分层+分任务预算"（零拟合即 14.5/21=0.69，2.72× 随机）；连续分数降级为需独立 cohort+持握标签确认的次要候选；全局 3.21× 今后必须按"0.69 组成 + 0.12 增量"分解引用，不得再当排序器信息量。唯一下一步 = **同刻观测最小 L2 合同**（分层含真实持握正例、probe 改闭合+受控提升 2-3cm、任务内排名分预算，组成分层作免费基线臂）。报告 `P1_TASK9_CONDITIONAL_RESULT_20261010.md`、D-038；私有产物 `artifacts/p1_return_time_triage_lab/{task9_conditional_v1,incremental_v1}.json`。L2 仍 HOLD。
+
 ## 1. 总状态
 
 **`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / TRIAGE_103_SERVER_6_OF_6_PLUS_8_OF_8_PASS / GLOBAL_TOP20_LMG_17_OF_21_PROXY_POS / T9_CONDITIONAL_CODE_UNRUN / TASK_GATE_MATCHED_INCREMENTAL_CODE_UNRUN / NEW_L2_HOLD`**
@@ -104,7 +106,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **下一步交给服务器 Coding Agent 一次完成两项互补L1实验**：已有的 `p1_task9_conditional_lab.py`（Task9 D-only 19例 Top4/8、探索性置换/留一集）+ 本轮 `p1_triage_incremental_lab.py`（固定LMG排序，在全部103例分离门槛、任务和连续分数的净增量）。两项都只读冻结 A0+Stage R、不得换阈值或标签；需对实际结果给出独立效用解释与STOP/GO，修复代码问题后commit/push脱敏汇总。**两项实验真实结果均待跑**，不启动新仿真或L2。
+1. **第四轮两项互补 L1 实验已执行完毕（2026-10-10）**：Task9 D-only 子池置换 p 0.21–0.43 判静态阈值路线 **STOP**；103 例匹配分解判组成效应解释 78% 富集、连续增量 +0.120（区间跨 0）。唯一保留主候选 = 廉价门槛+任务组成分层（0.69/Top20% 零拟合）；连续分数为次要候选需独立 cohort。唯一下一步 = 同刻观测最小 L2 合同（等用户授权），不启动新仿真或 L2。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
