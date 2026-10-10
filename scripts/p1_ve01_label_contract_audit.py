@@ -128,8 +128,17 @@ def audit(manifest, root):
     counter["allocated"] = len(manifest)
     counter["with_probe_time_held_reference"] = 0
     counter["with_probe_time_contact_reference"] = 0
+    expected_cohort = (
+        counter["started_with_events"] == 21
+        and counter["started_not_triggered"] == 15
+        and counter["triggered"] == 6
+        and counter["probed"] == 5
+        and counter["no_event_file"] == 3
+        and counter["later_task_success_observed"] == 6
+        and counter["trigger_without_followup_audit"] == 0
+    )
     gate = ("NO_PROBE_TIME_PHYSICAL_LABELS_IN_EVENT_CONTRACT"
-            if counter["probed"] > 0 and not violations
+            if expected_cohort and not violations
             else "HOLD_EVENT_INTEGRITY_OR_PROBE_MISSING")
     return {
         "protocol": "VE01.1_FROZEN_DEV0_LABEL_TIME_AVAILABILITY",
