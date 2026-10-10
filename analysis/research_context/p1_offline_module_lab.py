@@ -271,6 +271,64 @@ def leave_one_task_out_selection(rows):
         "caution": "Three nonindependent task folds only. Module selection learns from TRAIN audit proxy labels OFFLINE; no training of neural weights, no deployment and no confirmatory generalization.",
     }
 
+def failure_slices(rows):
+    """Aggregate weak-reference disagreement by original tool flag and task.
+
+    Uses the audit label only AFTER offline grouping. There are no sample
+    identifiers, traces, predicted contact labels or privileged coordinates
+    in the output. Quantiles describe feature patterns, not causal mechanisms.
+    """
+    feature_keys = ("min_gripper_opening", "final_gripper_opening", "peak_lift_m")
+    groups = defaultdict(list)
+    for r in rows:
+        group = ("FLAG_T" if r["tool_report"]["success"] else "FLAG_F",
+                 "PROXY_POS" if r["reference"] else "PROXY_NEG")
+        groups[("ALL", *group)].append(r)
+        groups[(r["task"], *group)].append(r)
+    def feature_distribution(samples, key):
+        vals = [s["tool_report"].get(key) for s in samples]
+        finite = sorted(v for v in vals if type(v) in (int, float)
+                        and math.isfinite(v) and v >= 0)
+        if not finite:
+            return {"n_valid": 0, "n_missing": len(vals)}
+        return {"n_valid": len(finite), "n_missing": len(vals)-len(finite),
+                "min": round(finite[0], 6),
+                "p25": round(finite[len(finite)//4], 6),
+                "median": round(finite[len(finite)//2], 6),
+                "p75": round(finite[3*len(finite)//4], 6),
+                "max": round(finite[-1], 6)}
+    return [
+        {"task": task, "tool_flag": flag, "fgonly_proxy": ref,
+         "n": len(samples),
+         "features": {name: feature_distribution(samples, name)
+                      for name in feature_keys}}
+        for (task, flag, ref), samples in sorted(groups.items())
+    ]
+
+def flag_false_rescue_tradeoffs(rows):
+    """Rescued A0-FN counts MUST be paired with new A0-TN false accepts."""
+    subset = [r for r in rows if r["tool_report"]["success"] is False]
+    results = {}
+    for name, spec in PRESETS.items():
+        rescued = new_fp = abstain = 0
+        for r in subset:
+            prediction = predict(spec, r["tool_report"])
+            if prediction is None:
+                abstain += 1
+            elif prediction is True:
+                if r["reference"]:
+                    rescued += 1
+                else:
+                    new_fp += 1
+        results[name] = {
+            "n_original_tool_failures": len(subset),
+            "proxy_FN_rescued": rescued,
+            "new_proxy_false_accepts": new_fp,
+            "unknown_default_retry": abstain,
+            "caution": "Proxy-only retrospective rescue; no real physical grasp or policy action evaluated",
+        }
+    return results
+
 def evaluate(rows):
     overall = score(rows, PRESETS)
     tasks = sorted({r["task"] for r in rows})
@@ -295,6 +353,8 @@ def evaluate(rows):
             "n_tasks": len(tasks), "task_n": dict(Counter(r["task"] for r in rows)),
             "fixed_arms": overall, "delta_vs_tool_flag": comparisons,
             "per_task": per_task,
+            "failure_slices_aggregate_only": failure_slices(rows),
+            "flag_false_rescue_tradeoffs": flag_false_rescue_tradeoffs(rows),
             "leave_one_task_out_module_selection": leave_one_task_out_selection(rows),
             "paired_episode_cluster_delta_balacc_95": intervals,
             "threshold_sensitivity_grid": sensitivity_grid(rows),
@@ -329,6 +389,8 @@ def main():
         "n_episodes": result["n_episodes"], "task_n": result["task_n"],
         "fixed_arms": result["fixed_arms"],
         "delta_vs_tool_flag": result["delta_vs_tool_flag"],
+        "flag_false_rescue_tradeoffs": result["flag_false_rescue_tradeoffs"],
+        "leave_one_task_out": result["leave_one_task_out_module_selection"],
         "module_report_path": str(out),
         "reference_limit": "Same-skill FGONLY proxy, NOT held-grasp truth",
     }, ensure_ascii=False, indent=2))
