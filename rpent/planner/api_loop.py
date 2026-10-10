@@ -765,6 +765,15 @@ class ApiAgentLoop:
         agent = self._build_agent(system_prompt, toolkit)
         messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
 
+        # 性能遥测与终端 _solve 同款(默认关;详见 ApiLatencyProbe)
+        from rpent.utils.api_latency_probe import ApiLatencyProbe
+
+        try:
+            latency_probe = ApiLatencyProbe.from_env(repo=get_repo_root())
+        except ValueError as exc:
+            logger.warning("[api-latency] disabled: %s", exc)
+            latency_probe = None
+
         def emit_user(text: str, *, initial: bool = False) -> None:
             if not initial:
                 messages.append({"role": "user", "content": text})
@@ -794,6 +803,7 @@ class ApiAgentLoop:
             observer=observer,
             max_turns=max_turns,
             no_images=self._no_images,
+            latency_probe=latency_probe,
         )
         error: str | None = None
         try:
@@ -1183,12 +1193,14 @@ class _ApiDashboardSession:
         observer: _ApiRunObserver,
         max_turns: int,
         no_images: bool,
+        latency_probe: Any = None,
     ) -> None:
         self._agent = agent
         self._control = control
         self._max_turns = max_turns
         self._no_images = no_images
         self._observer = observer
+        self._latency_probe = latency_probe
         self._history: list[ModelMessage] = []
         self.usage = RunUsage()
         self._pending_prompts: deque[tuple[str | None, str]] = deque()
@@ -1196,6 +1208,19 @@ class _ApiDashboardSession:
         self._active_prompt = False
         self._closing = False
         self.error: str | None = None
+
+    def _measure_model_node(self, event: str, usage: Any = None) -> None:
+        """与终端 _solve 相同的旁路遥测:出错只禁用,绝不断循环。"""
+        if self._latency_probe is None:
+            return
+        try:
+            if event == "begin":
+                self._latency_probe.begin_request()
+            else:
+                self._latency_probe.finish_if_pending(usage=usage, outcome=event)
+        except (OSError, ValueError) as exc:
+            logger.warning("[api-latency] disabled: %s", type(exc).__name__)
+            self._latency_probe = None
 
     async def run(self, prompt: str) -> None:
         await self.submit(prompt)
@@ -1280,7 +1305,14 @@ class _ApiDashboardSession:
             ) as run:
                 node = run.next_node
                 while not Agent.is_end_node(node):
+                    if Agent.is_model_request_node(node):
+                        self._measure_model_node("begin")
                     if Agent.is_call_tools_node(node):
+                        # per-response RequestUsage(非累计),与终端路径一致
+                        self._measure_model_node(
+                            "tool_node",
+                            getattr(node.model_response, "usage", None),
+                        )
                         await self._process_tool_node(run, node)
                     if (
                         self._observer.finish_result is not None
@@ -1294,9 +1326,12 @@ class _ApiDashboardSession:
                         node = await run.next(node)
                         break
                     node = await run.next(node)
-
+                # end-node 到达或挂起 prompt 中断;中断路径 inflight 必为
+                # None(tool_node 已收口),finish_if_pending 是无操作安全
+                self._measure_model_node("end_node", run.usage)
                 run_completed = True
         except Exception as exc:
+            self._measure_model_node("error")
             self.error = _api_error_text(exc, no_images=self._no_images)
             if not self._closing:
                 self._control.end()

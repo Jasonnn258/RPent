@@ -251,7 +251,10 @@ def _start_persistent_vla(log_fh) -> tuple[subprocess.Popen, str]:
         if proc.poll() is not None:
             sys.exit(f"FATAL: persistent vla_server died; see {log_path}")
         try:
-            cli.healthz(timeout_s=2)
+            # healthz 不是 HttpRpcClient 的方法,必须走 call("healthz")
+            # (2026-10-10 修正:cli.healthz(...) 的 AttributeError 被下面的
+            # except Exception 吞成"未就绪",--persistent-vla 从未能启动)
+            cli.call("healthz", timeout_s=2)
             ready = True
             break
         except Exception as e:
@@ -264,6 +267,48 @@ def _start_persistent_vla(log_fh) -> tuple[subprocess.Popen, str]:
     _log(log_fh, {"ev": "persistent_vla_up", "endpoint": endpoint,
                   "load_s": load_s, "log": str(log_path)})
     return proc, endpoint
+
+
+def _persistent_vla_alive(proc: subprocess.Popen, endpoint: str) -> bool:
+    """常驻 vla_server 集间探活(性能轮 B2,仅 --persistent-vla 路径)。
+
+    server 中途死亡后,后续每集都要到第一次 VLA 调用才失败,白烧
+    worst_wall;在集边界探活可立即止损。进程存活 + healthz 双条件,
+    任一失败即视为死亡(runner 主循环 break,finally 照常回收)。
+    """
+    if proc.poll() is not None:
+        return False
+    from rpent.utils.http_rpc import HttpRpcClient
+
+    try:
+        # 注意:HttpRpcClient 没有 healthz 方法,走 call("healthz")
+        # (2026-10-10 性能轮 B2 修正:旧写法 AttributeError 被
+        # except Exception 吞掉,探活恒失败)
+        HttpRpcClient(endpoint).call("healthz", timeout_s=5)
+        return True
+    except Exception:
+        return False
+
+
+def _sweep_if_crashed(proc: subprocess.Popen, pgid: int,
+                      log_fh, key: str) -> bool:
+    """崩溃清扫(2026-10-10 性能轮 B3):rc≠0 时 killpg 清扫孤儿 daemon。
+
+    子进程 rc≠0(崩溃/断言)时其 session 里可能残留孤儿 daemon
+    (vla/env/sam3)——旧逻辑一律按 natural_exit 跳过 killpg,泄漏进程
+    持续占 GPU/内存。rc=0 的自然退出不受影响(组内已自清理)。
+    返回是否执行了清扫。
+    """
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        return False            # 还活着:不是崩溃路径,无需清扫
+    if proc.returncode in (0, None):
+        return False
+    how = _kill_pg(pgid, 5.0)
+    _log(log_fh, {"ev": "episode_crash_sweep", "key": key,
+                  "rc": proc.returncode, "how": how})
+    return True
 
 
 def _kill_pg(pgid: int, grace_s: float = SIGTERM_GRACE_S) -> str:
@@ -541,6 +586,13 @@ def main() -> None:
             if stop_all.is_set():
                 _log(log_fh, {"ev": "stop", "reason": "SIGTERM"})
                 break
+            if persistent_proc is not None and \
+                    not _persistent_vla_alive(persistent_proc, endpoint):
+                # 集间守卫(B2):常驻 server 已死 → 不再启动注定失败的集,
+                # 立即止损(finally 回收;预留/账本留痕走既有 STOP 语义)
+                _log(log_fh, {"ev": "stop", "reason": "persistent_vla_dead",
+                              "endpoint": endpoint})
+                break
             task = str(row["task"])
             key = f"p1dev1a_t{task}_s{row['seed']}"
             # 禁重跑:该 key 已有终止性事件(probe_done/episode_end)→ 跳过,
@@ -608,6 +660,8 @@ def main() -> None:
                 how = _kill_pg(pgid)
                 _log(log_fh, {"ev": "episode_killed", "key": key,
                               "reason": terminated_by, "how": how})
+            else:
+                _sweep_if_crashed(proc, pgid, log_fh, key)
             try:
                 proc.wait(timeout=SIGTERM_GRACE_S + 15)
             except subprocess.TimeoutExpired:
