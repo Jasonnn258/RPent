@@ -359,6 +359,14 @@
 - **解释限制**：后验识别的19例子池，p值仅是探索性置换诊断，不等于独立确认；FGONLY同技能末端弱运动学代理也不等于物体保持、抓持或未来动作收益。L2新仿真/Runtime仍 HOLD。
 - **停止门槛**：池内精度接近基率、Leave-One-Episode 不稳，则停止同类静态末端规则搜索；改提议同步真实视觉/接触状态的独立采样合同，必须用户批准有界L2后才能执行。
 
+## D-037 · 全局3.21×富集需分解：固定门槛/任务组成之外，LMG连续分数是否真正新增信息？
+
+- **日期/来源**：2026-10-10，服务器 `db9d2b5` 已执行103 Tool False Return-Time Triage（6/6+8/8）；LMG Top20%=17正/4负，Random基线5.30正，3.21倍富集。鲁棒性报告还表明**21/21被选样本都属于011门槛模式**，任务 t3/t5/t9 2/8/11；这使“连续分数本身带来3.21倍信息”成为**尚未经控制的因果式归因**。
+- **与已有D-036互补的实证**：已有 `p1_task9_conditional_lab.py` 对Task9 D-only小子池19例做Top4/8+探索性标签置换，是**局部内生效度**。本轮新增 `p1_triage_incremental_lab.py`、`test_p1_triage_incremental_lab.py` 和 `P1_TRIAGE_INCREMENTAL_EXPERIMENT.md`，针对完整103例，以旧冻结LMG分数/相同Top20/40权重固定选中集；按全局、Gate、Task和**Task×Gate**四套保留原选中名额的匹配随机基线，离线用audit-only端点FGONLY正例率计算随机预期，比较 **observed−matched** 的子群内连续分数增量，并以episode聚类bootstrap描述波动；同时与D_ONLY、PEAK_LIFT旧臂及any/exit参考做固定对照。
+- **研究停止门**：若Task×Gate匹配后额外命中很少/不稳定，保留“廉价门槛风险分层+分任务预算”作为L1候选，**停止将LMG公式本身作为创新核心**；若仍有较稳定的子群内额外信息，则可保留“连续证据用于复核排序”的候选，但只能在**独立新cohort和held-grasp标签**上确认。
+- **硬边界**：匹配随机用同cohort audit-only标签算**参考期望**，仅是离线标准化，不能作为在线任务先验特征，也不是算法训练/因果干预。FGONLY弱代理、没有独立持握真值。冻结A0/StageR只读，旧DEV0 CLOSED，全部新sim/GPU/Runtime L2 HOLD。**新脚本/测试已提交但服务器未运行**；D-036的Task9子池检验亦待服务器运行。
+- **运行方式**：实验服务器Coding Agent一段Prompt自主 pull→两项测试→两项真实L1分析→科学裁决→脱敏Git commit/push，用户不需要手动逐命令操作。
+
 ## 新决策追加模板
 
 ```markdown
