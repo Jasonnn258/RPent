@@ -40,9 +40,11 @@
 
 > **2026-10-10 远端自主三门槛实验已完成；新时间持续性实验待跑**：GitHub `bb7c664` 记录实验服务器 Agent 完成三门槛消融（合成6/6 + 追加分析6/6、真实206），完整报告 `P1_PICK_GATE_LAB_RESULT_20261010.md`、D-031。D∧L∧Gfinal **206/206 逐例重建**原 flag；先前 L∧Gmin 的错用变量造成相对 L∧Gfinal **0.086 BAcc 实现伪影**。纠正后 L∧Gfinal BAcc 0.8553 vs Tool0.8012，但 Task3 下降0.116，3 task LOTO pooled差-0.006；56代理FN中40缺下降D、Task9 30 FN中24缺D（19只缺D），**未证明物理持握或因果恢复效果**。下一步查冻结 `research_package_a.py:label_reference`，发现 FGONLY 采用**整个技能任何一刻为正**，与退出时 Tool flag 的时间构念不同。已新增 `p1_temporal_proxy_lab.py` 与合成测试，做 **56 FN 与 Task9 19 D-only 的末尾/短暂 proxy positivity 对照**，必须复核源 SHA 与原A0逐例reference。**新脚本尚未在服务器跑测试与真数据**；结果分流到几何相对D或时间一致性研究。新 L2 仍 HOLD。
 
+> **2026-10-10 FGONLY 时间持续性实验真实执行完毕（本轮实验服务器自主运行，全程离线只读）**：pull 至 `ce0f78f`，`test_p1_temporal_proxy_lab.py` **7/7 PASS** 后实跑，资格门（source SHA==schema_qa、206 逐例 flag/reference 一致、175 episodes）全过。补充实验 `p1_temporal_proxy_followup.py`（合成 **8/8 PASS** 后实跑，唯一操作变量=参考时点，臂/阈值冻结，零阈值选择）。**(1) 56 个代理漏报 = 26 个退出时仍正 / 30 个仅中途瞬时 / 0 未知**（17/26 末尾 3 个归档测量点连续为正）；101/101 工具成功行退出时仍正（时间上零冲突）。**(2) 持续/瞬时按门槛模式干净分离**：D-only 漏报 72.7%（24/33）退出时仍正，缺 L/G 漏报仅 8.7%（2/23）；26 个持续漏报 92.3% 是 D-only。**(3) 退出时点重打分：flag BAcc 0.8012→0.8850（FN 56→26），L∧G_final 0.8553→0.8909；两臂差从 +0.054 缩到 +0.0059**（episode bootstrap 中位 +0.0057，区间 [−0.046,+0.059] 跨 0）——gate-lab 去 D 收益约 **89% 是 any-time 参考时点伪影**；去 D 在退出时点 FP 2→16。**(4) t9 的 19 个 D-only：11 持续/8 瞬时，start_eef_z/descent 中位（1.2134/0.0664 vs 1.2258/0.0685）几乎无分离**——几何解释"为何缺 D"但不预测退出时状态；t3 5/6、t5 8/8 持续。**(5) 分流判定：下一方向=返回时点证据一致性（Temporal Evidence Consistency）**（同刻观测契约 + 门槛模式风险分层 D-only 72.7% vs 缺L/G 8.7%；P1 失败错位前提 54.4%→25.2% 返回时点）；Geometry-relative Descent 降级为条件性次级（剩 24 例、t9 内不可分、须在退出时点重评）。退出时点 FGONLY 仍是同一运动学弱代理，非持握真值；详见 `P1_TEMPORAL_PROXY_RESULT_20261010.md`；私有产物在 `artifacts/p1_temporal_proxy_lab/`。
+
 ## 1. 总状态
 
-**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / GATE_LAB_REAL_206_6_OF_6_PLUS_6_OF_6 / TERMINAL_TOOL_GATE_206_OF_206 / TASK9_D_MISSING_24_OF_30_PROXY_FN / FGONLY_TERMINAL_PERSISTENCE_L1_CODE_UNRUN / NEW_L2_HOLD`**
+**`PACKAGE_A_FROZEN / P1_DEV0_CLOSED / GATE_LAB_REAL_206_6_OF_6_PLUS_6_OF_6 / TEMPORAL_PROXY_LAB_EXECUTED_7_OF_7_PLUS_8_OF_8 / FN56_SPLIT_26_EXIT_PERSISTENT_30_TRANSIENT / DROP_D_GAIN_89PCT_HORIZON_ARTIFACT / RETURN_TIME_EVIDENCE_CONSISTENCY_PREREG_NEXT / NEW_L2_HOLD`**
 
 - 研究线:RPent 具身物理证据可信度(H0)→ 有限成本的主动验证与恢复(方法候选 P1)→ 证据治理的长期记忆与进化(P2)。
 - 成果级别:多阶段离线实证结果、研究审查、结构扫描、PAEG 规范、A0 v2 预注册候选、EERD 字段级契约、P1 可证伪问题定义;**未证明方法上的新算法效果或 Runtime 改善**。
@@ -72,6 +74,7 @@
 | **VE01.1 服务器实际验证** | 10/10 tests OK；5/5 合法输入，3 near-min gap / 2 plateau，1 最近表面临近 EEF 但目标身份未知，0 held/contact 独立正例 | 只是保守的离线证据资格和未知状态，不能当作真实物理接触/持握性能；后续目标改为时间同步独立标签可得性 |
 | **Module Lab v1(用户服务器)** | 7/7 tests;13 固定臂 BAcc 全部低于 Tool 0.8012;LOTO 合并 −0.078;t9 占 30/56 代理 FN | 挑战臂缺 D 且误用 min 开度;结论需按 gate-lab 修正重读;详见 `P1_MODULE_LAB_SERVER_RESULT_20261010.md` |
 | **三门槛消融 Gate Lab(2026-10-10 实跑)** | 6/6+6/6 tests;末端 D∧L∧G_final **逐例=flag**(0/206 分歧);L∧G_final 0.8553(+0.054,96.4% bootstrap≥0)但 t3 −0.116;min↔final 伪影 0.086 BAcc/22 行;t9 30 FN 中 24 缺 D,机制=柜顶高起点(start_z 1.20 vs 1.01)×绝对 0.10m 阈值;LOTO 合并 −0.006 | FGONLY 弱代理同源;描述性敏感性;去 D 收益 t9 特异不可全局部署;下一轮=几何相对 D_rel 预注册新采集,本轮不宣称收益;详见 `P1_PICK_GATE_LAB_RESULT_20261010.md` |
+| **Temporal Proxy Lab(2026-10-10 实跑)** | 7/7+8/8 tests;SHA/逐例资格门全过;56 FN=26 退出持续/30 瞬时/0 未知;D-only 持续率 72.7% vs 缺L/G 8.7%;退出时点重打分 flag 0.8850 / L∧G_final 0.8909(Δ=+0.0059,bootstrap 跨 0)——去 D 收益 89% 是时点伪影;t9 D-only 11 持续/8 瞬时且几何无分离 | 退出时点 FGONLY 仍是同一运动学弱代理非持握真值;P1 失败错位前提修正为 25.2%(返回时点);下一方向=返回时点证据一致性;详见 `P1_TEMPORAL_PROXY_RESULT_20261010.md` |
 | PAEG | v0.2.2 规范层 | 未实现、未定标、未验证部署效果 |
 
 ## 3. 当前科学问题与优先级
@@ -93,7 +96,7 @@
 
 ## 5. 当前待办（禁止再次启动旧 DEV0）
 
-1. **完整三门槛服务器实验已完成**，不再复跑或后验扫描 D 阈值。下一项实验是 `test_p1_temporal_proxy_lab.py` + `p1_temporal_proxy_lab.py` 的独立206样本技内 FGONLY 时间持续性分析，尤其 Task9 19 个只缺D、flag=False/FGONLY+ 样本在 final_meas 是否仍为proxy-positive。Stage R只读、冻结 SHA 必须匹配 Package A `schema_qa.json`，mismatch直接 STOP；由服务器 Coding Agent 单 Prompt 自主 pull→test→run→分析→commit/push。新脚本 **服务器待跑**，terminal FGONLY 仍非物理抓取真值。
+1. **三门槛与时间持续性两个服务器实验均已完成**，不再复跑或后验扫描 D 阈值/参考时点。下一项是**返回时点证据一致性(Temporal Evidence Consistency)的研究设计**:把 P1 的证据/参考契约从"技内任意时刻"锚定到工具返回时刻的同刻观测,用门槛模式做风险分层(D-only 持续率 72.7% vs 缺 L/G 8.7%),研究哪些**合法(非特权)返回时观测**能区分 26 个退出持续与 30 个瞬时案例;任何在线验证属新 L2,须新预注册+授权。Geometry-relative Descent 降级为条件性次级(目标剩 24 例、t9 内不可与瞬时区分、须在退出时点重评)。
 2. 若继续 P1 主动验证方向，下一步是**修正设计的最小 L2**（用户授权后另立预注册）：probe 改"闭合+受控提升"使 lift 判据可用、采集含真实持握正例的分层样本（t9/t3/t5 配额）、验证触发时刻 hi-res wrist 覆盖、接线两分支可达的 pre-delivery 消费者。旧 D2/D3 冻结规则不得复活。
 3. 不补跑 DEV0 3 格；不改在线 Runtime；私有图像/HTML/JSONL 留 `artifacts/` 与 `rpent_data/`，不入 Git。
 
