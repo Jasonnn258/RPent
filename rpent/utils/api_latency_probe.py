@@ -31,8 +31,8 @@ class ApiLatencyProbe:
     """One probe per Planner solve; no mutable global state.
 
     A graph run may be restarted after each model turn, so usage from
-    run.usage is explicitly marked as per-graph cumulative, not falsely
-    represented as per-turn token deltas. No per-episode IDs are recorded.
+    ModelResponse.usage is a per-model-request RequestUsage object, not
+    the cumulative graph run usage. No per-episode IDs are recorded.
     """
 
     def __init__(self, destination: Path, clock=time.perf_counter):
@@ -67,15 +67,16 @@ class ApiLatencyProbe:
             if type(v) is int and v >= 0:
                 return v
             return None
-        # pydantic-ai run.usage may be cumulative across requests within
-        # one agent.iter; never interpret totals below as per-call values.
+        # Capture the Response's own RequestUsage, which is per API request.
+        # Do not pass RunUsage(run.usage) here (it may be cumulative).
         rec = {
             "protocol": "RPENT_API_REQUEST_LATENCY_V1",
             "request_idx": self.sequence,
             "model_node_elapsed_s": round(elapsed, 6),
-            "graph_usage_input_tokens_cumulative": count("input_tokens"),
-            "graph_usage_output_tokens_cumulative": count("output_tokens"),
-            "graph_usage_requests_cumulative": count("requests"),
+            "request_input_tokens": count("input_tokens"),
+            "request_output_tokens": count("output_tokens"),
+            "request_cache_read_tokens": count("cache_read_tokens"),
+            "request_cache_write_tokens": count("cache_write_tokens"),
             "outcome": outcome if outcome in ("tool_node", "end_node", "error") else "unknown",
         }
         self.destination.parent.mkdir(parents=True, exist_ok=True)
