@@ -388,6 +388,15 @@
 - **停止规则**：若 label-blind quota 无增益，则撤回“任务预算是主要算法机制”的表述；保留静态 gate-only 风险分组作为L1便宜对照，Task9同类静态阈值STOP。即使 quota有增益仍不得以同103条样本声称泛化或held接触收益；结束后不再在同数据上挑更多公式。下一真物理同刻观测与恢复动作需重新审批bounded L2。
 - **科学状态**：`REAL_4TH_ROUND_VERIFIED / RETROSPECTIVE_MATCHED_STAT_CORRECTED / LABEL_BLIND_BATCH_PROTOTYPE_SERVER_UNRUN / NEW_L2_HOLD`。
 
+## D-040 · 用户委托独立审查：Time-Aligned Evidence + Budgeted Selective Verification 分级预授权
+
+- **用户委托**：2026-10-10 用户要求“你自己替我审核授权”，明确允许助手代为作科研阶段准入判断。审查文档 `P1_L2_INDEPENDENT_AUTHORIZATION_REVIEW_20261010.md`。
+- **方法论 GO**：冻结103 Tool False 的时间定义问题 56 any-positive/26 exit-positive；D-only Top20 13.26/21；连续LMG 17/21 主要来自组成，独立 Task9 D-only n19/11 的静态排名 p≥0.21；因此新研究的核心变量必须是**同刻目标接触/持握证据、具成本的主动探测、机械作用盲对照与有限预算的验证分配**，而不是在旧103条持续调参。
+- **分级授权**：G1 合法/审计双通道的同刻采样代码及 mock/synthetic Tests **立即可执行**；G2 独立新 `P1-L2-FEAS` simulator pilot **用户委托下 PRE-AUTHORIZED**，以硬上限 12 独立新 episodes、累计≤3 GPU-hour、≤4h wall-clock、≤12 triggers 为 ceiling。服务器 Agent 必须在 *零新 Episode* 预检证明确有环境/资源控制权、硬预算可执行（并发在飞预留+安全中止）、不污染 StageR/DEV0、可获得独立目标 ID+指尖接触+目标支承/抬升和精确物理时间，否则自动 STOP=0新样本。PASS 后可在同一自主流程启动该有界 pilot，无需再次向用户索要同一技术许可。无法确认GPU计费/结束机制也 STOP。
+- **不批准**：原 Stage R §36、S1、DEV0 重启；真实机器人设备动作；大型五臂随机因果研究/训练/权重修改/预算加码。G2 仅验证物理真值可得性、对齐、类别可达性和成本；G3 完整动作效果仍 HOLD，必须 G2 结果再审。
+- **实事求是**：ChatGPT 能更新 GitHub，但没有用户服务器 shell；委托审批不等于已执行，需由服务器内Coding Agent自主 pull→校验→若PASS执行→报告/提交。任何超预算风险直接停止，不用完配额亦可。
+- **状态**：`P1_L2_METHOD_GO / G1_GO / G2_PREAUTH_CONDITIONAL_AUTO_GO / G3_HOLD`。
+
 ## 新决策追加模板
 
 ```markdown
