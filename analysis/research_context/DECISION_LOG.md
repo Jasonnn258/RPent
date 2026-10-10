@@ -237,6 +237,16 @@
 - **不能推出什么**：持握检出率/准确率（5 例 0 正例、无 probe 时刻物理真值）；"修正 L2 可改善结局"（Hypothesis）；audit 真值是 retry 结局不构成 probe 状态标签；主观视觉与几何一致(n=5)不等于效度。
 - **重新开启条件**：用户授权最小修正 L2 新预注册——probe 改"闭合+受控提升 2-3cm"使 lift 判据可用、分层采样含真实持握正例（t9/t3/t5 配额）、hi-res 触发时刻覆盖验证、两分支可达的 pre-delivery 消费者接线；旧 D2/D3 冻结规则不得复活。
 
+## D-025 · VE-v0.1 独立复审：把闭合停住/近场深度归回候选信号，新增 fail-closed 离线审计
+
+- **日期/来源**：2026-10-10，独立读取夜间提交 `32af61b` 的研究报告与 `p1_ve01_evidence.py`、`p1_ve01_legal_extract.py`、`p1_ve01_run.py`、`p1_ve01_arms.py`、`p1_ve01_adversarial.py`。未登录用户服务器读取私有 5 张图和私有 VE01 JSON；19/19、10/10 是仓库执行报告记载而非本轮独立实测。
+- **保留**：有五个 probe 合法观测样本与多模态离线结构化证据；原 D2 5/5 CONTINUE vs D3 5/5 RETRY 的策略差异已另经用户服务器后验核对；新原型将夹爪开度轨迹和几何质量纳入解释性状态分箱，可继续作为 L1 探索。
+- **必要降级**：历史三例 post_gap 近最小值、两例较大开度/变化小，仅支持观测到“不同闭合响应模式”，**并未物理证明**两例一定受到目标接触或碰撞（servo/机械限位/控制/传感替代解释未排除）；最近 EEF 0.5mm 的腕视世界坐标可能来自机器人自身、桌面或目标，**无 target-instance/self mask**，不能赋予“目标在指间”或“实际接触”的标签；全画面变化并不能唯一归因为纯深度视差。
+- **对照局限**：B3 自称 visual-only，然而使用 EEF proprio 与腕视深度图距离，实际上是几何+proprio；ADV7 测得零 CONTINUE 是 B1′/B3/B4 **代码写死**不输出 CONTINUE 的性质，不是可验证的低误继续率；六臂“独特状态种类”依赖人工状态码，且与门槛配置同源，不能当独立性能结果。Planner think 正则提取的 success/flag 也不能称为独立真实持握标签。
+- **工程缺口**：原 `arm_b3/arm_b4` 缺 `claim.validity/freshness` Gate；可能在过期、特权污染、缺图输入上仍读取原有字段，或在 `visual_camera_motion=None` 时崩溃。新增独立 `scripts/p1_ve01_safe_arms.py` (v0.1.1) 和 `test_p1_ve01_safe_arms.py`，不改原历史对照：invalid/stale/缺值/原 gap 类别与值冲突时返回 `RETRY+ABSTAIN`；其他时候仅输出 `GAP_PLATEAU_CAUSE_UNKNOWN` / `SURFACE_NEAR_EEF_IDENTITY_UNKNOWN` 等明确非真值状态。**尚未在服务器跑新测试与私有五例**。
+- **决策**：将“已确认两个阻挡”“t9_s1003 已有目标接触”“系统性假继续已坐实”等 VE-v0.1 报告主张降级为探索性风险，原报告保留可追溯且以 `P1_VE01_INDEPENDENT_REVIEW.md` 为解释性勘误。只有有独立 mask/持握真值/时间点对齐且不泄漏的方法，才能恢复相关强主张；新 L2 无授权，所有在线实验保持 HOLD。
+- **下一动作**：服务器只读运行 `test_p1_ve01_safe_arms.py`，再对已有 `evidence_claims.json` 执行 `p1_ve01_safe_arms.py`（新输出单独在私有 VE01 数据目录），检查数据兼容与五案例保守输出；若有矛盾 STOP 并定位，绝不修改旧冻结结果。
+
 ## 新决策追加模板
 
 ```markdown
