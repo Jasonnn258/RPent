@@ -121,9 +121,12 @@ def aggregate(records):
         fn_rows=[r for r in taskrows if r["flag"] is False and r["proxy"]["frozen_any_positive"]]
         result["by_task_gate_failure"][task]={
             "n_proxy_FN":len(fn_rows),
-            "gate_pattern_class":dict(sorted(Counter(
-                (r["gate_pattern"],r["proxy"]["class"]) for r in fn_rows
-            ).items(),key=lambda kv:kv[0])),
+            "gate_pattern_class":[
+                {"gates_D_L_Gfinal":p,"temporal_class":cl,"n":n}
+                for (p,cl),n in sorted(Counter(
+                    (r["gate_pattern"],r["proxy"]["class"]) for r in fn_rows
+                ).items())
+            ],
             "only_D_missing_fn":{
                 "n":sum(r["gate_pattern"]=="011" for r in fn_rows),
                 "temporal_classes":_counter(
@@ -131,11 +134,6 @@ def aggregate(records):
                     lambda r:r["proxy"]["class"]),
             },
         }
-        # JSON object keys cannot be tuples, convert explicit pair keys.
-        result["by_task_gate_failure"][task]["gate_pattern_class"]=[
-            {"gates_D_L_Gfinal":p,"temporal_class":cl,"n":n}
-            for (p,cl),n in sorted(Counter((r["gate_pattern"],r["proxy"]["class"]) for r in fn_rows).items())
-        ]
     for flag in (True,False):
         for frozen_pos in (True,False):
             xs=[r for r in records if r["flag"] is flag and
@@ -168,7 +166,6 @@ def aggregate(records):
     return result
 
 def run(root=ROOT, src=SRC):
-    from research_package_a import source_paths
     frozen=load_data(src,strict=True)
     expected={(r["episode_id"],r["step_idx"]):r for r in frozen}
     qa=json.loads((src/"schema_qa.json").read_text(encoding="utf-8"))
@@ -214,7 +211,7 @@ def main():
         pa.error("Output must stay within private gitignored artifacts")
     if args.output.resolve()==args.input.resolve():
         pa.error("Refuse to overwrite frozen A0 export")
-    data,provenance=run(root=ROOT,src=args.input)
+    data,_provenance=run(root=ROOT,src=args.input)
     # Summaries only. Hash ledger and all source assets already validated
     # against the frozen schema_qa file, which itself is not modified.
     data["source_alignment"]="MATCHES_A0_SEALED_SCHEMA_SHA256"
