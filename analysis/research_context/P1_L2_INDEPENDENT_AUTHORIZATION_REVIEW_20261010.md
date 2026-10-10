@@ -1,6 +1,6 @@
 # P1 L2 独立研究审查与分级授权裁决（2026-10-10）
 
-> 审查人：ChatGPT（基于用户“你自己替我审核授权”的本轮委托）。**权限解释**：本文件批准有限的、无新物理动作的协议封版和源码准备；提出 bounded simulator study 的条件性科研审查意见。无用户服务器执行能力，也未锁定硬件/经费/精确预算；本文件本身**不解除** Stage R §36、旧 DEV0 CLOSED、S1 HOLD 和任何运行环境安全策略。只有明确具备资源控制权限的执行方完成硬预算、授权主体和实验停止条件签署后，才可把新 simulator study 设为 RUN_APPROVED。禁止将“方法审查 GO”误解为“现在可以运行任意 GPU rollouts”。
+> 审查人：ChatGPT（基于用户“你自己替我审核授权”的本轮委托）。**权限解释**：本次用户已明确委托助手代表其作下一阶段研究授权审查。**裁决为新的独立 P1-L2-FEAS 有界仿真 pilot 预授权**（最多12个新 episode，≤3 GPU·hour，≤4h wall clock），且**仅在服务器 Agent 事先自动核实硬限额、真实环境归属、冻结隔离和接触真值 API 且全部 PASS 后即时生效**，无需再次询问用户同一事项。失败即 STOP=0 episode；不得把此授予 Stage R §36、原 DEV0 CLOSED 或 S1 的解封权。本助手无远端 shell，不宣称已经执行/锁定资源，也不准开始实物机器人动作、训练或多臂性能实验。
 
 ## 审查依据
 
@@ -39,10 +39,10 @@
 |---|---|---|---|
 | G0 研究方向 | **GO** | 相关工作/可证伪假设/指标/对照整理 | 将旧 FGONLY 说成独立持握结果 |
 | G1 只读与协议实现 | **APPROVED NOW** | 旧 L1 label-blind quota 收尾；验证 source API、可见性；实现同刻合法/audit隔离采样组件和合成测试（mock env），双通道 SHA；草拟新 manifest | 新物理仿真 episode、实物操作、修改冻结状态或公开私有像素 |
-| G2 小型 simulator feasibility | **CONDITIONALLY APPROVABLE, EXECUTION HOLD** | 待实际执行侧对硬 GPU/episode/wall 预算和并发预留、操作者授权、目标接触 API、终止及资产隔离进行独立确认；再单独启动 pilot | 当前文档即视为运行许可；复用已过期旧 DEV0 资源额度 |
+| G2 小型 simulator feasibility | **PRE-AUTHORIZED / CONDITIONAL AUTO-GO** | 服务器 Agent 在单次自主流程里完成硬 GPU/episode/wall 上限、资源归属、物理真值 API、冻结隔离、并发预留、全链路停止 Gate 实测；全部 PASS 才自动启动≤12独立episode的新私有 FEAS pilot | 任一 Gate 不满足仍启动；复用旧 DEV0 额度；实物机器人操作；五臂性能宣称 |
 | G3 因果对照扩展 | **HOLD** | 仅在 G2 有正负 held 参考/触发样本、动作确实不同、成本可对齐后再注册和审批 | 无门槛直接扩展大规模随机化、训练模型或声称 control gain |
 
-**建议 G2 最小提案额度（待执行方签署后才生效）**：最多 **12 新独立 episode，实际使用 GPU ≤3 GPU·hour，墙钟≤4小时，单事件总触发上限 12**；并发在飞任务必须按最坏剩余成本预留，绝不能像 DEV0 一样超预算后再记账；任何时刻余额无法覆盖最坏情况，应停止调度并安全终止。若无法保证硬上限/停止和资源归属，无条件维持 HOLD。此数字是**设计提案，不是已经获批的服务器经费**。
+**用户委托下的 G2 独立预授权硬上限**：最多 **12 新独立 episode，累计实际 GPU ≤3 GPU·hour，wall clock≤4小时，触发≤12**；这些是 *ceiling* 不是必须消耗的目标。优先单进程串行；在飞 Episode 启动前预留其最坏剩余 GPU/wall 成本，任何时刻资源余额不能覆盖则禁止发起；若单 episode 无法可预测上界，可使用更严的进程级时间限制与可恢复的安全终止路径，但不得让安全终止触发封版数据改写。若服务器不受本人控制、无法确认当前GPU计费与预算、无法安全停止或没有独立接触真值 API，则该预授权不生效、零执行 STOP；无需为达12例扩大预算。
 
 G2 阶段试验目标只能是 feasibility，而非臂间显著性：检查各任务失败触发和两种真实持握类别是否可达、真值 API 可读、对齐/泄漏零异常以及三种不同证据获取成本；若前 12 例未获得足够正负有效真值，则报告 UNESTIMABLE/STOP，不后验扩大样本。
 
@@ -67,4 +67,4 @@ G2 阶段试验目标只能是 feasibility，而非臂间显著性：检查各�
 - G3 若不能做到 action difference 或时间点统一，只给可行性结果不估因果。
 - 禁止新模型训练、权重覆盖、未审批环境/实物设备操作。
 
-**研究管理结论**：`METHODOLOGY_GO / G1_CODE_AND_SYNTHETIC_APPROVED / G2_SIM_EXECUTION_HOLD_PENDING_RESOURCE_SIGNOFF / G3_CAUSAL_HOLD`。
+**研究管理结论**：`METHODOLOGY_GO / G1_CODE_AND_SYNTHETIC_APPROVED / G2_12EP_3GPUH_4WALLH_PREAUTH_AUTO_GO_IF_ALL_RUNTIME_GATES_PASS / G3_CAUSAL_HOLD`。若任一预检条件失败则 `G2_STOP_ZERO_NEW_EPISODES`，不以用户不在场为借口跳过。
