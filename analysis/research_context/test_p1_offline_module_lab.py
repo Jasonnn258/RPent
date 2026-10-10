@@ -13,6 +13,7 @@ sys.path.insert(0,str(HERE))
 from p1_offline_module_lab import (
     PRESETS, VIEWS, confusion, delta_vs_flag, evaluate, jl, leave_one_task_out_selection,
     load_data, metrics, predict, score, sensitivity_grid, signal,
+    failure_slices, flag_false_rescue_tradeoffs,
 )
 
 def make_rows():
@@ -131,6 +132,24 @@ class ModuleLabTests(unittest.TestCase):
         self.assertEqual(interval,
                          delta_vs_flag(rows,PRESETS["A1_gap0035_AND_lift050"],
                                        repeats=60,seed=1234))
+
+    def test_error_slice_and_rescue_are_real_counts_not_stubbed(self):
+        rows=make_rows()
+        cuts=failure_slices(rows)
+        overall=[r for r in cuts if r["task"]=="ALL"]
+        self.assertEqual(sum(r["n"] for r in overall),12)
+        self.assertTrue(all(set(r["features"])=={
+            "min_gripper_opening","final_gripper_opening","peak_lift_m"}
+                            for r in overall))
+        rescue=flag_false_rescue_tradeoffs(rows)
+        self.assertEqual(rescue["F0_tool_flag"]["proxy_FN_rescued"],0)
+        self.assertEqual(rescue["F0_tool_flag"]["new_proxy_false_accepts"],0)
+        self.assertGreater(
+            rescue["C1_always_true"]["new_proxy_false_accepts"],0)
+        self.assertGreater(
+            rescue["R1_flag_OR_lift050"]["proxy_FN_rescued"],0)
+        self.assertNotIn("ep03",str(cuts))
+        self.assertNotIn("ep03",str(rescue))
 
     def test_unknown_reference_never_scored(self):
         with tempfile.TemporaryDirectory() as tmp:
