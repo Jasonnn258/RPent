@@ -351,6 +351,14 @@
 - **不能推出什么**：退出时 FGONLY 与 any-time 是同一运动学弱代理的两个时点（EEF 同源、无接触力、无独立真值）；"排序高"只代表优先复核，≠ CONTINUE/持握/动作收益；回顾性 103 例不能证明跨 cohort 泛化或因果；bootstrap/jackknife 仅样本不确定性描述；本轮零阈值选择、零训练、零 Runtime 改动。
 - **重新开启条件**：用户授权机制 (A)+(B) 的新 cohort 最小 L2 预注册（含同刻观测合同与任务分层配额）。Stage R §36 / S1 / 冻结 A0/DEV0 不动。
 
+## D-036 · 从全局分诊增益切到 Task9 D-only 条件可辨识性
+
+- **2026-10-10 服务器依据**：`db9d2b5` 回报103 Tool False/79 episodes，6/6主测试、8/8鲁棒性测试；全局 `LIFT_MINUS_GAP` Top20% 17/21、precision0.810 vs 随机0.252，三任务内精度0.8/1.0/0.727，但全球固定21个名额只给t3两席，任务分数尺度漂移。Task9 D-only池19，退出时FGONLY正11、负8；此前Top4 precision=0.750、lift相对池内随机11/19仅1.30。
+- **科学问题**：排除“已经知道是 D-only”这一类别优势后，固定合法末端连续分数是否在同类失败里仍有可靠的选择性？直接在固定19例中看Top4/8代理命中、1万次置换与留一Episode波动，比继续后验调开度/提升阈值更能判断是否值得加模型。
+- **本轮可执行交付**：`p1_task9_conditional_lab.py`、`test_p1_task9_conditional_lab.py`、`P1_TASK9_CONDITIONAL_EXPERIMENT.md`；固定沿用原PEAK_LIFT/FINAL_GAP/LIFT_MINUS_GAP/D_ONLY_THEN_LIFT及随机池内基准；审计标签仅用于离线评分，输出聚合无私有case ID。**代码已提交，但实验服务器尚未执行新实验及合成测试**。
+- **解释限制**：后验识别的19例子池，p值仅是探索性置换诊断，不等于独立确认；FGONLY同技能末端弱运动学代理也不等于物体保持、抓持或未来动作收益。L2新仿真/Runtime仍 HOLD。
+- **停止门槛**：池内精度接近基率、Leave-One-Episode 不稳，则停止同类静态末端规则搜索；改提议同步真实视觉/接触状态的独立采样合同，必须用户批准有界L2后才能执行。
+
 ## 新决策追加模板
 
 ```markdown
