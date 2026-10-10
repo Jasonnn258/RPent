@@ -221,6 +221,56 @@ def sensitivity_grid(rows):
                 specs[f"{operator}_gap{t:g}_lift{l:g}"] = (operator, g, lift)
     return score(rows, specs)
 
+def leave_one_task_out_selection(rows):
+    """Select among FIXED candidate modules on the other two tasks only.
+
+    This is an offline exploratory module-selection experiment. No threshold
+    fitting or online changes; held-out task labels never enter selection.
+    There are only three tasks, so transfer estimates are highly unstable.
+    """
+    tasks = sorted({r["task"] for r in rows})
+    if len(tasks) < 2:
+        return {"status": "UNESTIMABLE_LESS_THAN_TWO_TASKS"}
+    candidates = {k: v for k, v in PRESETS.items() if not k.startswith("C")}
+    folds = []
+    pooled = Counter()
+    for heldout in tasks:
+        train = [r for r in rows if r["task"] != heldout]
+        test = [r for r in rows if r["task"] == heldout]
+        trained = score(train, candidates)
+        def key(name):
+            m = trained[name]
+            ba = m["balanced_accuracy"] if m["balanced_accuracy"] is not None else -1
+            far = m["proxy_false_accept_rate"] if m["proxy_false_accept_rate"] is not None else 1
+            return (-ba, far, m["abstain"], name)
+        chosen = min(candidates, key=key)
+        test_result = metrics(confusion(test, candidates[chosen]))
+        base_test = metrics(confusion(test, PRESETS["F0_tool_flag"]))
+        for k in ("tp", "fp", "fn", "tn", "abstain", "n"):
+            pooled[k] += test_result[k]
+        folds.append({
+            "heldout_task": heldout, "n_training": len(train),
+            "n_heldout": len(test), "selected_module": chosen,
+            "training_module_bacc": trained[chosen]["balanced_accuracy"],
+            "test_selected": test_result, "test_flag_baseline": base_test,
+            "delta_test_bacc_vs_flag": (
+                round(test_result["balanced_accuracy"]-base_test["balanced_accuracy"], 6)
+                if test_result["balanced_accuracy"] is not None
+                and base_test["balanced_accuracy"] is not None else None),
+        })
+    pooled_m = metrics(dict(pooled))
+    base_pooled = metrics(confusion(rows, PRESETS["F0_tool_flag"]))
+    return {
+        "status": "EXPLORATORY_CROSS_TASK_MODULE_SELECTION",
+        "folds": folds, "pooled_test_selected": pooled_m,
+        "pooled_test_baseline": base_pooled,
+        "delta_pooled_balacc": (
+            round(pooled_m["balanced_accuracy"]-base_pooled["balanced_accuracy"], 6)
+            if pooled_m["balanced_accuracy"] is not None
+            and base_pooled["balanced_accuracy"] is not None else None),
+        "caution": "Three nonindependent task folds only. Module selection learns from TRAIN audit proxy labels OFFLINE; no training of neural weights, no deployment and no confirmatory generalization.",
+    }
+
 def evaluate(rows):
     overall = score(rows, PRESETS)
     tasks = sorted({r["task"] for r in rows})
@@ -244,13 +294,16 @@ def evaluate(rows):
             "n_primary": len(rows), "n_episodes": len({r["episode_id"] for r in rows}),
             "n_tasks": len(tasks), "task_n": dict(Counter(r["task"] for r in rows)),
             "fixed_arms": overall, "delta_vs_tool_flag": comparisons,
-            "per_task": per_task, "paired_episode_cluster_delta_balacc_95": intervals,
+            "per_task": per_task,
+            "leave_one_task_out_module_selection": leave_one_task_out_selection(rows),
+            "paired_episode_cluster_delta_balacc_95": intervals,
             "threshold_sensitivity_grid": sensitivity_grid(rows),
             "limitations": [
                 "A0 frozen reference is within-skill FGONLY pose-following, not probe-time or future held object",
                 "No module selection, parameter fitting, new rollout, training or policy intervention",
                 "Accuracy and FP/FN measure agreement with FGONLY only; equal-time physical labels unavailable",
                 "Threshold grid is exploratory on the same cohort; no heldout causal generalization",
+                "Leave-one-task-out uses TRAIN audit proxy only to choose fixed module family and reports outcomes on separate tasks; no neural optimization",
                 "Always-positive control is critical for reference class imbalance",
                 "Confidence intervals are episode-cluster bootstrap descriptive uncertainty only",
                 "Offline audit reference is joined only for scoring; no audit-only features enter prediction",
