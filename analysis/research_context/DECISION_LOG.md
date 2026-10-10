@@ -420,6 +420,15 @@
 - **关闭条款**：按预登记与用户指令，**本轮后不再在这 103 例上搜索任何新静态规则/固定臂/参数**（t9 子池静态阈值维持第四轮 STOP）。除非出现实质有效性漏洞，同数据静态面研究终结。
 - **不能推出什么**：FGONLY 弱代理非持握真值；103 例已被五轮复用，任何数字不是泛化证明；GATE_ONLY/LMG 的全部数值是复核优先级，非 CONTINUE/动作收益；无新仿真/训练/Runtime/L2。
 - **与 L2 授权的衔接**：本轮即 D-041 §待办(a) 的收官件；(b) DEV1A G1–G4 预检门与 ≤8 集 pilot 按 D-041 上限执行（probe 一次 ≤2cm 受控提升，比本条目早先写的 2-3cm 更严，以 D-041 为准；GATE_ONLY 0.632 作为其中免费分诊基线臂）。Stage R §36 / S1 / 冻结 A0/DEV0 不动。
+## D-043 · DEV1A 独立预检找到的 G1/G4 实质阻塞与已交付 mock 合同
+
+- **性质**：2026-10-10 源码级验证与模拟输入模块提交，非真实服务器实验。最新 `b287be5` 完成的是第五轮 L1 和 D-042，**没有 P1-L2-FEAS/DEV1A 新 Episode**。D-041 严格8集、3GPUh、4wallh、单worker、每集≤1500step/1次probe/垂直提升≤2cm，覆盖旧 D-040 的12集 ceiling。
+- **G1 实际 BLOCKED**：`robots/libero/env_client.py` 和 `env_server.py` 只提供低维 `sim_measurement`（目标名/对象位姿），缺少目标与左右指及支撑面 geom 双方可核验的 `contact_snapshot` RPC。不能用物体坐标、gap 或近表面代替。需在远端 worker 暴露原生 contact pairs 并同tick测量后才能考核真值可得性。
+- **G4 旧实现不可复用**：`scripts/p1_dev0_run.py` 使用 GPU 900s 裕量，而每集硬超时5400s，存在未预留完整在飞最坏成本的资源越限结构。
+- **本轮实际代码**：`p1_dev1a_operational_truth.py`/tests 完成 audit-only `BILATERAL/SINGLE/NONE/UNKNOWN` 接触、受支撑、同tick/同目标ID校验及受控≤2cm提升短窗 Operational `RETAINED/NOT_RETAINED/UNKNOWN` 纯函数合同；`p1_dev1a_budget_gate.py`/tests 提供单worker/8集/按task配额/完整最坏GPU与墙钟成本预留、超额保留事故态和源码级 fail-closed 检查。**新合成测试尚未在用户服务器实跑**；mock PASS 不等于真实 G1–G4 PASS。
+- **剩余阻塞**：缺 live G1 MuJoCo 接触 API 验收、live G2 图像/接触同 env tick 无步进核对、live G3 audit-only 污染对抗、live G4 durable ledger 与进程组中断安全/GPU数量计费；因此 DEV1A **0新episode**，不得自动运行。服务器 Agent 完成全部真实前置门方可依据 D-041 条件批准执行，任一失败STOP=0。
+- **状态**：`L1_D042_CLOSED / G1_MISSING_CONTACT_RPC / G4_MOCK_RESERVATION_COMMITTED / LIVE_GATES_UNVERIFIED / DEV1A_0_EP / DEV1B_HOLD`。
+
 决策追加模板
 
 ```markdown
