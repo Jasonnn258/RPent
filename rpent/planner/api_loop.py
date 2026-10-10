@@ -556,7 +556,11 @@ class ApiAgentLoop:
                         if Agent.is_model_request_node(node):
                             _measure_model_node("begin")
                         elif Agent.is_call_tools_node(node):
-                            _measure_model_node("tool_node", run.usage)
+                            # ModelResponse.usage is request-local; run.usage can
+                            # be cumulative after multiple API calls.
+                            _measure_model_node(
+                                "tool_node", getattr(node.model_response, "usage", None)
+                            )
                         elif Agent.is_end_node(node):
                             _measure_model_node("end_node", run.usage)
                         if interactive and _inject_pending(run):
