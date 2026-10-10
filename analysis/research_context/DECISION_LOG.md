@@ -265,6 +265,14 @@
 - **科研边界**：五个已有 Probe 只有 RGB+合法 proprio 的事实仍与 Runtime 源码一致；此事件合同中后续 `check_success` 无法变成 probe-time target-contact/held 标签。下一正式 L2 如需正例必须获得新独立授权与可验证的物理标签采集合同，不补跑旧 DEV0。
 - **判定**：`LABEL_TIME_V1_REPORTED_PASS / NO_LABEL_SCOPE_DOWNGRADED / V2_PROBE_SCHEMA_SCAN_UNRUN / NO_NEW_L2`。
 
+## D-028 · v2 Label-time 真实5/5 PASS，L1 停止点与下一 L2 合同
+
+- **日期/来源**：2026-10-10，用户服务器运行新版 `test_p1_ve01_label_contract_audit.py` 与既有 DEV0 JSONL 实测：5/5 单元测试 OK；`NO_EXPLICIT_PROBE_LABEL_IN_RECOGNIZED_EVENT_SCHEMA`；5 个 Probe 字段结构全部匹配 Runtime，unreviewed=0，integrity violations=0；四个 H 后审计+两个提前终局，五次 Probe 均在各自未来审计之前。
+- **正确的研究解释**：**只在五个已检查的 Probe 事件 JSONL 结构中**没有明示同刻 `target_contact/target_held` 真值。不能推断私有目录其他历史文件/模拟器可重建数据没有相关信号，不能把后续 `check_success`/Planner flag 当 probe-time 标签；`0 reference` 不是 `0 contact` 或模型 `0 error`。
+- **增量源码事实**：`robots/libero/tools.py:dump_state` 的 Wrist low/hi world map 与 images 基于 Toolkit step `NN`，`segment` 的 mask 仅临时用于落 `mask_shape/box/world_xyz/overlay/source_step` 等，不保留可直接分离目标/机器人自身的 raw binary mask。旧 `rpent/utils/p1_dev0.py:_run_probe` 绕 Toolkit step 直接调 `set_gripper`，其新增输出只有后置 RGB 和白名单 proprio；旧 pre-trigger world 和 segment 无法视为 probe-end 同步物理参考。文件源码能限定数据合同，但本轮未实际扫描其他私有 sidecar 文件存在性。
+- **交付**：`P1_NEXT_L2_LABEL_AND_CONTRAST_GATE.md`，对下一阶段提出明确 probe-end 同物理步号独立双指/目标身份与支撑物审计，区分接触 vs lift 后持续持握，保留 UNKNOWN；采用相同物理 Probe 的 blind/proprio/visual 信息对照、单独评估 lift 机械效果、精确 H 评价及在飞工作预算预留。**设计草案不是资源或 Runtime 授权，不是对未来收益的已验证论断。**
+- **STOP/GO**：合法 RGB/proprio 证据原型与 schema/时序分析层 GO；继续用这五例给出 held/contact precision、已证物理接触位置、证据收益等结论 **STOP**（缺独立标签与执行分支效果）；新 L2 物理实验 **HOLD**，需要新有界授权与预注册封版。停止继续重复同类 QA。
+
 ## 新决策追加模板
 
 ```markdown
