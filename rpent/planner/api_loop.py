@@ -382,6 +382,34 @@ class ApiAgentLoop:
         last_error: str | None = None
         quit_requested = False
 
+        # Optional performance-only telemetry. Default unset = zero behavior
+        # change. Logs only model-request latency and aggregate usage under
+        # private artifacts/, never prompts/tool args/images/secret tokens.
+        from rpent.utils.api_latency_probe import ApiLatencyProbe
+
+        try:
+            _api_latency_probe = ApiLatencyProbe.from_env(repo=get_repo_root())
+        except ValueError as _probe_exc:
+            logger.warning("[api-latency] disabled: %s", _probe_exc)
+            _api_latency_probe = None
+
+        def _measure_model_node(event: str, usage: Any = None) -> None:
+            nonlocal _api_latency_probe
+            if _api_latency_probe is None:
+                return
+            try:
+                if event == "begin":
+                    _api_latency_probe.begin_request()
+                else:
+                    _api_latency_probe.finish_if_pending(
+                        usage=usage, outcome=event
+                    )
+            except (OSError, ValueError) as _probe_exc:
+                # Instrumentation must never change a robot action or
+                # terminate the otherwise valid pydantic-ai tool loop.
+                logger.warning("[api-latency] disabled: %s", type(_probe_exc).__name__)
+                _api_latency_probe = None
+
         # Dual-Route Reasoning — Fast/Slow decider layered on Structured Memory
         # (SM1 unchanged). Fast steps run conservative zero-arg actions without
         # an LLM call; everything else falls through to the model below.
@@ -525,6 +553,12 @@ class ApiAgentLoop:
                     usage_limits=UsageLimits(request_limit=max_turns + 1),
                 ) as run:
                     async for node in run:
+                        if Agent.is_model_request_node(node):
+                            _measure_model_node("begin")
+                        elif Agent.is_call_tools_node(node):
+                            _measure_model_node("tool_node", run.usage)
+                        elif Agent.is_end_node(node):
+                            _measure_model_node("end_node", run.usage)
                         if interactive and _inject_pending(run):
                             quit_requested = True
                             break
@@ -674,8 +708,10 @@ class ApiAgentLoop:
                     seed = nxt
                     messages.append({"role": "user", "content": seed})
         except UsageLimitExceeded as e:
+            _measure_model_node("error")
             logger.info("usage limit reached: %s", e)
         except Exception as e:  # noqa: BLE001 - surfaced via PlannerResult.error
+            _measure_model_node("error")
             last_error = _api_error_text(e, no_images=self._no_images)
             logger.error("agent run failed: %s", last_error)
             logger.error("traceback:\n%s", traceback.format_exc())
